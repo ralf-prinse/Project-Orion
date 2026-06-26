@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 
 import pandas as pd
-import yfinance as yf
 
+from services.market_data.historical_provider import HistoricalDataProvider
+from services.market_data.yahoo_historical_provider import YahooHistoricalDataProvider
 from services.scanner.quote_service import Quote
 
 
@@ -19,18 +20,20 @@ class TechnicalScanner:
     """
     Voert technische analyse uit op de beste kandidaten.
 
-    Sprint 5.10:
-    - Haalt historische data in batches op.
-    - Voorkomt losse download per aandeel.
-    - Houdt dezelfde publieke scan-interface.
+    Vanaf Sprint 6.6:
+    - TechnicalScanner downloadt zelf geen historische data meer.
+    - Alle historische candles komen via HistoricalDataProvider.
+    - yfinance mag hier niet meer rechtstreeks gebruikt worden.
     """
 
     def __init__(
         self,
+        historical_provider: HistoricalDataProvider | None = None,
         period: str = "6mo",
         interval: str = "1d",
         batch_size: int = 100,
     ):
+        self.historical_provider = historical_provider or YahooHistoricalDataProvider()
         self.period = period
         self.interval = interval
         self.batch_size = batch_size
@@ -51,72 +54,38 @@ class TechnicalScanner:
         if not quotes:
             return []
 
-        yf_symbols = [self._to_yfinance_symbol(quote.symbol) for quote in quotes]
-        quote_map = {
-            self._to_yfinance_symbol(quote.symbol): quote
-            for quote in quotes
-        }
+        symbols = [quote.symbol for quote in quotes]
+        quote_map = {quote.symbol: quote for quote in quotes}
 
-        try:
-            data = yf.download(
-                tickers=yf_symbols,
-                period=self.period,
-                interval=self.interval,
-                group_by="ticker",
-                auto_adjust=False,
-                progress=False,
-                threads=True,
-            )
-        except Exception:
-            return []
+        history = self.historical_provider.get_history(
+            symbols=symbols,
+            period=self.period,
+            interval=self.interval,
+        )
 
-        if data is None or data.empty:
+        if not history:
             return []
 
         results: list[TechnicalScanResult] = []
 
-        for yf_symbol in yf_symbols:
-            quote = quote_map.get(yf_symbol)
+        for symbol, data in history.items():
+            quote = quote_map.get(symbol)
 
             if quote is None:
                 continue
 
-            symbol_data = self._extract_symbol_data(
-                data=data,
-                yf_symbol=yf_symbol,
-                multi_symbol=len(yf_symbols) > 1,
-            )
-
-            if symbol_data is None or symbol_data.empty:
+            if data is None or data.empty:
                 continue
 
             result = self._scan_symbol_data(
                 quote=quote,
-                data=symbol_data,
+                data=data,
             )
 
             if result is not None:
                 results.append(result)
 
         return results
-
-    def _extract_symbol_data(
-        self,
-        data: pd.DataFrame,
-        yf_symbol: str,
-        multi_symbol: bool,
-    ) -> pd.DataFrame | None:
-        if multi_symbol:
-            if not isinstance(data.columns, pd.MultiIndex):
-                return None
-
-            if yf_symbol not in data.columns.get_level_values(0):
-                return None
-
-            symbol_data = data[yf_symbol].dropna(how="all")
-            return symbol_data
-
-        return data.dropna(how="all")
 
     def _scan_symbol_data(
         self,
@@ -236,6 +205,3 @@ class TechnicalScanner:
     def _chunks(self, items: list[Quote], size: int):
         for index in range(0, len(items), size):
             yield items[index:index + size]
-
-    def _to_yfinance_symbol(self, symbol: str) -> str:
-        return symbol.replace(".", "-")
