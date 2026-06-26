@@ -1,3 +1,10 @@
+import pandas as pd
+
+from services.analysis.indicator_library.momentum import calculate_rsi
+from services.analysis.indicator_library.moving_averages import (
+    calculate_ema,
+    calculate_sma,
+)
 from services.analysis.models import IndicatorResult
 
 
@@ -5,46 +12,67 @@ class IndicatorEngine:
     """
     Centrale manager voor alle technische indicatoren.
 
-    In Sprint 7.1 bevat deze engine nog geen echte berekeningen.
-    Hij vormt alleen de architectuur waarop Sprint 7.2 verder bouwt.
+    Sprint 7.2:
+    - Berekent SMA20 en SMA50.
+    - Berekent EMA20 en EMA50.
+    - Berekent RSI14.
     """
 
-    def __init__(self):
-        pass
+    def calculate(
+        self,
+        symbol: str,
+        candles: pd.DataFrame,
+    ) -> IndicatorResult:
+        result = IndicatorResult(symbol=symbol)
 
-    def calculate(self, symbol: str, candles) -> IndicatorResult:
-        """
-        Bereken alle indicatoren voor één aandeel.
+        close = self._extract_close_series(candles)
 
-        Parameters
-        ----------
-        symbol : str
-            Het ticker symbool.
+        if close is None:
+            result.set("error", "Geen geldige Close-kolom gevonden")
+            return result
 
-        candles :
-            Historische candle data.
+        result.set("sma20", calculate_sma(close, period=20))
+        result.set("sma50", calculate_sma(close, period=50))
 
-        Returns
-        -------
-        IndicatorResult
-        """
+        result.set("ema20", calculate_ema(close, period=20))
+        result.set("ema50", calculate_ema(close, period=50))
 
-        result = IndicatorResult(symbol)
-
-        #
-        # Placeholder indicatoren.
-        # Deze worden in Sprint 7.2 vervangen door echte berekeningen.
-        #
-
-        result.set("sma20", None)
-        result.set("sma50", None)
-
-        result.set("ema20", None)
-        result.set("ema50", None)
-
-        result.set("rsi", None)
-        result.set("macd", None)
-        result.set("atr", None)
-        result.set("adx", None)
+        result.set("rsi14", calculate_rsi(close, period=14))
 
         return result
+
+    def _extract_close_series(
+        self,
+        candles: pd.DataFrame,
+    ) -> pd.Series | None:
+        if candles is None or candles.empty:
+            return None
+
+        if isinstance(candles.columns, pd.MultiIndex):
+            if "Close" in candles.columns.get_level_values(-1):
+                close_data = candles.xs("Close", axis=1, level=-1)
+            elif "Close" in candles.columns.get_level_values(0):
+                close_data = candles["Close"]
+            else:
+                return None
+
+            if isinstance(close_data, pd.DataFrame):
+                if close_data.empty:
+                    return None
+
+                return close_data.iloc[:, 0]
+
+            return close_data
+
+        if "Close" not in candles.columns:
+            return None
+
+        close_data = candles["Close"]
+
+        if isinstance(close_data, pd.DataFrame):
+            if close_data.empty:
+                return None
+
+            return close_data.iloc[:, 0]
+
+        return close_data
