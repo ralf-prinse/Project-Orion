@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from services.portfolio_store import PortfolioStore
 from models.portfolio import Portfolio
 from providers.yahoo_provider import YahooProvider
 from services.scanner_service import ScannerService
@@ -29,11 +30,8 @@ class OrionWindow(QMainWindow):
         self.scanner_service = ScannerService(self.provider)
         self.trade_manager = TradeManager()
 
-        self.portfolio = Portfolio(
-            cash=300.00,
-            currency="EUR",
-            max_position_percentage=0.35,
-        )
+        self.portfolio_store = PortfolioStore()
+        self.portfolio = self.portfolio_store.load()
 
         self.title_label = QLabel("Project Orion")
         self.title_label.setAlignment(Qt.AlignCenter)
