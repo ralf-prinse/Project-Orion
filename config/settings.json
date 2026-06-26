@@ -1,0 +1,7 @@
+{
+    "provider": "yfinance",
+    "currency": "EUR",
+    "broker": "DEGIRO",
+    "paper_trading": true,
+    "refresh_interval": 60
+}

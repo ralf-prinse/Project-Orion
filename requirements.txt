@@ -1,0 +1,6 @@
+PySide6
+pandas
+plotly
+requests
+yfinance
+scikit-learn
