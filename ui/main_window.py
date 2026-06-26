@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
 from providers.yahoo_provider import YahooProvider
 from services.portfolio_store import PortfolioStore
 from services.scanner_service import ScannerService
+from services.trade_history_store import TradeHistoryStore
 from services.trade_manager import TradeManager
 from services.universe_manager import UniverseManager
 
@@ -30,9 +31,14 @@ class OrionWindow(QMainWindow):
             universe_manager=self.universe_manager,
             max_workers=8,
         )
-        self.trade_manager = TradeManager()
 
         self.portfolio_store = PortfolioStore()
+        self.trade_history_store = TradeHistoryStore()
+        self.trade_manager = TradeManager(
+            portfolio_store=self.portfolio_store,
+            trade_history_store=self.trade_history_store,
+        )
+
         self.portfolio = self.portfolio_store.load()
         self.active_universe = "swing"
 
@@ -40,8 +46,8 @@ class OrionWindow(QMainWindow):
 
         self.dashboard_page = self.create_dashboard_page()
         self.portfolio_page = self.create_portfolio_page()
-        self.history_page = self.create_placeholder_page("Historie", "Hier komt straks de trade history.")
-        self.settings_page = self.create_placeholder_page("Instellingen", "Hier komen straks risico, budget en universe-instellingen.")
+        self.history_page = self.create_history_page()
+        self.settings_page = self.create_settings_page()
 
         self.pages.addWidget(self.dashboard_page)
         self.pages.addWidget(self.portfolio_page)
@@ -99,7 +105,7 @@ class OrionWindow(QMainWindow):
         header = QLabel("Goedemorgen Ralf.")
         header.setStyleSheet("font-size: 32px; font-weight: bold; margin-top: 25px;")
 
-        intro = QLabel("Laat Orion de markt analyseren en alleen concrete swing-trade acties tonen.")
+        intro = QLabel("Orion zoekt alleen naar concrete swing-trades van enkele uren tot enkele dagen.")
         intro.setStyleSheet("font-size: 16px; color: #9ca3af; margin-bottom: 20px;")
 
         self.scan_button = QPushButton("Analyseer markt")
@@ -137,16 +143,35 @@ class OrionWindow(QMainWindow):
         page.setLayout(layout)
         return page
 
-    def create_placeholder_page(self, title_text, body_text):
+    def create_history_page(self):
         page = QWidget()
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignTop)
 
-        title = QLabel(title_text)
+        title = QLabel("Historie")
         title.setStyleSheet("font-size: 32px; font-weight: bold; margin-top: 25px;")
 
-        body = QLabel(body_text)
-        body.setStyleSheet("font-size: 16px; color: #9ca3af; padding: 20px;")
+        self.history_label = QLabel(self.format_trade_history())
+        self.history_label.setWordWrap(True)
+        self.history_label.setStyleSheet("font-size: 16px; color: #e5e7eb; padding: 20px;")
+
+        layout.addWidget(title)
+        layout.addWidget(self.history_label)
+
+        page.setLayout(layout)
+        return page
+
+    def create_settings_page(self):
+        page = QWidget()
+        layout = QVBoxLayout()
+        layout.setAlignment(Qt.AlignTop)
+
+        title = QLabel("Instellingen")
+        title.setStyleSheet("font-size: 32px; font-weight: bold; margin-top: 25px;")
+
+        body = QLabel(self.format_settings())
+        body.setWordWrap(True)
+        body.setStyleSheet("font-size: 16px; color: #e5e7eb; padding: 20px;")
 
         layout.addWidget(title)
         layout.addWidget(body)
@@ -178,6 +203,7 @@ class OrionWindow(QMainWindow):
             )
 
             self.portfolio_label.setText(self.format_portfolio())
+            self.history_label.setText(self.format_trade_history())
 
         except Exception as error:
             self.advice_label.setText(f"Fout tijdens scan: {error}")
@@ -255,6 +281,64 @@ class OrionWindow(QMainWindow):
 
         html += "</div>"
         return html
+
+    def format_trade_history(self):
+        trades = self.trade_history_store.load()
+
+        if not trades:
+            return """
+            <div style="background:#1f2937; border-radius:16px; padding:24px;">
+                <h2>Geen historie</h2>
+                <p>Er zijn nog geen trade-events opgeslagen.</p>
+            </div>
+            """
+
+        html = """
+        <div style="background:#1f2937; border-radius:16px; padding:24px;">
+            <h2>Trade history</h2>
+        """
+
+        for trade in reversed(trades[-20:]):
+            action = trade.get("action", "UNKNOWN")
+            symbol = trade.get("symbol", "")
+            quantity = trade.get("quantity", 0)
+            price = float(trade.get("price", 0.0))
+            timestamp = trade.get("timestamp", "")
+            reason = trade.get("reason", "")
+
+            color = "#9ca3af"
+            if action == "BUY":
+                color = "#22c55e"
+            elif action == "SELL":
+                color = "#f97316"
+            elif action == "HOLD":
+                color = "#3b82f6"
+
+            html += f"""
+            <div style="background:#111827; border-left:5px solid {color}; border-radius:12px; padding:16px; margin:12px 0;">
+                <h3 style="color:{color};">{action} {symbol}</h3>
+                <p><b>Aantal:</b> {quantity}</p>
+                <p><b>Prijs:</b> {price:.2f}</p>
+                <p><b>Tijd:</b> {timestamp}</p>
+                <p>{reason}</p>
+            </div>
+            """
+
+        html += "</div>"
+        return html
+
+    def format_settings(self):
+        universe = self.universe_manager.get_universe(self.active_universe)
+
+        return f"""
+        <div style="background:#1f2937; border-radius:16px; padding:24px;">
+            <h2>Actieve instellingen</h2>
+            <p><b>Universe:</b> {universe.name}</p>
+           <p><b>Aantal symbols:</b> {len(self.universe_manager.get_symbols(self.active_universe))}</p>
+            <p><b>Max positiegrootte:</b> {self.portfolio.max_position_percentage * 100:.0f}% van cash</p>
+            <p><b>Handelsstijl:</b> Swing trades van enkele uren tot enkele dagen.</p>
+        </div>
+        """
 
     def stylesheet(self):
         return """
