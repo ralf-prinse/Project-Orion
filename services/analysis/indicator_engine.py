@@ -1,9 +1,15 @@
 import pandas as pd
 
+from services.analysis.indicator_library.advanced_momentum import calculate_macd
 from services.analysis.indicator_library.momentum import calculate_rsi
 from services.analysis.indicator_library.moving_averages import (
     calculate_ema,
     calculate_sma,
+)
+from services.analysis.indicator_library.trend_strength import calculate_adx
+from services.analysis.indicator_library.volatility import (
+    calculate_atr,
+    calculate_bollinger_bands,
 )
 from services.analysis.models import IndicatorResult
 
@@ -12,10 +18,14 @@ class IndicatorEngine:
     """
     Centrale manager voor alle technische indicatoren.
 
-    Sprint 7.2:
+    Sprint 7.3:
     - Berekent SMA20 en SMA50.
     - Berekent EMA20 en EMA50.
     - Berekent RSI14.
+    - Berekent MACD.
+    - Berekent ATR14.
+    - Berekent Bollinger Bands.
+    - Berekent ADX14.
     """
 
     def calculate(
@@ -38,6 +48,11 @@ class IndicatorEngine:
         result.set("ema50", calculate_ema(close, period=50))
 
         result.set("rsi14", calculate_rsi(close, period=14))
+
+        result.set("macd", calculate_macd(close))
+        result.set("atr14", calculate_atr(candles, period=14))
+        result.set("bollinger", calculate_bollinger_bands(close))
+        result.set("adx14", calculate_adx(candles, period=14))
 
         return result
 
