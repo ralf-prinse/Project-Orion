@@ -16,14 +16,6 @@ from services.scanner_service import ScannerService
 from services.watchlist_service import WatchlistService
 
 
-ACTION_LABELS = {
-    "BUY": "KOPEN",
-    "HOLD": "VASTHOUDEN",
-    "SELL": "VERKOPEN",
-    "NONE": "GEEN ACTIE",
-}
-
-
 class OrionWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -47,7 +39,7 @@ class OrionWindow(QMainWindow):
         self.scan_button = QPushButton("Scan markt")
         self.scan_button.clicked.connect(self.scan_market)
 
-        self.result_label = QLabel("Klik op 'Scan markt' om de watchlist te analyseren.")
+        self.result_label = QLabel("Klik op 'Scan markt' om de markt te analyseren.")
         self.result_label.setAlignment(Qt.AlignTop)
         self.result_label.setWordWrap(True)
 
@@ -76,20 +68,29 @@ class OrionWindow(QMainWindow):
         except Exception as error:
             self.result_label.setText(f"Fout tijdens scan: {error}")
 
-        def format_trade_plans(self, trade_plans):
-        buy_plans = [plan for plan in trade_plans if plan.action == "BUY"]
-        hold_plans = [plan for plan in trade_plans if plan.action == "HOLD"]
-        sell_plans = [plan for plan in trade_plans if plan.action == "SELL"]
+    def format_trade_plans(self, trade_plans):
+        buy_plans = [
+            plan for plan in trade_plans
+            if str(plan.action).upper() in ["BUY", "KOPEN"]
+        ]
+        hold_plans = [
+            plan for plan in trade_plans
+            if str(plan.action).upper() in ["HOLD", "VASTHOUDEN"]
+        ]
+        sell_plans = [
+            plan for plan in trade_plans
+            if str(plan.action).upper() in ["SELL", "VERKOPEN"]
+        ]
 
         action_count = len(buy_plans) + len(hold_plans) + len(sell_plans)
 
         html = "<h2>Project Orion</h2>"
-        html += f"<p><b>Ges Cand:</b> {len(trade_plans)} aandelen</p>"
+        html += f"<p><b>Gescand:</b> {len(trade_plans)} aandelen</p>"
         html += f"<p><b>Acties gevonden:</b> {action_count}</p>"
 
         if action_count == 0:
             html += "<h1>GEEN ACTIE</h1>"
-            html += "<p>Er zijn op dit moment geen koop-, verkoop- of vasthoudacties.</p>"
+            html += "<p>Orion ziet op dit moment geen overtuigende swing-trade.</p>"
             return html
 
         for title, plans in [
@@ -101,12 +102,11 @@ class OrionWindow(QMainWindow):
                 html += f"<h2>{title}</h2>"
 
                 for plan in plans:
-                    html += (
-                        f"<p><b>{plan.symbol}</b><br>"
-                        f"Aantal: {plan.quantity}<br>"
-                        f"Geschatte prijs: {plan.estimated_price:.2f}<br>"
-                        f"Geschatte waarde: {plan.estimated_value:.2f} {plan.currency}</p>"
-                    )
+                    html += f"<p><b>{plan.symbol}</b></p>"
+
+                    quantity = getattr(plan, "quantity", None)
+                    if quantity is not None:
+                        html += f"<p>Aantal: {quantity}</p>"
 
         return html
 
