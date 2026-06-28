@@ -31,7 +31,7 @@ class QuoteService:
 
     Belangrijk:
     - QuoteService gebruikt een MarketDataProvider.
-    - QuoteService gebruikt zelf geen yfinance meer.
+    - QuoteService gebruikt zelf geen yfinance.
     - Caching blijft hier centraal geregeld.
     - Niet-gevonden symbolen worden tijdelijk negatief gecachet.
     """

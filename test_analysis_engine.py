@@ -1,33 +1,41 @@
-from services.market_data.yahoo_historical_provider import YahooHistoricalDataProvider
+import pandas as pd
+
 from services.analysis.analysis_engine import AnalysisEngine
+
+
+def build_test_candles() -> pd.DataFrame:
+    rows = []
+
+    for index in range(100):
+        close = 100 + index
+
+        rows.append(
+            {
+                "Open": close - 1,
+                "High": close + 2,
+                "Low": close - 2,
+                "Close": close,
+                "Volume": 1_000_000,
+            }
+        )
+
+    return pd.DataFrame(rows)
 
 
 def main():
     print("=== ANALYSIS ENGINE TEST ===")
     print()
 
-    provider = YahooHistoricalDataProvider()
-    history = provider.get_history(
-        symbols=["AAPL"],
-        period="6mo",
-        interval="1d",
-    )
-
-    candles = history.get("AAPL")
-
-    if candles is None or candles.empty:
-        print("Geen candles ontvangen voor AAPL")
-        return
-
+    candles = build_test_candles()
     engine = AnalysisEngine()
 
     result = engine.analyze(
-        symbol="AAPL",
+        symbol="TEST",
         candles=candles,
     )
 
     indicators = engine.indicator_engine.calculate(
-        symbol="AAPL",
+        symbol="TEST",
         candles=candles,
     )
 
@@ -49,9 +57,27 @@ def main():
     print(f"ADX14: {indicators.get('adx14')}")
     print()
 
+    print("Analysis Scores")
+    print(f"Trend Score: {result.trend_score}")
+    print(f"Momentum Score: {result.momentum_score}")
+    print(f"Volatility Score: {result.volatility_score}")
+    print(f"Overall Score: {result.overall_score}")
+    print()
+
     print("Analysis Notes")
     for note in result.notes:
         print(f"- {note}")
+
+    assert result.symbol == "TEST"
+    assert result.overall_score > 0
+    assert indicators.get("sma20") is not None
+    assert indicators.get("sma50") is not None
+    assert indicators.get("ema20") is not None
+    assert indicators.get("ema50") is not None
+    assert indicators.get("rsi14") is not None
+
+    print()
+    print("Analysis Engine test succesvol afgerond.")
 
 
 if __name__ == "__main__":
