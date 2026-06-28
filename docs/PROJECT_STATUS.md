@@ -1,873 +1,1574 @@
-# ============================================================
 # PROJECT ORION
+
 # PROJECT STATUS
-# ============================================================
 
-Version: 3.0
-Status: ACTIVE DEVELOPMENT
-Last Updated: 26 June 2026
+**Project Version:** v0.7.5-alpha
 
-Current Sprint:
-Sprint 6.5 COMPLETE ✅
+**Document Version:** 1.1
 
-Next Sprint:
-Sprint 6.6 – Historical Data Layer
+**Status:** Active Development
 
-Project State:
-READY TO CONTINUE
+**Repository:** Project-Orion
 
-# ============================================================
-# ⚠️ VOOR CHATGPT - LEES DIT EERST
-# ============================================================
+**Branch:** sprint-7-1-indicator-engine
 
-Voordat je antwoord geeft, lees je eerst dit volledige document.
+**Last Updated:** Sprint 7.5 – Technical Scanner migrated to Analysis Layer
+---
 
-Dit document is de actuele bron van waarheid voor Project Orion.
+# 1. Executive Summary
 
-Respecteer de bestaande architectuur.
+Project Orion is a professional desktop application for deterministic swing-trading analysis of the United States stock market.
 
-Begin NIET opnieuw met ontwerpen.
+Unlike traditional stock screeners, Orion is being developed as a modular decision-support platform. Every recommendation produced by the application is based on transparent technical analysis rather than black-box predictions.
 
-Begin NIET opnieuw met plannen.
+The project follows a layered architecture where every subsystem has a clearly defined responsibility.
 
-Werk altijd verder vanaf de laatst afgeronde sprint.
-
-Lever altijd volledige bestanden aan.
-
-Gebruik nooit losse codefragmenten tenzij daar expliciet om gevraagd wordt.
-
-Werk altijd één sprint tegelijk af.
-
-Na iedere afgeronde sprint moet PROJECT_STATUS.md opnieuw worden bijgewerkt.
-
-# ============================================================
-# PROJECT DOEL
-# ============================================================
-
-Project Orion is een professionele AI Swing Trading Assistant.
-
-Het uiteindelijke doel is een desktopapplicatie die zelfstandig de Amerikaanse aandelenmarkt analyseert en uitsluitend duidelijke handelsadviezen teruggeeft.
-
-De gebruiker hoeft zelf geen technische analyse uit te voeren.
-
-Orion doet alle analyses.
-
-De gebruiker krijgt uiteindelijk alleen:
-
-• BUY
-• SELL
-• HOLD
-• GEEN ACTIE
-
-De focus ligt volledig op swing trading.
-
-Gemiddelde houdduur:
-
-- enkele uren
-- één handelsdag
-- twee tot vijf dagen
-
-Orion is nadrukkelijk geen:
-
-- daytrading scanner
-- scalping systeem
-- lange termijn beleggingssoftware
-- crypto platform
-- optiesoftware
-
-# ============================================================
-# ONTWIKKELFILOSOFIE
-# ============================================================
-
-Tijdens de ontwikkeling gelden altijd de volgende regels.
-
-1. Architectuur vóór functionaliteit.
-2. Iedere module heeft één duidelijke verantwoordelijkheid.
-3. We werken uitsluitend met volledige bestanden.
-4. Orion moet modulair uitbreidbaar blijven.
-5. De GUI blijft eenvoudig.
-6. De gebruiker ziet geen technische indicatoren.
-7. Orion vertaalt technische analyse naar begrijpelijke taal.
-8. Orion mag liever géén trade adviseren dan een slechte trade.
-9. Schaalbaarheid staat altijd centraal.
-10. Orion moet uiteindelijk minimaal 10.000 aandelen per scan kunnen verwerken.
-
-# ============================================================
-# HUIDIGE PROJECTSTATUS
-# ============================================================
-
-Sprint 5 is volledig afgerond.
-
-Sprint 6.1 t/m Sprint 6.5 zijn eveneens volledig afgerond.
-
-De nieuwe modulaire scannerarchitectuur is operationeel.
-
-De scanner verwerkt momenteel het volledige Amerikaanse aandelenuniversum.
-
-Huidige universum:
-
-Nasdaq:
-3538 aandelen
-
-US Other:
-2666 aandelen
-
-Totaal:
-
-6204 Amerikaanse aandelen
-
-De scanner levert momenteel automatisch de Top 3 koopkansen op.
-
-# ============================================================
-# HUIDIGE ARCHITECTUUR
-# ============================================================
-
-UniverseLoader
+```text
+Universe Layer
 
 ↓
 
-QuoteService
+Market Data Layer
 
 ↓
 
-MarketDataProvider
+Historical Data Layer
 
 ↓
 
-YahooMarketDataProvider
+Indicator Library
 
 ↓
 
-PriceFilter
+Indicator Engine
 
 ↓
 
-VolumeFilter
+Analysis Engine
 
 ↓
 
-LiquidityFilter
+Signal Engine
 
 ↓
 
-RelativeStrengthFilter
+Decision Engine
 
 ↓
 
-MomentumFilter
+Portfolio Engine
 
 ↓
 
-TechnicalScanner
+Risk Manager
 
 ↓
 
-RankingEngine
+Trade Planner
 
 ↓
 
-Top 3 Opportunities
+Artificial Intelligence Layer
 
-Deze architectuur is leidend.
+↓
 
-Nieuwe functionaliteit wordt uitsluitend toegevoegd door nieuwe modules toe te voegen.
+Graphical User Interface
+```
 
-Bestaande verantwoordelijkheden worden niet vermengd.
+Each layer builds upon the previous one while remaining independent from higher-level business logic.
 
-# ============================================================
-# HOOFDMODULES
-# ============================================================
-
-## Universe
-
-✅ UniverseManager 2.0
-
-✅ UniverseDownloader
-
-✅ UniverseLoader
+This architecture allows Project Orion to grow into a professional trading platform without requiring large-scale redesigns.
 
 ---
 
-## Scanner
+# 2. Current Development Status
 
-✅ ScanPipeline
+Current phase:
 
-✅ QuoteService
+**Alpha Development**
 
-✅ PriceFilter
+Current milestone:
 
-✅ VolumeFilter
+Sprint 7.5 completed
 
-✅ LiquidityFilter
+The project has successfully completed the foundational market scanning architecture and has now entered the technical analysis phase.
 
-✅ RelativeStrengthFilter
+Completed milestones include:
 
-✅ MomentumFilter
+Complete Universe Management
+Market Data Layer
+Historical Data Layer
+Quote Cache
+Historical Cache
+Modular Scan Pipeline
+Ranking Engine
+Technical Scanner
+Indicator Library
+Indicator Engine
+Analysis Engine
+Technical Analysis Scoring
+Technical Scanner migrated to Analysis Layer
+Unified Technical Analysis Pipeline
 
-✅ TechnicalScanner
-
-✅ RankingEngine
+The project currently analyses more than **6,200 US-listed stocks** and is capable of downloading, caching and processing historical market data for technical analysis.
 
 ---
 
-## Portfolio
+# 3. Development Philosophy
 
-✅ Portfolio
+Project Orion is developed according to several fundamental engineering principles.
 
-✅ TradeManager
+## Deterministic Analysis
 
-✅ TradeHistoryStore
+Every recommendation must be reproducible.
 
-✅ MarketFilter
+No investment recommendation may depend on randomness or opaque AI reasoning.
 
 ---
 
-## GUI
+## Modular Architecture
 
-✅ Modulaire GUI
+Every subsystem performs a single responsibility.
 
-De GUI toont uitsluitend informatie die relevant is voor de gebruiker.
+Modules communicate through well-defined interfaces while remaining independent from each other.
 
-Technische scannerinformatie blijft verborgen.
+---
+
+## Explainability
+
+Every recommendation should be explainable.
+
+Every score should be traceable.
+
+Every calculation should be reproducible.
+
+---
+
+## Incremental Development
+
+The project is developed through small, fully functional sprints.
+
+Every sprint must result in:
+
+* Working software
+* Passing tests
+* Updated documentation
+* Git commit
+* GitHub push
+
+A sprint is only considered complete after all five requirements have been satisfied.
+
+---
+
+## Long-Term Objective
+
+The long-term objective is to transform Orion from a stock scanner into a complete AI-assisted trading platform capable of supporting the entire investment workflow, from market analysis to portfolio management and trade execution planning.
+
+This objective is achieved through continuous incremental development rather than large architectural rewrites.
+# 4. Completed Modules
+
+The following components have been fully implemented and tested.
+
+---
+
+## Universe Layer
+
+Status:
+
+**Completed**
+
+Purpose:
+
+Maintain the complete universe of tradable US equities.
+
+Capabilities:
+
+* Nasdaq download
+* US market download
+* Universe merging
+* Duplicate removal
+* CSV storage
+* Local universe loading
+
+Current universe:
+
+Approximately **6,204 US-listed stocks**.
+
+Files:
+
+```text
+services/universe/
+```
 
 ---
 
 ## Market Data Layer
 
-Nieuw gebouwd tijdens Sprint 6.
+Status:
 
-Bestaat momenteel uit:
+**Completed**
 
-✅ MarketDataProvider
+Purpose:
 
-✅ YahooMarketDataProvider
+Download current market prices.
 
-✅ Provider Statistics
+Capabilities:
 
-✅ Quote Cache
+* Yahoo Finance integration
+* Batch quote downloads
+* Quote caching
+* Cache statistics
+* Error handling
 
-✅ Negative Cache
+Files:
 
-QuoteService is niet langer direct afhankelijk van yfinance.
-
-Nieuwe providers kunnen later zonder wijzigingen aan de scanner worden toegevoegd.
-
-# ============================================================
-# UNIVERSE
-# ============================================================
-
-Het aandelenuniversum wordt volledig automatisch beheerd.
-
-UniverseManager is verantwoordelijk voor:
-
-- opbouwen van het universum
-- samenvoegen van verschillende markten
-- verwijderen van duplicaten
-- opslaan van het definitieve universum
-
-UniverseDownloader downloadt de actuele Amerikaanse beursnoteringen.
-
-UniverseLoader wordt gebruikt door de ScanPipeline.
-
-UniverseLoader ondersteunt:
-
-- volledige scan
-- beperkte testscans
-- automatische normalisatie
-- verwijderen van dubbele symbolen
-
-Huidige universum:
-
-Nasdaq:
-3538
-
-US Other:
-2666
-
-Totaal:
-
-6204 Amerikaanse aandelen
-
-Dit universum vormt de basis van iedere scan.
-
-# ============================================================
-# SCANPIPELINE
-# ============================================================
-
-De oude ScannerService is uitgefaseerd.
-
-Alle nieuwe ontwikkeling vindt plaats binnen ScanPipeline.
-
-ScanPipeline bevat zelf geen analyse-logica.
-
-De pipeline is uitsluitend verantwoordelijk voor het aanroepen van de verschillende modules in de juiste volgorde.
-
-Pipeline:
-
-UniverseLoader
-
-↓
-
-QuoteService
-
-↓
-
-PriceFilter
-
-↓
-
-VolumeFilter
-
-↓
-
-LiquidityFilter
-
-↓
-
-RelativeStrengthFilter
-
-↓
-
-MomentumFilter
-
-↓
-
-TechnicalScanner
-
-↓
-
-RankingEngine
-
-↓
-
-Top 3 Opportunities
-
-Iedere stap heeft precies één verantwoordelijkheid.
-
-Nieuwe modules worden als losse pipeline-stap toegevoegd.
-
-# ============================================================
-# QUOTESERVICE
-# ============================================================
-
-QuoteService is uitsluitend verantwoordelijk voor:
-
-- ophalen van quote-data
-- beheren van quote cache
-- beheren van negative cache
-- communiceren met MarketDataProvider
-- teruggeven van uniforme Quote-objecten
-
-QuoteService doet nadrukkelijk GEEN:
-
-- technische analyse
-- ranking
-- portfoliobeheer
-- koopadviezen
-
-QuoteService is een orchestrator.
-
-# ============================================================
-# MARKET DATA LAYER
-# ============================================================
-
-Tijdens Sprint 6 is de volledige Market Data Layer gebouwd.
-
-Structuur:
-
-services/
-
-market_data/
-
-- __init__.py
-- base_provider.py
-- yahoo_provider.py
-
-MarketDataProvider vormt de abstracte interface.
-
-Iedere toekomstige databron hoeft uitsluitend deze interface te implementeren.
-
-Hierdoor blijft de rest van Orion volledig ongewijzigd.
-
-Toekomstige providers:
-
-- Polygon
-- Alpaca
-- Finnhub
-- TwelveData
-- Interactive Brokers
-
-De scanner weet niet welke provider actief is.
-
-Alle communicatie verloopt via MarketDataProvider.
-
-# ============================================================
-# QUOTE CACHE
-# ============================================================
-
-Quote cache:
-
-data/cache/quotes.json
-
-Cache TTL:
-
-15 minuten
-
-De cache bevat:
-
-- actuele prijs
-- volume
-- vorige slotkoers
-- procentuele verandering
-- timestamp
-
-Bij een cache-hit wordt geen nieuwe API-call uitgevoerd.
-
-Hierdoor worden herhaalde scans extreem snel.
-
-# ============================================================
-# NEGATIVE CACHE
-# ============================================================
-
-Sprint 6.5 introduceerde een Negative Cache.
-
-Wanneer een aandeel tijdelijk niet beschikbaar is via de provider, wordt dit tijdelijk opgeslagen.
-
-Resultaat:
-
-- geen onnodige API-calls
-- minder belasting van Yahoo
-- veel snellere herhaalde scans
-
-Tijdens de laatste test:
-
-Negative cache hits:
-
-19
-
-Provider requests:
-
-0
-
-Hierdoor werd de provider helemaal niet meer aangeroepen voor ontbrekende symbolen.
-
-# ============================================================
-# TECHNICAL SCANNER
-# ============================================================
-
-TechnicalScanner analyseert uitsluitend aandelen die de eerdere filters hebben overleefd.
-
-Momenteel ondersteunt de scanner:
-
-- SMA20
-- SMA50
-- RSI14
-- 20-daags momentum
-
-De scanner bepaalt vervolgens:
-
-- BUY
-- HOLD
-- IGNORE
-
-De TechnicalScanner downloadt momenteel nog zelf historische candles.
-
-Dit verandert in Sprint 6.6.
-
-Na Sprint 6.6 gebruikt de scanner uitsluitend HistoricalDataProvider.
-
-# ============================================================
-# RANKING ENGINE
-# ============================================================
-
-RankingEngine ontvangt alle technische resultaten.
-
-Taken:
-
-- verwijderen van IGNORE-resultaten
-- sorteren op confidence
-- teruggeven van uitsluitend de Top 3 koopkansen
-
-RankingEngine haalt zelf geen marktdata op.
-
-RankingEngine voert geen technische analyse uit.
-
-# ============================================================
-# PERFORMANCE
-# ============================================================
-
-Laatste succesvolle test:
-
-Universe:
-
-1000 aandelen
-
-Quotes:
-
-981
-
-Quotes uit cache:
-
-981
-
-Nieuwe downloads:
-
-0
-
-Negative cache hits:
-
-19
-
-Technische kandidaten:
-
-100
-
-Technische resultaten:
-
-99
-
-Koopkansen:
-
-3
-
-Pipeline Performance:
-
-QuoteService:
-
-0.02 seconden
-
-TechnicalScanner:
-
-ongeveer 1.9 seconden
-
-Totale pipeline:
-
-ongeveer 2 seconden
-
-Hieruit blijkt dat de scanner zelf inmiddels zeer snel is.
-
-De grootste vertraging ontstaat uitsluitend wanneer nieuwe marktdata moet worden opgehaald.
-
-Door de Market Data Layer kan deze bottleneck later eenvoudig worden opgelost zonder wijzigingen aan de ScanPipeline.
-
-# ============================================================
-# AFGERONDE SPRINTS
-# ============================================================
-
-Sprint 1
-✅ Afgerond
-
-Opgeleverd:
-
-- Eerste projectstructuur
-- Basis GUI
-- Eerste scanner
-- Eerste portfolio-opzet
+```text
+services/market_data/
+```
 
 ---
 
-Sprint 2
-✅ Afgerond
-
-Opgeleverd:
-
-- Portfolio Engine
-- Decision Engine (eerste versie)
-- Database-opslag
-- Basis analyseflow
-
----
-
-Sprint 3
-✅ Afgerond
-
-Opgeleverd:
-
-- Modulaire GUI
-- Analyse-opslag
-- Verbeterde projectstructuur
-
----
-
-Sprint 4
-✅ Afgerond
-
-Opgeleverd:
-
-- UniverseManager 2.0
-- UniverseDownloader
-- UniverseLoader
-- Amerikaans aandelenuniversum
-- 6204 aandelen
-
----
-
-Sprint 5
-✅ Afgerond
-
-Opgeleverd:
-
-- Volledige ScanPipeline
-- QuoteService
-- PriceFilter
-- VolumeFilter
-- LiquidityFilter
-- RelativeStrengthFilter
-- MomentumFilter
-- TechnicalScanner
-- RankingEngine
-- Performance logging
-- Top 3 koopkansen
-
-De oude ScannerService is vervangen door een modulaire architectuur.
-
----
-
-Sprint 6.1
-✅ Afgerond
-
-Opgeleverd:
-
-- MarketDataProvider
-- YahooMarketDataProvider
-
-QuoteService is niet langer direct afhankelijk van yfinance.
-
----
-
-Sprint 6.2
-✅ Afgerond
-
-Opgeleverd:
-
-- Los provider-testscript
-- Provider onafhankelijk testbaar
-
----
-
-Sprint 6.3
-✅ Afgerond
-
-Opgeleverd:
-
-- Provider Statistics
-
-Iedere provider rapporteert nu:
-
-- providernaam
-- gevraagde symbolen
-- ontvangen quotes
-- ontbrekende quotes
-- duur
-
----
-
-Sprint 6.4
-✅ Afgerond
-
-Opgeleverd:
-
-Providerinformatie zichtbaar in ScanPipeline.
-
-Tijdens iedere scan wordt nu geregistreerd:
-
-- gebruikte provider
-- provider prestaties
-- provider statistieken
-
----
-
-Sprint 6.5
-✅ Afgerond
-
-Opgeleverd:
-
-- Negative Cache
-
-Niet gevonden aandelen worden tijdelijk onthouden.
-
-Resultaat:
-
-- minder API-calls
-- snellere herhaalde scans
-- lagere belasting van Yahoo
-
-Tijdens de laatste test:
-
-Provider requests:
-
-0
-
-Negative cache hits:
-
-19
-
-QuoteService:
-
-0.02 seconden
-
-Pipeline:
-
-ongeveer 2 seconden
-
-# ============================================================
-# OPENSTAANDE VERBETERPUNTEN
-# ============================================================
-
-De huidige architectuur is stabiel.
-
-Er zijn geen bekende architectuurproblemen.
-
-Openstaande verbeteringen:
-
-- Historical Data Layer
-- Historical Cache
-- DecisionEngine 2.0
-- Risk Manager
-- Position Sizing
-- AI Trade Reasoning
-- Paper Trading
-- Broker Integratie
-- GUI koppelen aan nieuwe ScanPipeline
-
-# ============================================================
-# EERSTVOLGENDE SPRINT
-# ============================================================
-
-Sprint 6.6
-
-Historical Data Layer
-
-Doel:
-
-TechnicalScanner mag geen historische candles meer downloaden.
-
-Daarvoor wordt een nieuwe abstractielaag gebouwd.
-
-Nieuwe map:
-
-services/
-
-market_data/
-
-Nieuwe bestanden:
-
-historical_provider.py
-
-historical_cache.py
-
-Later uitbreidbaar met:
-
-- Yahoo Historical Provider
-- Polygon Historical Provider
-- Alpaca Historical Provider
-
-Na Sprint 6.6 haalt uitsluitend HistoricalDataProvider historische candles op.
-
-TechnicalScanner gebruikt daarna alleen deze provider.
-
-Hierdoor wordt ook historische data volledig provider-onafhankelijk.
-
-# ============================================================
-# BELANGRIJKE ONTWIKKELREGELS
-# ============================================================
-
-Tijdens alle volgende sprints gelden de volgende regels.
-
-1.
-
-Altijd volledige bestanden.
-
-Nooit losse codefragmenten.
-
-2.
-
-Eerst architectuur.
-
-Daarna implementeren.
-
-3.
-
-Nieuwe functionaliteit wordt altijd modulair toegevoegd.
-
-4.
-
-Bestaande verantwoordelijkheden worden niet vermengd.
-
-5.
-
-GUI blijft eenvoudig.
-
-6.
-
-De gebruiker ziet geen technische indicatoren.
-
-7.
-
-Debuginformatie blijft uitsluitend voor ontwikkelaars.
-
-8.
-
-Na iedere sprint wordt PROJECT_STATUS.md bijgewerkt.
-
-# ============================================================
-# INSTRUCTIE VOOR EEN NIEUWE CHATGPT
-# ============================================================
-
-Wanneer dit document wordt geüpload in een nieuwe chat gelden de volgende instructies.
-
-Lees eerst het volledige document.
-
-Gebruik dit document als enige bron van waarheid.
-
-Begin NIET opnieuw met ontwerpen.
-
-Begin NIET opnieuw met plannen.
-
-Respecteer de bestaande architectuur.
-
-Werk altijd één sprint tegelijk uit.
-
-Lever altijd volledige bestanden aan.
-
-Ga direct verder met de sprint die onder "Eerstvolgende Sprint" staat.
-
-De huidige status van Project Orion is:
-
-Sprint 6.5 volledig afgerond.
-
-De volgende sprint is:
-
-Sprint 6.6
-
-Historical Data Layer.
-
-# ============================================================
-# CURRENT STATUS
-# ============================================================
-
-Project:
-
-Project Orion
+## Historical Data Layer
 
 Status:
 
-ACTIVE DEVELOPMENT
+**Completed**
 
-Laatste afgeronde sprint:
+Purpose:
 
-Sprint 6.5
+Download historical market data used by technical analysis.
 
-Volgende sprint:
+Capabilities:
 
-Sprint 6.6
+* Historical candles
+* Configurable periods
+* Daily intervals
+* Local caching
+* Cache reuse
+* Download statistics
 
-Projectstatus:
+Current configuration:
 
-READY TO CONTINUE
+History:
 
-Laatste update:
+125 daily candles
 
-26 juni 2026
+Provider:
 
-Dit document is vanaf nu de enige actuele bron van waarheid voor de ontwikkelstatus van Project Orion.
+Yahoo Finance
+
+Cache:
+
+Enabled
+
+---
+
+## Quote Cache
+
+Status:
+
+**Completed**
+
+Purpose:
+
+Reduce unnecessary API requests.
+
+Capabilities:
+
+* Automatic cache lookup
+* Automatic cache refresh
+* Cache statistics
+* Fast repeated scans
+
+Current behaviour:
+
+Repeated scans primarily use cached data.
+
+---
+
+## Historical Cache
+
+Status:
+
+**Completed**
+
+Purpose:
+
+Store downloaded historical candles locally.
+
+Capabilities:
+
+* Symbol-based cache
+* Automatic cache loading
+* Automatic cache updates
+* Reduced network usage
+
+Current location:
+
+```text
+data/cache/historical/
+```
+
+---
+
+## Scan Pipeline
+
+Status:
+
+**Completed**
+
+Purpose:
+
+Process thousands of stocks through a deterministic filtering pipeline.
+
+Current pipeline:
+
+```text
+Universe
+
+↓
+
+Quotes
+
+↓
+
+Price Filter
+
+↓
+
+Volume Filter
+
+↓
+
+Liquidity Filter
+
+↓
+
+Relative Strength Filter
+
+↓
+
+Momentum Filter
+
+↓
+
+Technical Scanner
+
+↓
+
+Ranking Engine
+
+↓
+
+Top Opportunities
+```
+
+Current performance:
+
+Universe:
+
+Approximately 6,200 stocks
+
+Pipeline:
+
+Fully modular
+
+---
+
+## Ranking Engine
+
+Status:
+
+**Completed**
+
+Purpose:
+
+Rank investment opportunities based on deterministic scoring.
+
+Capabilities:
+
+* Score calculation
+* Sorting
+* Top opportunity selection
+* Confidence scoring
+
+Current output:
+
+Top BUY candidates
+
+---
+
+## Technical Scanner
+
+Status:
+
+**Completed**
+
+Purpose:
+
+Perform technical evaluation of filtered stocks.
+
+Current capabilities:
+
+* Scanner integration
+* Historical data retrieval
+* Indicator Engine integration
+* Analysis Engine integration
+* Unified technical scoring
+* Ranking support
+
+The Technical Scanner no longer calculates indicators itself.
+
+All technical analysis is delegated to the Analysis Engine, making it the single source of truth for technical scoring throughout Orion.
+---
+
+## Analysis Layer
+
+Status:
+
+**Completed (Foundation)**
+
+Purpose:
+
+Transform historical market data into structured technical analysis.
+
+Current architecture:
+
+```text
+Historical Data
+
+↓
+
+Indicator Library
+
+↓
+
+Indicator Engine
+
+↓
+
+Analysis Engine
+```
+
+This layer now forms the analytical foundation for every future trading decision inside Orion.
+
+---
+
+## Indicator Library
+
+Status:
+
+**Completed**
+
+Purpose:
+
+Provide reusable mathematical indicator calculations.
+
+Currently implemented:
+
+* SMA20
+* SMA50
+* EMA20
+* EMA50
+* RSI14
+* MACD
+* ATR14
+* Bollinger Bands
+* ADX14
+
+Every indicator is implemented independently and can be reused throughout the platform.
+
+---
+
+## Indicator Engine
+
+Status:
+
+**Completed**
+
+Purpose:
+
+Coordinate all indicator calculations.
+
+Responsibilities:
+
+* Receive historical candles
+* Execute indicator calculations
+* Return a unified `IndicatorResult`
+* Isolate mathematical calculations from higher-level analysis
+
+This abstraction allows new indicators to be added without modifying the Analysis Engine.
+
+---
+
+## Analysis Engine
+
+Status:
+
+**Completed (Version 1)**
+
+Purpose:
+
+Interpret indicator values and convert them into technical analysis.
+
+Current scoring:
+
+* Trend Score
+* Momentum Score
+* Volatility Score
+* Overall Technical Score
+
+The Analysis Engine also generates explanatory analysis notes describing why a stock received its score.
+
+Future versions will expand this engine with dedicated analyzers for trend, momentum, volatility, market structure and volume.
+
+---
+
+## Testing
+
+All implemented modules have dedicated test scripts and have been successfully validated during development.
+
+Current tests include:
+
+* Universe loading
+* Historical provider
+* Scan pipeline
+* Scanner service
+* Market data provider
+* Indicator Engine
+* Analysis Engine
+
+Every completed sprint concludes with successful testing before being committed to GitHub.
+# 5. Current Architecture
+
+Project Orion follows a strict layered architecture.
+
+Every layer has a single responsibility and communicates only with adjacent layers.
+
+This separation keeps the project modular, testable and scalable.
+
+The current architecture is shown below.
+
+```text id="nfej2t"
+Universe Layer
+
+        │
+
+        ▼
+
+Market Data Layer
+
+        │
+
+        ▼
+
+Historical Data Layer
+
+        │
+
+        ▼
+
+Indicator Library
+
+        │
+
+        ▼
+
+Indicator Engine
+
+        │
+
+        ▼
+
+Analysis Engine
+
+        │
+
+        ▼
+
+Signal Engine
+
+        │
+
+        ▼
+
+Decision Engine
+
+        │
+
+        ▼
+
+Portfolio Engine
+
+        │
+
+        ▼
+
+Risk Manager
+
+        │
+
+        ▼
+
+Trade Planner
+
+        │
+
+        ▼
+
+Artificial Intelligence Layer
+
+        │
+
+        ▼
+
+Graphical User Interface
+```
+
+Only the first six layers are currently implemented.
+
+The remaining layers already exist in the Master Architecture and will be implemented incrementally during future sprints.
+
+---
+
+# 6. Current Folder Structure
+
+The project currently follows the following structure.
+
+```text id="nwyw0m"
+Project-Orion/
+
+│
+
+├── config/
+
+├── core/
+
+├── data/
+
+│   ├── cache/
+
+│   ├── universes/
+
+│   └── trade_history.json
+
+│
+
+├── database/
+
+├── docs/
+
+├── engines/
+
+├── models/
+
+├── output/
+
+├── providers/
+
+│
+
+├── services/
+
+│   ├── universe/
+
+│   ├── market_data/
+
+│   ├── scanner/
+
+│   └── analysis/
+
+│       ├── indicator_library/
+
+│       ├── indicator_engine.py
+
+│       ├── analysis_engine.py
+
+│       └── models.py
+
+│
+
+├── tests/
+
+│
+
+├── ui/
+
+│
+
+└── app.py
+```
+
+This structure is expected to remain stable throughout the remainder of Orion's development.
+
+New functionality should integrate into the existing architecture rather than introducing additional top-level directories.
+
+---
+
+# 7. Analysis Capabilities
+
+The current Analysis Layer performs deterministic technical analysis using historical market data.
+
+The following indicators are fully implemented.
+
+---
+
+## Moving Averages
+
+Simple Moving Average
+
+* SMA20
+* SMA50
+
+Exponential Moving Average
+
+* EMA20
+* EMA50
+
+These indicators are primarily used for trend detection.
+
+---
+
+## Momentum Indicators
+
+Relative Strength Index
+
+* RSI14
+
+Moving Average Convergence Divergence
+
+* MACD
+* Signal Line
+* Histogram
+
+These indicators measure market momentum and trend acceleration.
+
+---
+
+## Volatility Indicators
+
+Average True Range
+
+* ATR14
+
+Bollinger Bands
+
+* Upper Band
+* Middle Band
+* Lower Band
+* Band Width
+
+These indicators evaluate current market volatility.
+
+---
+
+## Trend Strength
+
+Average Directional Index
+
+* ADX14
+* +DI
+* -DI
+
+These indicators estimate trend strength independently of direction.
+
+---
+
+# 8. Analysis Scoring
+
+The Analysis Engine currently converts indicator values into deterministic technical scores.
+
+Current scoring categories:
+
+Trend Score
+
+Momentum Score
+
+Volatility Score
+
+Overall Technical Score
+
+Each score ranges from:
+
+```text id="7xndh3"
+0
+
+↓
+
+100
+```
+
+The current implementation also generates human-readable analysis notes explaining how each score was determined.
+
+Example:
+
+```text id="uj6jkr"
+Trend
+
+SMA20 above SMA50
+
+EMA20 above EMA50
+
+ADX confirms trend strength
+
+Momentum
+
+Healthy RSI
+
+MACD above signal line
+
+Volatility
+
+Healthy ATR
+
+Healthy Bollinger Width
+
+Overall Technical Score
+
+84
+```
+
+This scoring model represents Version 1 of the Analysis Engine and will evolve further as additional analyzers are introduced.
+
+---
+
+# 9. Current Scanner Pipeline
+
+The scanner currently processes stocks using the following deterministic workflow.
+
+```text id="hm0qjz"
+Load Universe
+
+↓
+
+Download Quotes
+
+↓
+
+Price Filter
+
+↓
+
+Volume Filter
+
+↓
+
+Liquidity Filter
+
+↓
+
+Relative Strength Filter
+
+↓
+
+Momentum Filter
+
+↓
+
+Historical Data
+
+↓
+
+Indicator Engine
+
+↓
+
+Analysis Engine
+The Technical Scanner now consumes AnalysisResult objects instead of maintaining its own indicator calculations.
+
+This eliminates duplicated technical analysis logic and centralises all scoring inside the Analysis Layer.
+↓
+
+Technical Scanner
+
+↓
+
+Ranking Engine
+
+↓
+
+Top Opportunities
+```
+
+This pipeline analyses every stock using the same sequence of deterministic filters.
+
+Future versions will insert the Signal Engine and Decision Engine after the Analysis Engine while preserving the modular structure.
+
+---
+
+# 10. Current Technical Capabilities
+
+At the completion of Sprint 7.4, Orion is capable of:
+
+* Loading more than 6,200 US-listed stocks.
+* Downloading current market prices.
+* Downloading historical daily candles.
+* Caching both quotes and historical data.
+* Performing deterministic technical analysis.
+* Calculating nine professional technical indicators.
+* Generating technical analysis scores.
+* Ranking investment opportunities.
+* Producing deterministic BUY candidates.
+
+The platform now possesses a complete analytical foundation upon which future decision-making layers will be constructed.
+# 11. Market Data Status
+
+Project Orion currently uses Yahoo Finance as its primary market data provider.
+
+Current provider:
+
+```text id="z7yx1o"
+Yahoo Finance
+```
+
+Current capabilities:
+
+* Live market quotes
+* Historical daily candles
+* Batch downloads
+* Automatic retries
+* Error handling
+* Local caching
+
+The provider layer has been designed around abstract interfaces, allowing additional providers to be integrated without modifying higher-level analysis code.
+
+Future providers may include:
+
+* Polygon.io
+* Alpha Vantage
+* Twelve Data
+* Interactive Brokers
+* Alpaca Markets
+* Finnhub
+
+The rest of Orion remains independent from the selected provider.
+
+---
+
+# 12. Universe Status
+
+Current universe:
+
+Approximately **6,204 US-listed stocks**.
+
+Universe composition:
+
+* Nasdaq-listed companies
+* Other major US exchanges
+* Duplicate removal
+* Local CSV storage
+
+Universe updates are performed independently from the scanner.
+
+Current workflow:
+
+```text id="kg76up"
+Download latest universe
+
+↓
+
+Merge exchanges
+
+↓
+
+Remove duplicates
+
+↓
+
+Store CSV
+
+↓
+
+Load locally during scans
+```
+
+This design minimises unnecessary network requests during daily scanning.
+
+---
+
+# 13. GUI Status
+
+Current GUI status:
+
+**Prototype**
+
+Current capabilities:
+
+* Desktop application
+* Basic navigation
+* Scanner integration
+* Opportunity display
+* Portfolio placeholder
+* Analysis placeholder
+
+The GUI currently serves as a functional interface rather than the final user experience.
+
+Future versions will introduce:
+
+* Interactive candlestick charts
+* Technical indicator overlays
+* AI explanation panel
+* Portfolio dashboard
+* Watchlists
+* Historical trade journal
+* Performance analytics
+* Multi-panel workspace
+* Professional dark theme
+
+The GUI architecture has already been defined within the Master Architecture document.
+
+---
+
+# 14. Current Test Status
+
+Project Orion follows a test-first engineering philosophy.
+
+All completed modules are validated before each sprint is considered complete.
+
+Current test suite includes:
+
+```text id="h2jjlwm"
+test_market_data_provider.py
+
+test_historical_data_provider.py
+
+test_scan_pipeline.py
+
+test_scan_universe.py
+
+test_analysis_engine.py
+
+test_scanner_service.py
+
+test_portfolio_engine.py
+
+test_trade_planner.py
+
+test_rsi.py
+
+test_rsi_signal.py
+
+test_ema_signal.py
+
+test_decision_engine.py
+```
+
+Additional tests continue to be added alongside new functionality.
+
+Regression testing forms an integral part of Orion's development workflow.
+
+---
+
+# 15. GitHub Status
+
+Repository:
+
+Project-Orion
+
+Primary branch:
+
+```text id="j6i0v5"
+main
+```
+
+Current development branch:
+
+```text id="r5y1dl"
+sprint-7-1-indicator-engine
+```
+
+Development workflow:
+
+```text id="nqj70q"
+Create feature branch
+
+↓
+
+Implement sprint
+
+↓
+
+Run tests
+
+↓
+
+Update documentation
+
+↓
+
+Git add
+
+↓
+
+Commit
+
+↓
+
+Push
+
+↓
+
+Merge into main
+```
+
+Every completed sprint is committed to GitHub with descriptive commit messages.
+
+The repository therefore represents a complete chronological history of Orion's development.
+
+---
+
+# 16. Current Version
+
+Current application version:
+
+```text id="2jgvkk"
+Project Orion
+
+v0.7.5-alpha
+```
+
+Meaning:
+
+Major Version
+
+0
+
+The platform remains under active architectural development.
+
+Minor Version
+
+7
+
+Represents the current development generation.
+
+Patch Version
+
+5
+
+Represents the completion of Sprint 7.5.
+
+Future versions will continue following semantic versioning principles.
+
+---
+
+# 17. Current Project Health
+
+Overall project health:
+
+🟢 Excellent
+
+Current assessment:
+
+Architecture:
+
+Complete foundation established.
+
+Documentation:
+
+Comprehensive and continuously maintained.
+
+Testing:
+
+Passing.
+
+GitHub:
+
+Up to date.
+
+Technical debt:
+
+Low.
+
+Modularity:
+
+Excellent.
+
+Scalability:
+
+High.
+
+Development pace:
+
+Consistent.
+
+The project is currently well positioned for implementation of higher-level analytical intelligence.
+
+---
+
+# 18. Current Risks
+
+The following architectural risks have been identified.
+
+Current limitations:
+
+* Signal Engine not yet implemented.
+* Decision Engine Version 2 not yet implemented.
+* Portfolio optimisation not yet implemented.
+* Risk Management not yet implemented.
+* Professional GUI not yet implemented.
+
+These items are already defined within the Master Architecture and form the roadmap for future development.
+
+None of these limitations require architectural redesign.
+
+They represent planned future implementation phases.
+# 19. Next Development Sprint
+
+## Sprint 7.6
+
+### Objective
+
+Expand the Analysis Layer by introducing dedicated analysis modules and further separating technical evaluation responsibilities.
+
+Sprint 7.5 completed the migration of the Technical Scanner to the new Analysis Layer. All technical scores are now generated exclusively by the Analysis Engine, eliminating duplicate indicator calculations within the scanner.
+
+Sprint 7.6 focuses on improving the internal architecture of the Analysis Layer while preserving all external behaviour.
+
+---
+
+### Current Situation
+
+Current analysis flow:
+
+```text
+Historical Data
+
+↓
+
+Indicator Engine
+
+↓
+
+Analysis Engine
+
+↓
+
+Technical Scanner
+
+↓
+
+Ranking Engine
+```
+
+The Analysis Engine currently contains all scoring logic for:
+
+* Trend
+* Momentum
+* Volatility
+
+Although fully functional, all scoring responsibilities still reside inside a single class.
+
+---
+
+### Sprint Goals
+
+Sprint 7.6 will begin splitting the Analysis Engine into dedicated analyzers.
+
+Planned analyzers include:
+
+* Trend Analyzer
+* Momentum Analyzer
+* Volatility Analyzer
+
+Each analyzer will become responsible for evaluating one specific technical domain while remaining completely deterministic.
+
+The Analysis Engine will evolve into an orchestration layer that combines the results from these specialized analyzers.
+
+---
+
+### Target Architecture
+
+```text
+Historical Data
+
+↓
+
+Indicator Engine
+
+↓
+
+Trend Analyzer
+
+↓
+
+Momentum Analyzer
+
+↓
+
+Volatility Analyzer
+
+↓
+
+Analysis Engine
+
+↓
+
+Technical Scanner
+
+↓
+
+Ranking Engine
+```
+
+---
+
+### Expected Outcome
+
+At the completion of Sprint 7.6 Orion will provide:
+
+* Dedicated analysis modules
+* Smaller and more maintainable analysis classes
+* Improved separation of responsibilities
+* Easier addition of future analyzers
+* No duplicate scoring logic
+* Full backwards compatibility with the existing scanner pipeline
+
+No behavioural changes are expected for the Technical Scanner or Ranking Engine.
+
+The purpose of Sprint 7.6 is purely architectural refinement in preparation for the next analytical capabilities.
+
+---
+
+# 20. Upcoming Milestones
+
+After Sprint 7.5, development will continue with the following milestones.
+
+## Signal Engine
+
+Responsibilities:
+
+* BUY signals
+* SELL signals
+* HOLD signals
+* Signal confidence
+* Signal explanations
+
+---
+
+## Decision Engine Version 2
+
+Responsibilities:
+
+* Combine technical analysis
+* Portfolio context
+* Risk evaluation
+* Final recommendation
+
+Outputs:
+
+BUY
+
+WATCH
+
+HOLD
+
+SELL
+
+---
+
+## Portfolio Engine
+
+Responsibilities:
+
+* Open positions
+* Portfolio statistics
+* Capital allocation
+* Exposure analysis
+* Historical performance
+
+---
+
+## Risk Manager
+
+Responsibilities:
+
+* Position sizing
+* Risk per trade
+* Portfolio heat
+* Stop-loss validation
+* Risk / Reward calculations
+
+---
+
+## Trade Planner
+
+Responsibilities:
+
+* Entry strategy
+* Stop-loss
+* Take-profit
+* Position sizing
+* Trade summary
+
+---
+
+## Artificial Intelligence Layer
+
+Responsibilities:
+
+* Explain recommendations
+* Portfolio summaries
+* Daily reports
+* Educational mode
+* Interactive assistant
+
+The AI layer will never replace deterministic analysis.
+
+Its purpose is to explain and communicate the results produced by Orion's analytical engines.
+
+---
+
+## Professional GUI
+
+Future GUI objectives:
+
+* Interactive candlestick charts
+* Technical indicator overlays
+* AI explanation panel
+* Portfolio dashboard
+* Market overview
+* Watchlists
+* Historical trades
+* Professional workspace
+
+The GUI will become the primary interface through which users interact with Orion.
+
+---
+
+# 21. Long-Term Roadmap
+
+Project Orion is expected to evolve through the following major phases.
+
+```text id="3hy9yx"
+Current
+
+↓
+
+Analysis Engine
+
+↓
+
+Signal Engine
+
+↓
+
+Decision Engine
+
+↓
+
+Portfolio Engine
+
+↓
+
+Risk Manager
+
+↓
+
+Trade Planner
+
+↓
+
+Artificial Intelligence
+
+↓
+
+Professional GUI
+
+↓
+
+Paper Trading
+
+↓
+
+Broker Integration
+
+↓
+
+Version 1.0
+```
+
+Version 1.0 represents Orion's first complete release as a professional deterministic swing-trading platform.
+
+Future versions will continue expanding the platform while preserving the architecture established in the Master Architecture document.
+
+---
+
+# 22. Current Development Priorities
+
+The current development priorities are listed below in order of importance.
+
+Priority 1
+
+Complete the new scanner architecture by integrating the Analysis Engine.
+
+Priority 2
+
+Implement the Signal Engine.
+
+Priority 3
+
+Implement Decision Engine Version 2.
+
+Priority 4
+
+Develop Portfolio Management.
+
+Priority 5
+
+Implement Risk Management.
+
+Priority 6
+
+Develop the Trade Planner.
+
+Priority 7
+
+Build the professional desktop GUI.
+
+All future work should continue following the incremental sprint methodology established during the current development phase.
+
+---
+
+# 23. Conclusion
+
+Project Orion has successfully completed the transition from a simple stock scanner to a structured analytical platform.
+
+The foundation now includes:
+
+* A scalable layered architecture.
+* Modular market data providers.
+* Historical data caching.
+* Deterministic technical indicators.
+* A reusable Indicator Library.
+* A dedicated Indicator Engine.
+* A dedicated Analysis Engine.
+* Technical analysis scoring.
+* Comprehensive documentation.
+* Continuous testing.
+* Git-based version control.
+
+With these foundations in place, future development can focus entirely on higher-level investment intelligence rather than rebuilding existing infrastructure.
+
+The architecture is stable, modular and designed for long-term growth.
+
+Project Orion is now entering the phase in which analytical intelligence will be transformed into complete investment decisions.
+
+---
+
+# End of Project Status
+
+**Project:** Project Orion
+
+**Current Version:** v0.7.4-alpha
+
+**Current Sprint:** Sprint 7.4 completed
+
+**Current Status:** Active Development
+
+**Repository Status:** Up to date
+
+**Documentation Status:** Current
+
+**Overall Project Health:** Excellent
+
+This document should be updated after every completed sprint and should always reflect the current implementation status of Project Orion.
