@@ -18,9 +18,10 @@ class IndicatorEngine:
     """
     Centrale manager voor alle technische indicatoren.
 
-    Sprint 7.7:
+    Sprint 7.8:
     - Berekent technische indicatoren.
     - Berekent basisstructuurwaarden voor StructureAnalyzer.
+    - Berekent volumegegevens voor VolumeAnalyzer.
     """
 
     def calculate(
@@ -33,6 +34,7 @@ class IndicatorEngine:
         close = self._extract_close_series(candles)
         high = self._extract_price_series(candles, "High")
         low = self._extract_price_series(candles, "Low")
+        volume = self._extract_price_series(candles, "Volume")
 
         if close is None:
             result.set("error", "Geen geldige Close-kolom gevonden")
@@ -58,6 +60,11 @@ class IndicatorEngine:
             low=low,
         )
 
+        self._add_volume_values(
+            result=result,
+            volume=volume,
+        )
+
         return result
 
     def _add_structure_values(
@@ -70,7 +77,12 @@ class IndicatorEngine:
         if close is None or close.empty:
             return
 
-        result.set("latest_close", float(close.dropna().iloc[-1]))
+        close = close.dropna()
+
+        if close.empty:
+            return
+
+        result.set("latest_close", float(close.iloc[-1]))
 
         if high is None or low is None:
             return
@@ -91,6 +103,41 @@ class IndicatorEngine:
         result.set("recent_low_20", recent_low_20)
         result.set("previous_high_20", previous_high_20)
         result.set("previous_low_20", previous_low_20)
+
+    def _add_volume_values(
+        self,
+        result: IndicatorResult,
+        volume: pd.Series | None,
+    ) -> None:
+        if volume is None:
+            return
+
+        volume = volume.dropna()
+
+        if len(volume) < 20:
+            return
+
+        latest_volume = float(volume.iloc[-1])
+        average_volume_20 = float(volume.iloc[-20:].mean())
+
+        result.set("latest_volume", latest_volume)
+        result.set("average_volume_20", average_volume_20)
+
+        if average_volume_20 > 0:
+            relative_volume = latest_volume / average_volume_20
+            result.set("relative_volume_20", float(relative_volume))
+
+        if len(volume) >= 40:
+            previous_average_volume_20 = float(volume.iloc[-40:-20].mean())
+            result.set("previous_average_volume_20", previous_average_volume_20)
+
+            if previous_average_volume_20 > 0:
+                volume_trend_20 = (
+                    (average_volume_20 - previous_average_volume_20)
+                    / previous_average_volume_20
+                ) * 100
+
+                result.set("volume_trend_20", float(volume_trend_20))
 
     def _extract_close_series(
         self,

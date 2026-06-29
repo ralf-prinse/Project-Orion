@@ -2,6 +2,7 @@ from services.analysis.analyzers.momentum_analyzer import MomentumAnalyzer
 from services.analysis.analyzers.structure_analyzer import StructureAnalyzer
 from services.analysis.analyzers.trend_analyzer import TrendAnalyzer
 from services.analysis.analyzers.volatility_analyzer import VolatilityAnalyzer
+from services.analysis.analyzers.volume_analyzer import VolumeAnalyzer
 from services.analysis.indicator_engine import IndicatorEngine
 from services.analysis.models import AnalysisResult, IndicatorResult
 
@@ -10,12 +11,13 @@ class AnalysisEngine:
     """
     Centrale technische analyse-engine van Project Orion.
 
-    Sprint 7.7:
+    Sprint 7.8:
     - Roept IndicatorEngine aan.
     - Delegeert trendscore aan TrendAnalyzer.
     - Delegeert momentumscore aan MomentumAnalyzer.
     - Delegeert volatilityscore aan VolatilityAnalyzer.
     - Delegeert structurescore aan StructureAnalyzer.
+    - Delegeert volumescore aan VolumeAnalyzer.
     - Berekent overall score intern.
     """
 
@@ -26,12 +28,14 @@ class AnalysisEngine:
         momentum_analyzer: MomentumAnalyzer | None = None,
         volatility_analyzer: VolatilityAnalyzer | None = None,
         structure_analyzer: StructureAnalyzer | None = None,
+        volume_analyzer: VolumeAnalyzer | None = None,
     ):
         self.indicator_engine = indicator_engine or IndicatorEngine()
         self.trend_analyzer = trend_analyzer or TrendAnalyzer()
         self.momentum_analyzer = momentum_analyzer or MomentumAnalyzer()
         self.volatility_analyzer = volatility_analyzer or VolatilityAnalyzer()
         self.structure_analyzer = structure_analyzer or StructureAnalyzer()
+        self.volume_analyzer = volume_analyzer or VolumeAnalyzer()
 
     def analyze(self, symbol: str, candles) -> AnalysisResult:
         indicators = self.indicator_engine.calculate(
@@ -75,6 +79,11 @@ class AnalysisEngine:
             result=result,
         )
 
+        result.volume_score = self.volume_analyzer.analyze(
+            indicators=indicators,
+            result=result,
+        )
+
         result.overall_score = self._calculate_overall_score(result)
 
         result.add_note(f"Overall technical score: {result.overall_score}")
@@ -86,10 +95,11 @@ class AnalysisEngine:
         result: AnalysisResult,
     ) -> int:
         weighted_score = (
-            result.trend_score * 0.35
-            + result.momentum_score * 0.30
-            + result.volatility_score * 0.20
+            result.trend_score * 0.30
+            + result.momentum_score * 0.25
+            + result.volatility_score * 0.15
             + result.structure_score * 0.15
+            + result.volume_score * 0.15
         )
 
         return int(round(weighted_score))
