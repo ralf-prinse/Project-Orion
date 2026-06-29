@@ -1,15 +1,10 @@
+from services.analysis.analyzers.base_analyzer import BaseAnalyzer
 from services.analysis.models import AnalysisResult, IndicatorResult
 
 
-class VolatilityAnalyzer:
+class VolatilityAnalyzer(BaseAnalyzer):
     """
     Analyseert volatiliteit op basis van berekende indicatoren.
-
-    Verantwoordelijkheid:
-    - Alleen volatilityscore bepalen.
-    - Alleen volatilitygerelateerde analysis notes toevoegen.
-    - Geen indicatoren berekenen.
-    - Geen BUY/HOLD/IGNORE beslissingen nemen.
     """
 
     def analyze(

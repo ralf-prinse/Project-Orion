@@ -1,15 +1,10 @@
+from services.analysis.analyzers.base_analyzer import BaseAnalyzer
 from services.analysis.models import AnalysisResult, IndicatorResult
 
 
-class TrendAnalyzer:
+class TrendAnalyzer(BaseAnalyzer):
     """
     Analyseert trendkwaliteit op basis van berekende indicatoren.
-
-    Verantwoordelijkheid:
-    - Alleen trendscore bepalen.
-    - Alleen trendgerelateerde analysis notes toevoegen.
-    - Geen indicatoren berekenen.
-    - Geen BUY/HOLD/IGNORE beslissingen nemen.
     """
 
     def analyze(

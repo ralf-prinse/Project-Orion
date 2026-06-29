@@ -1,15 +1,10 @@
+from services.analysis.analyzers.base_analyzer import BaseAnalyzer
 from services.analysis.models import AnalysisResult, IndicatorResult
 
 
-class MomentumAnalyzer:
+class MomentumAnalyzer(BaseAnalyzer):
     """
     Analyseert momentumkwaliteit op basis van berekende indicatoren.
-
-    Verantwoordelijkheid:
-    - Alleen momentumscore bepalen.
-    - Alleen momentumgerelateerde analysis notes toevoegen.
-    - Geen indicatoren berekenen.
-    - Geen BUY/HOLD/IGNORE beslissingen nemen.
     """
 
     def analyze(
