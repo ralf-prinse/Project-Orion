@@ -124,7 +124,7 @@ Advanced Modular Analysis Layer
 
 Current Sprint Status:
 
-Sprint 8.1 completed.
+Sprint 8.1.1 completed.
 
 The Analysis Layer now consists of eight specialised analyzers:
 
@@ -150,6 +150,20 @@ MarketRegimeAnalyzer provides market context and remains excluded from the overa
 RelativeStrengthAnalyzer contributes market-relative performance.
 
 CandlestickPatternAnalyzer contributes deterministic price-action analysis.
+AnalyzerRegistry now centrally manages all analyzers.
+
+AnalysisEngine no longer owns individual analyzer instances.
+
+Analyzer execution is registry-driven and remains fully deterministic.
+
+Each registered analyzer defines:
+
+- execution order
+- score field
+- raw candle requirement
+- overall score participation
+
+Future analyzers should be added by registering them in AnalyzerRegistry rather than modifying AnalysisEngine.
 
 The analytical foundation required for the future Signal Engine is now considered complete.
 # 4. Current Architecture
@@ -766,8 +780,8 @@ The Analysis Layer now consists of eight specialised analyzers.
 - MarketRegimeAnalyzer
 - RelativeStrengthAnalyzer
 - CandlestickPatternAnalyzer
-- Analyzer Registry als volgende sprint
-- Signal Engine daarna
+- Analyzer Registry completed
+- Signal Engine next
 
 The immediate development objective is to continue expanding analytical intelligence while preserving the modular architecture.
 
@@ -782,26 +796,24 @@ Future development should continue favouring specialised analyzers over monolith
 
 # 14. Immediate Next Sprint
 
-Sprint 8.1.1
+Sprint 8.2
 
 Objective:
-Introduce Analyzer Registry
+
+Implement Signal Engine
 
 Planned work:
 
-- Detect deterministic candlestick formations.
-- Generate an independent candlestick score.
-- Produce deterministic analysis notes.
-- Integrate into AnalysisEngine.
-- Preserve backwards compatibility.
-- Validate Analysis Layer regression tests.
-- Validate the complete Scan Pipeline.
+- Introduce SignalResult
+- Build modular SignalEngine
+- Convert AnalysisResult into deterministic trading signals
+- Preserve modular architecture
+- Maintain full backwards compatibility
+- Add complete unit test coverage
 
 Expected outcome:
 
-The Analysis Layer will consist of eight specialised analyzers while AnalysisEngine continues to function solely as the orchestration layer.
-
-This prepares Orion for the implementation of the Signal Engine.
+The Analysis Layer will feed a dedicated Signal Engine capable of generating deterministic BUY, WATCH, HOLD and SELL signals while keeping AnalysisEngine focused exclusively on technical analysis.
 ---
 
 # 15. Long-Term Vision

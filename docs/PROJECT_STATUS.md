@@ -7,10 +7,11 @@ Project Version: v0.8.1-alpha
 Document Version: 1.7
 
 Last Updated:
-Sprint 8.1 – CandlestickPatternAnalyzer added
+
 
 Current Milestone:
-Sprint 8.1 completed
+
+Sprint 8.1.1 completed
 ---
 
 # 1. Executive Summary
@@ -916,6 +917,41 @@ Validation:
 No regressions were introduced.
 Sprint 8.1 completed the analytical foundation required for the future Signal Engine.
 
+### Sprint 8.1.1 – Analyzer Registry
+
+**Status:** Completed
+
+Sprint 8.1.1 introduced a central Analyzer Registry.
+
+New components:
+
+- AnalyzerRegistry
+- AnalyzerDefinition
+- Registry-driven AnalysisEngine
+
+AnalysisEngine no longer manages analyzers directly.
+
+All analyzers are now registered centrally in deterministic execution order.
+
+The registry specifies:
+
+- analyzer
+- score field
+- raw candle requirement
+- overall score participation
+
+This architecture allows future analyzers to be added by registration instead of modifying AnalysisEngine.
+
+Validation:
+
+- test_analyzer_registry.py
+- test_analysis_engine.py
+- Complete Analysis Layer regression tests
+
+30 analysis tests passed.
+
+No regressions introduced.
+
 # 6. Current Folder Structure
 
 The project currently follows the following structure.
@@ -1529,6 +1565,9 @@ At the completion of Sprint 8.1 the Analysis Layer consists of eight specialised
 - MarketRegimeAnalyzer
 - RelativeStrengthAnalyzer
 - CandlestickPatternAnalyzer
+Analyzer Registry
+Registry-driven AnalysisEngine
+AnalyzerDefinition
 
 ---
 
@@ -1587,6 +1626,7 @@ Sprint 8.1.1 will freeze the Analysis Layer architecture.
 Future analyzers can be added by registering them rather than modifying AnalysisEngine.
 
 This prepares Orion for the implementation of the Signal Engine while keeping the architecture modular, maintainable and scalable.
+
 ## Current Analysis Layer
 
 TrendAnalyzer

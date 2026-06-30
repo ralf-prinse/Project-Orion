@@ -1,3 +1,39 @@
+## v0.8.1.1-alpha
+
+### Added
+
+* Added `AnalyzerRegistry`.
+* Added `AnalyzerDefinition`.
+* Added deterministic analyzer registration.
+* Added registry unit tests.
+
+### Changed
+
+* `AnalysisEngine` now retrieves analyzers from `AnalyzerRegistry`.
+* Analyzer execution is now registry-driven instead of hardcoded.
+* Overall score calculation now iterates over registered analyzers.
+* Raw candle data is automatically passed only to analyzers that require it.
+
+### Architecture
+
+The Analysis Layer now uses a central Analyzer Registry.
+
+Future analyzers can be added by registering them instead of modifying `AnalysisEngine`.
+
+This further reduces coupling and keeps `AnalysisEngine` focused exclusively on orchestration.
+
+### Validation
+
+Successfully validated through:
+
+* `test_analyzer_registry.py`
+* `test_analysis_engine.py`
+* Complete Analysis Layer regression tests
+
+30 analysis tests passed.
+
+No regressions introduced.
+
 ## v0.8.1-alpha
 
 ### Added

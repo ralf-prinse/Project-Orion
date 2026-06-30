@@ -1,30 +1,35 @@
+# PROJECT ORION
+
 Current Sprint
 
-✅ Sprint 8.1 completed: CandlestickPatternAnalyzer
+✅ Sprint 8.1.1 — Analyzer Registry
 
 
-Completed in Sprint 8.1
+Completed
 
-✅ Implement CandlestickPatternAnalyzer
+✅ Sprint 8.1 — CandlestickPatternAnalyzer
 
-✅ Add candlestick_score to AnalysisResult
+- Implemented CandlestickPatternAnalyzer
+- Added candlestick_score to AnalysisResult
+- Integrated CandlestickPatternAnalyzer into AnalysisEngine
+- Added raw candle analysis to the Analysis Layer
+- Implemented six deterministic candlestick patterns
+- Added unit tests
+- Validated Analysis Layer regression tests
+- Validated Scan Pipeline
 
-✅ Integrate CandlestickPatternAnalyzer into AnalysisEngine
+✅ Sprint 8.1.1 — Analyzer Registry
 
-✅ Support raw candle analysis inside Analysis Layer
-
-✅ Detect six deterministic candlestick patterns
-
-✅ Add CandlestickPatternAnalyzer unit tests
-
-✅ Validate Analysis Layer regression tests
-
-✅ Validate Scan Pipeline
+- Introduced AnalyzerRegistry
+- Introduced AnalyzerDefinition
+- Refactored AnalysisEngine to use registry-driven orchestration
+- Preserved deterministic analyzer execution order
+- Preserved backwards compatibility
+- Added AnalyzerRegistry unit tests
+- Validated complete Analysis Layer regression tests (30 passed)
 
 
 Upcoming
-
-☐ Sprint 8.1.1 — Analyzer Registry
 
 ☐ Sprint 8.2 — Signal Engine
 
@@ -41,13 +46,13 @@ Upcoming
 ☐ AI Layer
 
 
-
 Technical Debt / Maintenance
 
 ☐ Convert root-level test_scan_pipeline.py into a proper pytest regression test
 
-☐ Fix outdated test_scanner_service.py constructor usage
+☐ Fix outdated root-level test_scanner_service.py constructor usage
 
+☐ Remove remaining legacy root-level test files
 
 
 Future
