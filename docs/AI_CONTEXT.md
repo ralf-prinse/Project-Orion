@@ -2,131 +2,155 @@
 
 # AI_CONTEXT
 
-**Purpose**
+**Version:** v0.8.3.3-alpha
 
-This document provides the development context required for any future AI assistant or developer working on Project Orion.
+**Document Version:** 2.0
 
-Unlike the Master Architecture, this document focuses on practical development rules, engineering philosophy and the current implementation approach.
+---
 
-Every future development session should use this document together with:
+# Purpose
 
-* ORION_MASTER_ARCHITECTURE.md
-* PROJECT_STATUS.md
+This document provides the complete engineering context required for any future AI assistant or developer working on Project Orion.
 
-Together these three documents form the complete source of truth for Project Orion.
+Unlike the Master Architecture, this document focuses on practical software development.
+
+It defines:
+
+- engineering philosophy
+- architectural rules
+- development workflow
+- coding standards
+- current implementation status
+- future development direction
+
+Together with:
+
+- ORION_MASTER_ARCHITECTURE.md
+- PROJECT_STATUS.md
+
+this document forms the complete development context for Project Orion.
 
 ---
 
 # 1. Project Overview
 
-Project Orion is a deterministic swing-trading platform designed for the United States stock market.
+Project Orion is a professional deterministic swing-trading platform for the United States stock market.
 
-The objective is **not** to predict future prices using opaque AI models.
+Its objective is not to predict markets using opaque Artificial Intelligence.
 
-Instead, Orion performs transparent technical analysis using deterministic algorithms that can always be reproduced and explained.
+Instead, Orion produces deterministic investment decisions using transparent technical analysis and modular processing pipelines.
 
-Artificial Intelligence is used only as a communication layer.
+Artificial Intelligence is intentionally positioned as an explanation layer.
 
-AI never makes investment decisions.
+AI may explain deterministic calculations but never replace them.
 
-Every recommendation originates from deterministic calculations.
+Every investment recommendation must remain:
 
----
+- deterministic
+- reproducible
+- explainable
+- testable
 
-# 2. Development Philosophy
+# 2. Current Architecture
 
-Project Orion follows several strict engineering principles.
+Project Orion follows a deterministic layered architecture.
 
-## Architecture First
+Each processing layer has exactly one responsibility and communicates only through well-defined data models.
 
-Architecture always takes priority over implementation speed.
-
-Whenever a new feature is introduced, it must fit into the existing architecture rather than forcing architectural changes.
-
-Short-term convenience should never compromise long-term maintainability.
-
----
-
-## Small Working Sprints
-
-Development proceeds through small, fully functional sprints.
-
-Every sprint must produce working software.
-
-Incomplete implementations should be avoided whenever possible.
-
-Each sprint concludes with:
-
-* Working implementation
-* Successful tests
-* Documentation updates
-* Git commit
-* GitHub push
-
-Only then is a sprint considered complete.
-
----
-
-## Incremental Development
-
-Large rewrites are avoided.
-
-Instead, Project Orion evolves through incremental improvements.
-
-Future functionality should extend existing modules rather than replacing them.
-
-This philosophy has already proven successful during the implementation of:
-
-* Universe Layer
-* Market Data Layer
-* Historical Data Layer
-* Analysis Layer
+```text
+Universe Layer
+        │
+        ▼
+Market Data Layer
+        │
+        ▼
+Historical Data Layer
+        │
+        ▼
+Indicator Engine
+        │
+        ▼
+Analysis Layer
+        │
+        ▼
+Signal Layer
+        │
+        ▼
+Decision Layer
+        │
+        ▼
+Portfolio Layer
+        │
+        ▼
+Risk Manager
+        │
+        ▼
+Trade Planner
+        │
+        ▼
+Artificial Intelligence Layer
+        │
+        ▼
+Graphical User Interface
+```
 
 ---
 
-## Deterministic Software
+## Current Core Infrastructure
 
-Every calculation should produce identical results when supplied with identical input.
+Project Orion currently contains the following reusable core infrastructure:
 
-Randomness should never influence:
+### AnalyzerRunner
 
-* Technical analysis
-* Signal generation
-* Decision making
-* Portfolio calculations
-* Risk management
+Provides generic deterministic execution of registry-driven processing pipelines.
 
-Reproducibility is considered essential.
+Currently used by:
 
----
+- Analysis Layer
+- Signal Layer
+- Decision Layer
 
-## Explainability
-
-Every recommendation should be explainable.
-
-Every score should be traceable.
-
-Every AI explanation should reference deterministic calculations rather than generating speculative reasoning.
-
-Transparency always takes priority over sophistication.
+Future layers should reuse this infrastructure whenever practical.
 
 ---
 
-## Current Development Phase
+### Explainability Framework
 
-Current Version:
+The Explainability Framework provides structured explanations for deterministic decisions.
 
-Project Orion v0.8.1-alpha
+Core components:
 
-Current Phase:
+- ExplanationItem
+- ExplanationSeverity
+- ExplanationReport
 
-Advanced Modular Analysis Layer
+Future processing layers should use this framework instead of free-text explanations.
 
-Current Sprint Status:
+---
 
-Sprint 8.1.1 completed.
+## Current Processing Layers
 
-The Analysis Layer now consists of eight specialised analyzers:
+### Indicator Layer
+
+Responsibilities:
+
+- Mathematical indicator calculations
+- Benchmark-aware calculations
+- Produce IndicatorResult
+
+IndicatorEngine never performs interpretation.
+
+---
+
+### Analysis Layer
+
+Responsibilities:
+
+- Interpret technical indicators
+- Evaluate market structure
+- Produce AnalysisResult
+
+Current analyzers:
 
 - TrendAnalyzer
 - MomentumAnalyzer
@@ -137,325 +161,356 @@ The Analysis Layer now consists of eight specialised analyzers:
 - RelativeStrengthAnalyzer
 - CandlestickPatternAnalyzer
 
-AnalysisEngine functions exclusively as an orchestration layer.
-
-IndicatorEngine calculates technical indicators and benchmark-aware metrics.
-
-CandlestickPatternAnalyzer analyses raw candle data directly and is intentionally separated from IndicatorEngine because candlestick recognition is based on price action rather than derived indicators.
-
-Overall score weighting is centrally managed through the Analysis Layer configuration.
-
-MarketRegimeAnalyzer provides market context and remains excluded from the overall technical score.
-
-RelativeStrengthAnalyzer contributes market-relative performance.
-
-CandlestickPatternAnalyzer contributes deterministic price-action analysis.
-AnalyzerRegistry now centrally manages all analyzers.
-
-AnalysisEngine no longer owns individual analyzer instances.
-
-Analyzer execution is registry-driven and remains fully deterministic.
-
-Each registered analyzer defines:
-
-- execution order
-- score field
-- raw candle requirement
-- overall score participation
-
-Future analyzers should be added by registering them in AnalyzerRegistry rather than modifying AnalysisEngine.
-
-The analytical foundation required for the future Signal Engine is now considered complete.
-# 4. Current Architecture
-
-Project Orion currently follows the following layered architecture.
-
-```text id="arch01"
-Universe Layer
-
-↓
-
-Market Data Layer
-
-↓
-
-Historical Data Layer
-
-↓
-
-Indicator Library
-
-↓
-
-Indicator Engine
-
-↓
-
-Analysis Engine
-
-↓
-
-Signal Engine
-
-↓
-
-Decision Engine
-
-↓
-
-Portfolio Engine
-
-↓
-
-Risk Manager
-
-↓
-
-Trade Planner
-
-↓
-
-Artificial Intelligence Layer
-
-↓
-
-GUI
-```
-
-Only the first six layers are currently implemented.
-
-Every future module should integrate into this architecture rather than introducing alternative processing pipelines.
+AnalysisEngine acts purely as an orchestrator.
 
 ---
 
-# 5. Current Engineering Status
+### Signal Layer
 
-The following components are fully operational.
+Responsibilities:
 
-Infrastructure
+- Convert AnalysisResult into SignalResult.
+- Apply deterministic signal thresholds.
+- Produce trading signals.
 
-Infrastructure
+SignalEngine contains no business logic.
 
-* Universe Management
-* Market Data
-* Historical Data
-* Quote Cache
-* Historical Cache
-* Benchmark-aware IndicatorEngine
-* Central Analysis Weight Configuration
-* Raw Candle Analysis
+Signal generation is delegated to specialised analyzers through SignalRegistry.
 
-Scanner
+---
 
-* Scan Pipeline
-* Ranking Engine
-* Technical Scanner
+### Decision Layer
 
-Analysis
+Responsibilities:
 
-* Indicator Library
-* Indicator Engine
-* Analysis Engine
+- Validate trading signals.
+- Validate portfolio constraints.
+- Validate risk constraints.
+- Produce deterministic investment decisions.
 
-Analysis Framework
+Current pipeline:
 
-* BaseAnalyzer
-* Trend Analyzer
-* Momentum Analyzer
-* Volatility Analyzer
-* Structure Analyzer
-* Volume Analyzer
-* Analysis Engine orchestration
-* Dedicated analyzer unit tests
-* MarketRegimeAnalyzer
-* RelativeStrengthAnalyzer
-* CandlestickPatternAnalyzer
+```text
+SignalValidationAnalyzer
 
+↓
 
-Scanner Integration
+PortfolioValidationAnalyzer
 
-* Technical Scanner migrated to Analysis Layer
-* Unified technical scoring
-* AnalysisResult integration
+↓
 
+RiskValidationAnalyzer
 
-Indicators
+↓
 
-* SMA20
-* SMA50
-* EMA20
-* EMA50
-* RSI14
-* MACD
-* ATR14
-* Bollinger Bands
-* ADX14
+DecisionAssemblerAnalyzer
+```
 
-Scoring
+DecisionEngine orchestrates the pipeline through DecisionRegistry and AnalyzerRunner.
 
-* Trend Score
-* Momentum Score
-* Volatility Score
-* Structure Score
-* Volume Score
-* Market Regime Score
-* Relative Strength Score
-* Candlestick Score
-* Overall Technical Score
+---
 
-These modules should be considered stable unless future architectural improvements clearly justify modification.
-# 6. Engineering Rules
+Future layers should follow the same registry-driven architecture whenever practical.
 
-The following engineering rules should be respected throughout the lifetime of Project Orion.
+# 3. Engineering Philosophy
+
+Project Orion follows a number of fundamental engineering principles.
+
+These principles take precedence over implementation speed.
+
+---
+
+## Architecture First
+
+Architecture always takes priority over new functionality.
+
+Whenever new functionality is introduced, it should extend the existing architecture instead of forcing architectural redesign.
+
+Long-term maintainability always outweighs short-term convenience.
+
+---
+
+## Deterministic Processing
+
+Every processing layer must produce identical output when supplied with identical input.
+
+Randomness must never influence:
+
+- technical analysis
+- signal generation
+- decision making
+- portfolio management
+- risk management
+
+Determinism is considered a core architectural requirement.
 
 ---
 
 ## Single Responsibility
 
-Every class should perform one clearly defined task.
+Every component should perform one clearly defined task.
 
 Examples:
 
-Universe Loader
-
-Loads stock universes.
-
-Historical Provider
-
-Downloads historical candles.
-
-Indicator Engine
+IndicatorEngine
 
 Calculates indicators.
 
-Analysis Engine
+AnalysisEngine
 
-Interprets indicators.
+Coordinates analyzers.
 
-Signal Engine
+SignalEngine
 
-Produces trading signals.
+Coordinates signal analyzers.
 
-Each layer should remain independent from unrelated responsibilities.
+DecisionEngine
 
----
+Coordinates decision analyzers.
 
-## Modular Design
-
-Future functionality should be added by extending the architecture rather than modifying unrelated modules.
-
-Example:
-
-A new indicator should only require changes within:
-
-```text
-services/analysis/indicator_library/
-```
-
-The Analysis Engine should automatically benefit from the new indicator without architectural redesign.
+Business logic belongs inside specialised analyzers rather than orchestration layers.
 
 ---
 
-## Reusability
+## Registry-Driven Architecture
 
-Every calculation should be reusable.
+Every expandable processing layer should be registry driven.
 
-Indicator calculations should never be embedded inside business logic.
+Current registry implementations:
 
-Instead:
+- AnalyzerRegistry
+- SignalRegistry
+- DecisionRegistry
 
-```text
-Indicator Library
-
-↓
-
-Indicator Engine
-
-↓
-
-Analysis Engine
-```
-
-This separation makes testing significantly easier.
+Future layers should reuse this architectural pattern whenever practical.
 
 ---
 
-## Low Coupling
+## Explainability
 
-Modules should know as little as possible about each other.
+Every recommendation must be explainable.
 
-For example:
+Every decision must be traceable.
 
-The Indicator Engine should not know anything about:
+Every explanation should originate from deterministic calculations.
 
-* BUY signals
-* Portfolio management
-* Risk calculations
-* GUI rendering
-
-Similarly:
-
-The GUI should never contain business logic.
+Artificial Intelligence explains deterministic results but never creates investment decisions.
 
 ---
 
-## High Cohesion
+## Composition over Inheritance
 
-Each module should focus exclusively on its own responsibility.
+Reusable infrastructure should be shared through composition rather than deep inheritance hierarchies.
 
-Examples:
+Examples include:
 
-Indicator Library
+- AnalyzerRunner
+- Explainability Framework
 
-Only mathematics.
-
-Analysis Engine
-
-Only interpretation.
-
-Signal Engine
-
-Only signal generation.
-
-Decision Engine
-
-Only investment decisions.
-
-This principle keeps Orion maintainable as the codebase grows.
+Future infrastructure should continue following this principle.
 
 ---
 
-# 7. Coding Style
+## Incremental Development
 
-The following coding style should be used consistently.
+Project Orion evolves through small, fully completed sprints.
 
-## Readability over Cleverness
+Each sprint should include:
 
-Readable code is preferred over compact code.
+- architecture
+- implementation
+- unit tests
+- regression tests
+- documentation
+- Git commit
+- GitHub push
 
-Avoid unnecessarily complex implementations.
+No sprint is considered complete before all of these steps have been finished.
 
-Future developers should understand the code quickly.
+# 4. Current Development Status
+
+## Current Version
+
+Project Orion v0.8.3.3-alpha
 
 ---
 
-## Descriptive Naming
+## Completed Layers
 
-Variable names should describe their purpose.
+The following layers are considered implemented and operational.
 
-Good examples:
+### Infrastructure
 
-```python
-historical_data
+- Universe Layer
+- Market Data Layer
+- Historical Data Layer
+- Quote Cache
+- Historical Cache
 
-trend_score
+---
 
-overall_score
+### Analysis
 
-indicator_result
-```
+- Indicator Library
+- Indicator Engine
+- AnalysisEngine
+- AnalyzerRegistry
+- AnalyzerRunner
 
-Avoid abbreviated names unless universally recognised.
+Implemented analyzers:
+
+- TrendAnalyzer
+- MomentumAnalyzer
+- VolatilityAnalyzer
+- StructureAnalyzer
+- VolumeAnalyzer
+- MarketRegimeAnalyzer
+- RelativeStrengthAnalyzer
+- CandlestickPatternAnalyzer
+
+---
+
+### Signal Layer
+
+Implemented:
+
+- SignalEngine
+- SignalRegistry
+- BaseSignalAnalyzer
+- EntrySignalAnalyzer
+- SignalResult
+- Signal Threshold Configuration
+
+The Signal Layer converts deterministic technical analysis into deterministic trading signals.
+
+---
+
+### Decision Layer
+
+Implemented:
+
+- DecisionEngine
+- DecisionRegistry
+- BaseDecisionAnalyzer
+- DecisionContext
+- DecisionState
+- DecisionResult
+
+Current decision analyzers:
+
+- SignalValidationAnalyzer
+- PortfolioValidationAnalyzer
+- RiskValidationAnalyzer
+- DecisionAssemblerAnalyzer
+
+The Decision Layer converts deterministic trading signals into deterministic investment decisions.
+
+---
+
+### Explainability
+
+Implemented:
+
+- ExplanationItem
+- ExplanationSeverity
+- ExplanationReport
+
+The Explainability Framework is reusable across all processing layers and forms the foundation for future AI explanations, logging, reporting and audit trails.
+
+---
+
+## Current Test Status
+
+Current regression status:
+
+- Analysis Layer
+- Signal Layer
+- Decision Layer
+- Core Infrastructure
+
+Current result:
+
+58 passing tests
+
+No known regressions.
+
+---
+
+# 5. Current Roadmap
+
+The immediate development roadmap is:
+
+### Sprint 8.4
+
+Position Sizing Engine
+
+Objectives:
+
+- PositionSizingAnalyzer
+- configurable risk-per-trade
+- recommended position size
+- Decision Layer integration
+
+---
+
+### Sprint 8.5
+
+Portfolio Engine
+
+Objectives:
+
+- portfolio state
+- portfolio validation
+- exposure management
+
+---
+
+### Sprint 8.6
+
+Risk Manager
+
+Objectives:
+
+- portfolio risk
+- position risk
+- capital protection
+
+---
+
+Future roadmap:
+
+- Trade Planner
+- Paper Trading
+- Broker Integration
+- Professional Desktop GUI
+- Artificial Intelligence Explanation Layer
+
+---
+# 6. Development Workflow
+
+Every development sprint follows the same workflow.
+
+1. Design the architecture.
+2. Implement the functionality.
+3. Write unit tests.
+4. Execute regression tests.
+5. Update documentation.
+6. Commit to Git.
+7. Push to GitHub.
+
+A sprint is only considered complete after all seven steps have been successfully completed.
+
+---
+
+# 7. Coding Standards
+
+Project Orion follows the following coding conventions.
+
+## Readability
+
+Readable code is preferred over compact or clever implementations.
+
+Future developers should understand every module quickly.
 
 ---
 
@@ -463,226 +518,88 @@ Avoid abbreviated names unless universally recognised.
 
 Type hints should be used whenever practical.
 
-Example:
+---
 
-```python
-def calculate_rsi(
-    close: pd.Series,
-    period: int = 14,
-) -> float | None:
-```
+## Complete Files
 
-Type hints improve readability and simplify future maintenance.
+When a file changes substantially, complete file rewrites are preferred over partial snippets.
+
+This minimizes copy/paste errors and keeps implementations consistent.
 
 ---
 
-## Documentation
+## Low Coupling
 
-Every public class should contain a descriptive docstring.
+Modules should communicate only through clearly defined models.
 
-Every important function should explain:
-
-* Purpose
-* Parameters
-* Return value
-
-Code should explain intent rather than implementation details.
+Business logic should never leak into orchestration layers.
 
 ---
 
-## Avoid Duplication
+## High Cohesion
 
-Whenever similar code appears more than once, consider extracting reusable functionality.
-
-Project Orion should favour reusable components over duplicated logic.
-
----
-
-# 8. Sprint Workflow
-
-Development follows a fixed workflow.
-
-Step 1
-
-Design the architecture.
-
-Step 2
-
-Implement the architecture.
-
-Step 3
-
-Implement functionality.
-
-Step 4
-
-Write or update tests.
-
-Step 5
-
-Run all relevant tests.
-
-Step 6
-
-Update documentation.
-
-Step 7
-
-Commit changes.
-
-Step 8
-
-Push to GitHub.
-
-A sprint is never considered complete before all eight steps have been finished.
-
----
-
-# 9. Testing Philosophy
-
-Every significant module should have an associated test file.
-
-Tests should be deterministic.
-
-External APIs should be isolated whenever practical.
-
-New functionality should be verified immediately after implementation.
-
-Whenever possible:
-
-One module
-
-↓
-
-One test file
-
-↓
-
-One responsibility
-
-This philosophy has already been successfully applied throughout the current project.
-
----
-
-# 10. Documentation Rules
-
-Documentation is treated as part of the software.
-
-Every completed sprint should update:
-
-PROJECT_STATUS.md
-
-CHANGELOG.md
-
-TODO.md
-
-AI_CONTEXT.md (when architectural or development practices change)
-
-ORION_MASTER_ARCHITECTURE.md (only when the architecture itself changes)
-
-Documentation should always reflect the actual implementation.
-
-Future developers should never need to inspect the codebase merely to understand the project's current status.
-# 11. Instructions for Future AI Sessions
-
-Every future AI session should assume that Project Orion is an actively maintained professional software project.
-
-The project should never be treated as a prototype.
-
-Large architectural redesigns should be avoided unless explicitly requested.
-
-The existing architecture should always be respected.
-
----
-
-## Respect Existing Architecture
-
-Before proposing new modules or redesigns, first determine whether equivalent functionality already exists.
-
-Whenever functionality already exists, extend it instead of replacing it.
-
-Future AI sessions should assume that the Master Architecture represents the intended long-term design.
-
----
-
-## Never Rebuild Completed Sprints
-
-Completed sprints should be considered stable.
-
-Future development should build upon completed functionality rather than replacing it.
-
-Examples of completed work include:
-
-* Universe Layer
-* Market Data Layer
-* Historical Data Layer
-* Indicator Library
-* Indicator Engine
-* Analysis Engine
-
-These modules should only be modified for bug fixes, optimisation or architectural improvements.
-
----
-
-## One Responsibility Per Sprint
-
-Future development should remain incremental.
-
-A sprint should introduce one clearly defined capability.
+Each module should perform exactly one responsibility.
 
 Examples:
 
-Sprint
-
-↓
-
-Signal Engine
-
-NOT
-
-Signal Engine
-
-*
-
-Portfolio
-
-*
-
-Risk Manager
-
-*
-
-GUI
-
-Keeping sprints focused makes testing, documentation and debugging significantly easier.
+- IndicatorEngine → calculations
+- AnalysisEngine → orchestration
+- SignalEngine → orchestration
+- DecisionEngine → orchestration
+- AnalyzerRunner → pipeline execution
 
 ---
 
-## Preserve Modularity
+# 8. Testing Standards
 
-Whenever new functionality is introduced, ask:
+Testing is considered part of implementation.
 
-Can this be implemented by adding a new module?
+Every significant module should have dedicated unit tests.
 
-If the answer is yes, avoid modifying existing modules unnecessarily.
+Regression tests should always be executed before documentation is updated.
 
-Project Orion should continue growing by adding layers rather than rewriting previous ones.
+Tests should remain:
 
----
-
-## Backwards Compatibility
-
-Whenever practical, new functionality should remain compatible with existing code.
-
-Avoid introducing breaking changes without a compelling architectural reason.
+- deterministic
+- isolated
+- reproducible
+- independent from external services whenever practical
 
 ---
 
-# 12. Communication Preferences
+# 9. Documentation Standards
 
-Development sessions should remain practical and structured.
+Documentation is treated as part of the software.
 
-The preferred workflow is:
+After every completed sprint the following documents should be reviewed:
+
+- CHANGELOG.md
+- TODO.md
+- PROJECT_STATUS.md
+- AI_CONTEXT.md
+
+ORION_MASTER_ARCHITECTURE.md should only be updated when the long-term architecture itself changes.
+
+Documentation should always reflect the actual implementation.
+
+---
+
+# 10. Instructions for Future AI Sessions
+
+Future AI sessions should treat Project Orion as a professional software product rather than a prototype.
+
+Always follow these principles:
+
+- Respect the existing architecture.
+- Prefer adding new modules over modifying existing ones.
+- Keep orchestration separate from business logic.
+- Preserve deterministic behaviour.
+- Prefer architecture over short-term convenience.
+- Avoid introducing technical debt.
+- Update tests before updating documentation.
+- Keep every layer modular and independently testable.
+
+The preferred development order remains:
 
 Architecture
 
@@ -696,57 +613,11 @@ Testing
 
 ↓
 
-Git
+Regression Tests
 
 ↓
 
 Documentation
-
-The AI should guide development one step at a time.
-
-Avoid introducing several unrelated features simultaneously.
-
----
-
-## Complete Files
-
-The preferred coding style is to provide complete files rather than isolated code snippets.
-
-Whenever a file changes substantially, rewrite the entire file.
-
-This reduces copy/paste mistakes and keeps implementations consistent.
-
----
-
-## Small Steps
-
-Large implementations should be divided into manageable steps.
-
-Each completed step should be tested before continuing.
-
-This approach has consistently produced stable progress throughout Orion's development.
-
----
-
-## Testing First
-
-Immediately after implementing new functionality, provide a corresponding test.
-
-Testing should occur before moving to the next implementation step.
-
----
-
-## Documentation Last
-
-Documentation should be updated after implementation and testing have been completed.
-
-The preferred order is:
-
-Implementation
-
-↓
-
-Testing
 
 ↓
 
@@ -756,313 +627,9 @@ Git Commit
 
 GitHub Push
 
-↓
+This document, together with:
 
-Documentation
+- ORION_MASTER_ARCHITECTURE.md
+- PROJECT_STATUS.md
 
-This ensures that documentation always reflects working software.
-
----
-
-# 13. Current Development Focus
-
-## Current Development Focus
-
-Sprint 8.1 successfully introduced CandlestickPatternAnalyzer.
-
-The Analysis Layer now consists of eight specialised analyzers.
-
-- TrendAnalyzer
-- MomentumAnalyzer
-- VolatilityAnalyzer
-- StructureAnalyzer
-- VolumeAnalyzer
-- MarketRegimeAnalyzer
-- RelativeStrengthAnalyzer
-- CandlestickPatternAnalyzer
-- Analyzer Registry completed
-- Signal Engine next
-
-The immediate development objective is to continue expanding analytical intelligence while preserving the modular architecture.
-
-The next planned components are:
-
-- CandlestickPatternAnalyzer
-- Signal Engine
-- Decision Engine
-- Portfolio Engine
-
-Future development should continue favouring specialised analyzers over monolithic implementations.
-
-# 14. Immediate Next Sprint
-
-Sprint 8.2
-
-Objective:
-
-Implement Signal Engine
-
-Planned work:
-
-- Introduce SignalResult
-- Build modular SignalEngine
-- Convert AnalysisResult into deterministic trading signals
-- Preserve modular architecture
-- Maintain full backwards compatibility
-- Add complete unit test coverage
-
-Expected outcome:
-
-The Analysis Layer will feed a dedicated Signal Engine capable of generating deterministic BUY, WATCH, HOLD and SELL signals while keeping AnalysisEngine focused exclusively on technical analysis.
----
-
-# 15. Long-Term Vision
-
-Project Orion is intended to become a professional desktop application capable of assisting investors throughout the complete investment process.
-
-Future capabilities include:
-
-* Market scanning
-* Technical analysis
-* Signal generation
-* Investment decisions
-* Portfolio management
-* Risk analysis
-* Trade planning
-* AI explanations
-* Paper trading
-* Broker integration
-
-Artificial Intelligence should remain an explanatory layer rather than a decision-making engine.
-
-Deterministic analysis should always remain the foundation of every recommendation generated by Orion.
-# 16. Developer Notes
-
-The following notes describe the development practices that have proven successful throughout the development of Project Orion.
-
-These are not architectural requirements, but engineering conventions that should be preserved whenever practical.
-
----
-
-## Build the Foundation First
-
-Project Orion has consistently been developed from the bottom upwards.
-
-Infrastructure always precedes intelligence.
-
-The development order is intentionally structured as follows:
-
-```text
-Universe
-
-↓
-
-Market Data
-
-↓
-
-Historical Data
-
-↓
-
-Indicator Library
-
-↓
-
-Indicator Engine
-
-↓
-
-Analysis Engine
-
-↓
-
-Signal Engine
-
-↓
-
-Decision Engine
-
-↓
-
-Portfolio Engine
-
-↓
-
-Risk Manager
-
-↓
-
-Trade Planner
-
-↓
-
-Artificial Intelligence
-
-↓
-
-GUI
-```
-
-Future development should continue respecting this order whenever possible.
-
----
-
-## Complete One Layer Before Starting the Next
-
-Development should avoid partially implemented systems.
-
-Instead:
-
-Finish one layer completely.
-
-Test it.
-
-Document it.
-
-Commit it.
-
-Only then continue to the next layer.
-
-This methodology has resulted in a highly stable codebase with very little technical debt.
-
----
-
-## Prefer Architecture Over Features
-
-Whenever choosing between:
-
-Adding another feature
-
-or
-
-Improving architecture
-
-Architecture should generally take priority.
-
-A solid architecture enables future features to be implemented more rapidly and with fewer defects.
-
----
-
-## Keep Documentation Current
-
-Documentation is considered part of the software.
-
-Documentation should never lag behind implementation.
-
-After each completed sprint the following workflow should be followed:
-
-```text
-Implementation
-
-↓
-
-Testing
-
-↓
-
-Git Commit
-
-↓
-
-GitHub Push
-
-↓
-
-Documentation
-```
-
-The documentation should always describe the current implementation.
-
----
-
-## Complete Files Instead of Partial Snippets
-
-When making significant changes to a file, complete file rewrites are preferred over isolated snippets.
-
-Providing complete files reduces copy-and-paste errors and ensures consistent formatting.
-
-Future AI sessions should continue using this approach whenever practical.
-
----
-
-## One Step at a Time
-
-Development sessions should proceed incrementally.
-
-Avoid introducing multiple unrelated systems simultaneously.
-
-Instead:
-
-Design.
-
-↓
-
-Implement.
-
-↓
-
-Test.
-
-↓
-
-Commit.
-
-↓
-
-Document.
-
-↓
-
-Continue.
-
-This approach has proven significantly more reliable than attempting to implement large features in a single step.
-
----
-
-## Maintain Professional Standards
-
-Although Orion is currently an alpha project, it should always be treated as a professional software product.
-
-Every new component should meet the same quality standards as production software.
-
-This includes:
-
-* Clear architecture
-* Modular implementation
-* Readable code
-* Comprehensive testing
-* Up-to-date documentation
-* Version control
-* Deterministic behaviour
-
----
-
-# 17. Final Statement
-
-Project Orion has evolved beyond a simple programming exercise.
-
-It is now a structured software platform with a documented architecture, deterministic analytical core and a clearly defined long-term roadmap.
-
-Future development should preserve the principles established throughout the project:
-
-* Build incrementally.
-* Respect the architecture.
-* Keep modules independent.
-* Test continuously.
-* Document consistently.
-* Prefer clarity over complexity.
-* Ensure every recommendation remains deterministic and explainable.
-
-By following these principles, Orion can continue to grow into a professional swing-trading platform while remaining maintainable, scalable and understandable for both developers and AI assistants.
-
----
-
-# End of AI Context
-
-This document should accompany every future development session together with:
-
-* ORION_MASTER_ARCHITECTURE.md
-* PROJECT_STATUS.md
-
-These three documents collectively define the complete development context for Project Orion and should be regarded as the authoritative source of truth throughout the lifetime of the project.
+forms the complete development context for every future Orion development session.

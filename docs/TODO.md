@@ -1,66 +1,67 @@
-# PROJECT ORION
-
 Current Sprint
 
-✅ Sprint 8.1.1 — Analyzer Registry
+✅ Sprint 8.3.3 — Explainability Framework Foundation
 
 
-Completed
+Recently Completed
 
 ✅ Sprint 8.1 — CandlestickPatternAnalyzer
 
-- Implemented CandlestickPatternAnalyzer
-- Added candlestick_score to AnalysisResult
-- Integrated CandlestickPatternAnalyzer into AnalysisEngine
-- Added raw candle analysis to the Analysis Layer
-- Implemented six deterministic candlestick patterns
-- Added unit tests
-- Validated Analysis Layer regression tests
-- Validated Scan Pipeline
-
 ✅ Sprint 8.1.1 — Analyzer Registry
 
-- Introduced AnalyzerRegistry
-- Introduced AnalyzerDefinition
-- Refactored AnalysisEngine to use registry-driven orchestration
-- Preserved deterministic analyzer execution order
-- Preserved backwards compatibility
-- Added AnalyzerRegistry unit tests
-- Validated complete Analysis Layer regression tests (30 passed)
+✅ Sprint 8.2 — Signal Engine Foundation
+
+✅ Sprint 8.2.1 — AnalyzerRunner Orchestration
+
+✅ Sprint 8.3.1 — Decision Layer Foundation
+
+✅ Sprint 8.3.2 — Decision Validation Pipeline
+
+✅ Sprint 8.3.3 — Explainability Framework
 
 
-Upcoming
+Next Sprint
 
-☐ Sprint 8.2 — Signal Engine
+☐ Sprint 8.4 — Position Sizing Engine
 
-☐ Sprint 8.3 — Decision Engine v2
+Planned objectives:
 
-☐ Sprint 8.4 — Risk Manager
-
-☐ Sprint 8.5 — Position Sizing
-
-☐ Sprint 8.6 — Portfolio Engine
-
-☐ Professional GUI
-
-☐ AI Layer
+- Introduce PositionSizingAnalyzer
+- Calculate recommended position size
+- Support configurable risk-per-trade
+- Prepare integration with Portfolio Engine
+- Full unit test coverage
 
 
-Technical Debt / Maintenance
+Upcoming Roadmap
 
-☐ Convert root-level test_scan_pipeline.py into a proper pytest regression test
+☐ Portfolio Engine
 
-☐ Fix outdated root-level test_scanner_service.py constructor usage
+☐ Risk Manager
 
-☐ Remove remaining legacy root-level test files
+☐ Earnings Risk Analyzer
 
+☐ Sector Exposure Analyzer
 
-Future
-
-☐ AI Assistant
+☐ Trade Planner
 
 ☐ Paper Trading
 
 ☐ Broker Integration
 
-☐ Portfolio Optimizer
+☐ Professional Desktop GUI
+
+☐ AI Explanation Layer
+
+
+Technical Debt
+
+🟢 Low
+
+Current architectural improvements under consideration:
+
+- Introduce generic Processing Pipeline framework
+- Integrate Explainability Framework into Analysis Layer
+- Integrate Explainability Framework into Signal Layer
+- Replace free-text reasons with structured ExplanationItems
+- Harmonise naming across all processing layers

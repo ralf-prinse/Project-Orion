@@ -1,3 +1,205 @@
+## v0.8.3.3-alpha
+
+### Added
+
+* Added core Explainability Framework.
+* Added `ExplanationItem`.
+* Added `ExplanationSeverity`.
+* Added `ExplanationReport`.
+* Added dedicated explainability unit tests.
+
+### Architecture
+
+Project Orion now has a reusable explainability foundation that can be used by:
+
+* Analysis Layer
+* Signal Layer
+* Decision Layer
+* Risk Manager
+* Portfolio Engine
+* GUI
+* Artificial Intelligence Layer
+
+This prepares Orion for structured explanations, audit trails, backtesting diagnostics and future AI-generated summaries.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/core`
+
+5 core tests passed.
+
+No regressions introduced.
+
+---
+
+## v0.8.3.2-alpha
+
+### Added
+
+* Added `PortfolioValidationAnalyzer`.
+* Added `RiskValidationAnalyzer`.
+* Extended `DecisionRegistry`.
+* Added portfolio validation tests.
+* Added risk validation tests.
+
+### Changed
+
+* Decision Layer now validates portfolio capacity before assembling a final decision.
+* Decision Layer now validates basic risk context before assembling a final decision.
+* `DecisionAssemblerAnalyzer` now respects portfolio and risk blockers.
+
+### Architecture
+
+The Decision Layer now follows a validation pipeline:
+
+* SignalValidationAnalyzer
+* PortfolioValidationAnalyzer
+* RiskValidationAnalyzer
+* DecisionAssemblerAnalyzer
+
+This prepares Orion for future portfolio management, risk management and position sizing.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/decisions`
+
+11 decision tests passed.
+
+No regressions introduced.
+
+---
+
+## v0.8.3.1-alpha
+
+### Added
+
+* Added Decision Layer foundation.
+* Added `DecisionAction`.
+* Added `DecisionContext`.
+* Added `DecisionState`.
+* Added `DecisionResult`.
+* Added `BaseDecisionAnalyzer`.
+* Added `SignalValidationAnalyzer`.
+* Added `DecisionAssemblerAnalyzer`.
+* Added `DecisionRegistry`.
+* Added `DecisionEngine`.
+
+### Architecture
+
+Project Orion now contains a modular Decision Layer.
+
+The Decision Layer converts `SignalResult` and `DecisionContext` into deterministic `DecisionResult` objects.
+
+The layer follows the same registry-driven architecture as the Analysis Layer and Signal Layer.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/decisions`
+
+9 decision tests passed.
+
+No regressions introduced.
+
+---
+
+## v0.8.2.1-alpha
+
+### Added
+
+* Added `AnalyzerRunner` as a reusable orchestration component.
+* Added generic registry execution infrastructure.
+* Added dedicated unit tests for `AnalyzerRunner`.
+
+### Changed
+
+* `SignalEngine` now delegates analyzer execution to `AnalyzerRunner`.
+* `AnalysisEngine` now delegates analyzer execution to `AnalyzerRunner`.
+* Removed duplicated orchestration logic from both engines.
+* Preserved deterministic execution order and backwards compatibility.
+
+### Architecture
+
+Project Orion now shares a common orchestration layer for registry-driven engines.
+
+Current registry-driven engines:
+
+* AnalysisEngine
+* SignalEngine
+
+Future engines such as `DecisionEngine` can reuse the same orchestration infrastructure without duplicating code.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/core`
+* `tests/analysis`
+* `tests/signals`
+
+42 tests passed.
+
+No regressions introduced.
+
+---
+
+## v0.8.2-alpha
+
+### Added
+
+* Added complete Signal Layer foundation.
+* Added `SignalEngine`.
+* Added `SignalRegistry`.
+* Added `SignalAnalyzerDefinition`.
+* Added `BaseSignalAnalyzer`.
+* Added `EntrySignalAnalyzer`.
+* Added `SignalResult`.
+* Added `Signal` enum.
+* Added configurable signal thresholds.
+* Added dedicated Signal Layer unit tests.
+
+### Changed
+
+* Introduced deterministic signal generation based on `AnalysisResult`.
+* Added registry-driven signal execution.
+* Centralised signal thresholds into a dedicated configuration module.
+* Prepared the architecture for future trading strategies and backtesting.
+
+### Architecture
+
+Project Orion now contains three modular processing layers:
+
+* Indicator Layer
+* Analysis Layer
+* Signal Layer
+
+The Signal Layer follows the same architectural principles as the Analysis Layer:
+
+* Registry-driven
+* Modular analyzers
+* Deterministic behaviour
+* Single Responsibility
+* Fully testable
+
+### Validation
+
+Successfully validated through:
+
+* `test_signal_engine.py`
+* `test_signal_registry.py`
+* `test_signal_thresholds.py`
+
+10 Signal Layer tests passed.
+
+No regressions introduced.
+
+---
+
 ## v0.8.1.1-alpha
 
 ### Added
