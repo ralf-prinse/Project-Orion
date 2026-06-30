@@ -1,3 +1,56 @@
+## v0.8.0-alpha
+
+### Added
+
+* Added `RelativeStrengthAnalyzer` to the modular Analysis Layer.
+* Added `relative_strength_score` to `AnalysisResult`.
+* Added benchmark support to `IndicatorEngine`.
+* Added SPY benchmark integration to `TechnicalScanner`.
+* Added configurable analysis weights (`analysis_weights.py`).
+* Added unit tests for `RelativeStrengthAnalyzer`.
+* Added unit tests for benchmark calculations inside `IndicatorEngine`.
+
+### Changed
+
+* `AnalysisEngine` now orchestrates seven specialised analyzers:
+
+  * TrendAnalyzer
+  * MomentumAnalyzer
+  * VolatilityAnalyzer
+  * StructureAnalyzer
+  * VolumeAnalyzer
+  * MarketRegimeAnalyzer
+  * RelativeStrengthAnalyzer
+
+* `IndicatorEngine.calculate()` now supports optional `benchmark_candles`.
+* Relative Strength is now incorporated into the overall technical score.
+* Score weights have been centralized in a dedicated configuration module.
+
+### Architecture
+
+The Analysis Layer now distinguishes between:
+
+* Technical quality scoring
+* Market context
+* Relative market performance
+
+MarketRegimeAnalyzer remains excluded from the overall score because it provides market context rather than technical quality.
+
+RelativeStrengthAnalyzer becomes a first-class technical component within the Analysis Layer.
+
+### Validation
+
+Successfully validated through:
+
+* `test_analysis_engine.py`
+* `test_market_regime_analyzer.py`
+* `test_relative_strength_analyzer.py`
+* `test_indicator_engine_relative_strength.py`
+* Complete Analysis Layer regression tests
+* Manual Scan Pipeline validation
+
+No regressions were introduced.
+
 ## v0.7.9-alpha
 
 ### Added

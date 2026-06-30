@@ -2,10 +2,15 @@
 
 # PROJECT STATUS
 
-Project Version: v0.7.9-alpha
-Document Version: 1.5
-Last Updated: Sprint 7.9 – MarketRegimeAnalyzer added
-Current milestone: Sprint 7.9 completed
+Project Version: v0.8.0-alpha
+
+Document Version: 1.6
+
+Last Updated:
+Sprint 8.0 – RelativeStrengthAnalyzer added
+
+Current milestone:
+Sprint 8.0 completed
 ---
 
 # 1. Executive Summary
@@ -82,7 +87,7 @@ Current phase:
 
 Current milestone:
 
-Sprint 7.9 completed
+Sprint 8.0 completed
 
 The project has successfully completed the foundational market scanning architecture and has now entered the technical analysis phase.
 
@@ -105,6 +110,10 @@ Unified Technical Analysis Pipeline
 MarketRegimeAnalyzer
 Analysis Layer orchestration
 Analysis Layer regression tests
+RelativeStrengthAnalyzer
+Benchmark-aware IndicatorEngine
+Configurable Analysis Weights
+SPY benchmark integration
 
 The project currently analyses more than **6,200 US-listed stocks** and is capable of downloading, caching and processing historical market data for technical analysis.
 
@@ -803,6 +812,45 @@ Only the first six layers are currently implemented.
 
 The remaining layers already exist in the Master Architecture and will be implemented incrementally during future sprints.
 
+### Sprint 8.0 – Relative Strength Analyzer
+
+**Status:** Completed
+
+Sprint 8.0 introduced relative strength analysis into the modular Analysis Layer.
+
+New components:
+
+- RelativeStrengthAnalyzer
+- relative_strength_score
+- Benchmark-aware IndicatorEngine
+- SPY benchmark integration
+- Centralised analysis weight configuration
+
+AnalysisEngine now orchestrates seven specialised analyzers:
+
+- TrendAnalyzer
+- MomentumAnalyzer
+- VolatilityAnalyzer
+- StructureAnalyzer
+- VolumeAnalyzer
+- MarketRegimeAnalyzer
+- RelativeStrengthAnalyzer
+
+RelativeStrengthAnalyzer measures whether a stock outperforms or underperforms the broader market.
+
+SPY is currently used as the default benchmark.
+
+Unlike MarketRegimeAnalyzer, RelativeStrengthAnalyzer contributes directly to the overall technical score.
+
+Validation:
+
+- test_relative_strength_analyzer.py
+- test_indicator_engine_relative_strength.py
+- Complete Analysis Layer regression tests
+- Manual Scan Pipeline validation
+
+No regressions were introduced.
+
 ---
 
 # 6. Current Folder Structure
@@ -950,17 +998,20 @@ These indicators estimate trend strength independently of direction.
 
 # 8. Analysis Scoring
 
-The Analysis Engine currently converts indicator values into deterministic technical scores.
-
-Current scoring categories:
-
-TTrend Score
+Trend Score
 Momentum Score
 Volatility Score
 Structure Score
 Volume Score
-Market Regime Score --> market_regime_score bewust niet wordt meegenomen in overall_score, omdat het context levert en geen extra kwaliteitsdimensie
+Market Regime Score
+Relative Strength Score
 Overall Technical Score
+
+RelativeStrengthAnalyzer compares the performance of an individual stock against the broader market.
+The current benchmark is SPY.
+Relative strength contributes directly to the overall technical score because it represents an independent measure of technical quality.
+MarketRegimeAnalyzer remains separate from the overall score because it provides market context rather than technical quality.
+Overall score weighting is centrally managed through the Analysis Layer configuration to ensure consistency and simplify future optimisation and backtesting.
 
 Each score ranges from:
 
@@ -1389,15 +1440,15 @@ They represent planned future implementation phases.
 
 # 19. Next Development Sprint
 
-## Sprint 8.0
+## Sprint 8.1
 
 ### Objective
 
-Implement the **RelativeStrengthAnalyzer**.
+Implement the **CandlestickPatternAnalyzer**.
 
-Sprint 8.0 extends the modular Analysis Layer by introducing relative strength analysis as an independent analyzer.
+Sprint 8.1 will extend the modular Analysis Layer with deterministic candlestick pattern recognition.
 
-The objective is to measure the performance of an individual stock relative to the broader market while preserving the existing layered architecture.
+The analyzer will identify high-probability bullish and bearish candlestick formations and translate them into an independent technical score together with explanatory analysis notes.
 
 No existing analyzers will be modified beyond the minimal integration required by the AnalysisEngine.
 
@@ -1405,33 +1456,105 @@ No existing analyzers will be modified beyond the minimal integration required b
 
 ## Current Analysis Layer
 
-At the completion of Sprint 7.9 the Analysis Layer consists of six specialised analyzers:
+At the completion of Sprint 8.0 the Analysis Layer consists of seven specialised analyzers:
 
-* TrendAnalyzer
-* MomentumAnalyzer
-* VolatilityAnalyzer
-* StructureAnalyzer
-* VolumeAnalyzer
-* MarketRegimeAnalyzer
+- TrendAnalyzer
+- MomentumAnalyzer
+- VolatilityAnalyzer
+- StructureAnalyzer
+- VolumeAnalyzer
+- MarketRegimeAnalyzer
+- RelativeStrengthAnalyzer
 
-The AnalysisEngine functions exclusively as an orchestration layer.
-
-Each analyzer is responsible for a single analytical domain and returns an independent score together with explanatory analysis notes.
+The AnalysisEngine continues to function exclusively as an orchestration layer.
 
 ---
 
-## Sprint 8.0 Goals
+## Sprint 8.1 Goals
 
-The RelativeStrengthAnalyzer will:
+The CandlestickPatternAnalyzer will:
 
-* Compare a stock against a market benchmark.
-* Determine whether the stock is outperforming or underperforming the market.
-* Produce an independent relative strength score.
-* Generate human-readable analysis notes.
-* Integrate into the modular Analysis Layer without affecting existing analyzers.
+- Detect deterministic candlestick formations.
+- Identify bullish reversal patterns.
+- Identify bearish reversal patterns.
+- Produce an independent candlestick score.
+- Generate human-readable analysis notes.
+- Integrate into the modular Analysis Layer.
+- Preserve full backwards compatibility.
 
-The existing architecture will remain fully backwards compatible.
+---
 
+## Initial Supported Patterns
+
+The first implementation will focus on the most reliable single- and two-candle formations:
+
+Bullish
+
+- Hammer
+- Bullish Engulfing
+- Piercing Line
+
+Bearish
+
+- Shooting Star
+- Bearish Engulfing
+- Dark Cloud Cover
+
+Additional multi-candle patterns can be introduced in future sprints.
+
+---
+
+## Target Architecture
+
+```text
+Historical Data
+
+↓
+
+Indicator Engine
+
+↓
+
+TrendAnalyzer
+MomentumAnalyzer
+VolatilityAnalyzer
+StructureAnalyzer
+VolumeAnalyzer
+MarketRegimeAnalyzer
+RelativeStrengthAnalyzer
+CandlestickPatternAnalyzer
+
+↓
+
+AnalysisEngine
+
+↓
+
+TechnicalScanner
+
+↓
+
+RankingEngine
+```
+
+---
+
+## Expected Outcome
+
+At the completion of Sprint 8.1 Orion will provide eight specialised analyzers.
+
+The Analysis Layer will then evaluate:
+
+- Trend
+- Momentum
+- Volatility
+- Market Structure
+- Volume
+- Market Regime
+- Relative Strength
+- Candlestick Behaviour
+
+This significantly enriches the analytical foundation for the future Signal Engine while preserving Orion's deterministic and modular architecture.
 ---
 
 ## Target Architecture

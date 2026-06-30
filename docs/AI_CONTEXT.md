@@ -112,11 +112,11 @@ Transparency always takes priority over sophistication.
 
 ---
 
-# 3. Current Development Phase
+## Current Development Phase
 
 Current Version:
 
-Project Orion v0.7.9-alpha
+Project Orion v0.8.0-alpha
 
 Current Phase:
 
@@ -124,27 +124,31 @@ Advanced Modular Analysis Layer
 
 Current Sprint Status:
 
-Sprint 7.9 completed.
+Sprint 8.0 completed.
 
-The Analysis Layer now consists of six specialised analyzers:
+The Analysis Layer now consists of seven specialised analyzers:
 
-- Trend Analyzer
-- Momentum Analyzer
-- Volatility Analyzer
-- Structure Analyzer
-- Volume Analyzer
+- TrendAnalyzer
+- MomentumAnalyzer
+- VolatilityAnalyzer
+- StructureAnalyzer
+- VolumeAnalyzer
 - MarketRegimeAnalyzer
+- RelativeStrengthAnalyzer
 
-AnalysisEngine acts exclusively as an orchestration layer.
+AnalysisEngine functions exclusively as an orchestration layer.
 
-IndicatorEngine provides technical indicators, market structure data and volume information.
+IndicatorEngine now supports optional benchmark data and calculates relative strength metrics.
 
-MarketRegimeAnalyzer provides market context through market_regime_score.
+TechnicalScanner retrieves SPY benchmark data once per scan batch and provides benchmark-aware analysis.
 
-The market_regime_score is intentionally excluded from the overall technical score to prevent double counting of technical characteristics.
+Overall score weighting is centrally managed through the Analysis Layer configuration.
 
-The architecture is now prepared for future analyzers such as RelativeStrengthAnalyzer, CandlestickPatternAnalyzer and the future Signal Engine.
----
+MarketRegimeAnalyzer provides market context and remains excluded from the overall technical score.
+
+RelativeStrengthAnalyzer provides an independent measure of technical quality and contributes directly to the overall technical score.
+
+The architecture is now prepared for future analyzers such as CandlestickPatternAnalyzer and the future Signal Engine.
 
 # 4. Current Architecture
 
@@ -219,6 +223,8 @@ Infrastructure
 * Historical Data
 * Quote Cache
 * Historical Cache
+  Benchmark-aware IndicatorEngine
+  Central Analysis Weight Configuration
 
 Scanner
 
@@ -243,6 +249,7 @@ Analysis Framework
 * Analysis Engine orchestration
 * Dedicated analyzer unit tests
 * MarketRegimeAnalyzer
+  RelativeStrengthAnalyzer
 
 
 Scanner Integration
@@ -272,6 +279,7 @@ Scoring
 * Structure Score
 * Volume Score
 * Market Regime Score
+Relative Strength Score
 * Overall Technical Score
 
 These modules should be considered stable unless future architectural improvements clearly justify modification.
@@ -737,52 +745,52 @@ This ensures that documentation always reflects working software.
 
 # 13. Current Development Focus
 
-The immediate development objective is to continue expanding the modular Analysis Layer.
+## Current Development Focus
 
-Sprint 7.9 successfully introduced the MarketRegimeAnalyzer.
+Sprint 8.0 successfully introduced RelativeStrengthAnalyzer.
 
-The Analysis Layer now consists of:
+The Analysis Layer now consists of seven specialised analyzers:
 
-* Trend Analyzer
-* Momentum Analyzer
-* Volatility Analyzer
-* Structure Analyzer
-* Volume Analyzer
-* MarketRegimeAnalyzer
+- TrendAnalyzer
+- MomentumAnalyzer
+- VolatilityAnalyzer
+- StructureAnalyzer
+- VolumeAnalyzer
+- MarketRegimeAnalyzer
+- RelativeStrengthAnalyzer
 
-The next analytical expansion will be:
+The immediate development objective is to continue expanding analytical intelligence while preserving the modular architecture.
 
-* RelativeStrengthAnalyzer
-* CandlestickPatternAnalyzer
-* SignalEngine
+The next planned components are:
 
-Future development should continue expanding analytical intelligence while preserving the modular analyzer architecture.
----
+- CandlestickPatternAnalyzer
+- Signal Engine
+- Decision Engine
+- Portfolio Engine
+
+Future development should continue favouring specialised analyzers over monolithic implementations.
 
 # 14. Immediate Next Sprint
 
-# 14. Immediate Next Sprint
-
-Sprint 8.0
+Sprint 8.1
 
 Objective:
 
-Implement RelativeStrengthAnalyzer.
+Implement CandlestickPatternAnalyzer.
 
 Planned work:
 
-* Implement RelativeStrengthAnalyzer.
-* Compare individual stocks against a market benchmark.
-* Produce an independent relative strength score.
-* Generate deterministic analysis notes.
-* Integrate the analyzer into AnalysisEngine.
-* Preserve backwards compatibility.
-* Validate all Analysis Layer regression tests.
-* Validate the complete scanner pipeline.
+- Detect deterministic candlestick formations.
+- Generate an independent candlestick score.
+- Produce deterministic analysis notes.
+- Integrate into AnalysisEngine.
+- Preserve backwards compatibility.
+- Validate Analysis Layer regression tests.
+- Validate the complete Scan Pipeline.
 
 Expected outcome:
 
-The Analysis Layer will consist of seven specialised analyzers while AnalysisEngine continues to function solely as the orchestration layer.
+The Analysis Layer will consist of eight specialised analyzers while AnalysisEngine continues to function solely as the orchestration layer.
 
 This prepares Orion for the implementation of the Signal Engine.
 ---

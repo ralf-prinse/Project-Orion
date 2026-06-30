@@ -23,11 +23,11 @@ class TechnicalScanner:
     """
     Voert technische analyse uit op de beste scanner-kandidaten.
 
-    Sprint 7.5:
-    - TechnicalScanner gebruikt de nieuwe Analysis Layer.
-    - Indicatorberekeningen worden niet meer lokaal uitgevoerd.
-    - AnalysisEngine is de enige bron voor technische scores.
+    Sprint 8.0:
+    - TechnicalScanner gebruikt de modulaire Analysis Layer.
     - Historical data blijft afkomstig uit HistoricalDataProvider.
+    - SPY wordt gebruikt als standaard benchmark voor relative strength.
+    - Benchmark-historie wordt één keer per batch opgehaald.
     """
 
     def __init__(
@@ -37,12 +37,14 @@ class TechnicalScanner:
         period: str = "6mo",
         interval: str = "1d",
         batch_size: int = 100,
+        benchmark_symbol: str = "SPY",
     ):
         self.historical_provider = historical_provider or YahooHistoricalDataProvider()
         self.analysis_engine = analysis_engine or AnalysisEngine()
         self.period = period
         self.interval = interval
         self.batch_size = batch_size
+        self.benchmark_symbol = benchmark_symbol
 
     def scan(self, quotes: list[Quote]) -> list[TechnicalScanResult]:
         if not quotes:
@@ -63,8 +65,10 @@ class TechnicalScanner:
         symbols = [quote.symbol for quote in quotes]
         quote_map = {quote.symbol: quote for quote in quotes}
 
+        symbols_with_benchmark = self._add_benchmark_symbol(symbols)
+
         history = self.historical_provider.get_history(
-            symbols=symbols,
+            symbols=symbols_with_benchmark,
             period=self.period,
             interval=self.interval,
         )
@@ -72,9 +76,14 @@ class TechnicalScanner:
         if not history:
             return []
 
+        benchmark_candles = history.get(self.benchmark_symbol)
+
         results: list[TechnicalScanResult] = []
 
         for symbol, data in history.items():
+            if symbol == self.benchmark_symbol:
+                continue
+
             quote = quote_map.get(symbol)
 
             if quote is None:
@@ -86,6 +95,7 @@ class TechnicalScanner:
             result = self._scan_symbol_data(
                 quote=quote,
                 data=data,
+                benchmark_candles=benchmark_candles,
             )
 
             if result is not None:
@@ -97,6 +107,7 @@ class TechnicalScanner:
         self,
         quote: Quote,
         data: pd.DataFrame,
+        benchmark_candles: pd.DataFrame | None = None,
     ) -> TechnicalScanResult | None:
         if not self._has_enough_data(data):
             return None
@@ -104,6 +115,7 @@ class TechnicalScanner:
         analysis = self.analysis_engine.analyze(
             symbol=quote.symbol,
             candles=data,
+            benchmark_candles=benchmark_candles,
         )
 
         technical_score = float(analysis.overall_score)
@@ -139,6 +151,12 @@ class TechnicalScanner:
             return False
 
         return len(data) >= 60
+
+    def _add_benchmark_symbol(self, symbols: list[str]) -> list[str]:
+        if self.benchmark_symbol in symbols:
+            return symbols
+
+        return symbols + [self.benchmark_symbol]
 
     def _chunks(self, items: list[Quote], size: int):
         for index in range(0, len(items), size):

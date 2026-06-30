@@ -1,9 +1,13 @@
 from services.analysis.analyzers.market_regime_analyzer import MarketRegimeAnalyzer
 from services.analysis.analyzers.momentum_analyzer import MomentumAnalyzer
+from services.analysis.analyzers.relative_strength_analyzer import (
+    RelativeStrengthAnalyzer,
+)
 from services.analysis.analyzers.structure_analyzer import StructureAnalyzer
 from services.analysis.analyzers.trend_analyzer import TrendAnalyzer
 from services.analysis.analyzers.volatility_analyzer import VolatilityAnalyzer
 from services.analysis.analyzers.volume_analyzer import VolumeAnalyzer
+from services.analysis.config.analysis_weights import ALL_WEIGHTS
 from services.analysis.indicator_engine import IndicatorEngine
 from services.analysis.models import AnalysisResult, IndicatorResult
 
@@ -12,18 +16,17 @@ class AnalysisEngine:
     """
     Centrale technische analyse-engine van Project Orion.
 
-    Sprint 7.9:
+    Sprint 8.0.1:
     - Roept IndicatorEngine aan.
-    - Delegeert trendscore aan TrendAnalyzer.
-    - Delegeert momentumscore aan MomentumAnalyzer.
-    - Delegeert volatilityscore aan VolatilityAnalyzer.
-    - Delegeert structurescore aan StructureAnalyzer.
-    - Delegeert volumescore aan VolumeAnalyzer.
-    - Delegeert market regime score aan MarketRegimeAnalyzer.
+    - Delegeert alle analysegebieden aan gespecialiseerde analyzers.
+    - Gebruikt centrale configuratie voor scorewegingen.
     - Berekent overall score intern.
 
     MarketRegimeAnalyzer levert marktcontext en wordt bewust niet meegenomen
     in de overall technische score om dubbele weging te voorkomen.
+
+    RelativeStrengthAnalyzer levert marktvergelijking en wordt meegenomen
+    als technische kwaliteitscomponent.
     """
 
     def __init__(
@@ -35,6 +38,7 @@ class AnalysisEngine:
         structure_analyzer: StructureAnalyzer | None = None,
         volume_analyzer: VolumeAnalyzer | None = None,
         market_regime_analyzer: MarketRegimeAnalyzer | None = None,
+        relative_strength_analyzer: RelativeStrengthAnalyzer | None = None,
     ):
         self.indicator_engine = indicator_engine or IndicatorEngine()
         self.trend_analyzer = trend_analyzer or TrendAnalyzer()
@@ -45,11 +49,20 @@ class AnalysisEngine:
         self.market_regime_analyzer = (
             market_regime_analyzer or MarketRegimeAnalyzer()
         )
+        self.relative_strength_analyzer = (
+            relative_strength_analyzer or RelativeStrengthAnalyzer()
+        )
 
-    def analyze(self, symbol: str, candles) -> AnalysisResult:
+    def analyze(
+        self,
+        symbol: str,
+        candles,
+        benchmark_candles=None,
+    ) -> AnalysisResult:
         indicators = self.indicator_engine.calculate(
             symbol=symbol,
             candles=candles,
+            benchmark_candles=benchmark_candles,
         )
 
         return self._build_analysis_result(
@@ -98,6 +111,11 @@ class AnalysisEngine:
             result=result,
         )
 
+        result.relative_strength_score = self.relative_strength_analyzer.analyze(
+            indicators=indicators,
+            result=result,
+        )
+
         result.overall_score = self._calculate_overall_score(result)
 
         result.add_note(f"Overall technical score: {result.overall_score}")
@@ -109,22 +127,20 @@ class AnalysisEngine:
         result: AnalysisResult,
     ) -> int:
         """
-        Berekent de overall technische score.
+        Berekent de overall technische score met centrale configuratie.
 
         MarketRegimeAnalyzer levert context over het huidige markttype,
-        maar wordt bewust nog niet meegenomen in de overall score om
+        maar wordt bewust niet meegenomen in de overall score om
         dubbele weging van bestaande technische kenmerken te voorkomen.
-
-        De Market Regime-score zal in toekomstige sprints worden gebruikt
-        door de Signal Engine en Decision Engine.
         """
 
         weighted_score = (
-            result.trend_score * 0.30
-            + result.momentum_score * 0.25
-            + result.volatility_score * 0.15
-            + result.structure_score * 0.15
-            + result.volume_score * 0.15
+            result.trend_score * ALL_WEIGHTS["trend"]
+            + result.momentum_score * ALL_WEIGHTS["momentum"]
+            + result.volatility_score * ALL_WEIGHTS["volatility"]
+            + result.structure_score * ALL_WEIGHTS["structure"]
+            + result.volume_score * ALL_WEIGHTS["volume"]
+            + result.relative_strength_score * ALL_WEIGHTS["relative_strength"]
         )
 
         return int(round(weighted_score))

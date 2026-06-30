@@ -18,16 +18,18 @@ class IndicatorEngine:
     """
     Centrale manager voor alle technische indicatoren.
 
-    Sprint 7.8:
+    Sprint 8.0:
     - Berekent technische indicatoren.
     - Berekent basisstructuurwaarden voor StructureAnalyzer.
     - Berekent volumegegevens voor VolumeAnalyzer.
+    - Ondersteunt optionele benchmark candles voor RelativeStrengthAnalyzer.
     """
 
     def calculate(
         self,
         symbol: str,
         candles: pd.DataFrame,
+        benchmark_candles: pd.DataFrame | None = None,
     ) -> IndicatorResult:
         result = IndicatorResult(symbol=symbol)
 
@@ -63,6 +65,12 @@ class IndicatorEngine:
         self._add_volume_values(
             result=result,
             volume=volume,
+        )
+
+        self._add_relative_strength_values(
+            result=result,
+            close=close,
+            benchmark_candles=benchmark_candles,
         )
 
         return result
@@ -138,6 +146,73 @@ class IndicatorEngine:
                 ) * 100
 
                 result.set("volume_trend_20", float(volume_trend_20))
+
+    def _add_relative_strength_values(
+        self,
+        result: IndicatorResult,
+        close: pd.Series,
+        benchmark_candles: pd.DataFrame | None,
+    ) -> None:
+        if benchmark_candles is None:
+            return
+
+        benchmark_close = self._extract_close_series(benchmark_candles)
+
+        if benchmark_close is None:
+            return
+
+        close = close.dropna()
+        benchmark_close = benchmark_close.dropna()
+
+        if close.empty or benchmark_close.empty:
+            return
+
+        relative_strength_20 = self._calculate_relative_strength(
+            close=close,
+            benchmark_close=benchmark_close,
+            period=20,
+        )
+
+        relative_strength_50 = self._calculate_relative_strength(
+            close=close,
+            benchmark_close=benchmark_close,
+            period=50,
+        )
+
+        if relative_strength_20 is not None:
+            result.set("relative_strength_20", relative_strength_20)
+
+        if relative_strength_50 is not None:
+            result.set("relative_strength_50", relative_strength_50)
+
+        if relative_strength_20 is not None and relative_strength_50 is not None:
+            relative_strength_trend = relative_strength_20 - relative_strength_50
+            result.set("relative_strength_trend", float(relative_strength_trend))
+
+    def _calculate_relative_strength(
+        self,
+        close: pd.Series,
+        benchmark_close: pd.Series,
+        period: int,
+    ) -> float | None:
+        if len(close) < period + 1 or len(benchmark_close) < period + 1:
+            return None
+
+        stock_start = float(close.iloc[-period - 1])
+        stock_end = float(close.iloc[-1])
+
+        benchmark_start = float(benchmark_close.iloc[-period - 1])
+        benchmark_end = float(benchmark_close.iloc[-1])
+
+        if stock_start <= 0 or benchmark_start <= 0:
+            return None
+
+        stock_return = ((stock_end - stock_start) / stock_start) * 100
+        benchmark_return = (
+            (benchmark_end - benchmark_start) / benchmark_start
+        ) * 100
+
+        return float(stock_return - benchmark_return)
 
     def _extract_close_series(
         self,

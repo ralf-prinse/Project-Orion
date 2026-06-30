@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Dict, Any
+from typing import Any
 
 
 @dataclass
@@ -13,7 +13,7 @@ class IndicatorResult:
 
     symbol: str
 
-    values: Dict[str, Any] = field(default_factory=dict)
+    values: dict[str, Any] = field(default_factory=dict)
 
     def set(self, name: str, value: Any):
         self.values[name] = value
@@ -39,6 +39,7 @@ class AnalysisResult:
     structure_score: int = 0
     volume_score: int = 0
     market_regime_score: int = 0
+    relative_strength_score: int = 0
 
     overall_score: int = 0
 
