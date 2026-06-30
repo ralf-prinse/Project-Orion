@@ -116,24 +116,34 @@ Transparency always takes priority over sophistication.
 
 Current Version:
 
-Project Orion v0.7.5-alpha
+Project Orion v0.7.9-alpha
 
 Current Phase:
 
-Unified Analysis Layer
+Advanced Modular Analysis Layer
 
 Current Sprint Status:
 
-Sprint 7.5 completed.
+Sprint 7.9 completed.
 
-The Technical Scanner has now been fully migrated to the Analysis Layer.
+The Analysis Layer now consists of six specialised analyzers:
 
-The Analysis Engine is now the single source of truth for deterministic technical scoring throughout Orion.
+- Trend Analyzer
+- Momentum Analyzer
+- Volatility Analyzer
+- Structure Analyzer
+- Volume Analyzer
+- MarketRegimeAnalyzer
 
-The analytical foundation is considered stable.
+AnalysisEngine acts exclusively as an orchestration layer.
 
-Future development will focus on modularising the Analysis Layer before introducing the Signal Engine.
+IndicatorEngine provides technical indicators, market structure data and volume information.
 
+MarketRegimeAnalyzer provides market context through market_regime_score.
+
+The market_regime_score is intentionally excluded from the overall technical score to prevent double counting of technical characteristics.
+
+The architecture is now prepared for future analyzers such as RelativeStrengthAnalyzer, CandlestickPatternAnalyzer and the future Signal Engine.
 ---
 
 # 4. Current Architecture
@@ -222,6 +232,19 @@ Analysis
 * Indicator Engine
 * Analysis Engine
 
+Analysis Framework
+
+* BaseAnalyzer
+* Trend Analyzer
+* Momentum Analyzer
+* Volatility Analyzer
+* Structure Analyzer
+* Volume Analyzer
+* Analysis Engine orchestration
+* Dedicated analyzer unit tests
+* MarketRegimeAnalyzer
+
+
 Scanner Integration
 
 * Technical Scanner migrated to Analysis Layer
@@ -246,6 +269,9 @@ Scoring
 * Trend Score
 * Momentum Score
 * Volatility Score
+* Structure Score
+* Volume Score
+* Market Regime Score
 * Overall Technical Score
 
 These modules should be considered stable unless future architectural improvements clearly justify modification.
@@ -711,76 +737,54 @@ This ensures that documentation always reflects working software.
 
 # 13. Current Development Focus
 
-The immediate development objective is:
+The immediate development objective is to continue expanding the modular Analysis Layer.
 
-Refactor the Analysis Layer into dedicated analyzers.
+Sprint 7.9 successfully introduced the MarketRegimeAnalyzer.
 
-The next sprint will split the current Analysis Engine into specialised components while preserving all external behaviour.
-
-Planned analyzers include:
+The Analysis Layer now consists of:
 
 * Trend Analyzer
 * Momentum Analyzer
 * Volatility Analyzer
+* Structure Analyzer
+* Volume Analyzer
+* MarketRegimeAnalyzer
 
-The Analysis Engine will evolve into an orchestration layer responsible for combining the results produced by these analyzers.
+The next analytical expansion will be:
 
-Infrastructure development is considered complete.
+* RelativeStrengthAnalyzer
+* CandlestickPatternAnalyzer
+* SignalEngine
 
-Future work will primarily focus on analytical intelligence rather than additional infrastructure.
-
+Future development should continue expanding analytical intelligence while preserving the modular analyzer architecture.
 ---
 
 # 14. Immediate Next Sprint
 
-Sprint 7.6
+# 14. Immediate Next Sprint
+
+Sprint 8.0
 
 Objective:
 
-Refactor the Analysis Layer into dedicated analyzers.
+Implement RelativeStrengthAnalyzer.
 
-Expected architecture:
+Planned work:
 
-```text
-Historical Data
-
-↓
-
-Indicator Engine
-
-↓
-
-Trend Analyzer
-
-↓
-
-Momentum Analyzer
-
-↓
-
-Volatility Analyzer
-
-↓
-
-Analysis Engine
-
-↓
-
-Technical Scanner
-
-↓
-
-Ranking Engine
-```
+* Implement RelativeStrengthAnalyzer.
+* Compare individual stocks against a market benchmark.
+* Produce an independent relative strength score.
+* Generate deterministic analysis notes.
+* Integrate the analyzer into AnalysisEngine.
+* Preserve backwards compatibility.
+* Validate all Analysis Layer regression tests.
+* Validate the complete scanner pipeline.
 
 Expected outcome:
 
-* Smaller analysis classes
-* Better separation of responsibilities
-* Easier future expansion
-* No duplicated scoring logic
-* Full backwards compatibility
+The Analysis Layer will consist of seven specialised analyzers while AnalysisEngine continues to function solely as the orchestration layer.
 
+This prepares Orion for the implementation of the Signal Engine.
 ---
 
 # 15. Long-Term Vision

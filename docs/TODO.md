@@ -1,20 +1,38 @@
 Current Sprint
 
-☐ Refactor Analysis Engine into dedicated analyzers
+✅ Sprint 7.9 completed: MarketRegimeAnalyzer
+
+
+
+Completed in Sprint 7.9
+
+✅ Implement MarketRegimeAnalyzer
+
+✅ Integrate MarketRegimeAnalyzer into AnalysisEngine
+
+✅ Add market_regime_score to AnalysisResult
+
+✅ Keep market_regime_score out of overall_score to avoid double counting
+
+✅ Create MarketRegimeAnalyzer unit tests
+
+✅ Create AnalysisEngine integration tests
+
+✅ Validate Analysis Layer regression tests
+
+✅ Validate Scan Pipeline manually
+
+
 
 Upcoming
 
-☐ Trend Analyzer
+☐ Relative Strength Analyzer
 
-☐ Momentum Analyzer
-
-☐ Volatility Analyzer
-
-☐ Structure Analyzer
+☐ Candlestick Pattern Analyzer
 
 ☐ Signal Engine
 
-☐ Decision Engine 2
+☐ Decision Engine v2
 
 ☐ Portfolio Engine
 
@@ -23,6 +41,18 @@ Upcoming
 ☐ Trade Planner
 
 ☐ Professional GUI
+
+☐ AI Layer
+
+
+
+Technical Debt / Maintenance
+
+☐ Convert root-level test_scan_pipeline.py into a proper pytest regression test
+
+☐ Fix outdated test_scanner_service.py constructor usage
+
+
 
 Future
 

@@ -2,17 +2,10 @@
 
 # PROJECT STATUS
 
-**Project Version:** v0.7.5-alpha
-
-**Document Version:** 1.1
-
-**Status:** Active Development
-
-**Repository:** Project-Orion
-
-**Branch:** sprint-7-1-indicator-engine
-
-**Last Updated:** Sprint 7.5 – Technical Scanner migrated to Analysis Layer
+Project Version: v0.7.9-alpha
+Document Version: 1.5
+Last Updated: Sprint 7.9 – MarketRegimeAnalyzer added
+Current milestone: Sprint 7.9 completed
 ---
 
 # 1. Executive Summary
@@ -89,7 +82,7 @@ Current phase:
 
 Current milestone:
 
-Sprint 7.5 completed
+Sprint 7.9 completed
 
 The project has successfully completed the foundational market scanning architecture and has now entered the technical analysis phase.
 
@@ -109,6 +102,9 @@ Analysis Engine
 Technical Analysis Scoring
 Technical Scanner migrated to Analysis Layer
 Unified Technical Analysis Pipeline
+MarketRegimeAnalyzer
+Analysis Layer orchestration
+Analysis Layer regression tests
 
 The project currently analyses more than **6,200 US-listed stocks** and is capable of downloading, caching and processing historical market data for technical analysis.
 
@@ -422,9 +418,168 @@ The Technical Scanner no longer calculates indicators itself.
 All technical analysis is delegated to the Analysis Engine, making it the single source of truth for technical scoring throughout Orion.
 ---
 
-## Analysis Layer
+### Sprint 7.7 – Structure Analyzer & Analyzer Framework
 
-Status:
+**Status:** ✅ Completed
+
+#### Nieuwe componenten
+
+* BaseAnalyzer (abstracte basisinterface voor alle analyzers)
+* StructureAnalyzer
+* Uitgebreide IndicatorEngine met structure-data
+* AnalysisEngine ondersteunt nu vier onafhankelijke analyzers
+
+#### Indicator Engine
+
+IndicatorEngine levert nu naast de bestaande indicatoren ook basisstructuurinformatie:
+
+* latest_close
+* recent_high_20
+* recent_low_20
+* previous_high_20
+* previous_low_20
+
+Deze waarden vormen de basis voor marktstructuuranalyse zonder dat analyzers zelf candledata hoeven te verwerken.
+
+#### BaseAnalyzer
+
+Alle analyzers implementeren nu dezelfde interface.
+
+Huidige analyzers:
+
+* TrendAnalyzer
+* MomentumAnalyzer
+* VolatilityAnalyzer
+* StructureAnalyzer
+
+Hierdoor kunnen toekomstige analyzers eenvoudig worden toegevoegd zonder wijzigingen aan de bestaande architectuur.
+
+#### Structure Analyzer
+
+Nieuwe analyse van marktstructuur:
+
+* breakout boven recente high
+* breakdown onder recente low
+* hogere highs
+* hogere lows
+* bullish structuur
+* neutrale structuur
+
+StructureAnalyzer berekent uitsluitend de structurescore en voegt bijbehorende analysis notes toe.
+
+#### Analysis Engine
+
+AnalysisEngine delegeert nu volledig naar gespecialiseerde analyzers:
+
+* TrendAnalyzer
+* MomentumAnalyzer
+* VolatilityAnalyzer
+* StructureAnalyzer
+
+De engine fungeert uitsluitend nog als orchestrator.
+
+#### Overall Score
+
+De overall technical score gebruikt nu vier componenten:
+
+* Trend 35%
+* Momentum 30%
+* Volatility 20%
+* Structure 15%
+
+Hierdoor wordt marktstructuur meegenomen in de uiteindelijke technische beoordeling.
+
+#### Nieuwe tests
+
+Toegevoegd:
+
+* test_structure_analyzer.py
+
+Alle regressietests blijven succesvol:
+
+* test_trend_analyzer.py
+* test_momentum_analyzer.py
+* test_volatility_analyzer.py
+* test_structure_analyzer.py
+* test_analysis_engine.py
+* test_scan_pipeline.py
+
+#### Architectuur
+
+De Analysis Layer bestaat nu uit:
+
+IndicatorEngine
+
+↓
+
+TrendAnalyzer
+
+MomentumAnalyzer
+
+VolatilityAnalyzer
+
+StructureAnalyzer
+
+↓
+
+AnalysisEngine
+
+↓
+
+TechnicalScanner
+
+Hiermee is de Analysis Layer volledig modulair en klaar voor verdere uitbreiding met aanvullende analyzers zoals Volume, Relative Strength, Market Regime en Candlestick Patterns.
+
+---
+
+## Testing
+
+All implemented modules have dedicated test scripts and have been successfully validated during development.
+
+Current tests include:
+
+* Universe loading
+* Historical provider
+* Scan pipeline
+* Scanner service
+* Market data provider
+* Indicator Engine
+* Analysis Engine
+
+Every completed sprint concludes with successful testing before being committed to GitHub.
+
+### Sprint 7.8 – Volume Analyzer
+
+**Status:** Completed
+
+Sprint 7.8 introduced volume analysis into the modular Analysis Layer.
+
+New components:
+
+- VolumeAnalyzer
+- Volume-based IndicatorEngine values
+- Volume score
+- Volume Analyzer regression test
+
+IndicatorEngine now provides:
+
+- latest_volume
+- average_volume_20
+- relative_volume_20
+- previous_average_volume_20
+- volume_trend_20
+
+AnalysisEngine now delegates volume evaluation to VolumeAnalyzer.
+
+The overall technical score now uses five weighted components:
+
+- Trend: 30%
+- Momentum: 25%
+- Volatility: 15%
+- Structure: 15%
+- Volume: 15%
+
+This allows Orion to evaluate whether technical setups are supported by sufficient trading volume.
 
 **Completed (Foundation)**
 
@@ -522,23 +677,42 @@ The Analysis Engine also generates explanatory analysis notes describing why a s
 
 Future versions will expand this engine with dedicated analyzers for trend, momentum, volatility, market structure and volume.
 
----
 
-## Testing
+### Sprint 7.9 – Market Regime Analyzer
 
-All implemented modules have dedicated test scripts and have been successfully validated during development.
+**Status:** Completed
 
-Current tests include:
+Sprint 7.9 introduced market regime classification into the modular Analysis Layer.
 
-* Universe loading
-* Historical provider
-* Scan pipeline
-* Scanner service
-* Market data provider
-* Indicator Engine
-* Analysis Engine
+New components:
 
-Every completed sprint concludes with successful testing before being committed to GitHub.
+- MarketRegimeAnalyzer
+- market_regime_score
+- AnalysisEngine integration
+- AnalysisEngine integration tests
+
+AnalysisEngine now orchestrates six specialised analyzers:
+
+- TrendAnalyzer
+- MomentumAnalyzer
+- VolatilityAnalyzer
+- StructureAnalyzer
+- VolumeAnalyzer
+- MarketRegimeAnalyzer
+
+Unlike the other analyzers, MarketRegimeAnalyzer provides market context rather than contributing directly to the overall technical score.
+
+This prevents double counting while preparing Orion for the future Signal Engine and Decision Engine.
+
+Validation:
+
+- test_market_regime_analyzer.py
+- test_analysis_engine.py
+- Analysis Layer regression tests
+- Manual Scan Pipeline validation
+
+No regressions were introduced.
+
 # 5. Current Architecture
 
 Project Orion follows a strict layered architecture.
@@ -780,12 +954,12 @@ The Analysis Engine currently converts indicator values into deterministic techn
 
 Current scoring categories:
 
-Trend Score
-
+TTrend Score
 Momentum Score
-
 Volatility Score
-
+Structure Score
+Volume Score
+Market Regime Score --> market_regime_score bewust niet wordt meegenomen in overall_score, omdat het context levert en geen extra kwaliteitsdimensie
 Overall Technical Score
 
 Each score ranges from:
@@ -1212,19 +1386,108 @@ These items are already defined within the Master Architecture and form the road
 None of these limitations require architectural redesign.
 
 They represent planned future implementation phases.
+
 # 19. Next Development Sprint
 
-## Sprint 7.6
+## Sprint 8.0
 
 ### Objective
 
-Expand the Analysis Layer by introducing dedicated analysis modules and further separating technical evaluation responsibilities.
+Implement the **RelativeStrengthAnalyzer**.
 
-Sprint 7.5 completed the migration of the Technical Scanner to the new Analysis Layer. All technical scores are now generated exclusively by the Analysis Engine, eliminating duplicate indicator calculations within the scanner.
+Sprint 8.0 extends the modular Analysis Layer by introducing relative strength analysis as an independent analyzer.
 
-Sprint 7.6 focuses on improving the internal architecture of the Analysis Layer while preserving all external behaviour.
+The objective is to measure the performance of an individual stock relative to the broader market while preserving the existing layered architecture.
+
+No existing analyzers will be modified beyond the minimal integration required by the AnalysisEngine.
 
 ---
+
+## Current Analysis Layer
+
+At the completion of Sprint 7.9 the Analysis Layer consists of six specialised analyzers:
+
+* TrendAnalyzer
+* MomentumAnalyzer
+* VolatilityAnalyzer
+* StructureAnalyzer
+* VolumeAnalyzer
+* MarketRegimeAnalyzer
+
+The AnalysisEngine functions exclusively as an orchestration layer.
+
+Each analyzer is responsible for a single analytical domain and returns an independent score together with explanatory analysis notes.
+
+---
+
+## Sprint 8.0 Goals
+
+The RelativeStrengthAnalyzer will:
+
+* Compare a stock against a market benchmark.
+* Determine whether the stock is outperforming or underperforming the market.
+* Produce an independent relative strength score.
+* Generate human-readable analysis notes.
+* Integrate into the modular Analysis Layer without affecting existing analyzers.
+
+The existing architecture will remain fully backwards compatible.
+
+---
+
+## Target Architecture
+
+```text
+Historical Data
+
+↓
+
+Indicator Engine
+
+↓
+
+TrendAnalyzer
+
+MomentumAnalyzer
+
+VolatilityAnalyzer
+
+StructureAnalyzer
+
+VolumeAnalyzer
+
+MarketRegimeAnalyzer
+
+RelativeStrengthAnalyzer
+
+↓
+
+AnalysisEngine
+
+↓
+
+TechnicalScanner
+
+↓
+
+RankingEngine
+```
+
+---
+
+## Expected Outcome
+
+At the completion of Sprint 8.0 Orion will provide:
+
+* Seven specialised analyzers.
+* Independent relative strength analysis.
+* Improved technical context for future trading signals.
+* Additional deterministic analysis notes.
+* Full backwards compatibility.
+* Complete unit and regression test coverage.
+
+The AnalysisEngine will continue to function solely as the orchestration layer while the analytical intelligence is distributed across specialised analyzers.
+
+This architecture prepares Orion for the implementation of the Signal Engine in the subsequent development phase.
 
 ### Current Situation
 

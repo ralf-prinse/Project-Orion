@@ -38,6 +38,7 @@ class AnalysisResult:
     volatility_score: int = 0
     structure_score: int = 0
     volume_score: int = 0
+    market_regime_score: int = 0
 
     overall_score: int = 0
 
