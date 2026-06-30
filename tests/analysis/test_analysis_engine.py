@@ -91,8 +91,8 @@ def test_analysis_engine_calculates_weighted_overall_score():
         candles=None,
     )
 
-    assert result.overall_score == 65
-    assert "Overall technical score: 65" in result.notes
+    assert result.overall_score == 64
+    assert "Overall technical score: 64" in result.notes
 
 
 def test_analysis_engine_returns_error_result_when_indicators_fail():

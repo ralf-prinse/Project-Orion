@@ -1,26 +1,21 @@
 Current Sprint
 
-✅ Sprint 8.0 completed: RelativeStrengthAnalyzer
+✅ Sprint 8.1 completed: CandlestickPatternAnalyzer
 
 
+Completed in Sprint 8.1
 
-Completed in Sprint 8.0
+✅ Implement CandlestickPatternAnalyzer
 
-✅ Implement RelativeStrengthAnalyzer
+✅ Add candlestick_score to AnalysisResult
 
-✅ Integrate RelativeStrengthAnalyzer into AnalysisEngine
+✅ Integrate CandlestickPatternAnalyzer into AnalysisEngine
 
-✅ Add relative_strength_score to AnalysisResult
+✅ Support raw candle analysis inside Analysis Layer
 
-✅ Extend IndicatorEngine with benchmark support
+✅ Detect six deterministic candlestick patterns
 
-✅ Integrate SPY benchmark into TechnicalScanner
-
-✅ Add configurable analysis weights
-
-✅ Create RelativeStrengthAnalyzer unit tests
-
-✅ Create IndicatorEngine benchmark tests
+✅ Add CandlestickPatternAnalyzer unit tests
 
 ✅ Validate Analysis Layer regression tests
 
@@ -29,17 +24,17 @@ Completed in Sprint 8.0
 
 Upcoming
 
-☐ CandlestickPatternAnalyzer
+☐ Sprint 8.1.1 — Analyzer Registry
 
-☐ Signal Engine
+☐ Sprint 8.2 — Signal Engine
 
-☐ Decision Engine v2
+☐ Sprint 8.3 — Decision Engine v2
 
-☐ Portfolio Engine
+☐ Sprint 8.4 — Risk Manager
 
-☐ Risk Manager
+☐ Sprint 8.5 — Position Sizing
 
-☐ Trade Planner
+☐ Sprint 8.6 — Portfolio Engine
 
 ☐ Professional GUI
 

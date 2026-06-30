@@ -1,3 +1,54 @@
+## v0.8.1-alpha
+
+### Added
+
+* Added `CandlestickPatternAnalyzer` to the modular Analysis Layer.
+* Added `candlestick_score` to `AnalysisResult`.
+* Added deterministic candlestick pattern detection.
+* Added unit tests for `CandlestickPatternAnalyzer`.
+
+### Supported Patterns
+
+Bullish
+
+* Hammer
+* Bullish Engulfing
+* Piercing Line
+
+Bearish
+
+* Shooting Star
+* Bearish Engulfing
+* Dark Cloud Cover
+
+### Changed
+
+* `AnalysisEngine` now orchestrates eight specialised analyzers.
+* `CandlestickPatternAnalyzer` receives raw candle data directly.
+* Analysis score weighting now includes candlestick analysis.
+
+### Architecture
+
+The Analysis Layer now distinguishes between:
+
+* Technical indicators
+* Market structure
+* Relative strength
+* Price action
+
+Candlestick pattern recognition is intentionally separated from the IndicatorEngine because candlestick analysis is based on raw price action rather than derived technical indicators.
+
+### Validation
+
+Successfully validated through:
+
+* `test_analysis_engine.py`
+* `test_candlestick_pattern_analyzer.py`
+* Complete Analysis Layer regression tests
+* Manual Scan Pipeline validation
+
+No regressions were introduced.
+
 ## v0.8.0-alpha
 
 ### Added

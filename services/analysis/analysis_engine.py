@@ -1,3 +1,6 @@
+from services.analysis.analyzers.candlestick_pattern_analyzer import (
+    CandlestickPatternAnalyzer,
+)
 from services.analysis.analyzers.market_regime_analyzer import MarketRegimeAnalyzer
 from services.analysis.analyzers.momentum_analyzer import MomentumAnalyzer
 from services.analysis.analyzers.relative_strength_analyzer import (
@@ -16,17 +19,15 @@ class AnalysisEngine:
     """
     Centrale technische analyse-engine van Project Orion.
 
-    Sprint 8.0.1:
+    Sprint 8.1:
     - Roept IndicatorEngine aan.
     - Delegeert alle analysegebieden aan gespecialiseerde analyzers.
+    - Geeft raw candledata door aan CandlestickPatternAnalyzer.
     - Gebruikt centrale configuratie voor scorewegingen.
     - Berekent overall score intern.
 
     MarketRegimeAnalyzer levert marktcontext en wordt bewust niet meegenomen
     in de overall technische score om dubbele weging te voorkomen.
-
-    RelativeStrengthAnalyzer levert marktvergelijking en wordt meegenomen
-    als technische kwaliteitscomponent.
     """
 
     def __init__(
@@ -39,6 +40,7 @@ class AnalysisEngine:
         volume_analyzer: VolumeAnalyzer | None = None,
         market_regime_analyzer: MarketRegimeAnalyzer | None = None,
         relative_strength_analyzer: RelativeStrengthAnalyzer | None = None,
+        candlestick_pattern_analyzer: CandlestickPatternAnalyzer | None = None,
     ):
         self.indicator_engine = indicator_engine or IndicatorEngine()
         self.trend_analyzer = trend_analyzer or TrendAnalyzer()
@@ -51,6 +53,9 @@ class AnalysisEngine:
         )
         self.relative_strength_analyzer = (
             relative_strength_analyzer or RelativeStrengthAnalyzer()
+        )
+        self.candlestick_pattern_analyzer = (
+            candlestick_pattern_analyzer or CandlestickPatternAnalyzer()
         )
 
     def analyze(
@@ -67,12 +72,14 @@ class AnalysisEngine:
 
         return self._build_analysis_result(
             symbol=symbol,
+            candles=candles,
             indicators=indicators,
         )
 
     def _build_analysis_result(
         self,
         symbol: str,
+        candles,
         indicators: IndicatorResult,
     ) -> AnalysisResult:
         result = AnalysisResult(symbol=symbol)
@@ -116,6 +123,12 @@ class AnalysisEngine:
             result=result,
         )
 
+        result.candlestick_score = self.candlestick_pattern_analyzer.analyze(
+            indicators=indicators,
+            candles=candles,
+            result=result,
+        )
+
         result.overall_score = self._calculate_overall_score(result)
 
         result.add_note(f"Overall technical score: {result.overall_score}")
@@ -141,6 +154,7 @@ class AnalysisEngine:
             + result.structure_score * ALL_WEIGHTS["structure"]
             + result.volume_score * ALL_WEIGHTS["volume"]
             + result.relative_strength_score * ALL_WEIGHTS["relative_strength"]
+            + result.candlestick_score * ALL_WEIGHTS["candlestick"]
         )
 
         return int(round(weighted_score))

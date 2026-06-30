@@ -8,12 +8,13 @@ MarketRegimeAnalyzer is intentionally excluded because it provides
 market context rather than technical quality.
 """
 
-TREND_WEIGHT = 0.25
-MOMENTUM_WEIGHT = 0.20
-VOLATILITY_WEIGHT = 0.15
-STRUCTURE_WEIGHT = 0.15
-VOLUME_WEIGHT = 0.15
-RELATIVE_STRENGTH_WEIGHT = 0.10
+TREND_WEIGHT = 0.22
+MOMENTUM_WEIGHT = 0.18
+VOLATILITY_WEIGHT = 0.13
+STRUCTURE_WEIGHT = 0.13
+VOLUME_WEIGHT = 0.12
+RELATIVE_STRENGTH_WEIGHT = 0.12
+CANDLESTICK_WEIGHT = 0.10
 
 
 ALL_WEIGHTS = {
@@ -23,4 +24,5 @@ ALL_WEIGHTS = {
     "structure": STRUCTURE_WEIGHT,
     "volume": VOLUME_WEIGHT,
     "relative_strength": RELATIVE_STRENGTH_WEIGHT,
+    "candlestick": CANDLESTICK_WEIGHT,
 }

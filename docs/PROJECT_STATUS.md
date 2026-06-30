@@ -2,15 +2,15 @@
 
 # PROJECT STATUS
 
-Project Version: v0.8.0-alpha
+Project Version: v0.8.1-alpha
 
-Document Version: 1.6
+Document Version: 1.7
 
 Last Updated:
-Sprint 8.0 – RelativeStrengthAnalyzer added
+Sprint 8.1 – CandlestickPatternAnalyzer added
 
-Current milestone:
-Sprint 8.0 completed
+Current Milestone:
+Sprint 8.1 completed
 ---
 
 # 1. Executive Summary
@@ -85,9 +85,9 @@ Current phase:
 
 **Alpha Development**
 
-Current milestone:
+Current Milestone
 
-Sprint 8.0 completed
+Sprint 8.1 completed
 
 The project has successfully completed the foundational market scanning architecture and has now entered the technical analysis phase.
 
@@ -114,6 +114,10 @@ RelativeStrengthAnalyzer
 Benchmark-aware IndicatorEngine
 Configurable Analysis Weights
 SPY benchmark integration
+CandlestickPatternAnalyzer
+Candlestick pattern recognition
+Raw candle analysis
+Eight specialized analyzers
 
 The project currently analyses more than **6,200 US-listed stocks** and is capable of downloading, caching and processing historical market data for technical analysis.
 
@@ -677,10 +681,33 @@ Interpret indicator values and convert them into technical analysis.
 
 Current scoring:
 
-* Trend Score
-* Momentum Score
-* Volatility Score
-* Overall Technical Score
+Trend Score
+
+Momentum Score
+
+Volatility Score
+
+Structure Score
+
+Volume Score
+
+Market Regime Score
+
+Relative Strength Score
+
+Candlestick Score
+
+Overall Technical Score
+
+CandlestickPatternAnalyzer is the first analyzer that operates directly on raw candle data instead of derived technical indicators.
+
+This separation intentionally keeps price action analysis outside the IndicatorEngine.
+
+IndicatorEngine remains responsible for calculating technical indicators, while CandlestickPatternAnalyzer interprets raw market behaviour.
+
+AnalysisEngine orchestrates both indicator-based analyzers and raw price-action analyzers through a unified modular interface.
+
+Overall score weighting is centrally managed through the Analysis Layer configuration.
 
 The Analysis Engine also generates explanatory analysis notes describing why a stock received its score.
 
@@ -851,7 +878,43 @@ Validation:
 
 No regressions were introduced.
 
----
+### Sprint 8.1 – CandlestickPatternAnalyzer
+
+**Status:** Completed
+
+Sprint 8.1 introduced deterministic candlestick pattern recognition into the modular Analysis Layer.
+
+New components:
+
+- CandlestickPatternAnalyzer
+- candlestick_score
+- Raw candle analysis
+- Deterministic pattern recognition
+
+Supported bullish patterns:
+
+- Hammer
+- Bullish Engulfing
+- Piercing Line
+
+Supported bearish patterns:
+
+- Shooting Star
+- Bearish Engulfing
+- Dark Cloud Cover
+
+Unlike the other analyzers, CandlestickPatternAnalyzer analyses raw candle data directly instead of derived technical indicators.
+
+AnalysisEngine now orchestrates eight specialised analyzers.
+
+Validation:
+
+- test_candlestick_pattern_analyzer.py
+- Complete Analysis Layer regression tests
+- Manual Scan Pipeline validation
+
+No regressions were introduced.
+Sprint 8.1 completed the analytical foundation required for the future Signal Engine.
 
 # 6. Current Folder Structure
 
@@ -1440,23 +1503,23 @@ They represent planned future implementation phases.
 
 # 19. Next Development Sprint
 
-## Sprint 8.1
+# 19. Next Development Sprint
+
+## Sprint 8.1.1
 
 ### Objective
 
-Implement the **CandlestickPatternAnalyzer**.
+Introduce an Analyzer Registry.
 
-Sprint 8.1 will extend the modular Analysis Layer with deterministic candlestick pattern recognition.
+The Analyzer Registry will centralise analyzer registration and remove explicit analyzer management from AnalysisEngine.
 
-The analyzer will identify high-probability bullish and bearish candlestick formations and translate them into an independent technical score together with explanatory analysis notes.
-
-No existing analyzers will be modified beyond the minimal integration required by the AnalysisEngine.
+The objective is to prepare Orion for rapid expansion without increasing orchestration complexity.
 
 ---
 
 ## Current Analysis Layer
 
-At the completion of Sprint 8.0 the Analysis Layer consists of seven specialised analyzers:
+At the completion of Sprint 8.1 the Analysis Layer consists of eight specialised analyzers:
 
 - TrendAnalyzer
 - MomentumAnalyzer
@@ -1465,6 +1528,82 @@ At the completion of Sprint 8.0 the Analysis Layer consists of seven specialised
 - VolumeAnalyzer
 - MarketRegimeAnalyzer
 - RelativeStrengthAnalyzer
+- CandlestickPatternAnalyzer
+
+---
+
+## Sprint 8.1.1 Goals
+
+The Analyzer Registry will:
+
+- Register all analyzers centrally.
+- Remove hardcoded analyzer management from AnalysisEngine.
+- Simplify future analyzer integration.
+- Reduce AnalysisEngine complexity.
+- Preserve backwards compatibility.
+- Preserve deterministic execution order.
+
+---
+
+## Target Architecture
+
+```text
+Historical Data
+        │
+        ▼
+IndicatorEngine
+        │
+        ▼
+IndicatorResult
+        │
+        ▼
+Analyzer Registry
+        │
+        ├── TrendAnalyzer
+        ├── MomentumAnalyzer
+        ├── VolatilityAnalyzer
+        ├── StructureAnalyzer
+        ├── VolumeAnalyzer
+        ├── MarketRegimeAnalyzer
+        ├── RelativeStrengthAnalyzer
+        └── CandlestickPatternAnalyzer
+                │
+                ▼
+        AnalysisEngine
+                │
+                ▼
+        TechnicalScanner
+                │
+                ▼
+        RankingEngine
+```
+
+---
+
+## Expected Outcome
+
+Sprint 8.1.1 will freeze the Analysis Layer architecture.
+
+Future analyzers can be added by registering them rather than modifying AnalysisEngine.
+
+This prepares Orion for the implementation of the Signal Engine while keeping the architecture modular, maintainable and scalable.
+## Current Analysis Layer
+
+TrendAnalyzer
+
+MomentumAnalyzer
+
+VolatilityAnalyzer
+
+StructureAnalyzer
+
+VolumeAnalyzer
+
+MarketRegimeAnalyzer
+
+RelativeStrengthAnalyzer
+
+CandlestickPatternAnalyzer
 
 The AnalysisEngine continues to function exclusively as an orchestration layer.
 

@@ -40,6 +40,7 @@ class AnalysisResult:
     volume_score: int = 0
     market_regime_score: int = 0
     relative_strength_score: int = 0
+    candlestick_score: int = 0
 
     overall_score: int = 0
 
