@@ -1,10 +1,11 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
+from ui.workspace.base_workspace import BaseWorkspace
 from ui.workspace.workspace_panel import WorkspacePanel
 
 
-class ScannerWorkspace(QWidget):
+class ScannerWorkspace(BaseWorkspace):
     """
     Presentation-only scanner workspace.
 
@@ -14,7 +15,11 @@ class ScannerWorkspace(QWidget):
     """
 
     def __init__(self, theme):
-        super().__init__()
+        super().__init__(
+            theme=theme,
+            title="Scanner",
+            intro="Analyseer de markt en bekijk potentiële swing-trade kandidaten.",
+        )
 
         self.theme = theme
 
@@ -33,23 +38,10 @@ class ScannerWorkspace(QWidget):
         self._build_layout()
 
     def _build_layout(self):
-        layout = QVBoxLayout()
-        layout.setAlignment(Qt.AlignTop)
 
-        title = QLabel("Scanner")
-        title.setStyleSheet(self.theme.title_style() + "; margin-top: 25px;")
+        self.add_workspace_widget(self.status_panel)
+        self.add_workspace_widget(self.results_panel)
 
-        intro = QLabel(
-            "Analyseer de markt en bekijk potentiële swing-trade kandidaten."
-        )
-        intro.setStyleSheet(self.theme.muted_text_style() + "; margin-bottom: 20px;")
-
-        layout.addWidget(title)
-        layout.addWidget(intro)
-        layout.addWidget(self.status_panel)
-        layout.addWidget(self.results_panel)
-
-        self.setLayout(layout)
 
     def set_status_text(self, text: str):
         self.status_panel.set_body(text)
