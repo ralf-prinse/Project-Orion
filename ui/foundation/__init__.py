@@ -13,6 +13,7 @@ from ui.foundation.navigation import NavigationRegistry
 from ui.foundation.performance_dashboard_presenter import PerformanceDashboardPresenter
 from ui.foundation.performance_presenter import PerformancePresenter
 from ui.foundation.portfolio_presenter import PortfolioPresenter
+from ui.foundation.risk_dashboard_presenter import RiskDashboardPresenter
 
 __all__ = [
     "DashboardPresenter",
@@ -28,4 +29,5 @@ __all__ = [
     "PerformanceDashboardPresenter",
     "PerformancePresenter",
     "PortfolioPresenter",
+    "RiskDashboardPresenter",
 ]

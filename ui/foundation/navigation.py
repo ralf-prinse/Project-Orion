@@ -30,6 +30,7 @@ class NavigationRegistry:
             GuiNavigationItem(GuiPage.DASHBOARD, "Dashboard", 10),
             GuiNavigationItem(GuiPage.SCANNER, "Scanner", 20),
             GuiNavigationItem(GuiPage.PORTFOLIO, "Portfolio", 30),
+            GuiNavigationItem(GuiPage.RISK, "Risk", 35),
             GuiNavigationItem(GuiPage.BACKTESTING, "Backtesting", 40),
             GuiNavigationItem(GuiPage.PAPER_TRADING, "Paper Trading", 50),
             GuiNavigationItem(GuiPage.TRADE_PLANNER, "Trade Planner", 60),

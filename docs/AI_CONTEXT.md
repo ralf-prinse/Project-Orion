@@ -2,7 +2,7 @@
 
 # AI_CONTEXT
 
-**Version:** v0.9.9-alpha
+**Version:** v1.0.0-alpha
 
 **Document Version:** 2.0
 
@@ -331,7 +331,7 @@ No sprint is considered complete before all of these steps have been finished.
 
 ## Current Version
 
-Project Orion v0.9.6-alpha
+Project Orion v1.0.0-alpha
 
 ---
 

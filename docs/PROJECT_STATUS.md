@@ -2,7 +2,7 @@
 
 # PROJECT STATUS
 
-Project Version: v0.9.9-alpha
+Project Version: v1.0.0-alpha
 
 **Document Version:** 2.0
 
@@ -12,7 +12,7 @@ Project Version: v0.9.9-alpha
 
 Current Milestone
 
-✅ Sprint 9.9 – GUI Portfolio Dashboard Integration completed
+✅ Sprint 10.0 – GUI Risk Dashboard Integration completed
 ---
 
 # 1. Executive Summary
@@ -55,6 +55,7 @@ Current implementation status:
 - ✅ Unified GUI Dashboard Composition
 - ✅ Scanner-to-GUI Integration
 - ✅ Portfolio-to-GUI Integration
+- ✅ Risk-to-GUI Integration
 ---
 # 2. Current Architecture
 
@@ -117,7 +118,7 @@ Signal Layer
 Decision Layer
 ```
 
-The next major milestone is connecting deterministic engine outputs to the professional GUI through display-only presenters.
+The next major milestone is expanding the professional GUI workflow while preserving strict separation between presentation and deterministic engines.
 ---
 
 ## Completed Infrastructure

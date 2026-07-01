@@ -1,6 +1,6 @@
 Current Sprint
 
-✅ Sprint 9.9 — GUI Portfolio Dashboard Integration
+✅ Sprint 10.0 — GUI Risk Dashboard Integration
 
 
 Recently Completed
@@ -49,19 +49,19 @@ Recently Completed
 
 ✅ Sprint 9.8 — GUI Scanner Dashboard Integration
 
-✅ Sprint 9.9 — GUI Portfolio Dashboard Integration
+✅ Sprint 10.0 — GUI Risk Dashboard Integration
 
 
 Next Sprint
 
-☐ Sprint 10.0 — GUI Risk Dashboard Integration
+☐ Sprint 10.1 — GUI Backtesting Dashboard Integration
 
 Planned objectives:
 
-- Add risk dashboard presenter
-- Prepare risk result display sections
-- Connect risk outputs to display-only GUI sections
-- Preserve risk/GUI separation
+- Add backtesting dashboard presenter
+- Prepare backtest result display sections
+- Connect backtesting outputs to display-only GUI sections
+- Preserve backtesting/GUI separation
 - Full unit test coverage
 
 
@@ -88,6 +88,8 @@ Upcoming Roadmap
 ✅ AI Explanation Layer
 
 ✅ GUI Trade Planner Integration
+
+✅ GUI Risk Dashboard Integration
 
 
 Technical Debt

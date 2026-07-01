@@ -1,5 +1,36 @@
 # PROJECT ORION
 
+## v1.0.0-alpha
+
+### Added
+
+* Added GUI Risk Dashboard Integration.
+* Added `RiskDashboardPresenter` for display-only risk summary, limit status, risk metrics, context, profile and diagnostics sections.
+* Added `GuiPage.RISK` and Risk navigation item.
+* Updated GUI application version to `v1.0.0-alpha`.
+* Added dedicated risk dashboard presenter and navigation unit tests.
+
+### Architecture
+
+Sprint 10.0 connects Risk Manager outputs to the Professional GUI Foundation without introducing risk evaluation, portfolio calculations, position sizing or trade-planning logic into the GUI.
+
+The GUI receives completed `RiskResult`, `RiskContext` and `RiskProfile` objects and projects them into stable `GuiSection` and `GuiMetric` view models. Risk calculations remain inside `services/risk`, while the GUI remains strictly display-only.
+
+This completes the first v1.0 alpha GUI risk workflow and preserves Orion's deterministic layered architecture.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/ui`
+* `tests`
+
+205 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
+---
+
 ## v0.9.9-alpha
 
 ### Added
