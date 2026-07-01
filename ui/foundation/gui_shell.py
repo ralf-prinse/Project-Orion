@@ -3,10 +3,12 @@ from ui.foundation.dashboard_presenter import DashboardPresenter
 from ui.foundation.explanation_presenter import ExplanationPresenter
 from services.performance.models import PerformanceResult
 from services.paper_trading.models import PaperTradingResult
+from services.planner.models import TradePlanResult
 from ui.foundation.models import GuiApplicationConfig, GuiPage, GuiSection, GuiShellState
 from ui.foundation.navigation import NavigationRegistry
 from ui.foundation.performance_dashboard_presenter import PerformanceDashboardPresenter
 from ui.foundation.paper_trading_presenter import PaperTradingPresenter
+from ui.foundation.trade_plan_presenter import TradePlanPresenter
 
 
 class GuiShell:
@@ -26,6 +28,7 @@ class GuiShell:
         explanation_presenter: ExplanationPresenter | None = None,
         performance_dashboard_presenter: PerformanceDashboardPresenter | None = None,
         paper_trading_presenter: PaperTradingPresenter | None = None,
+        trade_plan_presenter: TradePlanPresenter | None = None,
     ):
         self.config = config or GuiApplicationConfig()
         self.navigation_registry = navigation_registry or NavigationRegistry()
@@ -35,6 +38,7 @@ class GuiShell:
             performance_dashboard_presenter or PerformanceDashboardPresenter()
         )
         self.paper_trading_presenter = paper_trading_presenter or PaperTradingPresenter()
+        self.trade_plan_presenter = trade_plan_presenter or TradePlanPresenter()
         self.state = GuiShellState(
             current_page=self._resolve_initial_page(self.config.default_page),
             navigation_items=self.navigation_registry.get_items(),
@@ -78,6 +82,12 @@ class GuiShell:
         self.state.sections = self.paper_trading_presenter.create_sections(paper_trading_result)
         self.state.current_page = GuiPage.PAPER_TRADING
         self.state.status_message = "Paper trading dashboard updated"
+        return self.state
+
+    def build_trade_plan_dashboard(self, trade_plan_result: TradePlanResult) -> GuiShellState:
+        self.state.sections = self.trade_plan_presenter.create_sections(trade_plan_result)
+        self.state.current_page = GuiPage.TRADE_PLANNER
+        self.state.status_message = "Trade plan dashboard updated"
         return self.state
 
     def _resolve_initial_page(self, preferred_page: GuiPage) -> GuiPage:

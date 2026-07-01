@@ -1,6 +1,6 @@
 Current Sprint
 
-✅ Sprint 9.5 — GUI Paper Trading Integration
+✅ Sprint 9.6 — GUI Trade Planner Integration
 
 
 Recently Completed
@@ -43,10 +43,12 @@ Recently Completed
 
 ✅ Sprint 9.5 — GUI Paper Trading Integration
 
+✅ Sprint 9.6 — GUI Trade Planner Integration
+
 
 Next Sprint
 
-☐ Sprint 9.6 — Scanner-to-GUI Integration
+☐ Sprint 9.7 — Scanner-to-GUI Integration
 
 Planned objectives:
 
@@ -78,6 +80,8 @@ Upcoming Roadmap
 ✅ Professional Desktop GUI Foundation
 
 ✅ AI Explanation Layer
+
+✅ GUI Trade Planner Integration
 
 
 Technical Debt

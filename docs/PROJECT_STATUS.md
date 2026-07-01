@@ -2,7 +2,7 @@
 
 # PROJECT STATUS
 
-Project Version: v0.9.5-alpha
+Project Version: v0.9.6-alpha
 
 **Document Version:** 2.0
 
@@ -12,7 +12,7 @@ Project Version: v0.9.5-alpha
 
 Current Milestone
 
-✅ Sprint 9.5 – GUI Paper Trading Integration completed
+✅ Sprint 9.6 – GUI Trade Planner Integration completed
 ---
 
 # 1. Executive Summary
@@ -51,6 +51,7 @@ Current implementation status:
 - ✅ GUI Explanation Integration
 - ✅ GUI Performance Dashboard Integration
 - ✅ GUI Paper Trading Integration
+- ✅ GUI Trade Planner Integration
 - ⏳ Scanner-to-GUI Integration
 ---
 # 2. Current Architecture
@@ -418,7 +419,7 @@ Each sprint introduces one clearly defined capability while preserving the exist
 
 ## Next Sprint
 
-#### Sprint 9.6 — Scanner-to-GUI Integration
+#### Sprint 9.7 — Scanner-to-GUI Integration
 
 Objectives:
 

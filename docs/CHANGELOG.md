@@ -1,5 +1,37 @@
 # PROJECT ORION
 
+## v0.9.6-alpha
+
+### Added
+
+* Added GUI Trade Planner Integration.
+* Added `TradePlanPresenter` for display-only trade plan dashboard sections.
+* Extended `GuiPage` and `NavigationRegistry` with a Trade Planner page.
+* Extended `GuiShell` with `build_trade_plan_dashboard()`.
+* Updated GUI application version to `v0.9.6-alpha`.
+* Added dedicated trade plan presenter unit tests.
+
+### Architecture
+
+Sprint 9.6 connects the Trade Planner to the Professional GUI Foundation without introducing planning logic into the GUI.
+
+The GUI receives completed `TradePlanResult` objects from the deterministic Trade Planner and projects them into display-only `GuiSection` and `GuiMetric` view models. The GUI does not calculate entries, stops, targets, reward/risk ratios, position sizes, risk approval, portfolio state or investment decisions.
+
+This preserves the boundary between deterministic engines and presentation: services produce results, presenters format results, and the GUI shell displays them.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/ui`
+* `tests`
+
+186 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
+---
+
 ## v0.9.5-alpha
 
 ### Added
