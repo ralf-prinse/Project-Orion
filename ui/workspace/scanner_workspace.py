@@ -1,6 +1,8 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
+from ui.workspace.workspace_panel import WorkspacePanel
+
 
 class ScannerWorkspace(QWidget):
     """
@@ -16,17 +18,16 @@ class ScannerWorkspace(QWidget):
 
         self.theme = theme
 
-        self.status_label = QLabel("Scanner gereed.")
-        self.status_label.setWordWrap(True)
-        self.status_label.setStyleSheet(
-            self.theme.muted_text_style() + "; margin-bottom: 12px;"
+        self.status_panel = WorkspacePanel(
+            theme=self.theme,
+            title="Scan Status",
+            body="Scanner gereed.",
         )
 
-        self.summary_label = QLabel("Nog geen scannerresultaten beschikbaar.")
-        self.summary_label.setAlignment(Qt.AlignTop)
-        self.summary_label.setWordWrap(True)
-        self.summary_label.setStyleSheet(
-            self.theme.muted_text_style() + "; padding: 20px;"
+        self.results_panel = WorkspacePanel(
+            theme=self.theme,
+            title="Resultaten",
+            body="Nog geen scannerresultaten beschikbaar.",
         )
 
         self._build_layout()
@@ -43,23 +44,19 @@ class ScannerWorkspace(QWidget):
         )
         intro.setStyleSheet(self.theme.muted_text_style() + "; margin-bottom: 20px;")
 
-        results_title = QLabel("Resultaten")
-        results_title.setStyleSheet(self.theme.title_style() + "; margin-top: 20px;")
-
         layout.addWidget(title)
         layout.addWidget(intro)
-        layout.addWidget(self.status_label)
-        layout.addWidget(results_title)
-        layout.addWidget(self.summary_label)
+        layout.addWidget(self.status_panel)
+        layout.addWidget(self.results_panel)
 
         self.setLayout(layout)
 
     def set_status_text(self, text: str):
-        self.status_label.setText(text)
+        self.status_panel.set_body(text)
 
     def set_summary_html(self, html: str):
-        self.summary_label.setText(html)
+        self.results_panel.set_body(html)
 
     def clear_results(self):
-        self.status_label.setText("Scanner gereed.")
-        self.summary_label.setText("Nog geen scannerresultaten beschikbaar.")
+        self.status_panel.set_body("Scanner gereed.")
+        self.results_panel.set_body("Nog geen scannerresultaten beschikbaar.")
