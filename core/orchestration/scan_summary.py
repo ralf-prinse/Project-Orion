@@ -17,6 +17,7 @@ class ScanSummary:
     opportunities: list[Any] = field(default_factory=list)
     pipeline_status: Any | None = None
     statistics: ScanStatistics = field(default_factory=ScanStatistics)
+    stage_results: dict[str, Any] = field(default_factory=dict)
 
     @property
     def success(self) -> bool:

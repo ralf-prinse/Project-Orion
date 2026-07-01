@@ -185,3 +185,91 @@ def test_scan_orchestrator_emits_start_and_completion_progress():
     assert updates[0].percent == 0.0
     assert updates[-1].completed is True
     assert updates[-1].percent == 100.0
+
+from core.orchestration import ScanStepResult
+
+
+class RecordingStep:
+    def __init__(self, name: str, suffix: str):
+        self.name = name
+        self.suffix = suffix
+        self.received_payload = None
+
+    def run(self, payload):
+        self.received_payload = payload
+        return ScanStepResult(
+            payload=f"{payload}|{self.suffix}",
+            messages=[f"{self.name} done"],
+        )
+
+
+class OpportunityStep:
+    name = "opportunity_step"
+
+    def run(self, payload):
+        return ScanStepResult(
+            payload=payload,
+            opportunities=["MSFT", "NVDA"],
+            symbols_processed=2,
+            symbols_failed=1,
+            opportunities_count=2,
+        )
+
+
+def test_scan_orchestrator_runs_configured_scan_steps_in_order():
+    first = RecordingStep(name="first_step", suffix="first")
+    second = RecordingStep(name="second_step", suffix="second")
+    orchestrator = ScanOrchestrator(
+        scan_steps=[first, second],
+        clock=FakeClock(),
+    )
+
+    summary = orchestrator.run(["AAPL"])
+
+    assert first.received_payload == ["AAPL"]
+    assert second.received_payload == "['AAPL']|first"
+    assert summary.stage_results["first_step"] == "['AAPL']|first"
+    assert summary.stage_results["second_step"] == "['AAPL']|first|second"
+    assert "first_step" in [timing.stage for timing in summary.statistics.timings]
+    assert "second_step" in [timing.stage for timing in summary.statistics.timings]
+
+
+def test_scan_orchestrator_collects_step_level_summary_data():
+    orchestrator = ScanOrchestrator(
+        scan_steps=[OpportunityStep()],
+        clock=FakeClock(),
+    )
+
+    summary = orchestrator.run(["AAPL", "MSFT", "NVDA"])
+
+    assert summary.opportunities == ["MSFT", "NVDA"]
+    assert summary.statistics.symbols_processed == 2
+    assert summary.statistics.symbols_failed == 1
+    assert summary.statistics.opportunities_count == 2
+    assert summary.stage_results["opportunity_step"] == ["AAPL", "MSFT", "NVDA"]
+
+
+def test_scan_orchestrator_emits_progress_for_each_configured_step():
+    updates = []
+    orchestrator = ScanOrchestrator(
+        scan_steps=[
+            RecordingStep(name="first_step", suffix="first"),
+            RecordingStep(name="second_step", suffix="second"),
+        ],
+        clock=FakeClock(),
+    )
+
+    orchestrator.run(
+        ScanContext(
+            symbols=["AAPL"],
+            progress_callback=updates.append,
+        )
+    )
+
+    stages = [update.stage for update in updates]
+
+    assert "scan" in stages
+    assert "first_step" in stages
+    assert "second_step" in stages
+    assert updates[-1].stage == "scan"
+    assert updates[-1].completed is True

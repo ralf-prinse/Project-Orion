@@ -2,7 +2,7 @@
 
 # AI_CONTEXT
 
-**Version:** v1.0.9-alpha
+**Version:** v1.0.10-alpha
 
 **Document Version:** 2.0
 
@@ -882,3 +882,19 @@ Implemented:
 The ScanOrchestrator is a core orchestration component. It coordinates scan execution, timing, progress callbacks, summary creation and central error handling around the existing scanner pipeline. It must not contain market-data, analysis, signal, decision, portfolio, risk, planner, AI or GUI business logic.
 
 Current official regression status: 258 passing tests.
+
+
+# Sprint 10.10 Update — Scan Orchestrator Service Integration
+
+Implemented a step-driven orchestration integration layer:
+
+- `ScanStep` protocol
+- `ScanStepResult` model
+- `ScanPipelineStep` adapter
+- configurable `ScanOrchestrator` step execution
+- `ScanSummary.stage_results` for opaque stage payloads
+- step-level progress and timing
+
+Architectural rule: orchestration steps may adapt existing services or engines, but must not move domain calculations, trading decisions, provider logic, portfolio logic, risk logic, AI logic or GUI rendering into `core/orchestration`.
+
+Regression status: 261 tests passed.

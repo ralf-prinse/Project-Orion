@@ -1,5 +1,34 @@
 # CHANGELOG
 
+## v1.0.10-alpha
+
+### Added
+
+* Added `ScanStep` protocol for deterministic scan orchestration steps.
+* Added `ScanStepResult` as a structured step output model.
+* Added `ScanPipelineStep` adapter for the existing scanner pipeline.
+* Extended `ScanOrchestrator` with configurable step-driven execution.
+* Added stage result collection to `ScanSummary`.
+* Added step-level progress reporting and timing.
+* Added dedicated orchestration integration tests.
+
+### Architecture
+
+Sprint 10.10 promotes the Scan Orchestrator from a single pipeline wrapper to a reusable service integration layer. Existing scan infrastructure is now exposed through a `ScanStep` contract, allowing future universe, market-data, analysis, signal, decision, planner, AI and GUI/API integration steps to be connected without moving domain logic into the orchestrator.
+
+The orchestrator remains responsible only for deterministic coordination, progress, timing, stage payload collection and central error handling. Trading logic remains inside the domain services and engines.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/core`
+* `tests`
+
+261 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
 ## v1.0.9-alpha
 
 ### Added
