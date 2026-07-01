@@ -630,3 +630,42 @@ Indicator Engine
 ↓
 
 Analysis Engine
+## v0.8.4-alpha
+
+### Added
+
+* Added `PositionSizingResult` model.
+* Added `PositionSizingAnalyzer` to the Decision Layer pipeline.
+* Added configurable position sizing inputs to `DecisionContext`:
+  * `entry_price`
+  * `stop_loss`
+  * `risk_per_trade`
+  * `max_position_value`
+* Added `position_sizing` output to `DecisionState` and `DecisionResult`.
+* Added dedicated position sizing unit tests.
+* Added Decision Engine integration tests for position sizing.
+
+### Changed
+
+* `DecisionRegistry` now executes `PositionSizingAnalyzer` before `DecisionAssemblerAnalyzer`.
+* `DecisionEngine` now carries structured position sizing data into `DecisionResult`.
+* `position_size` remains available as a backwards-compatible alias for recommended shares.
+
+### Architecture
+
+Sprint 8.4 introduces deterministic fixed-fractional position sizing while preserving Orion's layered architecture.
+
+`PositionSizingAnalyzer` only enriches `DecisionState`. It does not make investment decisions, manage portfolio state or create trade plans.
+
+The new `PositionSizingResult` model prepares Orion for future Portfolio Engine, Risk Manager and Trade Planner integration.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/decisions`
+* `tests`
+
+63 tests passed.
+
+No regressions introduced in the official `tests` regression suite.

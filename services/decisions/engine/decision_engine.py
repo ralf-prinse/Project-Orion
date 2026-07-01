@@ -61,6 +61,7 @@ class DecisionEngine:
             confidence=decision_state.confidence,
             position_size=decision_state.position_size,
             risk_level=decision_state.risk_level,
+            position_sizing=decision_state.position_sizing,
             reasons=list(decision_state.reasons),
             warnings=list(decision_state.warnings),
         )

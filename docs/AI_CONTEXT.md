@@ -2,7 +2,7 @@
 
 # AI_CONTEXT
 
-**Version:** v0.8.3.3-alpha
+**Version:** v0.8.4-alpha
 
 **Document Version:** 2.0
 
@@ -331,7 +331,7 @@ No sprint is considered complete before all of these steps have been finished.
 
 ## Current Version
 
-Project Orion v0.8.3.3-alpha
+Project Orion v0.8.4-alpha
 
 ---
 
@@ -430,7 +430,7 @@ Current regression status:
 
 Current result:
 
-58 passing tests
+63 passing tests
 
 No known regressions.
 
@@ -633,3 +633,32 @@ This document, together with:
 - PROJECT_STATUS.md
 
 forms the complete development context for every future Orion development session.
+
+---
+
+# Sprint 8.4 Update
+
+Sprint 8.4 introduced the Position Sizing Engine.
+
+Implemented components:
+
+- PositionSizingResult
+- PositionSizingAnalyzer
+- DecisionContext position sizing inputs
+- DecisionState position_sizing output
+- DecisionResult position_sizing output
+- DecisionRegistry integration before DecisionAssemblerAnalyzer
+
+The official regression command is now:
+
+```bash
+py -m pytest tests
+```
+
+Current validation result:
+
+```text
+63 passed
+```
+
+Position sizing remains deterministic and does not make investment decisions. It only enriches the Decision Layer output with recommended sizing information.

@@ -1,6 +1,6 @@
 Current Sprint
 
-✅ Sprint 8.3.3 — Explainability Framework Foundation
+✅ Sprint 8.4 — Position Sizing Engine
 
 
 Recently Completed
@@ -19,17 +19,20 @@ Recently Completed
 
 ✅ Sprint 8.3.3 — Explainability Framework
 
+✅ Sprint 8.4 — Position Sizing Engine
+
 
 Next Sprint
 
-☐ Sprint 8.4 — Position Sizing Engine
+☐ Sprint 8.5 — Portfolio Engine
 
 Planned objectives:
 
-- Introduce PositionSizingAnalyzer
-- Calculate recommended position size
-- Support configurable risk-per-trade
-- Prepare integration with Portfolio Engine
+- Introduce portfolio state model
+- Track cash and open positions
+- Validate capital allocation
+- Prepare exposure management
+- Integrate with Decision Layer position sizing output
 - Full unit test coverage
 
 
@@ -65,3 +68,4 @@ Current architectural improvements under consideration:
 - Integrate Explainability Framework into Signal Layer
 - Replace free-text reasons with structured ExplanationItems
 - Harmonise naming across all processing layers
+- Consider moving position sizing configuration to a dedicated strategy profile module

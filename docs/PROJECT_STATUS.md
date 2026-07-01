@@ -2,7 +2,7 @@
 
 # PROJECT STATUS
 
-Project Version: v0.8.3.3-alpha
+Project Version: v0.8.4-alpha
 
 **Document Version:** 2.0
 
@@ -12,7 +12,7 @@ Project Version: v0.8.3.3-alpha
 
 Current Milestone
 
-✅ Sprint 8.3.3 – Explainability Framework completed
+✅ Sprint 8.4 – Position Sizing Engine completed
 ---
 
 # 1. Executive Summary
@@ -495,7 +495,7 @@ Artificial Intelligence explains deterministic calculations but never replaces t
 
 Current Version
 
-v0.8.3.3-alpha
+v0.8.4-alpha
 
 Current Status
 
@@ -530,3 +530,32 @@ deterministic signal generation
 The next phase will transform trading signals into deterministic investment decisions through the introduction of the Decision Layer.
 
 The long-term architecture remains stable and no architectural redesigns are currently anticipated.
+
+---
+
+# Sprint 8.4 Update
+
+Sprint 8.4 introduced the Position Sizing Engine.
+
+Implemented components:
+
+- PositionSizingResult
+- PositionSizingAnalyzer
+- DecisionContext position sizing inputs
+- DecisionState position_sizing output
+- DecisionResult position_sizing output
+- DecisionRegistry integration before DecisionAssemblerAnalyzer
+
+The official regression command is now:
+
+```bash
+py -m pytest tests
+```
+
+Current validation result:
+
+```text
+63 passed
+```
+
+Position sizing remains deterministic and does not make investment decisions. It only enriches the Decision Layer output with recommended sizing information.

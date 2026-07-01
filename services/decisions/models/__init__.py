@@ -2,10 +2,12 @@ from services.decisions.models.decision_action import DecisionAction
 from services.decisions.models.decision_context import DecisionContext
 from services.decisions.models.decision_result import DecisionResult
 from services.decisions.models.decision_state import DecisionState
+from services.decisions.models.position_sizing_result import PositionSizingResult
 
 __all__ = [
     "DecisionAction",
     "DecisionContext",
     "DecisionResult",
     "DecisionState",
+    "PositionSizingResult",
 ]

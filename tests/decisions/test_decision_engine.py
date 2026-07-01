@@ -52,7 +52,7 @@ def test_decision_engine_converts_buy_signal_to_buy_decision():
     )
     assert "Risk validation passed." in result.reasons
     assert "Decision action assembled as BUY." in result.reasons
-    assert result.warnings == []
+    assert "Position sizing skipped; account equity is not configured." in result.warnings
 
 
 def test_decision_engine_converts_watch_signal_to_watch_decision():

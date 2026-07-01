@@ -7,6 +7,9 @@ from services.decisions.analyzers.decision_assembler_analyzer import (
 from services.decisions.analyzers.portfolio_validation_analyzer import (
     PortfolioValidationAnalyzer,
 )
+from services.decisions.analyzers.position_sizing_analyzer import (
+    PositionSizingAnalyzer,
+)
 from services.decisions.analyzers.risk_validation_analyzer import (
     RiskValidationAnalyzer,
 )
@@ -64,6 +67,10 @@ class DecisionRegistry:
             DecisionAnalyzerDefinition(
                 name="risk_validation",
                 analyzer=RiskValidationAnalyzer(),
+            ),
+            DecisionAnalyzerDefinition(
+                name="position_sizing",
+                analyzer=PositionSizingAnalyzer(),
             ),
             DecisionAnalyzerDefinition(
                 name="decision_assembler",

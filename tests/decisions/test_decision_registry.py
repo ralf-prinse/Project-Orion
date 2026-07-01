@@ -13,6 +13,7 @@ def test_decision_registry_returns_default_analyzers_in_deterministic_order():
         "signal_validation",
         "portfolio_validation",
         "risk_validation",
+        "position_sizing",
         "decision_assembler",
     ]
 
@@ -23,4 +24,4 @@ def test_decision_registry_returns_copy_of_registered_analyzers():
     analyzers = registry.get_analyzers()
     analyzers.clear()
 
-    assert len(registry.get_analyzers()) == 4
+    assert len(registry.get_analyzers()) == 5
