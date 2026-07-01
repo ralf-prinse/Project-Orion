@@ -1,5 +1,36 @@
 # PROJECT ORION
 
+## v0.9.5-alpha
+
+### Added
+
+* Added GUI Paper Trading Integration.
+* Added `PaperTradingPresenter` for display-only paper trading dashboard sections.
+* Extended `GuiShell` with `build_paper_trading_dashboard()`.
+* Updated GUI application version to `v0.9.5-alpha`.
+* Added dedicated paper trading presenter unit tests.
+
+### Architecture
+
+Sprint 9.5 connects the Paper Trading Engine to the Professional GUI Foundation without introducing execution logic into the GUI.
+
+The GUI receives completed `PaperTradingResult` objects from the deterministic Paper Trading Engine and projects them into display-only `GuiSection` and `GuiMetric` view models. The GUI does not execute trades, mutate paper accounts, simulate fills, calculate signals, change portfolio state or make investment decisions.
+
+This preserves the boundary between deterministic engines and presentation: services produce results, presenters format results, and the GUI shell displays them.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/ui`
+* `tests`
+
+181 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
+---
+
 ## v0.9.4-alpha
 
 ### Added

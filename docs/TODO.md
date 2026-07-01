@@ -1,6 +1,6 @@
 Current Sprint
 
-✅ Sprint 9.4 — GUI Performance Dashboard Integration
+✅ Sprint 9.5 — GUI Paper Trading Integration
 
 
 Recently Completed
@@ -41,10 +41,12 @@ Recently Completed
 
 ✅ Sprint 9.4 — GUI Performance Dashboard Integration
 
+✅ Sprint 9.5 — GUI Paper Trading Integration
+
 
 Next Sprint
 
-☐ Sprint 9.5 — Scanner-to-GUI Integration
+☐ Sprint 9.6 — Scanner-to-GUI Integration
 
 Planned objectives:
 

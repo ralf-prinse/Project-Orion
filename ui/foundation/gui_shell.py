@@ -2,9 +2,11 @@ from services.ai.models import AIExplanationResult
 from ui.foundation.dashboard_presenter import DashboardPresenter
 from ui.foundation.explanation_presenter import ExplanationPresenter
 from services.performance.models import PerformanceResult
+from services.paper_trading.models import PaperTradingResult
 from ui.foundation.models import GuiApplicationConfig, GuiPage, GuiSection, GuiShellState
 from ui.foundation.navigation import NavigationRegistry
 from ui.foundation.performance_dashboard_presenter import PerformanceDashboardPresenter
+from ui.foundation.paper_trading_presenter import PaperTradingPresenter
 
 
 class GuiShell:
@@ -23,6 +25,7 @@ class GuiShell:
         dashboard_presenter: DashboardPresenter | None = None,
         explanation_presenter: ExplanationPresenter | None = None,
         performance_dashboard_presenter: PerformanceDashboardPresenter | None = None,
+        paper_trading_presenter: PaperTradingPresenter | None = None,
     ):
         self.config = config or GuiApplicationConfig()
         self.navigation_registry = navigation_registry or NavigationRegistry()
@@ -31,6 +34,7 @@ class GuiShell:
         self.performance_dashboard_presenter = (
             performance_dashboard_presenter or PerformanceDashboardPresenter()
         )
+        self.paper_trading_presenter = paper_trading_presenter or PaperTradingPresenter()
         self.state = GuiShellState(
             current_page=self._resolve_initial_page(self.config.default_page),
             navigation_items=self.navigation_registry.get_items(),
@@ -68,6 +72,12 @@ class GuiShell:
         self.state.sections = self.performance_dashboard_presenter.create_sections(performance_result)
         self.state.current_page = GuiPage.PERFORMANCE
         self.state.status_message = "Performance dashboard updated"
+        return self.state
+
+    def build_paper_trading_dashboard(self, paper_trading_result: PaperTradingResult) -> GuiShellState:
+        self.state.sections = self.paper_trading_presenter.create_sections(paper_trading_result)
+        self.state.current_page = GuiPage.PAPER_TRADING
+        self.state.status_message = "Paper trading dashboard updated"
         return self.state
 
     def _resolve_initial_page(self, preferred_page: GuiPage) -> GuiPage:

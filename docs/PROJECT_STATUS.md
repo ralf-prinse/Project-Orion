@@ -2,7 +2,7 @@
 
 # PROJECT STATUS
 
-Project Version: v0.9.4-alpha
+Project Version: v0.9.5-alpha
 
 **Document Version:** 2.0
 
@@ -12,7 +12,7 @@ Project Version: v0.9.4-alpha
 
 Current Milestone
 
-✅ Sprint 9.4 – GUI Performance Dashboard Integration completed
+✅ Sprint 9.5 – GUI Paper Trading Integration completed
 ---
 
 # 1. Executive Summary
@@ -50,6 +50,7 @@ Current implementation status:
 - ✅ Artificial Intelligence Explanation Layer Foundation
 - ✅ GUI Explanation Integration
 - ✅ GUI Performance Dashboard Integration
+- ✅ GUI Paper Trading Integration
 - ⏳ Scanner-to-GUI Integration
 ---
 # 2. Current Architecture
@@ -417,14 +418,14 @@ Each sprint introduces one clearly defined capability while preserving the exist
 
 ## Next Sprint
 
-#### Sprint 8.4 — Position Sizing Engine
+#### Sprint 9.6 — Scanner-to-GUI Integration
 
 Objectives:
 
-- Introduce PositionSizingAnalyzer
-- Calculate recommended position sizes
-- Support configurable risk-per-trade
-- Integrate with Decision Layer
+- Add scan result GUI presenter
+- Prepare scanner dashboard sections
+- Connect scan outputs to display-only GUI sections
+- Preserve provider independence
 - Full unit test coverage
 
 ---
