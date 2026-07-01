@@ -331,7 +331,7 @@ No sprint is considered complete before all of these steps have been finished.
 
 ## Current Version
 
-Project Orion v0.8.6-alpha
+Project Orion v0.8.7-alpha
 
 ---
 
@@ -453,7 +453,7 @@ Current regression status:
 
 Current result:
 
-86 passing tests
+98 passing tests
 
 No known regressions.
 
@@ -722,3 +722,32 @@ Validation:
 
 - Official regression suite: `tests`
 - Result: 73 passing tests
+
+
+---
+
+## Sprint 8.7 Engineering Update
+
+Sprint 8.7 introduced the dedicated Trade Planner layer.
+
+Implemented:
+
+- `services/planner`
+- `TradePlanContext`
+- `TradePlannerConfig`
+- `TradePlanResult`
+- `TradePlanner`
+- `TradePlanRegistry`
+- `BaseTradePlanAnalyzer`
+- `InputValidationAnalyzer`
+- `TargetPriceAnalyzer`
+- `RiskRewardAnalyzer`
+- `TradePlanSummaryAnalyzer`
+
+The Trade Planner is registry-driven and uses `AnalyzerRunner`.
+
+The Trade Planner consumes deterministic inputs from prior layers and produces executable trade-plan details. It does not make investment decisions, validate portfolio constraints, approve risk or calculate position sizing.
+
+Current official regression result:
+
+98 passing tests.

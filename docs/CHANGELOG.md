@@ -1,3 +1,41 @@
+## v0.8.7-alpha
+
+### Added
+
+* Added `services/planner` package.
+* Added `TradePlanContext` model.
+* Added `TradePlannerConfig` model.
+* Added `TradePlanResult` model.
+* Added `TradePlanner`.
+* Added `TradePlanRegistry`.
+* Added `BaseTradePlanAnalyzer`.
+* Added `InputValidationAnalyzer`.
+* Added `TargetPriceAnalyzer`.
+* Added `RiskRewardAnalyzer`.
+* Added `TradePlanSummaryAnalyzer`.
+* Added dedicated Trade Planner unit tests.
+
+### Architecture
+
+Sprint 8.7 introduces a dedicated registry-driven Trade Planner.
+
+The Trade Planner transforms approved deterministic inputs into an executable trade plan with entry price, stop-loss, target price, share quantity, position value and reward/risk metrics.
+
+The Trade Planner does not perform technical analysis, generate signals, make investment decisions, manage portfolio state, calculate position sizing or approve risk. It consumes outputs from earlier layers and prepares structured trade-plan output for GUI, reporting, paper trading and future broker integration.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/planner`
+* `tests`
+
+98 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
+---
+
 ## v0.8.6-alpha
 
 ### Added

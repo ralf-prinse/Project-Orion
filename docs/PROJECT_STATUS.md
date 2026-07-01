@@ -2,7 +2,7 @@
 
 # PROJECT STATUS
 
-Project Version: v0.8.6-alpha
+Project Version: v0.8.7-alpha
 
 **Document Version:** 2.0
 
@@ -12,7 +12,7 @@ Project Version: v0.8.6-alpha
 
 Current Milestone
 
-✅ Sprint 8.6 – Risk Manager completed
+✅ Sprint 8.7 – Trade Planner completed
 ---
 
 # 1. Executive Summary
@@ -625,3 +625,35 @@ Validation:
 - `tests/portfolio`
 - `tests`
 - 73 tests passed
+
+# Sprint 8.7 Update
+
+Sprint 8.7 introduced the Trade Planner.
+
+Implemented components:
+
+- TradePlanContext
+- TradePlannerConfig
+- TradePlanResult
+- TradePlanner
+- TradePlanRegistry
+- BaseTradePlanAnalyzer
+- InputValidationAnalyzer
+- TargetPriceAnalyzer
+- RiskRewardAnalyzer
+- TradePlanSummaryAnalyzer
+
+Architecture notes:
+
+- Trade Planner is a dedicated layer under `services/planner`.
+- Trade Planner uses `AnalyzerRunner` and a registry-driven analyzer pipeline.
+- Trade Planner transforms deterministic inputs into a concrete trade plan.
+- Trade Planner calculates entry, stop-loss, target, shares, position value and reward/risk metrics.
+- Trade Planner does not perform technical analysis, signal generation, decision making, portfolio management, position sizing or risk approval.
+
+Validation:
+
+- `tests/planner`
+- `tests`
+- 98 tests passed
+

@@ -1,6 +1,6 @@
 Current Sprint
 
-✅ Sprint 8.6 — Risk Manager
+✅ Sprint 8.7 — Trade Planner
 
 
 Recently Completed
@@ -25,17 +25,20 @@ Recently Completed
 
 ✅ Sprint 8.6 — Risk Manager
 
+✅ Sprint 8.7 — Trade Planner
+
 
 Next Sprint
 
-☐ Sprint 8.7 — Trade Planner
+☐ Sprint 8.8 — Paper Trading Foundation
 
 Planned objectives:
 
-- Introduce Trade Planner package
-- Generate deterministic entry, stop-loss and take-profit plans
-- Integrate position sizing and risk outputs as inputs
-- Prepare trade-plan explainability
+- Introduce Paper Trading package
+- Simulate trade execution from TradePlanResult
+- Track open simulated trades
+- Track closed simulated trades
+- Prepare trade history and performance metrics
 - Full unit test coverage
 
 
@@ -45,11 +48,11 @@ Upcoming Roadmap
 
 ✅ Risk Manager
 
+✅ Trade Planner
+
 ☐ Earnings Risk Analyzer
 
 ☐ Sector Exposure Analyzer
-
-☐ Trade Planner
 
 ☐ Paper Trading
 
@@ -72,3 +75,4 @@ Current architectural improvements under consideration:
 - Replace free-text reasons with structured ExplanationItems
 - Harmonise naming across all processing layers
 - Consider moving position sizing configuration to a dedicated strategy profile module
+- Consider structured trade plan explanations using ExplanationItems
