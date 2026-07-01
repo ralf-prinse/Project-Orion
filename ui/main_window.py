@@ -194,7 +194,8 @@ class OrionWindow(QMainWindow):
     def scan_market(self):
         try:
             self.dashboard_page.set_status_text("Orion analyseert de markt...")
-
+            self.scanner_page.set_status_text("Scanner analyseert de markt...")
+            self.scanner_page.set_summary_html("Resultaten worden opgehaald...")
             trade_plans = self.scanner_service.scan(
                 symbols=None,
                 portfolio=self.portfolio,
@@ -213,13 +214,20 @@ class OrionWindow(QMainWindow):
                     managed_trades=managed_trades,
                 )
             )
-
+            self.scanner_page.set_status_text("Scanneranalyse voltooid.")
+            self.scanner_page.set_summary_html(
+                self.format_advice(
+                    trade_plans=trade_plans,
+                    managed_trades=managed_trades,
+                )
+            )
             self.portfolio_label.setText(self.format_portfolio())
             self.history_label.setText(self.format_trade_history())
 
         except Exception as error:
             self.dashboard_page.set_status_text(f"Fout tijdens scan: {error}")
-
+            self.scanner_page.set_status_text("Scanneranalyse mislukt.")
+            self.scanner_page.set_summary_html(f"Fout tijdens scan: {error}")
     def format_advice(self, trade_plans, managed_trades):
         buy_plans = [p for p in trade_plans if str(p.action).upper() == "BUY"]
         hold_plans = [p for p in trade_plans if str(p.action).upper() == "HOLD"]
