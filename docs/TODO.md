@@ -1,6 +1,6 @@
 Current Sprint
 
-✅ Sprint 9.6 — GUI Trade Planner Integration
+✅ Sprint 9.7 — Unified GUI Dashboard Composition
 
 
 Recently Completed
@@ -45,10 +45,12 @@ Recently Completed
 
 ✅ Sprint 9.6 — GUI Trade Planner Integration
 
+✅ Sprint 9.7 — Unified GUI Dashboard Composition
+
 
 Next Sprint
 
-☐ Sprint 9.7 — Scanner-to-GUI Integration
+☐ Sprint 9.8 — Scanner-to-GUI Integration
 
 Planned objectives:
 

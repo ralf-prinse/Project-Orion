@@ -1,5 +1,36 @@
 # PROJECT ORION
 
+## v0.9.7-alpha
+
+### Added
+
+* Added Unified GUI Dashboard Composition.
+* Added `DashboardComposer` for combining deterministic GUI sections from multiple result types.
+* Extended `GuiShell` with `build_unified_dashboard()`.
+* Updated GUI application version to `v0.9.7-alpha`.
+* Added dedicated dashboard composer unit tests.
+
+### Architecture
+
+Sprint 9.7 introduces a display-only dashboard composition layer inside the Professional GUI Foundation.
+
+The composer combines already completed deterministic outputs such as `PerformanceResult`, `PaperTradingResult`, `TradePlanResult` and `AIExplanationResult` into one unified dashboard view. It delegates formatting to existing presenters and does not calculate performance, execute paper trades, plan trades, explain decisions, generate signals or make investment decisions.
+
+This prepares Orion for a professional desktop workflow where multiple engine outputs can be presented together while preserving strict separation between deterministic services and GUI presentation.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/ui`
+* `tests`
+
+190 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
+---
+
 ## v0.9.6-alpha
 
 ### Added

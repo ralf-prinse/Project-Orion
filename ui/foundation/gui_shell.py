@@ -1,4 +1,5 @@
 from services.ai.models import AIExplanationResult
+from ui.foundation.dashboard_composer import DashboardComposer
 from ui.foundation.dashboard_presenter import DashboardPresenter
 from ui.foundation.explanation_presenter import ExplanationPresenter
 from services.performance.models import PerformanceResult
@@ -29,6 +30,7 @@ class GuiShell:
         performance_dashboard_presenter: PerformanceDashboardPresenter | None = None,
         paper_trading_presenter: PaperTradingPresenter | None = None,
         trade_plan_presenter: TradePlanPresenter | None = None,
+        dashboard_composer: DashboardComposer | None = None,
     ):
         self.config = config or GuiApplicationConfig()
         self.navigation_registry = navigation_registry or NavigationRegistry()
@@ -39,6 +41,12 @@ class GuiShell:
         )
         self.paper_trading_presenter = paper_trading_presenter or PaperTradingPresenter()
         self.trade_plan_presenter = trade_plan_presenter or TradePlanPresenter()
+        self.dashboard_composer = dashboard_composer or DashboardComposer(
+            performance_presenter=self.performance_dashboard_presenter,
+            paper_trading_presenter=self.paper_trading_presenter,
+            trade_plan_presenter=self.trade_plan_presenter,
+            explanation_presenter=self.explanation_presenter,
+        )
         self.state = GuiShellState(
             current_page=self._resolve_initial_page(self.config.default_page),
             navigation_items=self.navigation_registry.get_items(),
@@ -88,6 +96,23 @@ class GuiShell:
         self.state.sections = self.trade_plan_presenter.create_sections(trade_plan_result)
         self.state.current_page = GuiPage.TRADE_PLANNER
         self.state.status_message = "Trade plan dashboard updated"
+        return self.state
+
+    def build_unified_dashboard(
+        self,
+        performance_result: PerformanceResult | None = None,
+        paper_trading_result: PaperTradingResult | None = None,
+        trade_plan_result: TradePlanResult | None = None,
+        explanation_result: AIExplanationResult | None = None,
+    ) -> GuiShellState:
+        self.state.sections = self.dashboard_composer.compose(
+            performance_result=performance_result,
+            paper_trading_result=paper_trading_result,
+            trade_plan_result=trade_plan_result,
+            explanation_result=explanation_result,
+        )
+        self.state.current_page = GuiPage.DASHBOARD
+        self.state.status_message = "Unified dashboard updated"
         return self.state
 
     def _resolve_initial_page(self, preferred_page: GuiPage) -> GuiPage:
