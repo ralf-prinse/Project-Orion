@@ -1,6 +1,6 @@
 Current Sprint
 
-✅ Sprint 10.2 — GUI Decision Dashboard Integration
+✅ Sprint 10.3 — GUI Signal Dashboard Integration
 
 
 Recently Completed
@@ -57,23 +57,25 @@ Recently Completed
 
 ✅ Sprint 10.2 — GUI Decision Dashboard Integration
 
+✅ Sprint 10.3 — GUI Signal Dashboard Integration
+
 
 Completed objectives:
 
-- Added DecisionPresenter
-- Added deterministic decision summary sections
-- Added deterministic decision position sizing sections
-- Added diagnostics for decision reasons, warnings and sizing warnings
-- Added Decisions navigation page
-- Integrated DecisionResult into the unified dashboard composer
-- Added GUI shell decision dashboard builder
-- Preserved strict GUI/Decision Layer separation
+- Added SignalPresenter
+- Added deterministic signal summary sections
+- Added deterministic bullish, bearish and neutral score sections
+- Added signal notes diagnostics section
+- Added Signals navigation page
+- Integrated SignalResult into the unified dashboard composer
+- Added GUI shell signal dashboard builder
+- Preserved strict GUI/Signal Layer separation
 - Added full unit test coverage
 
 
 Next Sprint
 
-☐ Sprint 10.3 — GUI Settings Foundation
+☐ Sprint 10.4 — GUI Settings Foundation
 
 Planned objectives:
 

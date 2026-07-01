@@ -10,7 +10,7 @@ def test_gui_shell_initializes_with_default_navigation():
     shell = GuiShell()
 
     assert shell.state.current_page == GuiPage.DASHBOARD
-    assert len(shell.state.navigation_items) == 10
+    assert len(shell.state.navigation_items) == 11
     assert shell.state.status_message == "Ready"
 
 

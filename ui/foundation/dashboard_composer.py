@@ -5,6 +5,7 @@ from services.paper_trading.models import PaperTradingResult
 from services.portfolio.models import PortfolioResult, PortfolioState
 from services.performance.models import PerformanceResult
 from services.planner.models import TradePlanResult
+from services.signals.models import SignalResult
 from typing import Any
 from ui.foundation.backtesting_presenter import BacktestingPresenter
 from ui.foundation.decision_presenter import DecisionPresenter
@@ -14,6 +15,7 @@ from ui.foundation.paper_trading_presenter import PaperTradingPresenter
 from ui.foundation.portfolio_presenter import PortfolioPresenter
 from ui.foundation.performance_dashboard_presenter import PerformanceDashboardPresenter
 from ui.foundation.scanner_presenter import ScannerPresenter
+from ui.foundation.signal_presenter import SignalPresenter
 from ui.foundation.trade_plan_presenter import TradePlanPresenter
 
 
@@ -36,6 +38,7 @@ class DashboardComposer:
         scanner_presenter: ScannerPresenter | None = None,
         portfolio_presenter: PortfolioPresenter | None = None,
         decision_presenter: DecisionPresenter | None = None,
+        signal_presenter: SignalPresenter | None = None,
     ):
         self.performance_presenter = performance_presenter or PerformanceDashboardPresenter()
         self.backtesting_presenter = backtesting_presenter or BacktestingPresenter()
@@ -45,6 +48,7 @@ class DashboardComposer:
         self.scanner_presenter = scanner_presenter or ScannerPresenter()
         self.portfolio_presenter = portfolio_presenter or PortfolioPresenter()
         self.decision_presenter = decision_presenter or DecisionPresenter()
+        self.signal_presenter = signal_presenter or SignalPresenter()
 
     def compose(
         self,
@@ -57,6 +61,7 @@ class DashboardComposer:
         portfolio_state: PortfolioState | None = None,
         portfolio_result: PortfolioResult | None = None,
         decision_result: DecisionResult | None = None,
+        signal_result: SignalResult | None = None,
     ) -> list[GuiSection]:
         sections: list[GuiSection] = [
             self._create_summary_section(
@@ -68,11 +73,15 @@ class DashboardComposer:
                 scanner_result=scanner_result,
                 portfolio_state=portfolio_state,
                 decision_result=decision_result,
+                signal_result=signal_result,
             )
         ]
 
         if decision_result is not None:
             sections.extend(self.decision_presenter.create_sections(decision_result))
+
+        if signal_result is not None:
+            sections.extend(self.signal_presenter.create_sections(signal_result))
 
         if scanner_result is not None:
             sections.extend(self.scanner_presenter.create_sections(scanner_result))
@@ -112,11 +121,14 @@ class DashboardComposer:
         scanner_result: Any | None,
         portfolio_state: PortfolioState | None,
         decision_result: DecisionResult | None,
+        signal_result: SignalResult | None,
     ) -> GuiSection:
         active_modules = []
 
         if decision_result is not None:
             active_modules.append("Decisions")
+        if signal_result is not None:
+            active_modules.append("Signals")
         if scanner_result is not None:
             active_modules.append("Scanner")
         if portfolio_state is not None:

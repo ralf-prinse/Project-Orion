@@ -1,5 +1,38 @@
 # PROJECT ORION
 
+## v1.0.3-alpha
+
+### Added
+
+* Added GUI Signal Dashboard Integration.
+* Added `SignalPresenter` for display-only signal summary, signal scores and signal notes sections.
+* Added `GuiPage.SIGNALS` and Signals navigation item.
+* Integrated `SignalResult` output into `DashboardComposer`.
+* Added `GuiShell.build_signal_dashboard()`.
+* Updated GUI application version to `v1.0.3-alpha`.
+* Added dedicated signal presenter, dashboard composer, navigation and shell unit tests.
+
+### Architecture
+
+Sprint 10.3 connects Signal Layer outputs to the Professional GUI Foundation without introducing signal generation, threshold evaluation, analysis interpretation or investment decision logic into the GUI.
+
+The GUI receives completed `SignalResult` objects and projects them into stable `GuiSection` and `GuiMetric` view models. Signal generation remains inside `services/signals`, while the GUI remains strictly display-only.
+
+This completes the core deterministic signal presentation workflow inside the desktop application.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/ui`
+* `tests`
+
+221 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
+---
+
 ## v1.0.2-alpha
 
 ### Added

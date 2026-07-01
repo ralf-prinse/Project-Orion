@@ -15,6 +15,7 @@ from ui.foundation.performance_dashboard_presenter import PerformanceDashboardPr
 from ui.foundation.performance_presenter import PerformancePresenter
 from ui.foundation.portfolio_presenter import PortfolioPresenter
 from ui.foundation.risk_dashboard_presenter import RiskDashboardPresenter
+from ui.foundation.signal_presenter import SignalPresenter
 
 __all__ = [
     "BacktestingPresenter",
@@ -32,4 +33,5 @@ __all__ = [
     "PerformancePresenter",
     "PortfolioPresenter",
     "RiskDashboardPresenter",
+    "SignalPresenter",
 ]

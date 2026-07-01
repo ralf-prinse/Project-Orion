@@ -29,6 +29,7 @@ class NavigationRegistry:
         return [
             GuiNavigationItem(GuiPage.DASHBOARD, "Dashboard", 10),
             GuiNavigationItem(GuiPage.DECISIONS, "Decisions", 15),
+            GuiNavigationItem(GuiPage.SIGNALS, "Signals", 18),
             GuiNavigationItem(GuiPage.SCANNER, "Scanner", 20),
             GuiNavigationItem(GuiPage.PORTFOLIO, "Portfolio", 30),
             GuiNavigationItem(GuiPage.RISK, "Risk", 35),
