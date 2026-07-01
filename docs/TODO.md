@@ -1,5 +1,26 @@
 Current Sprint
 
+✅ Sprint 10.14 — Event Bus Foundation
+
+Recently Completed
+
+✅ Sprint 10.13 — Dependency Injection Migration Phase 1
+
+Next Sprint
+
+☐ Sprint 10.15 — Logging & Diagnostics Listener Foundation
+
+Planned objectives:
+
+- Add structured logging listener for scan lifecycle events
+- Add diagnostics models for event-driven scan monitoring
+- Keep logging outside orchestration business logic
+- Add full unit test coverage
+
+---
+
+Current Sprint
+
 ✅ Sprint 10.13 — Dependency Injection Migration Phase 1
 
 

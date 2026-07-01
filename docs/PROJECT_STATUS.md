@@ -2,6 +2,20 @@
 
 # PROJECT STATUS
 
+Project Version: v0.10.14-alpha
+
+Current Milestone
+
+✅ Sprint 10.14 — Event Bus Foundation completed
+
+Project Orion now includes a deterministic synchronous Event Bus in `core/events`. The ScanOrchestrator can publish scan lifecycle events without coupling GUI, logging, metrics or future plugin concerns directly to orchestration logic.
+
+---
+
+# PROJECT ORION
+
+# PROJECT STATUS
+
 Project Version: v1.0.13-alpha
 
 **Document Version:** 2.0

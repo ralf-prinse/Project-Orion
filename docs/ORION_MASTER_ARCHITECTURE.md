@@ -1,3 +1,31 @@
+# Sprint 10.14 Architecture Addendum — Event Bus Foundation
+
+Project Orion now includes a small deterministic Event Bus in `core/events`. The Event Bus is infrastructure, not trading logic. It enables GUI, logging, metrics, diagnostics and future plugin components to observe scan lifecycle activity without direct dependency on `ScanOrchestrator`.
+
+Initial event flow:
+
+```text
+ScanOrchestrator
+    │
+    ├── ScanStartedEvent
+    ├── PipelineStepStartedEvent
+    ├── PipelineStepCompletedEvent
+    ├── PipelineFailedEvent
+    └── ScanCompletedEvent
+        │
+        ▼
+EventBus
+        │
+        ├── GUI listener (future)
+        ├── Logging listener (future)
+        ├── Metrics listener (future)
+        └── Plugin listener (future)
+```
+
+The Event Bus is synchronous and explicit. It does not use reflection, auto-discovery, async dispatch or external libraries. This preserves deterministic behaviour and keeps the architecture easy to reason about.
+
+---
+
 # PROJECT ORION
 
 ## Master Architecture Document

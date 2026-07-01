@@ -101,3 +101,32 @@ def test_application_container_replaces_transient_registration():
     assert isinstance(first, FakePipeline)
     assert isinstance(second, FakePipeline)
     assert first is not second
+
+
+def test_application_container_registers_event_bus():
+    from core.events import EventBus
+
+    container = ApplicationContainer()
+
+    assert ApplicationContainer.EVENT_BUS in container.registry.registered_names()
+    assert isinstance(container.event_bus(), EventBus)
+
+
+def test_application_container_injects_event_bus_into_orchestrator():
+    from core.events import EventBus
+
+    event_bus = EventBus()
+    registry = ServiceRegistry()
+    registry.register_singleton(
+        ApplicationContainer.EVENT_BUS,
+        lambda: event_bus,
+    )
+    registry.register_singleton(
+        ApplicationContainer.SCAN_PIPELINE,
+        FakePipeline,
+    )
+
+    container = ApplicationContainer(registry=registry)
+    orchestrator = container.scan_orchestrator()
+
+    assert orchestrator.event_bus is event_bus

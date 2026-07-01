@@ -16,12 +16,16 @@ class ApplicationContainer:
     that are part of the supported application composition.
     """
 
+    EVENT_BUS = "event_bus"
     SCAN_PIPELINE = "scan_pipeline"
     SCAN_ORCHESTRATOR = "scan_orchestrator"
 
     def __init__(self, registry: ServiceRegistry | None = None) -> None:
         self.registry = registry or ServiceRegistry()
         self._register_defaults()
+
+    def event_bus(self) -> Any:
+        return self.resolve(self.EVENT_BUS)
 
     def scan_pipeline(self) -> Any:
         return self.resolve(self.SCAN_PIPELINE)
@@ -51,6 +55,12 @@ class ApplicationContainer:
         self.registry.replace_transient(name, factory)
 
     def _register_defaults(self) -> None:
+        if not self.registry.is_registered(self.EVENT_BUS):
+            self.registry.register_singleton(
+                self.EVENT_BUS,
+                self._create_event_bus,
+            )
+
         if not self.registry.is_registered(self.SCAN_PIPELINE):
             self.registry.register_singleton(
                 self.SCAN_PIPELINE,
@@ -63,6 +73,11 @@ class ApplicationContainer:
                 self._create_scan_orchestrator,
             )
 
+    def _create_event_bus(self) -> Any:
+        from core.events import EventBus
+
+        return EventBus()
+
     def _create_scan_pipeline(self) -> Any:
         # Lazy import keeps importing core.container safe in environments where
         # optional provider/UI dependencies are unavailable.
@@ -73,4 +88,7 @@ class ApplicationContainer:
     def _create_scan_orchestrator(self) -> Any:
         from core.orchestration.scan_orchestrator import ScanOrchestrator
 
-        return ScanOrchestrator(scan_pipeline=self.scan_pipeline())
+        return ScanOrchestrator(
+            scan_pipeline=self.scan_pipeline(),
+            event_bus=self.event_bus(),
+        )

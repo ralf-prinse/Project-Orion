@@ -7,6 +7,14 @@ from core.orchestration.scan_pipeline_step import ScanPipelineStep
 from core.orchestration.scan_statistics import ScanStatistics
 from core.orchestration.scan_step import ScanStep, ScanStepResult
 from core.orchestration.scan_summary import ScanSummary
+from core.events import (
+    EventBus,
+    PipelineFailedEvent,
+    PipelineStepCompletedEvent,
+    PipelineStepStartedEvent,
+    ScanCompletedEvent,
+    ScanStartedEvent,
+)
 
 
 class ScanOrchestrator:
@@ -28,10 +36,12 @@ class ScanOrchestrator:
         scan_pipeline: Any | None = None,
         scan_steps: Sequence[ScanStep] | None = None,
         clock: Any | None = None,
+        event_bus: EventBus | None = None,
     ):
         self.scan_pipeline = scan_pipeline
         self.scan_steps = list(scan_steps) if scan_steps is not None else None
         self.clock = clock or perf_counter
+        self.event_bus = event_bus
 
     def _create_default_scan_pipeline(self) -> Any:
         # Lazy import keeps core.orchestration importable in environments where
@@ -67,6 +77,7 @@ class ScanOrchestrator:
             current=0,
             total=len(symbols),
         )
+        self._publish_event(ScanStartedEvent(symbols=symbols))
 
         if not symbols:
             statistics.add_message("Geen symbolen ontvangen.")
@@ -79,7 +90,9 @@ class ScanOrchestrator:
                 total=0,
                 completed=True,
             )
-            return ScanSummary(statistics=statistics)
+            summary = ScanSummary(statistics=statistics)
+            self._publish_event(ScanCompletedEvent(summary=summary))
+            return summary
 
         try:
             summary = self._run_steps(
@@ -99,6 +112,7 @@ class ScanOrchestrator:
                 completed=True,
             )
 
+            self._publish_event(ScanCompletedEvent(summary=summary))
             return summary
 
         except Exception as exc:
@@ -116,11 +130,19 @@ class ScanOrchestrator:
                 completed=True,
                 failed=True,
             )
+            self._publish_event(
+                PipelineFailedEvent(
+                    error_message=error_message,
+                    exception_type=exc.__class__.__name__,
+                )
+            )
 
             if not context.continue_on_error:
                 raise
 
-            return ScanSummary(statistics=statistics)
+            summary = ScanSummary(statistics=statistics)
+            self._publish_event(ScanCompletedEvent(summary=summary))
+            return summary
 
     def _run_steps(
         self,
@@ -153,6 +175,13 @@ class ScanOrchestrator:
                 percent=start_percent,
                 current=index - 1,
                 total=total_steps,
+            )
+            self._publish_event(
+                PipelineStepStartedEvent(
+                    step_name=step_name,
+                    index=index,
+                    total=total_steps,
+                )
             )
 
             step_start = self.clock()
@@ -187,6 +216,14 @@ class ScanOrchestrator:
                 current=index,
                 total=total_steps,
                 completed=index == total_steps,
+            )
+            self._publish_event(
+                PipelineStepCompletedEvent(
+                    step_name=step_name,
+                    index=index,
+                    total=total_steps,
+                    duration_seconds=step_seconds,
+                )
             )
 
         if statistics.symbols_processed == 0 and statistics.symbols_failed == 0:
@@ -318,6 +355,12 @@ class ScanOrchestrator:
             return 100.0
 
         return round((completed_steps / total_steps) * 100.0, 2)
+
+    def _publish_event(self, event: Any) -> None:
+        if self.event_bus is None:
+            return
+
+        self.event_bus.publish(event)
 
     def _elapsed_since(self, start: float) -> float:
         return round(float(self.clock() - start), 6)

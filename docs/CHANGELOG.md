@@ -1,3 +1,25 @@
+## v0.10.14-alpha
+
+### Added
+
+* Added Event Bus Foundation in `core/events`.
+* Added scan lifecycle events for scan start, step start, step completion, pipeline failure and scan completion.
+* Integrated optional event publishing into `ScanOrchestrator`.
+* Registered `EventBus` in `ApplicationContainer`.
+* Added dedicated Event Bus and orchestrator event tests.
+* Added ADR-0005 for the Event Bus architecture decision.
+
+### Architecture
+
+Orion now supports deterministic event publication from the orchestration layer.
+This prepares the platform for GUI progress updates, logging, metrics, diagnostics, plugins and broker integration without directly coupling those concerns to the ScanOrchestrator.
+
+### Validation
+
+Successfully validated through the official regression test suite.
+
+---
+
 ## v1.0.13-alpha
 
 ### Added
