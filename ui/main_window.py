@@ -17,6 +17,7 @@ from services.trade_manager import TradeManager
 from services.universe_manager import UniverseManager
 from ui.design import ORION_DARK_THEME
 from ui.foundation.models import GuiPage
+from ui.foundation.portfolio_presenter import PortfolioPresenter
 from ui.foundation.settings_presenter import SettingsPresenter
 from ui.workspace.dashboard_workspace import DashboardWorkspace
 from ui.workspace.history_workspace import HistoryWorkspace
@@ -56,6 +57,7 @@ class OrionWindow(QMainWindow):
         self.portfolio = self.portfolio_store.load()
         self.active_universe = "swing"
         self.settings_presenter = SettingsPresenter()
+        self.portfolio_presenter = PortfolioPresenter()
 
         self.workspace_controller = WorkspaceController()
         self.pages = QStackedWidget()
@@ -182,7 +184,9 @@ class OrionWindow(QMainWindow):
                     managed_trades=managed_trades,
                 )
             )
-            self.portfolio_page.set_overview(self.format_portfolio())
+            self.portfolio_page.set_sections(
+                self.portfolio_presenter.create_sections(self.portfolio)
+            )
             self.history_page.set_history(self.format_trade_history())
 
         except Exception as error:
@@ -234,34 +238,7 @@ class OrionWindow(QMainWindow):
 
         return html
 
-    def format_portfolio(self):
-        html = f"""
-        <div style="background:#1f2937; border-radius:16px; padding:24px;">
-            <h2>Overzicht</h2>
-            <p><b>Cash:</b> {self.portfolio.currency} {self.portfolio.cash:.2f}</p>
-            <p><b>Open posities:</b> {len(self.portfolio.positions)}</p>
-        """
-
-        if not self.portfolio.positions:
-            html += "<p>Je hebt momenteel geen open posities.</p></div>"
-            return html
-
-        html += "<h2>Posities</h2>"
-
-        for symbol, position in self.portfolio.positions.items():
-            quantity = getattr(position, "quantity", 0)
-            average_price = getattr(position, "average_price", 0.0)
-
-            html += f"""
-            <div style="background:#111827; border-radius:12px; padding:14px; margin:10px 0;">
-                <h3>{symbol}</h3>
-                <p>Aantal: {quantity}</p>
-                <p>Gemiddelde aankoopprijs: {average_price:.2f}</p>
-            </div>
-            """
-
-        html += "</div>"
-        return html
+    
 
     def format_trade_history(self):
         trades = self.trade_history_store.load()

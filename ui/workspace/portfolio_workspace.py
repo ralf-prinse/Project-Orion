@@ -1,4 +1,6 @@
+from ui.foundation.models import GuiSection
 from ui.workspace.base_workspace import BaseWorkspace
+from ui.workspace.gui_section_renderer import GuiSectionRenderer
 from ui.workspace.workspace_panel import WorkspacePanel
 
 
@@ -16,6 +18,8 @@ class PortfolioWorkspace(BaseWorkspace):
             title="Portfolio",
             intro="Bekijk de huidige portefeuille, allocatie en risico-overzicht.",
         )
+
+        self.section_renderer = GuiSectionRenderer(theme=self.theme)
 
         self.overview_panel = WorkspacePanel(
             theme=self.theme,
@@ -41,6 +45,15 @@ class PortfolioWorkspace(BaseWorkspace):
         self.add_workspace_widget(self.overview_panel)
         self.add_workspace_widget(self.positions_panel)
         self.add_workspace_widget(self.exposure_panel)
+
+    def set_sections(self, sections: list[GuiSection]):
+        self.overview_panel.setParent(None)
+        self.positions_panel.setParent(None)
+        self.exposure_panel.setParent(None)
+
+        for section in sections:
+            panel = self.section_renderer.render_section(section)
+            self.add_workspace_widget(panel)
 
     def set_overview(self, text: str):
         self.overview_panel.set_body(text)
