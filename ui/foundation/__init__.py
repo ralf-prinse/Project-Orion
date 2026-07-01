@@ -1,4 +1,5 @@
 from ui.foundation.dashboard_presenter import DashboardPresenter
+from ui.foundation.explanation_presenter import ExplanationPresenter
 from ui.foundation.gui_shell import GuiShell
 from ui.foundation.models import (
     GuiApplicationConfig,
@@ -13,6 +14,7 @@ from ui.foundation.performance_presenter import PerformancePresenter
 
 __all__ = [
     "DashboardPresenter",
+    "ExplanationPresenter",
     "GuiShell",
     "GuiApplicationConfig",
     "GuiMetric",

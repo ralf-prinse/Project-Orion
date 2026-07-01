@@ -1,5 +1,36 @@
 # PROJECT ORION
 
+## v0.9.3-alpha
+
+### Added
+
+* Added GUI Explanation Integration.
+* Added `ExplanationPresenter` for display-only AI explanation sections.
+* Extended `GuiShell` with `build_explanation()`.
+* Updated GUI application version to `v0.9.3-alpha`.
+* Added dedicated GUI explanation presenter unit tests.
+
+### Architecture
+
+Sprint 9.3 connects the AI Explanation Layer to the Professional GUI Foundation without introducing trading logic into the GUI.
+
+The GUI receives existing `AIExplanationResult` objects and projects them into deterministic `GuiSection` and `GuiMetric` view models. It does not call external AI providers, make investment decisions, calculate signals, size positions, approve risk, mutate portfolios or generate trade plans.
+
+This keeps the architectural boundary intact: deterministic engines produce results, the AI Explanation Layer explains those results, and the GUI displays them.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/ui`
+* `tests`
+
+173 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
+---
+
 ## v0.9.2-alpha
 
 ### Added

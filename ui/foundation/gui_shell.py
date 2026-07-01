@@ -1,4 +1,6 @@
+from services.ai.models import AIExplanationResult
 from ui.foundation.dashboard_presenter import DashboardPresenter
+from ui.foundation.explanation_presenter import ExplanationPresenter
 from ui.foundation.models import GuiApplicationConfig, GuiPage, GuiSection, GuiShellState
 from ui.foundation.navigation import NavigationRegistry
 
@@ -17,10 +19,12 @@ class GuiShell:
         config: GuiApplicationConfig | None = None,
         navigation_registry: NavigationRegistry | None = None,
         dashboard_presenter: DashboardPresenter | None = None,
+        explanation_presenter: ExplanationPresenter | None = None,
     ):
         self.config = config or GuiApplicationConfig()
         self.navigation_registry = navigation_registry or NavigationRegistry()
         self.dashboard_presenter = dashboard_presenter or DashboardPresenter()
+        self.explanation_presenter = explanation_presenter or ExplanationPresenter()
         self.state = GuiShellState(
             current_page=self._resolve_initial_page(self.config.default_page),
             navigation_items=self.navigation_registry.get_items(),
@@ -45,6 +49,12 @@ class GuiShell:
         self.state.sections = self.dashboard_presenter.create_overview_sections(**kwargs)
         self.state.current_page = GuiPage.DASHBOARD
         self.state.status_message = "Dashboard updated"
+        return self.state
+
+    def build_explanation(self, explanation_result: AIExplanationResult) -> GuiShellState:
+        self.state.sections = self.explanation_presenter.create_sections(explanation_result)
+        self.state.current_page = GuiPage.DASHBOARD
+        self.state.status_message = "Explanation updated"
         return self.state
 
     def _resolve_initial_page(self, preferred_page: GuiPage) -> GuiPage:

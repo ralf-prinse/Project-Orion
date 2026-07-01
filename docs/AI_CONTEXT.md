@@ -2,7 +2,7 @@
 
 # AI_CONTEXT
 
-**Version:** v0.9.2-alpha
+**Version:** v0.9.3-alpha
 
 **Document Version:** 2.0
 
@@ -331,7 +331,7 @@ No sprint is considered complete before all of these steps have been finished.
 
 ## Current Version
 
-Project Orion v0.9.2-alpha
+Project Orion v0.9.3-alpha
 
 ---
 
@@ -416,6 +416,18 @@ Implemented:
 - ExplanationReport
 
 The Explainability Framework is reusable across all processing layers and forms the foundation for future AI explanations, logging, reporting and audit trails.
+
+---
+
+### GUI Explanation Integration
+
+Implemented:
+
+- ExplanationPresenter
+- GuiShell.build_explanation()
+- GUI-ready projection of AIExplanationResult
+
+The GUI Explanation Integration allows the professional desktop GUI foundation to display deterministic AI explanation results. The GUI remains display-only and does not generate recommendations, calculate risk, mutate portfolios or call AI providers.
 
 ---
 

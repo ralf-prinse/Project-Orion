@@ -1,6 +1,6 @@
 Current Sprint
 
-✅ Sprint 9.2 — AI Explanation Layer Foundation
+✅ Sprint 9.3 — GUI Explanation Integration
 
 
 Recently Completed
@@ -37,17 +37,19 @@ Recently Completed
 
 ✅ Sprint 9.2 — AI Explanation Layer Foundation
 
+✅ Sprint 9.3 — GUI Explanation Integration
+
 
 Next Sprint
 
-☐ Sprint 9.3 — GUI Explanation Integration
+☐ Sprint 9.4 — Scanner-to-GUI Integration
 
 Planned objectives:
 
-- Connect AI Explanation Layer to GUI presenters
-- Add explanation-ready dashboard sections
+- Add scan result GUI presenter
+- Prepare scanner dashboard sections
 - Keep GUI display-only
-- Preserve AI explanation-only rule
+- Preserve provider independence
 - Full unit test coverage
 
 
@@ -71,7 +73,7 @@ Upcoming Roadmap
 
 ✅ Professional Desktop GUI Foundation
 
-☐ AI Explanation Layer
+✅ AI Explanation Layer
 
 
 Technical Debt
