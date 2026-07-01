@@ -1,6 +1,8 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
+from ui.foundation.models import GuiSection
+
 
 class WorkspacePanel(QWidget):
     """
@@ -39,6 +41,48 @@ class WorkspacePanel(QWidget):
         layout.addWidget(self.body_label)
 
         self.setLayout(layout)
+
+    @classmethod
+    def from_section(cls, theme, section: GuiSection) -> "WorkspacePanel":
+        """
+        Creates a WorkspacePanel directly from a GuiSection.
+
+        This keeps rendering responsibilities inside WorkspacePanel and
+        eliminates the need for a separate renderer object.
+        """
+        return cls(
+            theme=theme,
+            title=section.title,
+            body=cls._build_body(section),
+        )
+
+    @staticmethod
+    def _build_body(section: GuiSection) -> str:
+        parts: list[str] = []
+
+        if section.description:
+            parts.append(f"<p>{section.description}</p>")
+
+        if section.metrics:
+            parts.append("<ul>")
+
+            for metric in section.metrics:
+                helper = (
+                    f"<br><small>{metric.helper_text}</small>"
+                    if metric.helper_text
+                    else ""
+                )
+
+                parts.append(
+                    f"<li><b>{metric.label}:</b> {metric.value}{helper}</li>"
+                )
+
+            parts.append("</ul>")
+
+        if not parts:
+            return "No information available."
+
+        return "\n".join(parts)
 
     def set_title(self, title: str):
         self.title_label.setText(title)

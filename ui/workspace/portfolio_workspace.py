@@ -1,6 +1,5 @@
 from ui.foundation.models import GuiSection
 from ui.workspace.base_workspace import BaseWorkspace
-from ui.workspace.gui_section_renderer import GuiSectionRenderer
 from ui.workspace.workspace_panel import WorkspacePanel
 
 
@@ -18,8 +17,6 @@ class PortfolioWorkspace(BaseWorkspace):
             title="Portfolio",
             intro="Bekijk de huidige portefeuille, allocatie en risico-overzicht.",
         )
-
-        self.section_renderer = GuiSectionRenderer(theme=self.theme)
 
         self.overview_panel = WorkspacePanel(
             theme=self.theme,
@@ -52,8 +49,12 @@ class PortfolioWorkspace(BaseWorkspace):
         self.exposure_panel.setParent(None)
 
         for section in sections:
-            panel = self.section_renderer.render_section(section)
-            self.add_workspace_widget(panel)
+            self.add_workspace_widget(
+                WorkspacePanel.from_section(
+                    theme=self.theme,
+                    section=section,
+                )
+            )
 
     def set_overview(self, text: str):
         self.overview_panel.set_body(text)
@@ -65,12 +66,6 @@ class PortfolioWorkspace(BaseWorkspace):
         self.exposure_panel.set_body(text)
 
     def clear(self):
-        self.overview_panel.set_body(
-            "Nog geen portefeuillegegevens beschikbaar."
-        )
-        self.positions_panel.set_body(
-            "Er zijn momenteel geen open posities."
-        )
-        self.exposure_panel.set_body(
-            "Exposure-overzicht wordt later gekoppeld."
-        )
+        self.overview_panel.set_body("Nog geen portefeuillegegevens beschikbaar.")
+        self.positions_panel.set_body("Er zijn momenteel geen open posities.")
+        self.exposure_panel.set_body("Exposure-overzicht wordt later gekoppeld.")

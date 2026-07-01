@@ -10,11 +10,11 @@
 
 Project Orion is developed through Epics.
 
-Each Epic consists of Features.
+Every Epic consists of Features.
 
-Each Feature consists of small implementation Tasks.
+Every Feature consists of small deterministic implementation tasks.
 
-Architecture always takes precedence over new functionality.
+Architecture always takes precedence over implementation speed.
 
 ---
 
@@ -22,27 +22,27 @@ Architecture always takes precedence over new functionality.
 
 **Status:** ✅ Completed
 
-Completed systems:
+Completed:
 
-* Universe Layer
-* Market Data Layer
-* Historical Data Layer
-* Indicator Engine
-* Analysis Layer
-* Signal Layer
-* Decision Layer
-* Portfolio Engine
-* Risk Manager
-* Trade Planner
-* Backtesting
-* Paper Trading
-* Performance Analytics
-* Explainability Framework
-* AI Explanation Layer
-* Dependency Injection
-* Event Bus
-* Scan Orchestrator
-* Configuration Framework
+- Universe Layer
+- Market Data Layer
+- Historical Data Layer
+- Indicator Engine
+- Analysis Layer
+- Signal Layer
+- Decision Layer
+- Portfolio Engine
+- Risk Manager
+- Trade Planner
+- Backtesting
+- Paper Trading
+- Performance Analytics
+- Explainability Framework
+- AI Explanation Layer
+- Dependency Injection
+- Event Bus
+- Scan Orchestrator
+- Configuration Framework
 
 ---
 
@@ -58,86 +58,86 @@ Transform Orion into a professional desktop trading platform while preserving co
 
 # Feature 2.1 — Workspace Framework
 
+**Status:** ✅ Completed
+
+Completed:
+
+- WorkspaceController
+- DashboardRouter
+- BaseWorkspace
+- WorkspacePanel
+- DashboardWorkspace
+- ScannerWorkspace
+- PortfolioWorkspace
+- HistoryWorkspace
+- SettingsWorkspace
+- Workspace navigation
+- MainWindow composition-root migration
+
+---
+
+# Feature 2.2 — Presenter Architecture
+
 **Status:** 🚧 In Progress
 
-## Completed
+Completed:
 
-* [x] Introduce WorkspaceController
-* [x] Introduce DashboardRouter
-* [x] GuiShell Refactor — Phase 1
-* [x] MainWindow navigation decoupled from direct page switching
+- DashboardPresenter
+- PortfolioPresenter
+- HistoryPresenter
+- SettingsPresenter
 
-## Remaining
+Remaining:
 
-* [ ] Continue GuiShell decomposition
-* [ ] Introduce feature-oriented workspace pages
-* [ ] Docking architecture integration
-* [ ] Workspace state persistence
-* [ ] Navigation improvements
-* [ ] Layout persistence
+- Complete presenter migration
+- Remove remaining HTML presentation
+- Standardize GuiSection rendering
 
 ---
 
-# Feature 2.2 — Professional Dashboard
+# Feature 2.3 — GuiSection Migration
+
+**Status:** 🚧 In Progress
+
+Tasks:
+
+- Simplify WorkspacePanel rendering
+- Migrate remaining workspaces to WorkspacePanel.from_section()
+- Migrate DashboardWorkspace
+- Migrate HistoryWorkspace
+- Migrate ScannerWorkspace
+- Eliminate remaining HTML rendering
+
+---
+
+# Feature 2.4 — Professional Desktop UX
 
 **Status:** 🟡 Planned
 
 Tasks:
 
-* [ ] Professional dashboard layout
-* [ ] Dashboard workspace
-* [ ] Dashboard cards
-* [ ] Metric tiles
-* [ ] Status widgets
-* [ ] Market overview
-* [ ] Recent activity
-* [ ] Scan summary
-* [ ] Portfolio snapshot
+- Professional dashboard layout
+- Docking architecture
+- Layout persistence
+- Keyboard shortcuts
+- Toolbar
+- Status bar
+- Theme improvements
+- Responsive layouts
 
 ---
 
-# Feature 2.3 — Scanner Workspace
+# Feature 2.5 — Portfolio Experience
 
 **Status:** 🟡 Planned
 
 Tasks:
 
-* [ ] Dedicated Scanner Workspace
-* [ ] Scan progress
-* [ ] Result table
-* [ ] Filtering
-* [ ] Sorting
-* [ ] Scan history
-
----
-
-# Feature 2.4 — Portfolio Workspace
-
-**Status:** 🟡 Planned
-
-Tasks:
-
-* [ ] Portfolio Workspace
-* [ ] Positions
-* [ ] Allocation
-* [ ] Exposure
-* [ ] Sector allocation
-* [ ] Open risk overview
-
----
-
-# Feature 2.5 — Performance Workspace
-
-**Status:** 🟡 Planned
-
-Tasks:
-
-* [ ] Performance Workspace
-* [ ] Equity curve
-* [ ] Performance statistics
-* [ ] Win rate
-* [ ] Drawdown
-* [ ] Monthly performance
+- Position cards
+- Exposure overview
+- Allocation overview
+- Portfolio metrics
+- Performance integration
 
 ---
 
@@ -147,39 +147,10 @@ Tasks:
 
 Tasks:
 
-* [ ] AI Explanation Workspace
-* [ ] Trade explanations
-* [ ] Recommendation details
-* [ ] Scan summaries
-* [ ] Decision explanations
-
----
-
-# Feature 2.7 — Settings Workspace
-
-**Status:** 🟡 Planned
-
-Tasks:
-
-* [ ] Theme configuration
-* [ ] Application configuration
-* [ ] Provider configuration
-* [ ] User profiles
-
----
-
-# Feature 2.8 — Desktop Polish
-
-**Status:** 🟡 Planned
-
-Tasks:
-
-* [ ] Docking improvements
-* [ ] Icons
-* [ ] Keyboard shortcuts
-* [ ] Accessibility
-* [ ] Responsive layouts
-* [ ] Theme improvements
+- AI explanations
+- Trade summaries
+- Recommendation explanations
+- Daily overview
 
 ---
 
@@ -189,14 +160,13 @@ Tasks:
 
 Potential features:
 
-* Broker integration
-* Watchlists
-* Alerts
-* Market calendar
-* Earnings calendar
-* Notifications
-* Multi-monitor support
-* Cloud synchronization
+- Broker integration
+- Watchlists
+- Alerts
+- Market calendar
+- Earnings calendar
+- Multi-monitor support
+- Cloud synchronization
 
 ---
 
@@ -206,29 +176,27 @@ Potential features:
 
 Potential features:
 
-* Natural language queries
-* AI coaching
-* Portfolio explanations
-* Scan summaries
-* Daily reports
+- Natural language interaction
+- Portfolio coaching
+- Scan summaries
+- Daily reports
+- Workflow assistance
 
-Artificial Intelligence remains explanation-only.
-
-AI never replaces deterministic trading engines.
+AI remains explanation-only.
 
 ---
 
 # Continuous Engineering Tasks
 
-These tasks are always active.
+Always active:
 
-* [ ] Keep documentation synchronized
-* [ ] Keep regression tests green
-* [ ] Minimize technical debt
-* [ ] Preserve deterministic behaviour
-* [ ] Review architecture before implementation
-* [ ] Prefer small incremental changes
-* [ ] Keep GUI presentation-only
+- Keep documentation synchronized
+- Keep regression tests green
+- Preserve deterministic behaviour
+- Review architecture before implementation
+- Minimize technical debt
+- Prefer complete file replacements
+- Keep GUI presentation-only
 
 ---
 
@@ -236,28 +204,26 @@ These tasks are always active.
 
 A task is complete when:
 
-* Architecture reviewed
-* Existing implementation reviewed
-* One logical change implemented
-* Tests executed successfully
-* Documentation synchronized
-* Commit created
-* Changes pushed to GitHub
+- Architecture reviewed
+- Existing implementation reviewed
+- One logical responsibility implemented
+- Regression tests passed
+- Documentation synchronized
+- Commit created
+- Changes pushed
 
 ---
 
 # Immediate Next Focus
 
-Epic 2 → Workspace Framework Phase 2
-
 Priority order:
 
-1. Continue GuiShell decomposition
-2. Professional Dashboard Workspace
-3. Scanner Workspace
-4. Portfolio Workspace
-5. Performance Workspace
-6. AI Workspace
+1. Simplify WorkspacePanel rendering
+2. Migrate remaining workspaces to GuiSection-based panels
+3. Complete GuiSection migration
+4. Complete presenter migration
+5. Remove remaining HTML rendering
+6. Professional desktop UX
 
 ---
 
