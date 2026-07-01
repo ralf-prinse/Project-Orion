@@ -18,6 +18,7 @@ from services.universe_manager import UniverseManager
 from ui.design import ORION_DARK_THEME
 from ui.foundation.models import GuiPage
 from ui.workspace.dashboard_workspace import DashboardWorkspace
+from ui.workspace.portfolio_workspace import PortfolioWorkspace
 from ui.workspace.scanner_workspace import ScannerWorkspace
 from ui.workspace.workspace_controller import WorkspaceController
 
@@ -67,7 +68,7 @@ class OrionWindow(QMainWindow):
             on_scan_requested=self.scan_market,
         )
         self.scanner_page = ScannerWorkspace(theme=self.theme)
-        self.portfolio_page = self.create_portfolio_page()
+        self.portfolio_page = PortfolioWorkspace(theme=self.theme)
         self.history_page = self.create_history_page()
         self.settings_page = self.create_settings_page()
 
@@ -133,25 +134,6 @@ class OrionWindow(QMainWindow):
         page_index = self.workspace_page_indexes[result.state.current_page]
         self.pages.setCurrentIndex(page_index)
 
-    def create_portfolio_page(self):
-        page = QWidget()
-        layout = QVBoxLayout()
-        layout.setAlignment(Qt.AlignTop)
-
-        title = QLabel("Portfolio")
-        title.setStyleSheet(self.theme.title_style() + "; margin-top: 25px;")
-
-        self.portfolio_label = QLabel(self.format_portfolio())
-        self.portfolio_label.setWordWrap(True)
-        self.portfolio_label.setStyleSheet(
-            self.theme.muted_text_style() + "; padding: 20px;"
-        )
-
-        layout.addWidget(title)
-        layout.addWidget(self.portfolio_label)
-
-        page.setLayout(layout)
-        return page
 
     def create_history_page(self):
         page = QWidget()
@@ -221,7 +203,7 @@ class OrionWindow(QMainWindow):
                     managed_trades=managed_trades,
                 )
             )
-            self.portfolio_label.setText(self.format_portfolio())
+            self.portfolio_page.set_overview(self.format_portfolio())
             self.history_label.setText(self.format_trade_history())
 
         except Exception as error:
