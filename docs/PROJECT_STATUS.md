@@ -2,7 +2,7 @@
 
 # PROJECT STATUS
 
-Project Version: v0.8.8-alpha
+Project Version: v0.8.9-alpha
 
 **Document Version:** 2.0
 
@@ -12,7 +12,7 @@ Project Version: v0.8.8-alpha
 
 Current Milestone
 
-✅ Sprint 8.8 – Backtesting Foundation completed
+✅ Sprint 8.9 – Paper Trading Engine completed
 ---
 
 # 1. Executive Summary
@@ -691,3 +691,39 @@ Validation:
 - `tests/backtesting`
 - `tests`
 - 113 tests passed
+
+# Sprint 8.9 Update
+
+Sprint 8.9 introduced the Paper Trading Engine.
+
+Implemented components:
+
+- PaperAccount
+- PaperPosition
+- PaperTradeRecord
+- PaperTradingConfig
+- PaperTradingContext
+- PaperTradingResult
+- PaperTradingEngine
+- PaperTradingRegistry
+- BasePaperTradingAnalyzer
+- InputValidationAnalyzer
+- TradeExecutionAnalyzer
+- MarkToMarketAnalyzer
+- PositionCloseAnalyzer
+- AccountSummaryAnalyzer
+
+Architecture notes:
+
+- Paper Trading is a dedicated layer under `services/paper_trading`.
+- Paper Trading uses `AnalyzerRunner` and a registry-driven analyzer pipeline.
+- Paper Trading consumes deterministic `TradePlanResult` objects.
+- Paper Trading tracks virtual cash, open positions, closed trades, realized P/L, unrealized P/L and equity.
+- Paper Trading does not perform technical analysis, signal generation, decision making, position sizing, risk approval, historical backtesting, broker execution or AI reasoning.
+
+Validation:
+
+- `tests/paper_trading`
+- `tests`
+- 128 tests passed
+

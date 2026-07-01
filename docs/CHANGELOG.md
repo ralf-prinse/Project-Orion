@@ -1,3 +1,87 @@
+## v0.8.9-alpha
+
+### Added
+
+* Added `services/paper_trading` package.
+* Added `PaperAccount`.
+* Added `PaperPosition`.
+* Added `PaperTradeRecord`.
+* Added `PaperTradingConfig`.
+* Added `PaperTradingContext`.
+* Added `PaperTradingResult`.
+* Added `PaperTradingEngine`.
+* Added `PaperTradingRegistry`.
+* Added `BasePaperTradingAnalyzer`.
+* Added `InputValidationAnalyzer`.
+* Added `TradeExecutionAnalyzer`.
+* Added `MarkToMarketAnalyzer`.
+* Added `PositionCloseAnalyzer`.
+* Added `AccountSummaryAnalyzer`.
+* Added dedicated Paper Trading unit tests.
+
+### Architecture
+
+Sprint 8.9 introduces a dedicated registry-driven Paper Trading Engine.
+
+The Paper Trading Engine simulates execution of existing deterministic `TradePlanResult` objects on a virtual account. It tracks cash balance, open positions, trade history, realized P/L, unrealized P/L and equity without connecting to brokers or making investment decisions.
+
+This layer consumes deterministic trade plans and remains separate from analysis, signal generation, decision making, position sizing, portfolio validation, risk management, backtesting and broker integration.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/paper_trading`
+* `tests`
+
+128 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
+---
+
+## v0.8.9-alpha
+
+### Added
+
+* Added `services/paper_trading` package.
+* Added `PaperAccount`.
+* Added `PaperPosition`.
+* Added `PaperTradeRecord`.
+* Added `PaperTradingConfig`.
+* Added `PaperTradingContext`.
+* Added `PaperTradingResult`.
+* Added `PaperTradingEngine`.
+* Added `PaperTradingRegistry`.
+* Added `BasePaperTradingAnalyzer`.
+* Added `InputValidationAnalyzer`.
+* Added `TradeExecutionAnalyzer`.
+* Added `MarkToMarketAnalyzer`.
+* Added `PositionCloseAnalyzer`.
+* Added `AccountSummaryAnalyzer`.
+* Added dedicated Paper Trading unit tests.
+
+### Architecture
+
+Sprint 8.9 introduces a dedicated registry-driven Paper Trading Engine.
+
+The Paper Trading Layer consumes existing deterministic `TradePlanResult` objects and applies them to a virtual cash account. It can open simulated BUY positions, update open positions with market prices, close positions deterministically and report cash, equity, realized P/L, unrealized P/L and open position count.
+
+The Paper Trading Engine does not perform technical analysis, generate signals, make investment decisions, calculate position sizing, approve risk, backtest historical candles, route broker orders or use AI reasoning. It is a simulation layer that prepares Orion for performance analytics, GUI workflows and future broker integration.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/paper_trading`
+* `tests`
+
+128 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
+---
+
 ## v0.8.8-alpha
 
 ### Added

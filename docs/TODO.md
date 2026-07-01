@@ -1,6 +1,6 @@
 Current Sprint
 
-✅ Sprint 8.8 — Backtesting Foundation
+✅ Sprint 8.9 — Paper Trading Engine
 
 
 Recently Completed
@@ -29,18 +29,20 @@ Recently Completed
 
 ✅ Sprint 8.8 — Backtesting Foundation
 
+✅ Sprint 8.9 — Paper Trading Engine
+
 
 Next Sprint
 
-☐ Sprint 8.9 — Paper Trading Engine
+☐ Sprint 9.0 — Performance Analytics
 
 Planned objectives:
 
-- Introduce Paper Trading package
-- Consume TradePlanResult and Backtest concepts where practical
-- Track open simulated trades
-- Track closed simulated trades
-- Track simulated P/L and equity
+- Introduce Performance Analytics package
+- Consume BacktestResult and PaperTradingResult where practical
+- Calculate trade performance metrics
+- Calculate equity and P/L summaries
+- Prepare GUI/reporting integration
 - Full unit test coverage
 
 
@@ -56,7 +58,11 @@ Upcoming Roadmap
 
 ☐ Sector Exposure Analyzer
 
-☐ Paper Trading Engine
+✅ Paper Trading Engine
+
+☐ Performance Analytics
+
+☐ Performance Analytics
 
 ☐ Broker Integration
 
