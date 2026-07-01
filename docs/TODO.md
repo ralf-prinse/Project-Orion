@@ -1,5 +1,30 @@
 Current Sprint
 
+✅ Sprint 11.0 — GUI Design System Foundation
+
+Completed objectives:
+
+- Introduce central GUI design system
+- Add semantic palette, typography, spacing, metrics, icons and theme
+- Add toolkit-independent component view models
+- Begin migration of legacy PySide6 window styling to central theme
+- Add design-system tests
+
+Next GUI Work
+
+☐ Sprint 11.1 — Professional Dashboard Home Redesign
+
+Planned objectives:
+
+- Use design-system components in dashboard shell
+- Create professional home dashboard composition
+- Replace ad-hoc visual styling in dashboard widgets
+- Keep all trading logic outside the GUI
+
+---
+
+Current Sprint
+
 ✅ Sprint 10.15 — Event Bus Integration Phase 1
 
 Recently Completed

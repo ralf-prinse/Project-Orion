@@ -1,3 +1,28 @@
+## v1.1.0-alpha
+
+### Added
+
+* Added Orion GUI Design System foundation under `ui/design`.
+* Added central palette, typography, spacing, GUI metrics, icon mapping and theme objects.
+* Added toolkit-independent GUI component models under `ui/components`.
+* Added component models for cards, metric tiles, panels, section headers, status badges and sidebar buttons.
+* Added design-system and GUI component unit tests.
+* Added ADR-0007 for the GUI Design System architecture decision.
+
+### Changed
+
+* Updated the legacy PySide6 `OrionWindow` to consume the central Orion theme for application, title, muted text, sidebar and primary-button styling.
+
+### Architecture
+
+Sprint 11.0 starts the Professional GUI epic by introducing a central design language before expanding screens further. GUI presenters remain presentation-only and trading logic remains outside the GUI.
+
+### Validation
+
+Validated through the official regression test suite.
+
+---
+
 ## v0.10.15-alpha
 
 ### Added

@@ -8645,3 +8645,14 @@ Current responsibilities:
 * preserve a clear composition root as Orion grows toward v1.0.
 
 The container must not contain trading logic. Business logic remains in services and analyzers.
+
+
+# GUI Design System Architecture
+
+Project Orion uses a central GUI Design System to keep the desktop interface consistent and professional.
+
+The design system lives under `ui/design` and defines semantic colours, typography, spacing, metrics, icons and theme styles. Reusable presentation components live under `ui/components`.
+
+GUI components remain presentation-only. They may format deterministic outputs, but they must not perform market analysis, signal generation, decision making, portfolio calculations, risk calculations or trade planning.
+
+Future GUI screens should consume the design system instead of defining ad-hoc colours, margins or font sizes.

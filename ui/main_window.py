@@ -15,14 +15,20 @@ from services.scanner_service import ScannerService
 from services.trade_history_store import TradeHistoryStore
 from services.trade_manager import TradeManager
 from services.universe_manager import UniverseManager
+from ui.design import ORION_DARK_THEME
 
 
 class OrionWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
+        self.theme = ORION_DARK_THEME
+
         self.setWindowTitle("Project Orion")
-        self.resize(1100, 720)
+        self.resize(
+            self.theme.metrics.default_window_width,
+            self.theme.metrics.default_window_height,
+        )
 
         self.provider = YahooProvider()
         self.universe_manager = UniverseManager()
@@ -66,16 +72,16 @@ class OrionWindow(QMainWindow):
 
     def create_sidebar(self):
         sidebar = QWidget()
-        sidebar.setFixedWidth(220)
+        sidebar.setFixedWidth(self.theme.metrics.sidebar_width)
 
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignTop)
 
         title = QLabel("ORION")
-        title.setStyleSheet("font-size: 26px; font-weight: bold; margin: 20px;")
+        title.setStyleSheet(self.theme.title_style() + "; margin: 20px;")
 
         subtitle = QLabel("AI Swing Trader")
-        subtitle.setStyleSheet("color: #9ca3af; margin-left: 20px; margin-bottom: 30px;")
+        subtitle.setStyleSheet(self.theme.muted_text_style() + "; margin-left: 20px; margin-bottom: 30px;")
 
         layout.addWidget(title)
         layout.addWidget(subtitle)
@@ -94,7 +100,7 @@ class OrionWindow(QMainWindow):
             layout.addWidget(button)
 
         sidebar.setLayout(layout)
-        sidebar.setStyleSheet("background-color: #0b1120;")
+        sidebar.setObjectName("OrionSidebar")
         return sidebar
 
     def create_dashboard_page(self):
@@ -103,10 +109,10 @@ class OrionWindow(QMainWindow):
         layout.setAlignment(Qt.AlignTop)
 
         header = QLabel("Goedemorgen Ralf.")
-        header.setStyleSheet("font-size: 32px; font-weight: bold; margin-top: 25px;")
+        header.setStyleSheet(self.theme.title_style() + "; margin-top: 25px;")
 
         intro = QLabel("Orion zoekt alleen naar concrete swing-trades van enkele uren tot enkele dagen.")
-        intro.setStyleSheet("font-size: 16px; color: #9ca3af; margin-bottom: 20px;")
+        intro.setStyleSheet(self.theme.muted_text_style() + "; margin-bottom: 20px;")
 
         self.scan_button = QPushButton("Analyseer markt")
         self.scan_button.clicked.connect(self.scan_market)
@@ -115,7 +121,7 @@ class OrionWindow(QMainWindow):
         self.advice_label = QLabel("Nog geen analyse uitgevoerd.")
         self.advice_label.setAlignment(Qt.AlignTop)
         self.advice_label.setWordWrap(True)
-        self.advice_label.setStyleSheet("font-size: 16px; color: #e5e7eb; padding: 20px;")
+        self.advice_label.setStyleSheet(self.theme.muted_text_style() + "; padding: 20px;")
 
         layout.addWidget(header)
         layout.addWidget(intro)
@@ -131,11 +137,11 @@ class OrionWindow(QMainWindow):
         layout.setAlignment(Qt.AlignTop)
 
         title = QLabel("Portfolio")
-        title.setStyleSheet("font-size: 32px; font-weight: bold; margin-top: 25px;")
+        title.setStyleSheet(self.theme.title_style() + "; margin-top: 25px;")
 
         self.portfolio_label = QLabel(self.format_portfolio())
         self.portfolio_label.setWordWrap(True)
-        self.portfolio_label.setStyleSheet("font-size: 16px; color: #e5e7eb; padding: 20px;")
+        self.portfolio_label.setStyleSheet(self.theme.muted_text_style() + "; padding: 20px;")
 
         layout.addWidget(title)
         layout.addWidget(self.portfolio_label)
@@ -149,11 +155,11 @@ class OrionWindow(QMainWindow):
         layout.setAlignment(Qt.AlignTop)
 
         title = QLabel("Historie")
-        title.setStyleSheet("font-size: 32px; font-weight: bold; margin-top: 25px;")
+        title.setStyleSheet(self.theme.title_style() + "; margin-top: 25px;")
 
         self.history_label = QLabel(self.format_trade_history())
         self.history_label.setWordWrap(True)
-        self.history_label.setStyleSheet("font-size: 16px; color: #e5e7eb; padding: 20px;")
+        self.history_label.setStyleSheet(self.theme.muted_text_style() + "; padding: 20px;")
 
         layout.addWidget(title)
         layout.addWidget(self.history_label)
@@ -167,11 +173,11 @@ class OrionWindow(QMainWindow):
         layout.setAlignment(Qt.AlignTop)
 
         title = QLabel("Instellingen")
-        title.setStyleSheet("font-size: 32px; font-weight: bold; margin-top: 25px;")
+        title.setStyleSheet(self.theme.title_style() + "; margin-top: 25px;")
 
         body = QLabel(self.format_settings())
         body.setWordWrap(True)
-        body.setStyleSheet("font-size: 16px; color: #e5e7eb; padding: 20px;")
+        body.setStyleSheet(self.theme.muted_text_style() + "; padding: 20px;")
 
         layout.addWidget(title)
         layout.addWidget(body)

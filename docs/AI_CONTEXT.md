@@ -346,6 +346,14 @@ Each sprint should include:
 
 No sprint is considered complete before all of these steps have been finished.
 
+
+## GUI Design System
+
+Sprint 11.0 introduced a central GUI Design System under `ui/design` and toolkit-independent component view models under `ui/components`. Future GUI work should consume these shared palette, typography, spacing, metrics, icon and theme objects instead of defining ad-hoc styles inside individual screens.
+
+The GUI remains presentation-only. Trading logic must stay inside deterministic services and engines.
+
+
 # 4. Current Development Status
 
 ## Current Version
