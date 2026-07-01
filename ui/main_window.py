@@ -1,12 +1,12 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QLabel,
+    QHBoxLayout,
     QMainWindow,
     QPushButton,
-    QHBoxLayout,
+    QStackedWidget,
     QVBoxLayout,
     QWidget,
-    QStackedWidget,
 )
 
 from providers.yahoo_provider import YahooProvider
@@ -16,6 +16,9 @@ from services.trade_history_store import TradeHistoryStore
 from services.trade_manager import TradeManager
 from services.universe_manager import UniverseManager
 from ui.design import ORION_DARK_THEME
+from ui.foundation.models import GuiPage
+from ui.workspace.dashboard_workspace import DashboardWorkspace
+from ui.workspace.workspace_controller import WorkspaceController
 
 
 class OrionWindow(QMainWindow):
@@ -48,9 +51,19 @@ class OrionWindow(QMainWindow):
         self.portfolio = self.portfolio_store.load()
         self.active_universe = "swing"
 
+        self.workspace_controller = WorkspaceController()
         self.pages = QStackedWidget()
+        self.workspace_page_indexes = {
+            GuiPage.DASHBOARD: 0,
+            GuiPage.PORTFOLIO: 1,
+            GuiPage.HISTORY: 2,
+            GuiPage.SETTINGS: 3,
+        }
 
-        self.dashboard_page = self.create_dashboard_page()
+        self.dashboard_page = DashboardWorkspace(
+            theme=self.theme,
+            on_scan_requested=self.scan_market,
+        )
         self.portfolio_page = self.create_portfolio_page()
         self.history_page = self.create_history_page()
         self.settings_page = self.create_settings_page()
@@ -81,21 +94,28 @@ class OrionWindow(QMainWindow):
         title.setStyleSheet(self.theme.title_style() + "; margin: 20px;")
 
         subtitle = QLabel("AI Swing Trader")
-        subtitle.setStyleSheet(self.theme.muted_text_style() + "; margin-left: 20px; margin-bottom: 30px;")
+        subtitle.setStyleSheet(
+            self.theme.muted_text_style()
+            + "; margin-left: 20px; margin-bottom: 30px;"
+        )
 
         layout.addWidget(title)
         layout.addWidget(subtitle)
 
         buttons = [
-            ("Dashboard", 0),
-            ("Portfolio", 1),
-            ("Historie", 2),
-            ("Instellingen", 3),
+            ("Dashboard", GuiPage.DASHBOARD),
+            ("Portfolio", GuiPage.PORTFOLIO),
+            ("Historie", GuiPage.HISTORY),
+            ("Instellingen", GuiPage.SETTINGS),
         ]
 
-        for text, index in buttons:
+        for text, page in buttons:
             button = QPushButton(text)
-            button.clicked.connect(lambda checked=False, i=index: self.pages.setCurrentIndex(i))
+            button.clicked.connect(
+                lambda checked=False, target_page=page: self.navigate_to_workspace(
+                    target_page
+                )
+            )
             button.setStyleSheet(self.sidebar_button_style())
             layout.addWidget(button)
 
@@ -103,33 +123,10 @@ class OrionWindow(QMainWindow):
         sidebar.setObjectName("OrionSidebar")
         return sidebar
 
-    def create_dashboard_page(self):
-        page = QWidget()
-        layout = QVBoxLayout()
-        layout.setAlignment(Qt.AlignTop)
-
-        header = QLabel("Goedemorgen Ralf.")
-        header.setStyleSheet(self.theme.title_style() + "; margin-top: 25px;")
-
-        intro = QLabel("Orion zoekt alleen naar concrete swing-trades van enkele uren tot enkele dagen.")
-        intro.setStyleSheet(self.theme.muted_text_style() + "; margin-bottom: 20px;")
-
-        self.scan_button = QPushButton("Analyseer markt")
-        self.scan_button.clicked.connect(self.scan_market)
-        self.scan_button.setStyleSheet(self.primary_button_style())
-
-        self.advice_label = QLabel("Nog geen analyse uitgevoerd.")
-        self.advice_label.setAlignment(Qt.AlignTop)
-        self.advice_label.setWordWrap(True)
-        self.advice_label.setStyleSheet(self.theme.muted_text_style() + "; padding: 20px;")
-
-        layout.addWidget(header)
-        layout.addWidget(intro)
-        layout.addWidget(self.scan_button)
-        layout.addWidget(self.advice_label)
-
-        page.setLayout(layout)
-        return page
+    def navigate_to_workspace(self, page: GuiPage):
+        result = self.workspace_controller.navigate_to(page)
+        page_index = self.workspace_page_indexes[result.state.current_page]
+        self.pages.setCurrentIndex(page_index)
 
     def create_portfolio_page(self):
         page = QWidget()
@@ -141,7 +138,9 @@ class OrionWindow(QMainWindow):
 
         self.portfolio_label = QLabel(self.format_portfolio())
         self.portfolio_label.setWordWrap(True)
-        self.portfolio_label.setStyleSheet(self.theme.muted_text_style() + "; padding: 20px;")
+        self.portfolio_label.setStyleSheet(
+            self.theme.muted_text_style() + "; padding: 20px;"
+        )
 
         layout.addWidget(title)
         layout.addWidget(self.portfolio_label)
@@ -159,7 +158,9 @@ class OrionWindow(QMainWindow):
 
         self.history_label = QLabel(self.format_trade_history())
         self.history_label.setWordWrap(True)
-        self.history_label.setStyleSheet(self.theme.muted_text_style() + "; padding: 20px;")
+        self.history_label.setStyleSheet(
+            self.theme.muted_text_style() + "; padding: 20px;"
+        )
 
         layout.addWidget(title)
         layout.addWidget(self.history_label)
@@ -187,7 +188,7 @@ class OrionWindow(QMainWindow):
 
     def scan_market(self):
         try:
-            self.advice_label.setText("Orion analyseert de markt...")
+            self.dashboard_page.set_status_text("Orion analyseert de markt...")
 
             trade_plans = self.scanner_service.scan(
                 symbols=None,
@@ -201,7 +202,7 @@ class OrionWindow(QMainWindow):
                 execute=False,
             )
 
-            self.advice_label.setText(
+            self.dashboard_page.set_advice_html(
                 self.format_advice(
                     trade_plans=trade_plans,
                     managed_trades=managed_trades,
@@ -212,7 +213,7 @@ class OrionWindow(QMainWindow):
             self.history_label.setText(self.format_trade_history())
 
         except Exception as error:
-            self.advice_label.setText(f"Fout tijdens scan: {error}")
+            self.dashboard_page.set_status_text(f"Fout tijdens scan: {error}")
 
     def format_advice(self, trade_plans, managed_trades):
         buy_plans = [p for p in trade_plans if str(p.action).upper() == "BUY"]
@@ -340,7 +341,7 @@ class OrionWindow(QMainWindow):
         <div style="background:#1f2937; border-radius:16px; padding:24px;">
             <h2>Actieve instellingen</h2>
             <p><b>Universe:</b> {universe.name}</p>
-           <p><b>Aantal symbols:</b> {len(self.universe_manager.get_symbols(self.active_universe))}</p>
+            <p><b>Aantal symbols:</b> {len(self.universe_manager.get_symbols(self.active_universe))}</p>
             <p><b>Max positiegrootte:</b> {self.portfolio.max_position_percentage * 100:.0f}% van cash</p>
             <p><b>Handelsstijl:</b> Swing trades van enkele uren tot enkele dagen.</p>
         </div>
@@ -355,22 +356,6 @@ class OrionWindow(QMainWindow):
         }
         QLabel {
             color: #f9fafb;
-        }
-        """
-
-    def primary_button_style(self):
-        return """
-        QPushButton {
-            background-color: #2563eb;
-            color: white;
-            font-size: 16px;
-            font-weight: bold;
-            padding: 14px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        QPushButton:hover {
-            background-color: #1d4ed8;
         }
         """
 
