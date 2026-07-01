@@ -37,9 +37,27 @@ class DashboardPresenter:
                         GuiMetric("Trades", str(performance_result.total_trades)),
                         GuiMetric("Win Rate", f"{performance_result.win_rate:.2f}%"),
                         GuiMetric("Net P/L", f"{performance_result.net_pnl:.2f}"),
-                        GuiMetric("Max Drawdown", f"{performance_result.max_drawdown_pct:.2f}%"),
+                        GuiMetric(
+                            "Max Drawdown",
+                            f"{performance_result.max_drawdown_pct:.2f}%",
+                        ),
                     ],
                 )
             )
 
         return sections
+
+    def create_trade_advice_summary(self, trade_plans) -> GuiSection:
+        buy_count = len([p for p in trade_plans if str(p.action).upper() == "BUY"])
+        hold_count = len([p for p in trade_plans if str(p.action).upper() == "HOLD"])
+        sell_count = len([p for p in trade_plans if str(p.action).upper() == "SELL"])
+
+        return GuiSection(
+            title="Trade Advice Summary",
+            description="Display-only summary of deterministic trade plan actions.",
+            metrics=[
+                GuiMetric("Buy", str(buy_count)),
+                GuiMetric("Hold", str(hold_count)),
+                GuiMetric("Sell", str(sell_count)),
+            ],
+        )
