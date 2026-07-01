@@ -80,3 +80,26 @@ def test_gui_shell_builds_unified_dashboard_without_changing_engine_outputs():
     assert state.status_message == "Unified dashboard updated"
     assert state.sections[0].title == "Unified Dashboard Summary"
     assert any(section.title == "Performance Dashboard" for section in state.sections)
+
+from types import SimpleNamespace
+
+
+def test_dashboard_composer_can_include_scanner_sections():
+    scanner_result = SimpleNamespace(
+        opportunities=[SimpleNamespace(symbol="NVDA", action="BUY", confidence=91.0, reason="High quality setup")],
+        status=SimpleNamespace(
+            universe_count=500,
+            quotes_count=450,
+            technical_results_count=25,
+            opportunities_count=1,
+            messages=[],
+        ),
+    )
+
+    sections = DashboardComposer().compose(scanner_result=scanner_result)
+    titles = [section.title for section in sections]
+
+    assert sections[0].metrics[0].value == "Scanner"
+    assert sections[0].metrics[1].value == "1"
+    assert "Scanner Summary" in titles
+    assert "Top Opportunities" in titles

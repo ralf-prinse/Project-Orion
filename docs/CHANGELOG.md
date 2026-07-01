@@ -1,5 +1,37 @@
 # PROJECT ORION
 
+## v0.9.8-alpha
+
+### Added
+
+* Added GUI Scanner Dashboard Integration.
+* Added `ScannerPresenter` for display-only scanner dashboard sections.
+* Extended `DashboardComposer` with scanner result support.
+* Extended `GuiShell` with `build_scanner_dashboard()`.
+* Updated GUI application version to `v0.9.8-alpha`.
+* Added dedicated scanner presenter and integration unit tests.
+
+### Architecture
+
+Sprint 9.8 connects scanner outputs to the Professional GUI Foundation without introducing scanner, market-data, ranking or analysis logic into the GUI.
+
+The GUI receives completed scanner result objects and projects them into `GuiSection` and `GuiMetric` view models. The presenter uses presentation-safe access so importing GUI modules does not instantiate market-data providers or external data dependencies.
+
+This preserves provider independence and keeps the GUI strictly display-only while preparing Orion for a professional scanner dashboard and top-opportunities workflow.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/ui`
+* `tests`
+
+195 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
+---
+
 ## v0.9.7-alpha
 
 ### Added

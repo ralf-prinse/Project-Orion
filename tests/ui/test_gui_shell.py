@@ -51,3 +51,34 @@ def test_gui_shell_sets_sections_without_calculating_trading_logic():
     state = shell.set_sections(sections)
 
     assert state.sections == sections
+
+from types import SimpleNamespace
+
+
+def test_gui_shell_builds_scanner_dashboard_without_scanning():
+    shell = GuiShell()
+    scanner_result = SimpleNamespace(
+        opportunities=[SimpleNamespace(symbol="MSFT", action="HOLD", confidence=72.0, reason="Watchlist candidate")],
+        status=SimpleNamespace(universe_count=20, quotes_count=18, opportunities_count=1, messages=[]),
+    )
+
+    state = shell.build_scanner_dashboard(scanner_result)
+
+    assert state.current_page == GuiPage.SCANNER
+    assert state.status_message == "Scanner dashboard updated"
+    assert state.sections[0].title == "Scanner Summary"
+    assert state.sections[3].metrics[0].value == "MSFT"
+
+
+def test_gui_shell_unified_dashboard_accepts_scanner_result():
+    shell = GuiShell()
+    scanner_result = SimpleNamespace(
+        opportunities=[],
+        status=SimpleNamespace(universe_count=0, messages=["Geen symbolen ontvangen."]),
+    )
+
+    state = shell.build_unified_dashboard(scanner_result=scanner_result)
+
+    assert state.current_page == GuiPage.DASHBOARD
+    assert state.sections[0].metrics[0].value == "Scanner"
+    assert any(section.title == "Scanner Diagnostics" for section in state.sections)

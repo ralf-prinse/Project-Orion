@@ -2,7 +2,7 @@
 
 # PROJECT STATUS
 
-Project Version: v0.9.7-alpha
+Project Version: v0.9.8-alpha
 
 **Document Version:** 2.0
 
@@ -12,7 +12,7 @@ Project Version: v0.9.7-alpha
 
 Current Milestone
 
-✅ Sprint 9.7 – Unified GUI Dashboard Composition completed
+✅ Sprint 9.8 – GUI Scanner Dashboard Integration completed
 ---
 
 # 1. Executive Summary
@@ -420,7 +420,7 @@ Each sprint introduces one clearly defined capability while preserving the exist
 
 ## Next Sprint
 
-#### Sprint 9.7 — Scanner-to-GUI Integration
+#### Sprint 9.8 — GUI Scanner Dashboard Integration
 
 Objectives:
 

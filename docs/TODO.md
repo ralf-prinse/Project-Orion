@@ -1,6 +1,6 @@
 Current Sprint
 
-✅ Sprint 9.7 — Unified GUI Dashboard Composition
+✅ Sprint 9.8 — GUI Scanner Dashboard Integration
 
 
 Recently Completed
@@ -47,17 +47,19 @@ Recently Completed
 
 ✅ Sprint 9.7 — Unified GUI Dashboard Composition
 
+✅ Sprint 9.8 — GUI Scanner Dashboard Integration
+
 
 Next Sprint
 
-☐ Sprint 9.8 — Scanner-to-GUI Integration
+☐ Sprint 9.9 — GUI Portfolio Dashboard Integration
 
 Planned objectives:
 
-- Add scan result GUI presenter
-- Prepare scanner dashboard sections
-- Connect scan outputs to display-only GUI sections
-- Preserve provider independence
+- Add portfolio dashboard presenter
+- Prepare portfolio state display sections
+- Connect portfolio outputs to display-only GUI sections
+- Preserve portfolio/GUI separation
 - Full unit test coverage
 
 
