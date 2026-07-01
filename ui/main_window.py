@@ -138,26 +138,6 @@ class OrionWindow(QMainWindow):
         self.pages.setCurrentIndex(page_index)
 
 
-    def create_history_page(self):
-        page = QWidget()
-        layout = QVBoxLayout()
-        layout.setAlignment(Qt.AlignTop)
-
-        title = QLabel("Historie")
-        title.setStyleSheet(self.theme.title_style() + "; margin-top: 25px;")
-
-        self.history_label = QLabel(self.format_trade_history())
-        self.history_label.setWordWrap(True)
-        self.history_label.setStyleSheet(
-            self.theme.muted_text_style() + "; padding: 20px;"
-        )
-
-        layout.addWidget(title)
-        layout.addWidget(self.history_label)
-
-        page.setLayout(layout)
-        return page
-
     
 
     def scan_market(self):
