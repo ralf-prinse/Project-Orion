@@ -18,8 +18,10 @@ from services.universe_manager import UniverseManager
 from ui.design import ORION_DARK_THEME
 from ui.foundation.models import GuiPage
 from ui.workspace.dashboard_workspace import DashboardWorkspace
+from ui.workspace.history_workspace import HistoryWorkspace
 from ui.workspace.portfolio_workspace import PortfolioWorkspace
 from ui.workspace.scanner_workspace import ScannerWorkspace
+from ui.workspace.settings_workspace import SettingsWorkspace
 from ui.workspace.workspace_controller import WorkspaceController
 
 
@@ -69,8 +71,9 @@ class OrionWindow(QMainWindow):
         )
         self.scanner_page = ScannerWorkspace(theme=self.theme)
         self.portfolio_page = PortfolioWorkspace(theme=self.theme)
-        self.history_page = self.create_history_page()
-        self.settings_page = self.create_settings_page()
+        self.history_page = HistoryWorkspace(theme=self.theme)
+        self.settings_page = SettingsWorkspace(theme=self.theme)
+        self.settings_page.set_settings(self.format_settings())
 
         self.pages.addWidget(self.dashboard_page)
         self.pages.addWidget(self.scanner_page)
@@ -155,23 +158,7 @@ class OrionWindow(QMainWindow):
         page.setLayout(layout)
         return page
 
-    def create_settings_page(self):
-        page = QWidget()
-        layout = QVBoxLayout()
-        layout.setAlignment(Qt.AlignTop)
-
-        title = QLabel("Instellingen")
-        title.setStyleSheet(self.theme.title_style() + "; margin-top: 25px;")
-
-        body = QLabel(self.format_settings())
-        body.setWordWrap(True)
-        body.setStyleSheet(self.theme.muted_text_style() + "; padding: 20px;")
-
-        layout.addWidget(title)
-        layout.addWidget(body)
-
-        page.setLayout(layout)
-        return page
+    
 
     def scan_market(self):
         try:
@@ -204,7 +191,7 @@ class OrionWindow(QMainWindow):
                 )
             )
             self.portfolio_page.set_overview(self.format_portfolio())
-            self.history_label.setText(self.format_trade_history())
+            self.history_page.set_history(self.format_trade_history())
 
         except Exception as error:
             self.dashboard_page.set_status_text(f"Fout tijdens scan: {error}")
