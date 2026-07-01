@@ -1,5 +1,34 @@
 # CHANGELOG
 
+## v1.0.11-alpha
+
+### Added
+
+* Added central `core.configuration` package.
+* Added `OrionConfiguration` profile model.
+* Added scan, trading-risk, planner and presentation profile sections.
+* Added `ConfigurationValidator` and structured validation result.
+* Added `ConfigurationProfileRegistry` with conservative, balanced and aggressive swing profiles.
+* Added `ConfigurationService` for JSON loading, saving and validation.
+* Added dedicated configuration unit tests.
+
+### Architecture
+
+Sprint 10.11 introduces a central configuration foundation for Orion. Configuration is now grouped into deterministic user-facing profiles instead of scattered primitive values. The configuration layer does not calculate indicators, generate signals, make decisions, size positions, manage risk or plan trades. It only supplies validated preferences that downstream deterministic services may consume.
+
+This prepares Orion for GUI settings, CLI profiles, future scheduler support and release-ready user configuration without weakening the separation between orchestration, services and domain logic.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/core`
+* `tests`
+
+275 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
 ## v1.0.10-alpha
 
 ### Added

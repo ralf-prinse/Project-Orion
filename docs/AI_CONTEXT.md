@@ -898,3 +898,10 @@ Implemented a step-driven orchestration integration layer:
 Architectural rule: orchestration steps may adapt existing services or engines, but must not move domain calculations, trading decisions, provider logic, portfolio logic, risk logic, AI logic or GUI rendering into `core/orchestration`.
 
 Regression status: 261 tests passed.
+
+
+---
+
+## Sprint 10.11 Configuration Framework Foundation
+
+Project Orion now includes a central `core.configuration` package with validated configuration profiles. The framework supplies deterministic user preferences for scan execution, trading risk, trade planning and presentation. Configuration remains infrastructure only and must not contain trading logic, risk decisions, signal generation or analysis calculations.

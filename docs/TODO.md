@@ -1,9 +1,23 @@
 Current Sprint
 
-✅ Sprint 10.10 — Scan Orchestrator Service Integration
+✅ Sprint 10.11 — Configuration Framework Foundation
 
 
 Recently Completed
+
+
+✅ Sprint 10.11 — Configuration Framework Foundation
+
+Completed objectives:
+
+- Added central configuration package
+- Added OrionConfiguration profile model
+- Added scan, trading-risk, planner and presentation configuration sections
+- Added deterministic configuration validation
+- Added built-in conservative, balanced and aggressive swing profiles
+- Added JSON load/save service
+- Added full unit test coverage
+
 
 
 ✅ Sprint 10.9 — Scan Orchestrator Foundation
