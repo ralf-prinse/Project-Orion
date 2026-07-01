@@ -1,5 +1,6 @@
 from services.ai.models import AIExplanationResult
 from services.paper_trading.models import PaperAccount, PaperTradingResult
+from services.decisions.models import DecisionAction, DecisionResult
 from services.performance.models import PerformanceResult
 from services.portfolio.models import PortfolioPosition, PortfolioResult, PortfolioState
 from services.planner.models import TradePlanResult
@@ -157,3 +158,21 @@ def test_dashboard_composer_can_include_backtesting_sections():
     assert sections[0].metrics[1].value == "1"
     assert "Backtesting Dashboard" in titles
     assert "Backtest Trade Statistics" in titles
+
+
+def test_dashboard_composer_can_include_decision_sections():
+    decision = DecisionResult(
+        symbol="AAPL",
+        action=DecisionAction.BUY,
+        confidence=90,
+        reasons=["All deterministic validations passed"],
+    )
+
+    sections = DashboardComposer().compose(decision_result=decision)
+    titles = [section.title for section in sections]
+
+    assert sections[0].metrics[0].value == "Decisions"
+    assert sections[0].metrics[1].value == "1"
+    assert "Decision Dashboard" in titles
+    assert "Decision Position Sizing" in titles
+    assert "Decision Diagnostics" in titles

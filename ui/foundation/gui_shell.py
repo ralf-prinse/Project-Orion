@@ -1,8 +1,10 @@
 from services.ai.models import AIExplanationResult
 from services.backtesting.models import BacktestResult
+from services.decisions.models import DecisionResult
 from ui.foundation.backtesting_presenter import BacktestingPresenter
 from ui.foundation.dashboard_composer import DashboardComposer
 from ui.foundation.dashboard_presenter import DashboardPresenter
+from ui.foundation.decision_presenter import DecisionPresenter
 from ui.foundation.explanation_presenter import ExplanationPresenter
 from services.performance.models import PerformanceResult
 from services.paper_trading.models import PaperTradingResult
@@ -39,6 +41,7 @@ class GuiShell:
         trade_plan_presenter: TradePlanPresenter | None = None,
         scanner_presenter: ScannerPresenter | None = None,
         portfolio_presenter: PortfolioPresenter | None = None,
+        decision_presenter: DecisionPresenter | None = None,
         dashboard_composer: DashboardComposer | None = None,
     ):
         self.config = config or GuiApplicationConfig()
@@ -53,6 +56,7 @@ class GuiShell:
         self.trade_plan_presenter = trade_plan_presenter or TradePlanPresenter()
         self.scanner_presenter = scanner_presenter or ScannerPresenter()
         self.portfolio_presenter = portfolio_presenter or PortfolioPresenter()
+        self.decision_presenter = decision_presenter or DecisionPresenter()
         self.dashboard_composer = dashboard_composer or DashboardComposer(
             performance_presenter=self.performance_dashboard_presenter,
             backtesting_presenter=self.backtesting_presenter,
@@ -61,6 +65,7 @@ class GuiShell:
             explanation_presenter=self.explanation_presenter,
             scanner_presenter=self.scanner_presenter,
             portfolio_presenter=self.portfolio_presenter,
+            decision_presenter=self.decision_presenter,
         )
         self.state = GuiShellState(
             current_page=self._resolve_initial_page(self.config.default_page),
@@ -120,6 +125,13 @@ class GuiShell:
         self.state.status_message = "Trade plan dashboard updated"
         return self.state
 
+
+    def build_decision_dashboard(self, decision_result: DecisionResult) -> GuiShellState:
+        self.state.sections = self.decision_presenter.create_sections(decision_result)
+        self.state.current_page = GuiPage.DECISIONS
+        self.state.status_message = "Decision dashboard updated"
+        return self.state
+
     def build_scanner_dashboard(self, scanner_result: Any) -> GuiShellState:
         self.state.sections = self.scanner_presenter.create_sections(scanner_result)
         self.state.current_page = GuiPage.SCANNER
@@ -149,6 +161,7 @@ class GuiShell:
         scanner_result: Any | None = None,
         portfolio_state: PortfolioState | None = None,
         portfolio_result: PortfolioResult | None = None,
+        decision_result: DecisionResult | None = None,
     ) -> GuiShellState:
         self.state.sections = self.dashboard_composer.compose(
             performance_result=performance_result,
@@ -159,6 +172,7 @@ class GuiShell:
             scanner_result=scanner_result,
             portfolio_state=portfolio_state,
             portfolio_result=portfolio_result,
+            decision_result=decision_result,
         )
         self.state.current_page = GuiPage.DASHBOARD
         self.state.status_message = "Unified dashboard updated"

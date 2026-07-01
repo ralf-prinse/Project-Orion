@@ -1,5 +1,38 @@
 # PROJECT ORION
 
+## v1.0.2-alpha
+
+### Added
+
+* Added GUI Decision Dashboard Integration.
+* Added `DecisionPresenter` for display-only decision summary, position sizing and diagnostics sections.
+* Added `GuiPage.DECISIONS` and Decisions navigation item.
+* Integrated `DecisionResult` output into `DashboardComposer`.
+* Added `GuiShell.build_decision_dashboard()`.
+* Updated GUI application version to `v1.0.2-alpha`.
+* Added dedicated decision presenter, dashboard composer, navigation and shell unit tests.
+
+### Architecture
+
+Sprint 10.2 connects Decision Layer outputs to the Professional GUI Foundation without introducing signal validation, portfolio validation, risk validation, position sizing calculation or decision assembly logic into the GUI.
+
+The GUI receives completed `DecisionResult` objects and projects them into stable `GuiSection` and `GuiMetric` view models. Decision logic remains inside `services/decisions`, while the GUI remains strictly display-only.
+
+This completes the core deterministic decision presentation workflow inside the desktop application.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/ui`
+* `tests`
+
+216 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
+---
+
 ## v1.0.1-alpha
 
 ### Added

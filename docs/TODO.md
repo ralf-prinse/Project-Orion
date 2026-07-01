@@ -1,6 +1,6 @@
 Current Sprint
 
-✅ Sprint 10.1 — GUI Backtesting Dashboard Integration
+✅ Sprint 10.2 — GUI Decision Dashboard Integration
 
 
 Recently Completed
@@ -49,64 +49,38 @@ Recently Completed
 
 ✅ Sprint 9.8 — GUI Scanner Dashboard Integration
 
+✅ Sprint 9.9 — GUI Portfolio Dashboard Integration
+
+✅ Sprint 10.0 — GUI Risk Dashboard Integration
+
 ✅ Sprint 10.1 — GUI Backtesting Dashboard Integration
 
+✅ Sprint 10.2 — GUI Decision Dashboard Integration
 
-Next Sprint
-
-✅ Sprint 10.1 — GUI Backtesting Dashboard Integration
 
 Completed objectives:
 
-- Added BacktestingPresenter
-- Added deterministic backtest summary sections
-- Added deterministic backtest trade statistics sections
-- Added display-only backtest trade log sections
-- Added diagnostics for backtesting warnings and reasons
-- Integrated backtest output into the unified dashboard composer
-- Added GUI shell backtesting dashboard builder
-- Preserved strict GUI/backtesting separation
+- Added DecisionPresenter
+- Added deterministic decision summary sections
+- Added deterministic decision position sizing sections
+- Added diagnostics for decision reasons, warnings and sizing warnings
+- Added Decisions navigation page
+- Integrated DecisionResult into the unified dashboard composer
+- Added GUI shell decision dashboard builder
+- Preserved strict GUI/Decision Layer separation
 - Added full unit test coverage
 
 
 Next Sprint
 
-☐ Sprint 10.2 — GUI Settings Foundation
+☐ Sprint 10.3 — GUI Settings Foundation
 
 Planned objectives:
 
 - Add settings page presenter
 - Prepare deterministic configuration display sections
 - Keep configuration editing separate from trading engines
-- Preserve GUI presentation-only responsibility
-- Full unit test coverage
-
-
-Upcoming Roadmap
-
-✅ Portfolio Engine
-
-✅ Risk Manager
-
-✅ Trade Planner
-
-☐ Earnings Risk Analyzer
-
-☐ Sector Exposure Analyzer
-
-✅ Paper Trading Engine
-
-✅ Performance Analytics
-
-☐ Broker Integration
-
-✅ Professional Desktop GUI Foundation
-
-✅ AI Explanation Layer
-
-✅ GUI Trade Planner Integration
-
-✅ GUI Risk Dashboard Integration
+- Add full unit test coverage
 
 
 Technical Debt
@@ -120,5 +94,3 @@ Current architectural improvements under consideration:
 - Integrate Explainability Framework into Signal Layer
 - Replace free-text reasons with structured ExplanationItems
 - Harmonise naming across all processing layers
-- Consider moving position sizing configuration to a dedicated strategy profile module
-- Consider structured trade plan explanations using ExplanationItems

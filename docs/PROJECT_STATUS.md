@@ -2,7 +2,7 @@
 
 # PROJECT STATUS
 
-Project Version: v1.0.1-alpha
+Project Version: v1.0.2-alpha
 
 **Document Version:** 2.0
 
@@ -12,7 +12,7 @@ Project Version: v1.0.1-alpha
 
 Current Milestone
 
-✅ Sprint 10.1 – GUI Backtesting Dashboard Integration completed
+✅ Sprint 10.2 – GUI Decision Dashboard Integration completed
 ---
 
 # 1. Executive Summary
@@ -57,6 +57,7 @@ Current implementation status:
 - ✅ Portfolio-to-GUI Integration
 - ✅ Risk-to-GUI Integration
 - ✅ Backtesting-to-GUI Integration
+- ✅ Decision-to-GUI Integration
 ---
 # 2. Current Architecture
 

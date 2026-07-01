@@ -23,6 +23,7 @@ def test_navigation_registry_contains_known_page():
 
     assert registry.contains_page(GuiPage.DASHBOARD) is True
     assert registry.contains_page(GuiPage.PAPER_TRADING) is True
+    assert registry.contains_page(GuiPage.DECISIONS) is True
 
 
 def test_navigation_registry_default_page_uses_first_ordered_item():
