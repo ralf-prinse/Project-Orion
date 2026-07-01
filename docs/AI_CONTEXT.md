@@ -2,7 +2,7 @@
 
 # AI_CONTEXT
 
-**Version:** v0.9.0-alpha
+**Version:** v0.9.2-alpha
 
 **Document Version:** 2.0
 
@@ -331,7 +331,7 @@ No sprint is considered complete before all of these steps have been finished.
 
 ## Current Version
 
-Project Orion v0.9.1-alpha
+Project Orion v0.9.2-alpha
 
 ---
 
@@ -416,6 +416,22 @@ Implemented:
 - ExplanationReport
 
 The Explainability Framework is reusable across all processing layers and forms the foundation for future AI explanations, logging, reporting and audit trails.
+
+---
+
+### AI Explanation Layer
+
+Implemented:
+
+- AIExplanationEngine
+- AIExplanationRegistry
+- BaseAIExplanationAnalyzer
+- AIExplanationContext
+- AIExplanationConfig
+- AIExplanationResult
+- AIExplanationSection
+
+The AI Explanation Layer converts deterministic Orion outputs into structured explanations. It does not make investment decisions and does not call external AI models in the foundation sprint.
 
 ---
 

@@ -1,6 +1,6 @@
 Current Sprint
 
-✅ Sprint 9.1 — Professional Desktop GUI Foundation
+✅ Sprint 9.2 — AI Explanation Layer Foundation
 
 
 Recently Completed
@@ -35,18 +35,19 @@ Recently Completed
 
 ✅ Sprint 9.1 — Professional Desktop GUI Foundation
 
+✅ Sprint 9.2 — AI Explanation Layer Foundation
+
 
 Next Sprint
 
-☐ Sprint 9.2 — AI Explanation Layer
+☐ Sprint 9.3 — GUI Explanation Integration
 
 Planned objectives:
 
-- Introduce deterministic explanation input models
-- Convert engine outputs into AI-ready summaries
-- Keep AI strictly explanation-only
-- Prevent AI from making trading decisions
-- Prepare GUI integration for natural-language explanations
+- Connect AI Explanation Layer to GUI presenters
+- Add explanation-ready dashboard sections
+- Keep GUI display-only
+- Preserve AI explanation-only rule
 - Full unit test coverage
 
 

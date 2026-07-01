@@ -1,5 +1,43 @@
 # PROJECT ORION
 
+## v0.9.2-alpha
+
+### Added
+
+* Added `services/ai` package.
+* Added AI Explanation Layer Foundation.
+* Added `AIExplanationContext`.
+* Added `AIExplanationConfig`.
+* Added `AIExplanationResult`.
+* Added `AIExplanationSection`.
+* Added `ExplanationAudience`.
+* Added `AIExplanationEngine`.
+* Added `AIExplanationRegistry`.
+* Added `BaseAIExplanationAnalyzer`.
+* Added deterministic explanation analyzers for decisions, trade plans, performance analytics and structured explainability reports.
+* Added dedicated AI Explanation Layer unit tests.
+
+### Architecture
+
+Sprint 9.2 introduces the foundation for Orion's AI Explanation Layer.
+
+The layer does not make investment decisions, generate signals, calculate position sizes, approve risk, mutate portfolios, execute trades or call an external AI model. Instead, it converts existing deterministic Orion outputs into structured, reproducible explanation sections and summaries that are safe for GUI display, reporting and future LLM-based natural-language summarisation.
+
+The AI Explanation Layer follows the same registry-driven architecture as the earlier expandable processing layers and uses `AnalyzerRunner` for deterministic orchestration.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/ai`
+* `tests`
+
+169 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
+---
+
 ## v0.9.1-alpha
 
 ### Added
