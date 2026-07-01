@@ -1,5 +1,38 @@
 # PROJECT ORION
 
+## v1.0.4-alpha
+
+### Added
+
+* Added GUI Analysis Dashboard Integration.
+* Added `AnalysisPresenter` for display-only analysis summary, technical score and notes sections.
+* Added `GuiPage.ANALYSIS` and Analysis navigation item.
+* Integrated `AnalysisResult` output into `DashboardComposer`.
+* Added `GuiShell.build_analysis_dashboard()`.
+* Updated GUI application version to `v1.0.4-alpha`.
+* Added dedicated analysis presenter, dashboard composer, navigation and shell unit tests.
+
+### Architecture
+
+Sprint 10.4 connects Analysis Layer outputs to the Professional GUI Foundation without introducing indicator calculations, analyzer orchestration, signal generation or investment decision logic into the GUI.
+
+The GUI receives completed `AnalysisResult` objects and projects them into stable `GuiSection` and `GuiMetric` view models. Technical analysis remains inside `services/analysis`, while the GUI remains strictly display-only.
+
+This completes the core deterministic analysis presentation workflow inside the desktop application.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/ui`
+* `tests`
+
+226 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
+---
+
 ## v1.0.3-alpha
 
 ### Added
