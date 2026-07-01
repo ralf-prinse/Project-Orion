@@ -17,6 +17,7 @@ from services.trade_manager import TradeManager
 from services.universe_manager import UniverseManager
 from ui.design import ORION_DARK_THEME
 from ui.foundation.models import GuiPage
+from ui.foundation.settings_presenter import SettingsPresenter
 from ui.workspace.dashboard_workspace import DashboardWorkspace
 from ui.workspace.history_workspace import HistoryWorkspace
 from ui.workspace.portfolio_workspace import PortfolioWorkspace
@@ -54,6 +55,7 @@ class OrionWindow(QMainWindow):
 
         self.portfolio = self.portfolio_store.load()
         self.active_universe = "swing"
+        self.settings_presenter = SettingsPresenter()
 
         self.workspace_controller = WorkspaceController()
         self.pages = QStackedWidget()
@@ -73,7 +75,17 @@ class OrionWindow(QMainWindow):
         self.portfolio_page = PortfolioWorkspace(theme=self.theme)
         self.history_page = HistoryWorkspace(theme=self.theme)
         self.settings_page = SettingsWorkspace(theme=self.theme)
-        self.settings_page.set_settings(self.format_settings())
+        universe = self.universe_manager.get_universe(self.active_universe)
+
+        self.settings_page.set_settings(
+            self.settings_presenter.create_settings_summary(
+                universe_name=universe.name,
+                symbol_count=len(
+                    self.universe_manager.get_symbols(self.active_universe)
+                ),
+                max_position_percentage=self.portfolio.max_position_percentage,
+            )
+        )
 
         self.pages.addWidget(self.dashboard_page)
         self.pages.addWidget(self.scanner_page)
@@ -296,18 +308,7 @@ class OrionWindow(QMainWindow):
         html += "</div>"
         return html
 
-    def format_settings(self):
-        universe = self.universe_manager.get_universe(self.active_universe)
-
-        return f"""
-        <div style="background:#1f2937; border-radius:16px; padding:24px;">
-            <h2>Actieve instellingen</h2>
-            <p><b>Universe:</b> {universe.name}</p>
-            <p><b>Aantal symbols:</b> {len(self.universe_manager.get_symbols(self.active_universe))}</p>
-            <p><b>Max positiegrootte:</b> {self.portfolio.max_position_percentage * 100:.0f}% van cash</p>
-            <p><b>Handelsstijl:</b> Swing trades van enkele uren tot enkele dagen.</p>
-        </div>
-        """
+    
 
     def stylesheet(self):
         return """
