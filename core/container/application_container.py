@@ -17,6 +17,8 @@ class ApplicationContainer:
     """
 
     EVENT_BUS = "event_bus"
+    EVENT_LOGGING_LISTENER = "event_logging_listener"
+    EVENT_METRICS_LISTENER = "event_metrics_listener"
     SCAN_PIPELINE = "scan_pipeline"
     SCAN_ORCHESTRATOR = "scan_orchestrator"
 
@@ -26,6 +28,12 @@ class ApplicationContainer:
 
     def event_bus(self) -> Any:
         return self.resolve(self.EVENT_BUS)
+
+    def event_logging_listener(self) -> Any:
+        return self.resolve(self.EVENT_LOGGING_LISTENER)
+
+    def event_metrics_listener(self) -> Any:
+        return self.resolve(self.EVENT_METRICS_LISTENER)
 
     def scan_pipeline(self) -> Any:
         return self.resolve(self.SCAN_PIPELINE)
@@ -61,6 +69,18 @@ class ApplicationContainer:
                 self._create_event_bus,
             )
 
+        if not self.registry.is_registered(self.EVENT_LOGGING_LISTENER):
+            self.registry.register_singleton(
+                self.EVENT_LOGGING_LISTENER,
+                self._create_event_logging_listener,
+            )
+
+        if not self.registry.is_registered(self.EVENT_METRICS_LISTENER):
+            self.registry.register_singleton(
+                self.EVENT_METRICS_LISTENER,
+                self._create_event_metrics_listener,
+            )
+
         if not self.registry.is_registered(self.SCAN_PIPELINE):
             self.registry.register_singleton(
                 self.SCAN_PIPELINE,
@@ -74,9 +94,40 @@ class ApplicationContainer:
             )
 
     def _create_event_bus(self) -> Any:
-        from core.events import EventBus
+        from core.events import (
+            EventBus,
+            PipelineFailedEvent,
+            PipelineStepCompletedEvent,
+            PipelineStepStartedEvent,
+            ScanCompletedEvent,
+            ScanStartedEvent,
+        )
 
-        return EventBus()
+        event_bus = EventBus()
+        logging_listener = self.event_logging_listener()
+        metrics_listener = self.event_metrics_listener()
+
+        for event_type in (
+            ScanStartedEvent,
+            PipelineStepStartedEvent,
+            PipelineStepCompletedEvent,
+            PipelineFailedEvent,
+            ScanCompletedEvent,
+        ):
+            event_bus.subscribe(event_type, logging_listener)
+            event_bus.subscribe(event_type, metrics_listener)
+
+        return event_bus
+
+    def _create_event_logging_listener(self) -> Any:
+        from core.events import LoggingListener
+
+        return LoggingListener()
+
+    def _create_event_metrics_listener(self) -> Any:
+        from core.events import MetricsListener
+
+        return MetricsListener()
 
     def _create_scan_pipeline(self) -> Any:
         # Lazy import keeps importing core.container safe in environments where

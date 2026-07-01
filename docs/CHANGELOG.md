@@ -1,3 +1,24 @@
+## v0.10.15-alpha
+
+### Added
+
+* Added `LoggingListener` for deterministic scan lifecycle log entries.
+* Added `MetricsListener` for in-memory scan and pipeline metrics.
+* Added `EventLogEntry` and `StepMetric` support models.
+* Wired default Event Bus listeners through `ApplicationContainer`.
+* Added dedicated listener and container-wiring tests.
+* Added ADR-0006 for event-driven logging and metrics listeners.
+
+### Architecture
+
+The Event Bus is now used by real infrastructure listeners instead of being only a publication mechanism. Logging and metrics remain outside `ScanOrchestrator`, preserving orchestration purity while preparing Orion for future GUI progress, diagnostics, file logging and operational monitoring.
+
+### Validation
+
+Successfully validated through the official regression test suite.
+
+---
+
 ## v0.10.14-alpha
 
 ### Added
