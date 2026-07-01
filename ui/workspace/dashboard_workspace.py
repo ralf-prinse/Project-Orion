@@ -1,6 +1,8 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel, QPushButton, QVBoxLayout, QWidget
 
+from ui.workspace.workspace_panel import WorkspacePanel
+
 
 class DashboardWorkspace(QWidget):
     """
@@ -21,11 +23,28 @@ class DashboardWorkspace(QWidget):
         self.scan_button.clicked.connect(self.on_scan_requested)
         self.scan_button.setStyleSheet(self.primary_button_style())
 
-        self.advice_label = QLabel("Nog geen analyse uitgevoerd.")
-        self.advice_label.setAlignment(Qt.AlignTop)
-        self.advice_label.setWordWrap(True)
-        self.advice_label.setStyleSheet(
-            self.theme.muted_text_style() + "; padding: 20px;"
+        self.market_panel = WorkspacePanel(
+            theme=self.theme,
+            title="Market Overview",
+            body="Nog geen marktupdate beschikbaar.",
+        )
+
+        self.opportunities_panel = WorkspacePanel(
+            theme=self.theme,
+            title="Today's Opportunities",
+            body="Nog geen analyse uitgevoerd.",
+        )
+
+        self.portfolio_panel = WorkspacePanel(
+            theme=self.theme,
+            title="Portfolio Snapshot",
+            body="Portfolio-overzicht wordt later gekoppeld.",
+        )
+
+        self.activity_panel = WorkspacePanel(
+            theme=self.theme,
+            title="Recent Activity",
+            body="Nog geen recente activiteit beschikbaar.",
         )
 
         self._build_layout()
@@ -45,15 +64,24 @@ class DashboardWorkspace(QWidget):
         layout.addWidget(header)
         layout.addWidget(intro)
         layout.addWidget(self.scan_button)
-        layout.addWidget(self.advice_label)
+        layout.addWidget(self.market_panel)
+        layout.addWidget(self.opportunities_panel)
+        layout.addWidget(self.portfolio_panel)
+        layout.addWidget(self.activity_panel)
 
         self.setLayout(layout)
 
     def set_status_text(self, text: str):
-        self.advice_label.setText(text)
+        self.market_panel.set_body(text)
 
     def set_advice_html(self, html: str):
-        self.advice_label.setText(html)
+        self.opportunities_panel.set_body(html)
+
+    def set_portfolio_snapshot(self, html: str):
+        self.portfolio_panel.set_body(html)
+
+    def set_recent_activity(self, html: str):
+        self.activity_panel.set_body(html)
 
     def primary_button_style(self):
         return """
