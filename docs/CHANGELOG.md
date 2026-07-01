@@ -1,5 +1,33 @@
 # CHANGELOG
 
+## v1.0.6-alpha
+
+### Added
+
+* Added `MarketDataPresenter` for GUI market data dashboard sections.
+* Added `GuiPage.MARKET_DATA`.
+* Added Market Data navigation entry.
+* Added GUI shell market data dashboard builder.
+* Added unified dashboard support for market quotes and provider statistics.
+* Added dedicated GUI market data presenter unit tests.
+
+### Architecture
+
+Sprint 10.6 integrates deterministic market data output into the GUI layer while preserving strict separation of responsibilities.
+
+The GUI presents `MarketQuote` values and `MarketDataProviderStats` but never downloads quotes, communicates with providers, validates market data, calculates indicators, generates signals or makes decisions.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/ui`
+* `tests`
+
+237 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
 ## v1.0.5-alpha
 
 ### Added

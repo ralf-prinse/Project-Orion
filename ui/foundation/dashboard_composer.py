@@ -7,9 +7,11 @@ from services.portfolio.models import PortfolioResult, PortfolioState
 from services.performance.models import PerformanceResult
 from services.planner.models import TradePlanResult
 from services.signals.models import SignalResult
+from services.market_data.base_provider import MarketDataProviderStats, MarketQuote
 from typing import Any
 from ui.foundation.analysis_presenter import AnalysisPresenter
 from ui.foundation.indicator_presenter import IndicatorPresenter
+from ui.foundation.market_data_presenter import MarketDataPresenter
 from ui.foundation.backtesting_presenter import BacktestingPresenter
 from ui.foundation.decision_presenter import DecisionPresenter
 from ui.foundation.explanation_presenter import ExplanationPresenter
@@ -44,6 +46,7 @@ class DashboardComposer:
         signal_presenter: SignalPresenter | None = None,
         analysis_presenter: AnalysisPresenter | None = None,
         indicator_presenter: IndicatorPresenter | None = None,
+        market_data_presenter: MarketDataPresenter | None = None,
     ):
         self.performance_presenter = performance_presenter or PerformanceDashboardPresenter()
         self.backtesting_presenter = backtesting_presenter or BacktestingPresenter()
@@ -56,6 +59,7 @@ class DashboardComposer:
         self.signal_presenter = signal_presenter or SignalPresenter()
         self.analysis_presenter = analysis_presenter or AnalysisPresenter()
         self.indicator_presenter = indicator_presenter or IndicatorPresenter()
+        self.market_data_presenter = market_data_presenter or MarketDataPresenter()
 
     def compose(
         self,
@@ -71,6 +75,8 @@ class DashboardComposer:
         signal_result: SignalResult | None = None,
         analysis_result: AnalysisResult | None = None,
         indicator_result: IndicatorResult | None = None,
+        market_quotes: list[MarketQuote] | None = None,
+        quote_stats: MarketDataProviderStats | None = None,
     ) -> list[GuiSection]:
         sections: list[GuiSection] = [
             self._create_summary_section(
@@ -85,8 +91,12 @@ class DashboardComposer:
                 signal_result=signal_result,
                 analysis_result=analysis_result,
                 indicator_result=indicator_result,
+                market_quotes=market_quotes,
             )
         ]
+
+        if market_quotes is not None:
+            sections.extend(self.market_data_presenter.create_sections(market_quotes, quote_stats))
 
         if decision_result is not None:
             sections.extend(self.decision_presenter.create_sections(decision_result))
@@ -141,9 +151,12 @@ class DashboardComposer:
         signal_result: SignalResult | None,
         analysis_result: AnalysisResult | None,
         indicator_result: IndicatorResult | None,
+        market_quotes: list[MarketQuote] | None,
     ) -> GuiSection:
         active_modules = []
 
+        if market_quotes is not None:
+            active_modules.append("Market Data")
         if decision_result is not None:
             active_modules.append("Decisions")
         if analysis_result is not None:

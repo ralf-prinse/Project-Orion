@@ -3,6 +3,7 @@ from ui.foundation.dashboard_presenter import DashboardPresenter
 from ui.foundation.explanation_presenter import ExplanationPresenter
 from ui.foundation.gui_shell import GuiShell
 from ui.foundation.indicator_presenter import IndicatorPresenter
+from ui.foundation.market_data_presenter import MarketDataPresenter
 from ui.foundation.models import (
     GuiApplicationConfig,
     GuiMetric,
@@ -24,6 +25,7 @@ __all__ = [
     "ExplanationPresenter",
     "GuiShell",
     "IndicatorPresenter",
+    "MarketDataPresenter",
     "GuiApplicationConfig",
     "GuiMetric",
     "GuiNavigationItem",

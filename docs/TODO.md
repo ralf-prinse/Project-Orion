@@ -1,6 +1,6 @@
 Current Sprint
 
-✅ Sprint 10.4 — GUI Analysis Dashboard Integration
+✅ Sprint 10.6 — GUI Market Data Dashboard Integration
 
 
 Recently Completed
@@ -63,22 +63,25 @@ Recently Completed
 
 ✅ Sprint 10.5 — GUI Indicator Dashboard Integration
 
+✅ Sprint 10.6 — GUI Market Data Dashboard Integration
+
 
 Completed objectives:
 
-- Added IndicatorPresenter
-- Added deterministic indicator summary section
-- Added trend, momentum, volatility, structure, volume and relative strength indicator sections
-- Added Indicators navigation page
-- Integrated IndicatorResult into the unified dashboard composer
-- Added GUI shell indicator dashboard builder
-- Preserved strict GUI/Indicator Engine separation
+- Added MarketDataPresenter
+- Added deterministic market data summary section
+- Added quote presentation section
+- Added provider statistics presentation section
+- Added Market Data navigation page
+- Integrated market quotes into the unified dashboard composer
+- Added GUI shell market data dashboard builder
+- Preserved strict GUI/Market Data Layer separation
 - Added full unit test coverage
 
 
 Next Sprint
 
-☐ Sprint 10.6 — GUI Settings Foundation
+☐ Sprint 10.7 — GUI Settings Foundation
 
 Planned objectives:
 
