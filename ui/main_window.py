@@ -18,6 +18,7 @@ from services.universe_manager import UniverseManager
 from ui.design import ORION_DARK_THEME
 from ui.foundation.models import GuiPage
 from ui.workspace.dashboard_workspace import DashboardWorkspace
+from ui.workspace.scanner_workspace import ScannerWorkspace
 from ui.workspace.workspace_controller import WorkspaceController
 
 
@@ -55,20 +56,23 @@ class OrionWindow(QMainWindow):
         self.pages = QStackedWidget()
         self.workspace_page_indexes = {
             GuiPage.DASHBOARD: 0,
-            GuiPage.PORTFOLIO: 1,
-            GuiPage.HISTORY: 2,
-            GuiPage.SETTINGS: 3,
+            GuiPage.SCANNER: 1,
+            GuiPage.PORTFOLIO: 2,
+            GuiPage.HISTORY: 3,
+            GuiPage.SETTINGS: 4,
         }
 
         self.dashboard_page = DashboardWorkspace(
             theme=self.theme,
             on_scan_requested=self.scan_market,
         )
+        self.scanner_page = ScannerWorkspace(theme=self.theme)
         self.portfolio_page = self.create_portfolio_page()
         self.history_page = self.create_history_page()
         self.settings_page = self.create_settings_page()
 
         self.pages.addWidget(self.dashboard_page)
+        self.pages.addWidget(self.scanner_page)
         self.pages.addWidget(self.portfolio_page)
         self.pages.addWidget(self.history_page)
         self.pages.addWidget(self.settings_page)
@@ -104,6 +108,7 @@ class OrionWindow(QMainWindow):
 
         buttons = [
             ("Dashboard", GuiPage.DASHBOARD),
+            ("Scanner", GuiPage.SCANNER),
             ("Portfolio", GuiPage.PORTFOLIO),
             ("Historie", GuiPage.HISTORY),
             ("Instellingen", GuiPage.SETTINGS),
