@@ -2,7 +2,7 @@
 
 # AI_CONTEXT
 
-**Version:** v1.0.7-alpha
+**Version:** v1.0.8-alpha
 
 **Document Version:** 2.0
 

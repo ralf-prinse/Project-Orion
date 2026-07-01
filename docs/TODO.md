@@ -1,6 +1,6 @@
 Current Sprint
 
-✅ Sprint 10.7 — GUI Historical Data Dashboard Integration
+✅ Sprint 10.8 — GUI Universe Dashboard Integration
 
 
 Recently Completed

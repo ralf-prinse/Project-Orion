@@ -28,6 +28,7 @@ class NavigationRegistry:
     def _default_items() -> list[GuiNavigationItem]:
         return [
             GuiNavigationItem(GuiPage.DASHBOARD, "Dashboard", 10),
+            GuiNavigationItem(GuiPage.UNIVERSE, "Universe", 11),
             GuiNavigationItem(GuiPage.MARKET_DATA, "Market Data", 12),
             GuiNavigationItem(GuiPage.HISTORICAL_DATA, "Historical Data", 13),
             GuiNavigationItem(GuiPage.DECISIONS, "Decisions", 15),

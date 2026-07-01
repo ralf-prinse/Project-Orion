@@ -9,6 +9,7 @@ from ui.foundation.analysis_presenter import AnalysisPresenter
 from ui.foundation.indicator_presenter import IndicatorPresenter
 from ui.foundation.historical_data_presenter import HistoricalDataPresenter
 from ui.foundation.market_data_presenter import MarketDataPresenter
+from ui.foundation.universe_presenter import UniversePresenter
 from ui.foundation.backtesting_presenter import BacktestingPresenter
 from ui.foundation.dashboard_composer import DashboardComposer
 from ui.foundation.dashboard_presenter import DashboardPresenter
@@ -56,6 +57,7 @@ class GuiShell:
         indicator_presenter: IndicatorPresenter | None = None,
         market_data_presenter: MarketDataPresenter | None = None,
         historical_data_presenter: HistoricalDataPresenter | None = None,
+        universe_presenter: UniversePresenter | None = None,
         dashboard_composer: DashboardComposer | None = None,
     ):
         self.config = config or GuiApplicationConfig()
@@ -76,6 +78,7 @@ class GuiShell:
         self.indicator_presenter = indicator_presenter or IndicatorPresenter()
         self.market_data_presenter = market_data_presenter or MarketDataPresenter()
         self.historical_data_presenter = historical_data_presenter or HistoricalDataPresenter()
+        self.universe_presenter = universe_presenter or UniversePresenter()
         self.dashboard_composer = dashboard_composer or DashboardComposer(
             performance_presenter=self.performance_dashboard_presenter,
             backtesting_presenter=self.backtesting_presenter,
@@ -90,6 +93,7 @@ class GuiShell:
             indicator_presenter=self.indicator_presenter,
             market_data_presenter=self.market_data_presenter,
             historical_data_presenter=self.historical_data_presenter,
+            universe_presenter=self.universe_presenter,
         )
         self.state = GuiShellState(
             current_page=self._resolve_initial_page(self.config.default_page),
@@ -149,6 +153,17 @@ class GuiShell:
         self.state.status_message = "Trade plan dashboard updated"
         return self.state
 
+
+
+    def build_universe_dashboard(
+        self,
+        symbols: list[str],
+        update_stats: dict[str, Any] | None = None,
+    ) -> GuiShellState:
+        self.state.sections = self.universe_presenter.create_sections(symbols, update_stats)
+        self.state.current_page = GuiPage.UNIVERSE
+        self.state.status_message = "Universe dashboard updated"
+        return self.state
 
     def build_market_data_dashboard(
         self,
@@ -234,6 +249,8 @@ class GuiShell:
         quote_stats: MarketDataProviderStats | None = None,
         historical_data: dict[str, Any] | None = None,
         historical_stats: HistoricalProviderStats | None = None,
+        universe_symbols: list[str] | None = None,
+        universe_update_stats: dict[str, Any] | None = None,
     ) -> GuiShellState:
         self.state.sections = self.dashboard_composer.compose(
             performance_result=performance_result,
@@ -252,6 +269,8 @@ class GuiShell:
             quote_stats=quote_stats,
             historical_data=historical_data,
             historical_stats=historical_stats,
+            universe_symbols=universe_symbols,
+            universe_update_stats=universe_update_stats,
         )
         self.state.current_page = GuiPage.DASHBOARD
         self.state.status_message = "Unified dashboard updated"

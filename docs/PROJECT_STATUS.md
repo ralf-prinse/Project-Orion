@@ -2,7 +2,7 @@
 
 # PROJECT STATUS
 
-Project Version: v1.0.7-alpha
+Project Version: v1.0.8-alpha
 
 **Document Version:** 2.0
 
@@ -12,7 +12,7 @@ Project Version: v1.0.7-alpha
 
 Current Milestone
 
-✅ Sprint 10.7 – GUI Historical Data Dashboard Integration completed
+✅ Sprint 10.8 – GUI Universe Dashboard Integration completed
 ---
 
 # 1. Executive Summary

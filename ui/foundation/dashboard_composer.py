@@ -14,6 +14,7 @@ from ui.foundation.analysis_presenter import AnalysisPresenter
 from ui.foundation.indicator_presenter import IndicatorPresenter
 from ui.foundation.historical_data_presenter import HistoricalDataPresenter
 from ui.foundation.market_data_presenter import MarketDataPresenter
+from ui.foundation.universe_presenter import UniversePresenter
 from ui.foundation.backtesting_presenter import BacktestingPresenter
 from ui.foundation.decision_presenter import DecisionPresenter
 from ui.foundation.explanation_presenter import ExplanationPresenter
@@ -50,6 +51,7 @@ class DashboardComposer:
         indicator_presenter: IndicatorPresenter | None = None,
         market_data_presenter: MarketDataPresenter | None = None,
         historical_data_presenter: HistoricalDataPresenter | None = None,
+        universe_presenter: UniversePresenter | None = None,
     ):
         self.performance_presenter = performance_presenter or PerformanceDashboardPresenter()
         self.backtesting_presenter = backtesting_presenter or BacktestingPresenter()
@@ -64,6 +66,7 @@ class DashboardComposer:
         self.indicator_presenter = indicator_presenter or IndicatorPresenter()
         self.market_data_presenter = market_data_presenter or MarketDataPresenter()
         self.historical_data_presenter = historical_data_presenter or HistoricalDataPresenter()
+        self.universe_presenter = universe_presenter or UniversePresenter()
 
     def compose(
         self,
@@ -83,6 +86,8 @@ class DashboardComposer:
         quote_stats: MarketDataProviderStats | None = None,
         historical_data: dict[str, Any] | None = None,
         historical_stats: HistoricalProviderStats | None = None,
+        universe_symbols: list[str] | None = None,
+        universe_update_stats: dict[str, Any] | None = None,
     ) -> list[GuiSection]:
         sections: list[GuiSection] = [
             self._create_summary_section(
@@ -99,8 +104,12 @@ class DashboardComposer:
                 indicator_result=indicator_result,
                 market_quotes=market_quotes,
                 historical_data=historical_data,
+                universe_symbols=universe_symbols,
             )
         ]
+
+        if universe_symbols is not None:
+            sections.extend(self.universe_presenter.create_sections(universe_symbols, universe_update_stats))
 
         if market_quotes is not None:
             sections.extend(self.market_data_presenter.create_sections(market_quotes, quote_stats))
@@ -163,9 +172,12 @@ class DashboardComposer:
         indicator_result: IndicatorResult | None,
         market_quotes: list[MarketQuote] | None,
         historical_data: dict[str, Any] | None,
+        universe_symbols: list[str] | None,
     ) -> GuiSection:
         active_modules = []
 
+        if universe_symbols is not None:
+            active_modules.append("Universe")
         if market_quotes is not None:
             active_modules.append("Market Data")
         if historical_data is not None:

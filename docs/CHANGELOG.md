@@ -1,5 +1,33 @@
 # CHANGELOG
 
+## v1.0.8-alpha
+
+### Added
+
+* Added `UniversePresenter` for GUI universe dashboard sections.
+* Added `GuiPage.UNIVERSE`.
+* Added Universe navigation entry.
+* Added GUI shell universe dashboard builder.
+* Added unified dashboard support for universe symbols and update statistics.
+* Added dedicated GUI universe presenter unit tests.
+
+### Architecture
+
+Sprint 10.8 integrates deterministic Universe Layer output into the GUI layer while preserving strict separation of responsibilities.
+
+The GUI presents already loaded symbols and optional universe update counts but never downloads exchange files, reads universe CSV files, normalizes symbols, filters tickers, scans stocks or performs trading logic.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/ui`
+* `tests`
+
+249 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
 ## v1.0.7-alpha
 
 ### Added
