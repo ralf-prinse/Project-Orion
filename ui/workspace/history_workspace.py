@@ -1,3 +1,4 @@
+from ui.foundation.models import GuiSection
 from ui.workspace.base_workspace import BaseWorkspace
 from ui.workspace.workspace_panel import WorkspacePanel
 
@@ -6,8 +7,8 @@ class HistoryWorkspace(BaseWorkspace):
     """
     Presentation-only history workspace.
 
-    This workspace displays historical trade activity produced by Orion
-    services. It never performs calculations or accesses trading logic.
+    Displays deterministic trade history produced by Orion services.
+    Never performs calculations or interacts with trading logic.
     """
 
     def __init__(self, theme):
@@ -34,6 +35,20 @@ class HistoryWorkspace(BaseWorkspace):
     def _build_layout(self):
         self.add_workspace_widget(self.history_panel)
         self.add_workspace_widget(self.statistics_panel)
+
+    def set_sections(self, sections: list[GuiSection]):
+        self.history_panel.setParent(None)
+        self.statistics_panel.setParent(None)
+
+        for section in sections:
+            self.add_workspace_widget(
+                WorkspacePanel.from_section(
+                    theme=self.theme,
+                    section=section,
+                )
+            )
+
+    # Legacy API (temporary during migration)
 
     def set_history(self, text: str):
         self.history_panel.set_body(text)

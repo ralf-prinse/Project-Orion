@@ -16,6 +16,7 @@ from services.trade_history_store import TradeHistoryStore
 from services.trade_manager import TradeManager
 from services.universe_manager import UniverseManager
 from ui.design import ORION_DARK_THEME
+from ui.foundation.history_presenter import HistoryPresenter
 from ui.foundation.models import GuiPage
 from ui.foundation.portfolio_presenter import PortfolioPresenter
 from ui.foundation.settings_presenter import SettingsPresenter
@@ -56,8 +57,10 @@ class OrionWindow(QMainWindow):
 
         self.portfolio = self.portfolio_store.load()
         self.active_universe = "swing"
-        self.settings_presenter = SettingsPresenter()
+
+        self.history_presenter = HistoryPresenter()
         self.portfolio_presenter = PortfolioPresenter()
+        self.settings_presenter = SettingsPresenter()
 
         self.workspace_controller = WorkspaceController()
         self.pages = QStackedWidget()
@@ -77,6 +80,11 @@ class OrionWindow(QMainWindow):
         self.portfolio_page = PortfolioWorkspace(theme=self.theme)
         self.history_page = HistoryWorkspace(theme=self.theme)
         self.settings_page = SettingsWorkspace(theme=self.theme)
+
+        self._initialize_settings_workspace()
+        self._initialize_pages()
+
+    def _initialize_settings_workspace(self):
         universe = self.universe_manager.get_universe(self.active_universe)
 
         self.settings_page.set_settings(
@@ -89,6 +97,7 @@ class OrionWindow(QMainWindow):
             )
         )
 
+    def _initialize_pages(self):
         self.pages.addWidget(self.dashboard_page)
         self.pages.addWidget(self.scanner_page)
         self.pages.addWidget(self.portfolio_page)
@@ -151,14 +160,12 @@ class OrionWindow(QMainWindow):
         page_index = self.workspace_page_indexes[result.state.current_page]
         self.pages.setCurrentIndex(page_index)
 
-
-    
-
     def scan_market(self):
         try:
             self.dashboard_page.set_status_text("Orion analyseert de markt...")
             self.scanner_page.set_status_text("Scanner analyseert de markt...")
             self.scanner_page.set_summary_html("Resultaten worden opgehaald...")
+
             trade_plans = self.scanner_service.scan(
                 symbols=None,
                 portfolio=self.portfolio,
@@ -177,6 +184,7 @@ class OrionWindow(QMainWindow):
                     managed_trades=managed_trades,
                 )
             )
+
             self.scanner_page.set_status_text("Scanneranalyse voltooid.")
             self.scanner_page.set_summary_html(
                 self.format_advice(
@@ -184,15 +192,21 @@ class OrionWindow(QMainWindow):
                     managed_trades=managed_trades,
                 )
             )
+
             self.portfolio_page.set_sections(
                 self.portfolio_presenter.create_sections(self.portfolio)
             )
-            self.history_page.set_history(self.format_trade_history())
+
+            trades = self.trade_history_store.load()
+            self.history_page.set_sections(
+                self.history_presenter.create_sections(trades)
+            )
 
         except Exception as error:
             self.dashboard_page.set_status_text(f"Fout tijdens scan: {error}")
             self.scanner_page.set_status_text("Scanneranalyse mislukt.")
             self.scanner_page.set_summary_html(f"Fout tijdens scan: {error}")
+
     def format_advice(self, trade_plans, managed_trades):
         buy_plans = [p for p in trade_plans if str(p.action).upper() == "BUY"]
         hold_plans = [p for p in trade_plans if str(p.action).upper() == "HOLD"]
@@ -237,55 +251,6 @@ class OrionWindow(QMainWindow):
             """
 
         return html
-
-    
-
-    def format_trade_history(self):
-        trades = self.trade_history_store.load()
-
-        if not trades:
-            return """
-            <div style="background:#1f2937; border-radius:16px; padding:24px;">
-                <h2>Geen historie</h2>
-                <p>Er zijn nog geen trade-events opgeslagen.</p>
-            </div>
-            """
-
-        html = """
-        <div style="background:#1f2937; border-radius:16px; padding:24px;">
-            <h2>Trade history</h2>
-        """
-
-        for trade in reversed(trades[-20:]):
-            action = trade.get("action", "UNKNOWN")
-            symbol = trade.get("symbol", "")
-            quantity = trade.get("quantity", 0)
-            price = float(trade.get("price", 0.0))
-            timestamp = trade.get("timestamp", "")
-            reason = trade.get("reason", "")
-
-            color = "#9ca3af"
-            if action == "BUY":
-                color = "#22c55e"
-            elif action == "SELL":
-                color = "#f97316"
-            elif action == "HOLD":
-                color = "#3b82f6"
-
-            html += f"""
-            <div style="background:#111827; border-left:5px solid {color}; border-radius:12px; padding:16px; margin:12px 0;">
-                <h3 style="color:{color};">{action} {symbol}</h3>
-                <p><b>Aantal:</b> {quantity}</p>
-                <p><b>Prijs:</b> {price:.2f}</p>
-                <p><b>Tijd:</b> {timestamp}</p>
-                <p>{reason}</p>
-            </div>
-            """
-
-        html += "</div>"
-        return html
-
-    
 
     def stylesheet(self):
         return """
