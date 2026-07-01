@@ -1,10 +1,11 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel, QPushButton, QVBoxLayout, QWidget
 
+from ui.workspace.base_workspace import BaseWorkspace
 from ui.workspace.workspace_panel import WorkspacePanel
 
 
-class DashboardWorkspace(QWidget):
+class DashboardWorkspace(BaseWorkspace):
     """
     Presentation-only dashboard workspace.
 
@@ -14,7 +15,11 @@ class DashboardWorkspace(QWidget):
     """
 
     def __init__(self, theme, on_scan_requested):
-        super().__init__()
+        super().__init__(
+            theme=theme,
+            title="Goedemorgen Ralf.",
+            intro="Orion zoekt alleen naar concrete swing-trades van enkele uren tot enkele dagen.",
+)
 
         self.theme = theme
         self.on_scan_requested = on_scan_requested
@@ -50,24 +55,12 @@ class DashboardWorkspace(QWidget):
         self._build_layout()
 
     def _build_layout(self):
-        layout = QVBoxLayout()
-        layout.setAlignment(Qt.AlignTop)
-
-        header = QLabel("Goedemorgen Ralf.")
-        header.setStyleSheet(self.theme.title_style() + "; margin-top: 25px;")
-
-        intro = QLabel(
-            "Orion zoekt alleen naar concrete swing-trades van enkele uren tot enkele dagen."
-        )
-        intro.setStyleSheet(self.theme.muted_text_style() + "; margin-bottom: 20px;")
-
-        layout.addWidget(header)
-        layout.addWidget(intro)
-        layout.addWidget(self.scan_button)
-        layout.addWidget(self.market_panel)
-        layout.addWidget(self.opportunities_panel)
-        layout.addWidget(self.portfolio_panel)
-        layout.addWidget(self.activity_panel)
+       
+        self.add_workspace_widget(self.scan_button)
+        self.add_workspace_widget(self.market_panel)
+        self.add_workspace_widget(self.opportunities_panel)
+        self.add_workspace_widget(self.portfolio_panel)
+       self.add_workspace_widget(self.activity_panel)
 
         self.setLayout(layout)
 
