@@ -1,6 +1,6 @@
 Current Sprint
 
-✅ Sprint 10.12 — Dependency Injection Foundation
+✅ Sprint 10.13 — Dependency Injection Migration Phase 1
 
 
 Recently Completed

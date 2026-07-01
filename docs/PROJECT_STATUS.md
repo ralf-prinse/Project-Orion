@@ -2,7 +2,7 @@
 
 # PROJECT STATUS
 
-Project Version: v1.0.12-alpha
+Project Version: v1.0.13-alpha
 
 **Document Version:** 2.0
 
@@ -12,7 +12,7 @@ Project Version: v1.0.12-alpha
 
 Current Milestone
 
-✅ Sprint 10.12 – Dependency Injection Foundation completed
+✅ Sprint 10.13 – Dependency Injection Migration Phase 1 completed
 ---
 
 # 1. Executive Summary
@@ -62,7 +62,8 @@ Current implementation status:
 - ✅ Signal-to-GUI Integration
 - ✅ Scan Orchestrator Foundation
 - ✅ Configuration Framework
-- ✅ Dependency Injection Foundation Foundation
+- ✅ Dependency Injection Foundation
+- ✅ Dependency Injection Migration Phase 1
 ---
 # 2. Current Architecture
 

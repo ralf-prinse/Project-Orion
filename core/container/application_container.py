@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Any
 
 from core.container.service_registry import ServiceRegistry
@@ -10,9 +11,9 @@ class ApplicationContainer:
     Composition root for Project Orion.
 
     The container is the only infrastructure component responsible for building
-    application-level services. It starts deliberately small: Sprint 10.12.1
-    centralises construction of the scan pipeline and scan orchestrator without
-    forcing a risky project-wide refactor.
+    application-level services. It remains deliberately explicit: services are
+    registered by name with factories, and callers resolve only the services
+    that are part of the supported application composition.
     """
 
     SCAN_PIPELINE = "scan_pipeline"
@@ -23,10 +24,31 @@ class ApplicationContainer:
         self._register_defaults()
 
     def scan_pipeline(self) -> Any:
-        return self.registry.resolve(self.SCAN_PIPELINE)
+        return self.resolve(self.SCAN_PIPELINE)
 
     def scan_orchestrator(self) -> Any:
-        return self.registry.resolve(self.SCAN_ORCHESTRATOR)
+        return self.resolve(self.SCAN_ORCHESTRATOR)
+
+    def resolve(self, name: str) -> Any:
+        """Resolve a registered application service by name."""
+
+        return self.registry.resolve(name)
+
+    def replace_singleton(self, name: str, factory: Callable[[], Any]) -> None:
+        """
+        Replace a singleton registration.
+
+        This is intentionally exposed for tests and future provider swaps. It
+        keeps replacement logic inside the composition root instead of requiring
+        callers to manipulate registry internals directly.
+        """
+
+        self.registry.replace_singleton(name, factory)
+
+    def replace_transient(self, name: str, factory: Callable[[], Any]) -> None:
+        """Replace a transient registration through the composition root."""
+
+        self.registry.replace_transient(name, factory)
 
     def _register_defaults(self) -> None:
         if not self.registry.is_registered(self.SCAN_PIPELINE):

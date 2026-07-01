@@ -910,3 +910,14 @@ Regression status: 261 tests passed.
 ## Sprint 10.11 Configuration Framework Foundation
 
 Project Orion now includes a central `core.configuration` package with validated configuration profiles. The framework supplies deterministic user preferences for scan execution, trading risk, trade planning and presentation. Configuration remains infrastructure only and must not contain trading logic, risk decisions, signal generation or analysis calculations.
+
+
+---
+
+# Sprint 10.13 Notes
+
+Sprint 10.13 completed Dependency Injection Migration Phase 1.
+
+The `ServiceRegistry` now supports explicit service replacement, removal and singleton cache clearing. The `ApplicationContainer` exposes controlled replacement helpers so tests and future provider swaps do not need to manipulate registry internals directly.
+
+ADR documentation has been introduced under `docs/adr/` to preserve the reasoning behind major architecture decisions.

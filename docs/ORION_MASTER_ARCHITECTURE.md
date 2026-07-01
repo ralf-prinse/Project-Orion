@@ -8598,3 +8598,22 @@ This document should be reviewed and updated whenever major architectural change
 *"Good architecture is not built for today. It is built so that tomorrow's ideas have a place to live."*
 
 **— Project Orion**
+
+
+# Dependency Injection and Composition Root
+
+## Dependency Injection and Composition Root
+
+Project Orion uses an explicit dependency-injection foundation located in `core/container`.
+
+The purpose of this layer is to centralize application-level object construction while avoiding hidden runtime magic. Orion intentionally uses a small custom `ApplicationContainer` and `ServiceRegistry` instead of reflection, decorators or an external IoC framework.
+
+Current responsibilities:
+
+* register application services explicitly;
+* resolve scan-level infrastructure deterministically;
+* support singleton and transient lifetimes;
+* support controlled replacement for tests and future provider swaps;
+* preserve a clear composition root as Orion grows toward v1.0.
+
+The container must not contain trading logic. Business logic remains in services and analyzers.

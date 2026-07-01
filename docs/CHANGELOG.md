@@ -1,3 +1,34 @@
+## v1.0.13-alpha
+
+### Added
+
+* Added explicit service replacement support to `ServiceRegistry`.
+* Added service removal support to `ServiceRegistry`.
+* Added singleton cache reset support to `ServiceRegistry`.
+* Added composition-root replacement helpers to `ApplicationContainer`.
+* Added Architecture Decision Records for AnalyzerRunner, ScanOrchestrator and Dependency Injection.
+* Added dependency map documentation for the current composition root.
+* Added dedicated unit tests for registry replacement, removal and singleton cache behaviour.
+
+### Architecture
+
+Sprint 10.13 matures the Dependency Injection Foundation without introducing a risky project-wide refactor.
+
+The container remains intentionally explicit and small. It supports controlled service replacement for tests, future provider swaps and later plugin architecture while preserving deterministic construction.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/core`
+* `tests`
+
+294 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
+---
+
 # CHANGELOG
 
 ## v1.0.12-alpha

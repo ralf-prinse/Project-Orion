@@ -56,3 +56,48 @@ def test_application_container_preserves_preconfigured_orchestrator_registration
     container = ApplicationContainer(registry=registry)
 
     assert container.scan_orchestrator() is custom_orchestrator
+
+
+def test_application_container_resolves_registered_service_by_name():
+    fake_pipeline = FakePipeline()
+    registry = ServiceRegistry()
+    registry.register_singleton("custom", lambda: fake_pipeline)
+
+    container = ApplicationContainer(registry=registry)
+
+    assert container.resolve("custom") is fake_pipeline
+
+
+def test_application_container_replaces_singleton_registration():
+    first_pipeline = FakePipeline()
+    second_pipeline = FakePipeline()
+    registry = ServiceRegistry()
+    registry.register_singleton(
+        ApplicationContainer.SCAN_PIPELINE,
+        lambda: first_pipeline,
+    )
+    container = ApplicationContainer(registry=registry)
+
+    assert container.scan_pipeline() is first_pipeline
+
+    container.replace_singleton(
+        ApplicationContainer.SCAN_PIPELINE,
+        lambda: second_pipeline,
+    )
+
+    assert container.scan_pipeline() is second_pipeline
+
+
+def test_application_container_replaces_transient_registration():
+    registry = ServiceRegistry()
+    registry.register_singleton("custom", FakePipeline)
+    container = ApplicationContainer(registry=registry)
+
+    container.replace_transient("custom", FakePipeline)
+
+    first = container.resolve("custom")
+    second = container.resolve("custom")
+
+    assert isinstance(first, FakePipeline)
+    assert isinstance(second, FakePipeline)
+    assert first is not second
