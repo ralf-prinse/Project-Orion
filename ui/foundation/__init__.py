@@ -10,6 +10,7 @@ from ui.foundation.models import (
     GuiShellState,
 )
 from ui.foundation.navigation import NavigationRegistry
+from ui.foundation.performance_dashboard_presenter import PerformanceDashboardPresenter
 from ui.foundation.performance_presenter import PerformancePresenter
 
 __all__ = [
@@ -23,5 +24,6 @@ __all__ = [
     "GuiSection",
     "GuiShellState",
     "NavigationRegistry",
+    "PerformanceDashboardPresenter",
     "PerformancePresenter",
 ]

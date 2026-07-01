@@ -1,8 +1,10 @@
 from services.ai.models import AIExplanationResult
 from ui.foundation.dashboard_presenter import DashboardPresenter
 from ui.foundation.explanation_presenter import ExplanationPresenter
+from services.performance.models import PerformanceResult
 from ui.foundation.models import GuiApplicationConfig, GuiPage, GuiSection, GuiShellState
 from ui.foundation.navigation import NavigationRegistry
+from ui.foundation.performance_dashboard_presenter import PerformanceDashboardPresenter
 
 
 class GuiShell:
@@ -20,11 +22,15 @@ class GuiShell:
         navigation_registry: NavigationRegistry | None = None,
         dashboard_presenter: DashboardPresenter | None = None,
         explanation_presenter: ExplanationPresenter | None = None,
+        performance_dashboard_presenter: PerformanceDashboardPresenter | None = None,
     ):
         self.config = config or GuiApplicationConfig()
         self.navigation_registry = navigation_registry or NavigationRegistry()
         self.dashboard_presenter = dashboard_presenter or DashboardPresenter()
         self.explanation_presenter = explanation_presenter or ExplanationPresenter()
+        self.performance_dashboard_presenter = (
+            performance_dashboard_presenter or PerformanceDashboardPresenter()
+        )
         self.state = GuiShellState(
             current_page=self._resolve_initial_page(self.config.default_page),
             navigation_items=self.navigation_registry.get_items(),
@@ -55,6 +61,13 @@ class GuiShell:
         self.state.sections = self.explanation_presenter.create_sections(explanation_result)
         self.state.current_page = GuiPage.DASHBOARD
         self.state.status_message = "Explanation updated"
+        return self.state
+
+
+    def build_performance_dashboard(self, performance_result: PerformanceResult) -> GuiShellState:
+        self.state.sections = self.performance_dashboard_presenter.create_sections(performance_result)
+        self.state.current_page = GuiPage.PERFORMANCE
+        self.state.status_message = "Performance dashboard updated"
         return self.state
 
     def _resolve_initial_page(self, preferred_page: GuiPage) -> GuiPage:

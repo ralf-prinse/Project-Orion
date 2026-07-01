@@ -1,5 +1,36 @@
 # PROJECT ORION
 
+## v0.9.4-alpha
+
+### Added
+
+* Added GUI Performance Dashboard Integration.
+* Added `PerformanceDashboardPresenter` for dashboard-ready performance sections.
+* Extended `GuiShell` with `build_performance_dashboard()`.
+* Updated GUI application version to `v0.9.4-alpha`.
+* Added dedicated performance dashboard presenter unit tests.
+
+### Architecture
+
+Sprint 9.4 connects Performance Analytics to the Professional GUI Foundation without introducing calculations into the GUI.
+
+The GUI receives completed `PerformanceResult` objects from the deterministic Performance Analytics layer and projects them into display-only `GuiSection` and `GuiMetric` view models. The GUI does not calculate win rate, profit factor, expectancy, drawdown, portfolio state, risk approval or trading decisions.
+
+This preserves the boundary between deterministic engines and presentation: services calculate results, presenters format results, and the GUI shell displays them.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/ui`
+* `tests`
+
+177 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
+---
+
 ## v0.9.3-alpha
 
 ### Added

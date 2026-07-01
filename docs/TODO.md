@@ -1,6 +1,6 @@
 Current Sprint
 
-✅ Sprint 9.3 — GUI Explanation Integration
+✅ Sprint 9.4 — GUI Performance Dashboard Integration
 
 
 Recently Completed
@@ -39,16 +39,18 @@ Recently Completed
 
 ✅ Sprint 9.3 — GUI Explanation Integration
 
+✅ Sprint 9.4 — GUI Performance Dashboard Integration
+
 
 Next Sprint
 
-☐ Sprint 9.4 — Scanner-to-GUI Integration
+☐ Sprint 9.5 — Scanner-to-GUI Integration
 
 Planned objectives:
 
 - Add scan result GUI presenter
 - Prepare scanner dashboard sections
-- Keep GUI display-only
+- Connect scan outputs to display-only GUI sections
 - Preserve provider independence
 - Full unit test coverage
 

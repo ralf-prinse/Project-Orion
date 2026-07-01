@@ -66,7 +66,7 @@ class GuiApplicationConfig:
     application_name: str = "Project Orion"
     subtitle: str = "Deterministic Swing Trading Platform"
     default_page: GuiPage = GuiPage.DASHBOARD
-    version: str = "v0.9.3-alpha"
+    version: str = "v0.9.4-alpha"
 
 
 @dataclass
