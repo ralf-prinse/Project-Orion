@@ -331,7 +331,7 @@ No sprint is considered complete before all of these steps have been finished.
 
 ## Current Version
 
-Project Orion v0.9.0-alpha
+Project Orion v0.9.1-alpha
 
 ---
 
@@ -510,6 +510,7 @@ Next roadmap:
 - Backtesting Foundation
 - Paper Trading Engine
 - Performance Analytics
+- Professional Desktop GUI Foundation
 - Broker Integration
 - Professional Desktop GUI
 - Artificial Intelligence Explanation Layer

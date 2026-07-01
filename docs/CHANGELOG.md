@@ -1,3 +1,37 @@
+# PROJECT ORION
+
+## v0.9.1-alpha
+
+### Added
+
+* Added Professional Desktop GUI Foundation.
+* Added toolkit-independent GUI foundation package in `ui/foundation`.
+* Added `GuiPage`, `GuiNavigationItem`, `GuiMetric`, `GuiSection`, `GuiApplicationConfig` and `GuiShellState`.
+* Added deterministic `NavigationRegistry`.
+* Added `GuiShell` for presentation state and navigation orchestration.
+* Added `DashboardPresenter` for display-only dashboard sections.
+* Added `PerformancePresenter` for display-only performance analytics sections.
+* Added dedicated GUI foundation unit tests.
+
+### Architecture
+
+Sprint 9.1 introduces the professional GUI foundation without placing trading logic inside the GUI layer.
+
+The new GUI foundation is intentionally toolkit-independent. PySide6 screens can consume the shell, navigation registry and presenters later, while deterministic market analysis, signal generation, decision making, portfolio management, risk management, backtesting, paper trading and performance calculations remain inside their own service layers.
+
+The GUI layer formats and presents deterministic outputs only.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/ui`
+* `tests`
+
+155 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
 ## v0.9.0-alpha
 
 ### Added

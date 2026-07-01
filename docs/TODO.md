@@ -1,6 +1,6 @@
 Current Sprint
 
-✅ Sprint 9.0 — Performance Analytics
+✅ Sprint 9.1 — Professional Desktop GUI Foundation
 
 
 Recently Completed
@@ -33,19 +33,21 @@ Recently Completed
 
 ✅ Sprint 9.0 — Performance Analytics
 
+✅ Sprint 9.1 — Professional Desktop GUI Foundation
+
 
 Next Sprint
 
-☐ Sprint 9.1 — Professional Desktop GUI Foundation
+☐ Sprint 9.2 — AI Explanation Layer
 
 Planned objectives:
 
-- Introduce GUI application shell
-- Prepare dashboard structure
-- Prepare scan/performance views
-- Keep GUI free of trading logic
-- Prepare integration with deterministic engines
-- Full unit test coverage where practical
+- Introduce deterministic explanation input models
+- Convert engine outputs into AI-ready summaries
+- Keep AI strictly explanation-only
+- Prevent AI from making trading decisions
+- Prepare GUI integration for natural-language explanations
+- Full unit test coverage
 
 
 Upcoming Roadmap
@@ -66,7 +68,7 @@ Upcoming Roadmap
 
 ☐ Broker Integration
 
-☐ Professional Desktop GUI
+✅ Professional Desktop GUI Foundation
 
 ☐ AI Explanation Layer
 
