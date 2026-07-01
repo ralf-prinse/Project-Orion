@@ -4,8 +4,10 @@ from services.backtesting.models import BacktestResult
 from services.decisions.models import DecisionResult
 from services.signals.models import SignalResult
 from services.market_data.base_provider import MarketDataProviderStats, MarketQuote
+from services.market_data.historical_provider import HistoricalProviderStats
 from ui.foundation.analysis_presenter import AnalysisPresenter
 from ui.foundation.indicator_presenter import IndicatorPresenter
+from ui.foundation.historical_data_presenter import HistoricalDataPresenter
 from ui.foundation.market_data_presenter import MarketDataPresenter
 from ui.foundation.backtesting_presenter import BacktestingPresenter
 from ui.foundation.dashboard_composer import DashboardComposer
@@ -53,6 +55,7 @@ class GuiShell:
         analysis_presenter: AnalysisPresenter | None = None,
         indicator_presenter: IndicatorPresenter | None = None,
         market_data_presenter: MarketDataPresenter | None = None,
+        historical_data_presenter: HistoricalDataPresenter | None = None,
         dashboard_composer: DashboardComposer | None = None,
     ):
         self.config = config or GuiApplicationConfig()
@@ -72,6 +75,7 @@ class GuiShell:
         self.analysis_presenter = analysis_presenter or AnalysisPresenter()
         self.indicator_presenter = indicator_presenter or IndicatorPresenter()
         self.market_data_presenter = market_data_presenter or MarketDataPresenter()
+        self.historical_data_presenter = historical_data_presenter or HistoricalDataPresenter()
         self.dashboard_composer = dashboard_composer or DashboardComposer(
             performance_presenter=self.performance_dashboard_presenter,
             backtesting_presenter=self.backtesting_presenter,
@@ -85,6 +89,7 @@ class GuiShell:
             analysis_presenter=self.analysis_presenter,
             indicator_presenter=self.indicator_presenter,
             market_data_presenter=self.market_data_presenter,
+            historical_data_presenter=self.historical_data_presenter,
         )
         self.state = GuiShellState(
             current_page=self._resolve_initial_page(self.config.default_page),
@@ -156,6 +161,17 @@ class GuiShell:
         return self.state
 
 
+
+    def build_historical_data_dashboard(
+        self,
+        histories: dict[str, Any],
+        stats: HistoricalProviderStats | None = None,
+    ) -> GuiShellState:
+        self.state.sections = self.historical_data_presenter.create_sections(histories, stats)
+        self.state.current_page = GuiPage.HISTORICAL_DATA
+        self.state.status_message = "Historical data dashboard updated"
+        return self.state
+
     def build_decision_dashboard(self, decision_result: DecisionResult) -> GuiShellState:
         self.state.sections = self.decision_presenter.create_sections(decision_result)
         self.state.current_page = GuiPage.DECISIONS
@@ -216,6 +232,8 @@ class GuiShell:
         indicator_result: IndicatorResult | None = None,
         market_quotes: list[MarketQuote] | None = None,
         quote_stats: MarketDataProviderStats | None = None,
+        historical_data: dict[str, Any] | None = None,
+        historical_stats: HistoricalProviderStats | None = None,
     ) -> GuiShellState:
         self.state.sections = self.dashboard_composer.compose(
             performance_result=performance_result,
@@ -232,6 +250,8 @@ class GuiShell:
             indicator_result=indicator_result,
             market_quotes=market_quotes,
             quote_stats=quote_stats,
+            historical_data=historical_data,
+            historical_stats=historical_stats,
         )
         self.state.current_page = GuiPage.DASHBOARD
         self.state.status_message = "Unified dashboard updated"

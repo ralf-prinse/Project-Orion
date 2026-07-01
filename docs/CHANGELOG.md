@@ -1,5 +1,33 @@
 # CHANGELOG
 
+## v1.0.7-alpha
+
+### Added
+
+* Added `HistoricalDataPresenter` for GUI historical data dashboard sections.
+* Added `GuiPage.HISTORICAL_DATA`.
+* Added Historical Data navigation entry.
+* Added GUI shell historical data dashboard builder.
+* Added unified dashboard support for historical candle datasets and provider statistics.
+* Added dedicated GUI historical data presenter unit tests.
+
+### Architecture
+
+Sprint 10.7 integrates deterministic historical candle output into the GUI layer while preserving strict separation of responsibilities.
+
+The GUI presents already retrieved historical datasets and `HistoricalProviderStats` but never downloads candles, reads cache files, validates providers, calculates indicators, generates signals or makes decisions.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/ui`
+* `tests`
+
+243 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
 ## v1.0.6-alpha
 
 ### Added

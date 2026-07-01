@@ -1,6 +1,6 @@
 Current Sprint
 
-✅ Sprint 10.6 — GUI Market Data Dashboard Integration
+✅ Sprint 10.7 — GUI Historical Data Dashboard Integration
 
 
 Recently Completed
