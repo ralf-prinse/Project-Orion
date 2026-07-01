@@ -331,7 +331,7 @@ No sprint is considered complete before all of these steps have been finished.
 
 ## Current Version
 
-Project Orion v0.8.5-alpha
+Project Orion v0.8.6-alpha
 
 ---
 
@@ -419,6 +419,29 @@ The Explainability Framework is reusable across all processing layers and forms 
 
 ---
 
+
+### Risk Manager
+
+Implemented:
+
+- RiskManager
+- RiskRegistry
+- BaseRiskAnalyzer
+- RiskProfile
+- RiskContext
+- RiskResult
+
+Current risk analyzers:
+
+- RiskSummaryAnalyzer
+- TradeRiskAnalyzer
+- PortfolioRiskAnalyzer
+- DrawdownAnalyzer
+- CapitalProtectionAnalyzer
+- PositionExposureRiskAnalyzer
+
+The Risk Manager validates capital protection and risk exposure while remaining separate from portfolio management, decision assembly and trade planning.
+
 ## Current Test Status
 
 Current regression status:
@@ -430,7 +453,7 @@ Current regression status:
 
 Current result:
 
-73 passing tests
+86 passing tests
 
 No known regressions.
 
@@ -470,15 +493,18 @@ Objectives:
 
 Risk Manager
 
-Objectives:
+Status: Completed
 
-- portfolio risk
-- position risk
+Implemented:
+
+- portfolio risk validation
+- position risk validation
+- drawdown validation
 - capital protection
 
 ---
 
-Future roadmap:
+Next roadmap:
 
 - Trade Planner
 - Paper Trading

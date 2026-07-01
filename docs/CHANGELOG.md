@@ -1,3 +1,43 @@
+## v0.8.6-alpha
+
+### Added
+
+* Added `services/risk` package.
+* Added `RiskProfile` model.
+* Added `RiskContext` model.
+* Added `RiskResult` model.
+* Added `RiskManager`.
+* Added `RiskRegistry`.
+* Added `BaseRiskAnalyzer`.
+* Added `RiskSummaryAnalyzer`.
+* Added `TradeRiskAnalyzer`.
+* Added `PortfolioRiskAnalyzer`.
+* Added `DrawdownAnalyzer`.
+* Added `CapitalProtectionAnalyzer`.
+* Added `PositionExposureRiskAnalyzer`.
+* Added dedicated Risk Manager unit tests.
+
+### Architecture
+
+Sprint 8.6 introduces a dedicated registry-driven Risk Manager.
+
+The Risk Manager validates proposed trade risk, total portfolio risk, drawdown, minimum cash reserve and position exposure while remaining separate from technical analysis, signal generation, decision assembly, portfolio management, position sizing and trade planning.
+
+The new `RiskResult` model prepares Orion for future integration with the Decision Layer, Portfolio Engine, Trade Planner, GUI, reporting and AI explanation layer.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/risk`
+* `tests`
+
+86 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
+---
+
 ## v0.8.3.3-alpha
 
 ### Added

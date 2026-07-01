@@ -2,7 +2,7 @@
 
 # PROJECT STATUS
 
-Project Version: v0.8.5-alpha
+Project Version: v0.8.6-alpha
 
 **Document Version:** 2.0
 
@@ -12,7 +12,7 @@ Project Version: v0.8.5-alpha
 
 Current Milestone
 
-✅ Sprint 8.5 – Portfolio Engine completed
+✅ Sprint 8.6 – Risk Manager completed
 ---
 
 # 1. Executive Summary
@@ -41,7 +41,7 @@ Current implementation status:
 - ✅ Decision Layer Foundation
 - ✅ Explainability Framework
 - ✅ Portfolio Layer
-- ⏳ Risk Layer
+- ✅ Risk Layer
 - ⏳ Trade Planning
 - ⏳ Artificial Intelligence Layer
 - ⏳ Professional GUI
@@ -107,7 +107,7 @@ Signal Layer
 Decision Layer
 ```
 
-The next major milestone is the implementation of Position Sizing and the Portfolio Engine.
+The next major milestone is the implementation of the Trade Planner.
 ---
 
 ## Completed Infrastructure
@@ -330,6 +330,37 @@ The long-term objective is to transform Orion from a stock scanner into a comple
 This objective is achieved through continuous incremental development rather than large architectural rewrites.
 
 
+
+### Risk Layer
+
+Status: ✅ Completed
+
+Components:
+
+- RiskManager
+- RiskRegistry
+- RiskProfile
+- RiskContext
+- RiskResult
+- BaseRiskAnalyzer
+- RiskSummaryAnalyzer
+- TradeRiskAnalyzer
+- PortfolioRiskAnalyzer
+- DrawdownAnalyzer
+- CapitalProtectionAnalyzer
+- PositionExposureRiskAnalyzer
+
+Current capabilities:
+
+- Deterministic trade-risk validation
+- Portfolio-level risk validation
+- Drawdown validation
+- Capital protection through minimum cash reserve
+- Position exposure risk validation
+- Registry-driven orchestration
+
+The Risk Manager protects capital while remaining fully separate from technical analysis, signal generation, decision assembly, portfolio management, position sizing and trade planning.
+
 # 4. Roadmap
 
 Project Orion follows a strictly incremental development strategy.
@@ -404,11 +435,13 @@ Portfolio Engine
 
 ### Sprint 8.6
 
-Risk Manager
+Risk Manager — ✅ Completed
 
-### Future
+### Next
 
 - Trade Planner
+
+### Future
 - Paper Trading
 - Broker Integration
 - AI Assistant

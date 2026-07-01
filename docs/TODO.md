@@ -1,6 +1,6 @@
 Current Sprint
 
-✅ Sprint 8.5 — Portfolio Engine
+✅ Sprint 8.6 — Risk Manager
 
 
 Recently Completed
@@ -23,17 +23,19 @@ Recently Completed
 
 ✅ Sprint 8.5 — Portfolio Engine
 
+✅ Sprint 8.6 — Risk Manager
+
 
 Next Sprint
 
-☐ Sprint 8.6 — Risk Manager
+☐ Sprint 8.7 — Trade Planner
 
 Planned objectives:
 
-- Introduce portfolio-level risk validation
-- Validate portfolio drawdown and risk exposure
-- Prepare capital protection rules
-- Prepare stop-loss risk integration
+- Introduce Trade Planner package
+- Generate deterministic entry, stop-loss and take-profit plans
+- Integrate position sizing and risk outputs as inputs
+- Prepare trade-plan explainability
 - Full unit test coverage
 
 
@@ -41,7 +43,7 @@ Upcoming Roadmap
 
 ✅ Portfolio Engine
 
-☐ Risk Manager
+✅ Risk Manager
 
 ☐ Earnings Risk Analyzer
 
