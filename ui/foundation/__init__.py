@@ -12,6 +12,7 @@ from ui.foundation.models import (
 from ui.foundation.navigation import NavigationRegistry
 from ui.foundation.performance_dashboard_presenter import PerformanceDashboardPresenter
 from ui.foundation.performance_presenter import PerformancePresenter
+from ui.foundation.portfolio_presenter import PortfolioPresenter
 
 __all__ = [
     "DashboardPresenter",
@@ -26,4 +27,5 @@ __all__ = [
     "NavigationRegistry",
     "PerformanceDashboardPresenter",
     "PerformancePresenter",
+    "PortfolioPresenter",
 ]

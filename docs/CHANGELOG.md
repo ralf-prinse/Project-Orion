@@ -1,5 +1,36 @@
 # PROJECT ORION
 
+## v0.9.9-alpha
+
+### Added
+
+* Added GUI Portfolio Dashboard Integration.
+* Added `PortfolioPresenter` for display-only portfolio account, position and validation sections.
+* Extended `DashboardComposer` with portfolio state and portfolio result support.
+* Updated GUI application version to `v0.9.9-alpha`.
+* Added dedicated portfolio presenter and dashboard integration unit tests.
+
+### Architecture
+
+Sprint 9.9 connects Portfolio Engine outputs to the Professional GUI Foundation without introducing portfolio calculation, exposure validation, position sizing, risk management or trade planning logic into the GUI.
+
+The GUI receives completed `PortfolioState` and `PortfolioResult` objects and projects them into `GuiSection` and `GuiMetric` view models. Portfolio calculations remain inside `services/portfolio`, while the GUI remains strictly display-only.
+
+This completes another key GUI integration step and prepares Orion for a professional portfolio overview workflow.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/ui`
+* `tests`
+
+200 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
+---
+
 ## v0.9.8-alpha
 
 ### Added

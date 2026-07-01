@@ -1,6 +1,6 @@
 Current Sprint
 
-✅ Sprint 9.8 — GUI Scanner Dashboard Integration
+✅ Sprint 9.9 — GUI Portfolio Dashboard Integration
 
 
 Recently Completed
@@ -49,17 +49,19 @@ Recently Completed
 
 ✅ Sprint 9.8 — GUI Scanner Dashboard Integration
 
+✅ Sprint 9.9 — GUI Portfolio Dashboard Integration
+
 
 Next Sprint
 
-☐ Sprint 9.9 — GUI Portfolio Dashboard Integration
+☐ Sprint 10.0 — GUI Risk Dashboard Integration
 
 Planned objectives:
 
-- Add portfolio dashboard presenter
-- Prepare portfolio state display sections
-- Connect portfolio outputs to display-only GUI sections
-- Preserve portfolio/GUI separation
+- Add risk dashboard presenter
+- Prepare risk result display sections
+- Connect risk outputs to display-only GUI sections
+- Preserve risk/GUI separation
 - Full unit test coverage
 
 

@@ -1,5 +1,6 @@
 import pytest
 
+from services.portfolio.models import PortfolioPosition, PortfolioState
 from ui.foundation.gui_shell import GuiShell
 from ui.foundation.models import GuiApplicationConfig, GuiNavigationItem, GuiPage, GuiMetric, GuiSection
 from ui.foundation.navigation import NavigationRegistry
@@ -82,3 +83,25 @@ def test_gui_shell_unified_dashboard_accepts_scanner_result():
     assert state.current_page == GuiPage.DASHBOARD
     assert state.sections[0].metrics[0].value == "Scanner"
     assert any(section.title == "Scanner Diagnostics" for section in state.sections)
+
+
+def test_gui_shell_builds_portfolio_dashboard_without_portfolio_logic():
+    shell = GuiShell()
+    portfolio_state = PortfolioState(
+        cash=3000.0,
+        positions={
+            "AAPL": PortfolioPosition(
+                symbol="AAPL",
+                quantity=2,
+                average_price=150.0,
+                current_price=160.0,
+            )
+        },
+    )
+
+    state = shell.build_portfolio_dashboard(portfolio_state=portfolio_state)
+
+    assert state.current_page == GuiPage.PORTFOLIO
+    assert state.status_message == "Portfolio dashboard updated"
+    assert state.sections[0].title == "Portfolio Account"
+    assert state.sections[1].title == "Open Positions"

@@ -1,11 +1,13 @@
 from services.ai.models import AIExplanationResult
 from services.paper_trading.models import PaperTradingResult
+from services.portfolio.models import PortfolioResult, PortfolioState
 from services.performance.models import PerformanceResult
 from services.planner.models import TradePlanResult
 from typing import Any
 from ui.foundation.explanation_presenter import ExplanationPresenter
 from ui.foundation.models import GuiMetric, GuiSection
 from ui.foundation.paper_trading_presenter import PaperTradingPresenter
+from ui.foundation.portfolio_presenter import PortfolioPresenter
 from ui.foundation.performance_dashboard_presenter import PerformanceDashboardPresenter
 from ui.foundation.scanner_presenter import ScannerPresenter
 from ui.foundation.trade_plan_presenter import TradePlanPresenter
@@ -27,12 +29,14 @@ class DashboardComposer:
         trade_plan_presenter: TradePlanPresenter | None = None,
         explanation_presenter: ExplanationPresenter | None = None,
         scanner_presenter: ScannerPresenter | None = None,
+        portfolio_presenter: PortfolioPresenter | None = None,
     ):
         self.performance_presenter = performance_presenter or PerformanceDashboardPresenter()
         self.paper_trading_presenter = paper_trading_presenter or PaperTradingPresenter()
         self.trade_plan_presenter = trade_plan_presenter or TradePlanPresenter()
         self.explanation_presenter = explanation_presenter or ExplanationPresenter()
         self.scanner_presenter = scanner_presenter or ScannerPresenter()
+        self.portfolio_presenter = portfolio_presenter or PortfolioPresenter()
 
     def compose(
         self,
@@ -41,6 +45,8 @@ class DashboardComposer:
         trade_plan_result: TradePlanResult | None = None,
         explanation_result: AIExplanationResult | None = None,
         scanner_result: Any | None = None,
+        portfolio_state: PortfolioState | None = None,
+        portfolio_result: PortfolioResult | None = None,
     ) -> list[GuiSection]:
         sections: list[GuiSection] = [
             self._create_summary_section(
@@ -49,11 +55,20 @@ class DashboardComposer:
                 trade_plan_result=trade_plan_result,
                 explanation_result=explanation_result,
                 scanner_result=scanner_result,
+                portfolio_state=portfolio_state,
             )
         ]
 
         if scanner_result is not None:
             sections.extend(self.scanner_presenter.create_sections(scanner_result))
+
+        if portfolio_state is not None:
+            sections.extend(
+                self.portfolio_presenter.create_sections(
+                    portfolio_state=portfolio_state,
+                    portfolio_result=portfolio_result,
+                )
+            )
 
         if performance_result is not None:
             sections.extend(self.performance_presenter.create_sections(performance_result))
@@ -76,11 +91,14 @@ class DashboardComposer:
         trade_plan_result: TradePlanResult | None,
         explanation_result: AIExplanationResult | None,
         scanner_result: Any | None,
+        portfolio_state: PortfolioState | None,
     ) -> GuiSection:
         active_modules = []
 
         if scanner_result is not None:
             active_modules.append("Scanner")
+        if portfolio_state is not None:
+            active_modules.append("Portfolio")
         if performance_result is not None:
             active_modules.append("Performance")
         if paper_trading_result is not None:

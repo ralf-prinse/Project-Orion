@@ -4,12 +4,14 @@ from ui.foundation.dashboard_presenter import DashboardPresenter
 from ui.foundation.explanation_presenter import ExplanationPresenter
 from services.performance.models import PerformanceResult
 from services.paper_trading.models import PaperTradingResult
+from services.portfolio.models import PortfolioResult, PortfolioState
 from services.planner.models import TradePlanResult
 from typing import Any
 from ui.foundation.models import GuiApplicationConfig, GuiPage, GuiSection, GuiShellState
 from ui.foundation.navigation import NavigationRegistry
 from ui.foundation.performance_dashboard_presenter import PerformanceDashboardPresenter
 from ui.foundation.paper_trading_presenter import PaperTradingPresenter
+from ui.foundation.portfolio_presenter import PortfolioPresenter
 from ui.foundation.scanner_presenter import ScannerPresenter
 from ui.foundation.trade_plan_presenter import TradePlanPresenter
 
@@ -33,6 +35,7 @@ class GuiShell:
         paper_trading_presenter: PaperTradingPresenter | None = None,
         trade_plan_presenter: TradePlanPresenter | None = None,
         scanner_presenter: ScannerPresenter | None = None,
+        portfolio_presenter: PortfolioPresenter | None = None,
         dashboard_composer: DashboardComposer | None = None,
     ):
         self.config = config or GuiApplicationConfig()
@@ -45,12 +48,14 @@ class GuiShell:
         self.paper_trading_presenter = paper_trading_presenter or PaperTradingPresenter()
         self.trade_plan_presenter = trade_plan_presenter or TradePlanPresenter()
         self.scanner_presenter = scanner_presenter or ScannerPresenter()
+        self.portfolio_presenter = portfolio_presenter or PortfolioPresenter()
         self.dashboard_composer = dashboard_composer or DashboardComposer(
             performance_presenter=self.performance_dashboard_presenter,
             paper_trading_presenter=self.paper_trading_presenter,
             trade_plan_presenter=self.trade_plan_presenter,
             explanation_presenter=self.explanation_presenter,
             scanner_presenter=self.scanner_presenter,
+            portfolio_presenter=self.portfolio_presenter,
         )
         self.state = GuiShellState(
             current_page=self._resolve_initial_page(self.config.default_page),
@@ -109,6 +114,19 @@ class GuiShell:
         self.state.status_message = "Scanner dashboard updated"
         return self.state
 
+    def build_portfolio_dashboard(
+        self,
+        portfolio_state: PortfolioState,
+        portfolio_result: PortfolioResult | None = None,
+    ) -> GuiShellState:
+        self.state.sections = self.portfolio_presenter.create_sections(
+            portfolio_state=portfolio_state,
+            portfolio_result=portfolio_result,
+        )
+        self.state.current_page = GuiPage.PORTFOLIO
+        self.state.status_message = "Portfolio dashboard updated"
+        return self.state
+
     def build_unified_dashboard(
         self,
         performance_result: PerformanceResult | None = None,
@@ -116,6 +134,8 @@ class GuiShell:
         trade_plan_result: TradePlanResult | None = None,
         explanation_result: AIExplanationResult | None = None,
         scanner_result: Any | None = None,
+        portfolio_state: PortfolioState | None = None,
+        portfolio_result: PortfolioResult | None = None,
     ) -> GuiShellState:
         self.state.sections = self.dashboard_composer.compose(
             performance_result=performance_result,
@@ -123,6 +143,8 @@ class GuiShell:
             trade_plan_result=trade_plan_result,
             explanation_result=explanation_result,
             scanner_result=scanner_result,
+            portfolio_state=portfolio_state,
+            portfolio_result=portfolio_result,
         )
         self.state.current_page = GuiPage.DASHBOARD
         self.state.status_message = "Unified dashboard updated"

@@ -1,6 +1,7 @@
 from services.ai.models import AIExplanationResult
 from services.paper_trading.models import PaperAccount, PaperTradingResult
 from services.performance.models import PerformanceResult
+from services.portfolio.models import PortfolioPosition, PortfolioResult, PortfolioState
 from services.planner.models import TradePlanResult
 from ui.foundation.dashboard_composer import DashboardComposer
 from ui.foundation.gui_shell import GuiShell
@@ -103,3 +104,34 @@ def test_dashboard_composer_can_include_scanner_sections():
     assert sections[0].metrics[1].value == "1"
     assert "Scanner Summary" in titles
     assert "Top Opportunities" in titles
+
+
+def test_dashboard_composer_can_include_portfolio_sections():
+    portfolio_state = PortfolioState(
+        cash=7500.0,
+        positions={
+            "AAPL": PortfolioPosition(
+                symbol="AAPL",
+                quantity=4,
+                average_price=180.0,
+                current_price=190.0,
+            )
+        },
+    )
+    portfolio_result = PortfolioResult(
+        symbol="AAPL",
+        portfolio_allowed=True,
+        proposed_position_value=760.0,
+    )
+
+    sections = DashboardComposer().compose(
+        portfolio_state=portfolio_state,
+        portfolio_result=portfolio_result,
+    )
+    titles = [section.title for section in sections]
+
+    assert sections[0].metrics[0].value == "Portfolio"
+    assert sections[0].metrics[1].value == "1"
+    assert "Portfolio Account" in titles
+    assert "Open Positions" in titles
+    assert "Portfolio Validation" in titles
