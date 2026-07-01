@@ -1683,3 +1683,22 @@ Successfully validated through:
 
 No regressions introduced in the official `tests` regression suite.
 
+
+## v1.0.11-alpha
+
+### Added
+
+* Added GUI Workspace Framework foundation.
+* Added toolkit-independent workspace state models.
+* Added `DockManager` for deterministic panel registration.
+* Added workspace toolbar and status-bar presentation models.
+* Added workspace layout specification backed by the Orion Design System.
+* Added workspace unit tests.
+
+### Architecture
+
+The GUI now has a professional workspace foundation separating application layout from Qt widget construction. Future dashboards can be implemented as panels inside a stable shell instead of isolated windows or ad-hoc widgets.
+
+### Validation
+
+Validated through dedicated workspace tests and the existing UI regression suite.

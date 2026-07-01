@@ -173,3 +173,18 @@ Sprint 10.10 completed objectives:
 - Added step-level orchestration timing
 - Preserved domain logic outside core orchestration
 - Added full unit test coverage
+
+
+## Completed
+
+✅ Sprint 11.1 — GUI Workspace Framework Foundation
+
+## Next
+
+☐ Sprint 11.2 — Professional Dashboard Home
+
+Planned objectives:
+
+- Build the first dashboard page on top of the Workspace Framework.
+- Use Design System components only.
+- Keep GUI presentation-only and free from trading logic.
