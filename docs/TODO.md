@@ -1,12 +1,12 @@
 Current Sprint
 
-✅ Sprint 10.11 — Configuration Framework Foundation
+✅ Sprint 10.12 — Dependency Injection Foundation
 
 
 Recently Completed
 
 
-✅ Sprint 10.11 — Configuration Framework Foundation
+✅ Sprint 10.12 — Dependency Injection Foundation
 
 Completed objectives:
 

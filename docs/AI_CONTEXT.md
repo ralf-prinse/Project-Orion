@@ -98,6 +98,11 @@ Graphical User Interface
 
 ## Current Core Infrastructure
 
+### ApplicationContainer
+
+Provides the first explicit composition root for application-level service construction. The container currently centralizes construction of ScanPipeline and ScanOrchestrator through a small ServiceRegistry. It intentionally avoids reflection, auto-discovery and hidden dependency wiring.
+
+
 Project Orion currently contains the following reusable core infrastructure:
 
 ### AnalyzerRunner

@@ -2,7 +2,7 @@
 
 # PROJECT STATUS
 
-Project Version: v1.0.11-alpha
+Project Version: v1.0.12-alpha
 
 **Document Version:** 2.0
 
@@ -12,7 +12,7 @@ Project Version: v1.0.11-alpha
 
 Current Milestone
 
-✅ Sprint 10.11 – Configuration Framework Foundation completed
+✅ Sprint 10.12 – Dependency Injection Foundation completed
 ---
 
 # 1. Executive Summary
@@ -61,7 +61,8 @@ Current implementation status:
 - ✅ Decision-to-GUI Integration
 - ✅ Signal-to-GUI Integration
 - ✅ Scan Orchestrator Foundation
-- ✅ Configuration Framework Foundation
+- ✅ Configuration Framework
+- ✅ Dependency Injection Foundation Foundation
 ---
 # 2. Current Architecture
 

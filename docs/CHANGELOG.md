@@ -1,5 +1,30 @@
 # CHANGELOG
 
+## v1.0.12-alpha
+
+### Added
+
+* Added central `core.container` package.
+* Added `ServiceRegistry` with explicit singleton and transient registrations.
+* Added `ApplicationContainer` as the first Project Orion composition root.
+* Added container-backed construction for `ScanPipeline` and `ScanOrchestrator`.
+* Added dedicated container unit tests.
+
+### Architecture
+
+Sprint 10.12 introduces the first dependency injection foundation for Orion. The implementation deliberately remains explicit and small: no reflection, decorators, auto-discovery or hidden construction rules. The composition root starts with scan orchestration because it is the safest high-value entrypoint for future GUI, CLI, scheduler, API and broker workflows.
+
+The container does not add trading logic. It only centralizes construction of application-level services so future providers, profiles, plugins and test doubles can be introduced without scattering object construction throughout the codebase.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/core`
+* `tests`
+
+No regressions introduced in the official `tests` regression suite.
+
 ## v1.0.11-alpha
 
 ### Added
