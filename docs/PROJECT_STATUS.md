@@ -2,7 +2,7 @@
 
 # PROJECT STATUS
 
-Project Version: v0.8.7-alpha
+Project Version: v0.8.8-alpha
 
 **Document Version:** 2.0
 
@@ -12,7 +12,7 @@ Project Version: v0.8.7-alpha
 
 Current Milestone
 
-✅ Sprint 8.7 – Trade Planner completed
+✅ Sprint 8.8 – Backtesting Foundation completed
 ---
 
 # 1. Executive Summary
@@ -655,5 +655,39 @@ Validation:
 
 - `tests/planner`
 - `tests`
-- 98 tests passed
+- 113 tests passed
 
+
+
+# Sprint 8.8 Update
+
+Sprint 8.8 introduced the Backtesting Foundation.
+
+Implemented components:
+
+- BacktestCandle
+- BacktestConfig
+- BacktestContext
+- BacktestTrade
+- BacktestResult
+- BacktestEngine
+- BacktestRegistry
+- BaseBacktestAnalyzer
+- TradeSimulator
+- InputValidationAnalyzer
+- TradeSimulationAnalyzer
+- PerformanceSummaryAnalyzer
+
+Architecture notes:
+
+- Backtesting is a dedicated layer under `services/backtesting`.
+- Backtesting uses `AnalyzerRunner` and a registry-driven analyzer pipeline.
+- Backtesting simulates existing deterministic `TradePlanResult` objects over historical candles.
+- Backtesting does not perform technical analysis, signal generation, decision making, position sizing, portfolio mutation, risk approval, broker execution or AI reasoning.
+- Same-candle stop-loss and target handling is conservative by default to avoid optimistic assumptions with daily candles.
+
+Validation:
+
+- `tests/backtesting`
+- `tests`
+- 113 tests passed

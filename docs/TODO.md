@@ -1,6 +1,6 @@
 Current Sprint
 
-✅ Sprint 8.7 — Trade Planner
+✅ Sprint 8.8 — Backtesting Foundation
 
 
 Recently Completed
@@ -27,18 +27,20 @@ Recently Completed
 
 ✅ Sprint 8.7 — Trade Planner
 
+✅ Sprint 8.8 — Backtesting Foundation
+
 
 Next Sprint
 
-☐ Sprint 8.8 — Paper Trading Foundation
+☐ Sprint 8.9 — Paper Trading Engine
 
 Planned objectives:
 
 - Introduce Paper Trading package
-- Simulate trade execution from TradePlanResult
+- Consume TradePlanResult and Backtest concepts where practical
 - Track open simulated trades
 - Track closed simulated trades
-- Prepare trade history and performance metrics
+- Track simulated P/L and equity
 - Full unit test coverage
 
 
@@ -54,7 +56,7 @@ Upcoming Roadmap
 
 ☐ Sector Exposure Analyzer
 
-☐ Paper Trading
+☐ Paper Trading Engine
 
 ☐ Broker Integration
 

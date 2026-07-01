@@ -2,7 +2,7 @@
 
 # AI_CONTEXT
 
-**Version:** v0.8.5-alpha
+**Version:** v0.8.8-alpha
 
 **Document Version:** 2.0
 
@@ -331,7 +331,7 @@ No sprint is considered complete before all of these steps have been finished.
 
 ## Current Version
 
-Project Orion v0.8.7-alpha
+Project Orion v0.8.8-alpha
 
 ---
 
@@ -751,3 +751,24 @@ The Trade Planner consumes deterministic inputs from prior layers and produces e
 Current official regression result:
 
 98 passing tests.
+
+
+### Backtesting Foundation
+
+Implemented:
+
+- BacktestEngine
+- BacktestRegistry
+- BaseBacktestAnalyzer
+- BacktestCandle
+- BacktestConfig
+- BacktestContext
+- BacktestTrade
+- BacktestResult
+- TradeSimulator
+
+The Backtesting Foundation simulates existing deterministic trade plans over historical candles. It does not generate signals, make investment decisions, mutate live portfolio state, approve risk, execute broker orders or use AI reasoning.
+
+Current regression status:
+
+- 113 passing tests

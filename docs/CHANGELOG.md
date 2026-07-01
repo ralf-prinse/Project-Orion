@@ -1,3 +1,43 @@
+## v0.8.8-alpha
+
+### Added
+
+* Added `services/backtesting` package.
+* Added `BacktestCandle`.
+* Added `BacktestConfig`.
+* Added `BacktestContext`.
+* Added `BacktestTrade`.
+* Added `BacktestResult`.
+* Added `BacktestEngine`.
+* Added `BacktestRegistry`.
+* Added `BaseBacktestAnalyzer`.
+* Added `TradeSimulator`.
+* Added `InputValidationAnalyzer`.
+* Added `TradeSimulationAnalyzer`.
+* Added `PerformanceSummaryAnalyzer`.
+* Added dedicated Backtesting unit tests.
+
+### Architecture
+
+Sprint 8.8 introduces a dedicated registry-driven Backtesting Foundation.
+
+The Backtesting Layer simulates existing deterministic `TradePlanResult` objects over historical candles. This keeps the layer focused on simulation and performance measurement, while preserving the separation between analysis, signals, decisions, position sizing, portfolio management, risk management and trade planning.
+
+The default same-candle behaviour is conservative: when stop-loss and target are both reached within the same candle, the stop-loss is assumed to trigger first. This prevents optimistic assumptions when simulating trades on daily OHLC data.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/backtesting`
+* `tests`
+
+113 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
+---
+
 ## v0.8.7-alpha
 
 ### Added
