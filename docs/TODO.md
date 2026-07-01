@@ -1,6 +1,6 @@
 Current Sprint
 
-✅ Sprint 10.0 — GUI Risk Dashboard Integration
+✅ Sprint 10.1 — GUI Backtesting Dashboard Integration
 
 
 Recently Completed
@@ -49,19 +49,36 @@ Recently Completed
 
 ✅ Sprint 9.8 — GUI Scanner Dashboard Integration
 
-✅ Sprint 10.0 — GUI Risk Dashboard Integration
+✅ Sprint 10.1 — GUI Backtesting Dashboard Integration
 
 
 Next Sprint
 
-☐ Sprint 10.1 — GUI Backtesting Dashboard Integration
+✅ Sprint 10.1 — GUI Backtesting Dashboard Integration
+
+Completed objectives:
+
+- Added BacktestingPresenter
+- Added deterministic backtest summary sections
+- Added deterministic backtest trade statistics sections
+- Added display-only backtest trade log sections
+- Added diagnostics for backtesting warnings and reasons
+- Integrated backtest output into the unified dashboard composer
+- Added GUI shell backtesting dashboard builder
+- Preserved strict GUI/backtesting separation
+- Added full unit test coverage
+
+
+Next Sprint
+
+☐ Sprint 10.2 — GUI Settings Foundation
 
 Planned objectives:
 
-- Add backtesting dashboard presenter
-- Prepare backtest result display sections
-- Connect backtesting outputs to display-only GUI sections
-- Preserve backtesting/GUI separation
+- Add settings page presenter
+- Prepare deterministic configuration display sections
+- Keep configuration editing separate from trading engines
+- Preserve GUI presentation-only responsibility
 - Full unit test coverage
 
 

@@ -135,3 +135,25 @@ def test_dashboard_composer_can_include_portfolio_sections():
     assert "Portfolio Account" in titles
     assert "Open Positions" in titles
     assert "Portfolio Validation" in titles
+
+from services.backtesting.models import BacktestResult
+
+
+def test_dashboard_composer_can_include_backtesting_sections():
+    backtest = BacktestResult(
+        symbol="AAPL",
+        valid_backtest=True,
+        total_trades=1,
+        winning_trades=1,
+        win_rate=100.0,
+        total_gross_pnl=100.0,
+        total_return_pct=1.0,
+    )
+
+    sections = DashboardComposer().compose(backtest_result=backtest)
+    titles = [section.title for section in sections]
+
+    assert sections[0].metrics[0].value == "Backtesting"
+    assert sections[0].metrics[1].value == "1"
+    assert "Backtesting Dashboard" in titles
+    assert "Backtest Trade Statistics" in titles

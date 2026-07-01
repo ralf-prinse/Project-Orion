@@ -1,5 +1,36 @@
 # PROJECT ORION
 
+## v1.0.1-alpha
+
+### Added
+
+* Added GUI Backtesting Dashboard Integration.
+* Added `BacktestingPresenter` for display-only backtest summary, trade statistics, trade log and diagnostics sections.
+* Integrated backtesting output into `DashboardComposer`.
+* Added `GuiShell.build_backtesting_dashboard()`.
+* Added dedicated backtesting presenter, shell and dashboard composer unit tests.
+
+### Architecture
+
+Sprint 10.1 connects Backtesting Foundation outputs to the Professional GUI Foundation without introducing simulation, performance calculation, trade planning, portfolio mutation or decision logic into the GUI.
+
+The GUI receives completed `BacktestResult` objects and projects them into stable `GuiSection` and `GuiMetric` view models. Backtest simulation remains inside `services/backtesting`, while the GUI remains strictly display-only.
+
+This prepares Orion for a professional historical validation workflow inside the desktop application.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/ui`
+* `tests`
+
+211 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
+---
+
 ## v1.0.0-alpha
 
 ### Added

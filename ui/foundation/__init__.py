@@ -1,3 +1,4 @@
+from ui.foundation.backtesting_presenter import BacktestingPresenter
 from ui.foundation.dashboard_presenter import DashboardPresenter
 from ui.foundation.explanation_presenter import ExplanationPresenter
 from ui.foundation.gui_shell import GuiShell
@@ -16,6 +17,7 @@ from ui.foundation.portfolio_presenter import PortfolioPresenter
 from ui.foundation.risk_dashboard_presenter import RiskDashboardPresenter
 
 __all__ = [
+    "BacktestingPresenter",
     "DashboardPresenter",
     "ExplanationPresenter",
     "GuiShell",

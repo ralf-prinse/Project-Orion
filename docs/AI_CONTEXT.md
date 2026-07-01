@@ -331,7 +331,7 @@ No sprint is considered complete before all of these steps have been finished.
 
 ## Current Version
 
-Project Orion v1.0.0-alpha
+Project Orion v1.0.1-alpha
 
 ---
 

@@ -1,4 +1,6 @@
 from services.ai.models import AIExplanationResult
+from services.backtesting.models import BacktestResult
+from ui.foundation.backtesting_presenter import BacktestingPresenter
 from ui.foundation.dashboard_composer import DashboardComposer
 from ui.foundation.dashboard_presenter import DashboardPresenter
 from ui.foundation.explanation_presenter import ExplanationPresenter
@@ -32,6 +34,7 @@ class GuiShell:
         dashboard_presenter: DashboardPresenter | None = None,
         explanation_presenter: ExplanationPresenter | None = None,
         performance_dashboard_presenter: PerformanceDashboardPresenter | None = None,
+        backtesting_presenter: BacktestingPresenter | None = None,
         paper_trading_presenter: PaperTradingPresenter | None = None,
         trade_plan_presenter: TradePlanPresenter | None = None,
         scanner_presenter: ScannerPresenter | None = None,
@@ -45,12 +48,14 @@ class GuiShell:
         self.performance_dashboard_presenter = (
             performance_dashboard_presenter or PerformanceDashboardPresenter()
         )
+        self.backtesting_presenter = backtesting_presenter or BacktestingPresenter()
         self.paper_trading_presenter = paper_trading_presenter or PaperTradingPresenter()
         self.trade_plan_presenter = trade_plan_presenter or TradePlanPresenter()
         self.scanner_presenter = scanner_presenter or ScannerPresenter()
         self.portfolio_presenter = portfolio_presenter or PortfolioPresenter()
         self.dashboard_composer = dashboard_composer or DashboardComposer(
             performance_presenter=self.performance_dashboard_presenter,
+            backtesting_presenter=self.backtesting_presenter,
             paper_trading_presenter=self.paper_trading_presenter,
             trade_plan_presenter=self.trade_plan_presenter,
             explanation_presenter=self.explanation_presenter,
@@ -96,6 +101,13 @@ class GuiShell:
         self.state.status_message = "Performance dashboard updated"
         return self.state
 
+
+    def build_backtesting_dashboard(self, backtest_result: BacktestResult) -> GuiShellState:
+        self.state.sections = self.backtesting_presenter.create_sections(backtest_result)
+        self.state.current_page = GuiPage.BACKTESTING
+        self.state.status_message = "Backtesting dashboard updated"
+        return self.state
+
     def build_paper_trading_dashboard(self, paper_trading_result: PaperTradingResult) -> GuiShellState:
         self.state.sections = self.paper_trading_presenter.create_sections(paper_trading_result)
         self.state.current_page = GuiPage.PAPER_TRADING
@@ -130,6 +142,7 @@ class GuiShell:
     def build_unified_dashboard(
         self,
         performance_result: PerformanceResult | None = None,
+        backtest_result: BacktestResult | None = None,
         paper_trading_result: PaperTradingResult | None = None,
         trade_plan_result: TradePlanResult | None = None,
         explanation_result: AIExplanationResult | None = None,
@@ -139,6 +152,7 @@ class GuiShell:
     ) -> GuiShellState:
         self.state.sections = self.dashboard_composer.compose(
             performance_result=performance_result,
+            backtest_result=backtest_result,
             paper_trading_result=paper_trading_result,
             trade_plan_result=trade_plan_result,
             explanation_result=explanation_result,
