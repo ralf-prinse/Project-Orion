@@ -2,7 +2,7 @@
 
 # AI_CONTEXT
 
-**Version:** v1.0.8-alpha
+**Version:** v1.0.9-alpha
 
 **Document Version:** 2.0
 
@@ -865,3 +865,20 @@ Validation:
 - `tests`
 - 141 tests passed
 
+
+
+---
+
+# Sprint 10.9 Update — Scan Orchestrator Foundation
+
+Implemented:
+
+- ScanContext
+- ScanProgress
+- ScanStatistics
+- ScanSummary
+- ScanOrchestrator
+
+The ScanOrchestrator is a core orchestration component. It coordinates scan execution, timing, progress callbacks, summary creation and central error handling around the existing scanner pipeline. It must not contain market-data, analysis, signal, decision, portfolio, risk, planner, AI or GUI business logic.
+
+Current official regression status: 258 passing tests.

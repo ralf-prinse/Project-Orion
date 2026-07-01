@@ -1,5 +1,32 @@
 # CHANGELOG
 
+## v1.0.9-alpha
+
+### Added
+
+* Added `ScanContext` and immutable `ScanProgress` updates.
+* Added `ScanStatistics` and `ScanStageTiming` for orchestration-level runtime metrics.
+* Added `ScanSummary` as the stable public result model for full scans.
+* Added `ScanOrchestrator` as the central scan coordination foundation.
+* Added dedicated core orchestration unit tests.
+
+### Architecture
+
+Sprint 10.9 introduces an end-to-end scan orchestration foundation around the existing scanner pipeline.
+
+The orchestrator coordinates symbol normalization, progress callbacks, pipeline timing, summary creation and central error handling. It contains no market-data, analysis, signal, decision, portfolio, risk, planner, AI or GUI logic. This preserves Orion's layered architecture while preparing one stable public scan entrypoint for the GUI, CLI, schedulers, future APIs and broker workflows.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/core`
+* `tests`
+
+258 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
 ## v1.0.8-alpha
 
 ### Added
