@@ -1,5 +1,5 @@
 from services.ai.models import AIExplanationResult
-from services.analysis.models import AnalysisResult
+from services.analysis.models import AnalysisResult, IndicatorResult
 from services.decisions.models import DecisionResult
 from services.backtesting.models import BacktestResult
 from services.paper_trading.models import PaperTradingResult
@@ -9,6 +9,7 @@ from services.planner.models import TradePlanResult
 from services.signals.models import SignalResult
 from typing import Any
 from ui.foundation.analysis_presenter import AnalysisPresenter
+from ui.foundation.indicator_presenter import IndicatorPresenter
 from ui.foundation.backtesting_presenter import BacktestingPresenter
 from ui.foundation.decision_presenter import DecisionPresenter
 from ui.foundation.explanation_presenter import ExplanationPresenter
@@ -42,6 +43,7 @@ class DashboardComposer:
         decision_presenter: DecisionPresenter | None = None,
         signal_presenter: SignalPresenter | None = None,
         analysis_presenter: AnalysisPresenter | None = None,
+        indicator_presenter: IndicatorPresenter | None = None,
     ):
         self.performance_presenter = performance_presenter or PerformanceDashboardPresenter()
         self.backtesting_presenter = backtesting_presenter or BacktestingPresenter()
@@ -53,6 +55,7 @@ class DashboardComposer:
         self.decision_presenter = decision_presenter or DecisionPresenter()
         self.signal_presenter = signal_presenter or SignalPresenter()
         self.analysis_presenter = analysis_presenter or AnalysisPresenter()
+        self.indicator_presenter = indicator_presenter or IndicatorPresenter()
 
     def compose(
         self,
@@ -67,6 +70,7 @@ class DashboardComposer:
         decision_result: DecisionResult | None = None,
         signal_result: SignalResult | None = None,
         analysis_result: AnalysisResult | None = None,
+        indicator_result: IndicatorResult | None = None,
     ) -> list[GuiSection]:
         sections: list[GuiSection] = [
             self._create_summary_section(
@@ -80,6 +84,7 @@ class DashboardComposer:
                 decision_result=decision_result,
                 signal_result=signal_result,
                 analysis_result=analysis_result,
+                indicator_result=indicator_result,
             )
         ]
 
@@ -88,6 +93,9 @@ class DashboardComposer:
 
         if analysis_result is not None:
             sections.extend(self.analysis_presenter.create_sections(analysis_result))
+
+        if indicator_result is not None:
+            sections.extend(self.indicator_presenter.create_sections(indicator_result))
 
         if signal_result is not None:
             sections.extend(self.signal_presenter.create_sections(signal_result))
@@ -132,6 +140,7 @@ class DashboardComposer:
         decision_result: DecisionResult | None,
         signal_result: SignalResult | None,
         analysis_result: AnalysisResult | None,
+        indicator_result: IndicatorResult | None,
     ) -> GuiSection:
         active_modules = []
 
@@ -139,6 +148,8 @@ class DashboardComposer:
             active_modules.append("Decisions")
         if analysis_result is not None:
             active_modules.append("Analysis")
+        if indicator_result is not None:
+            active_modules.append("Indicators")
         if signal_result is not None:
             active_modules.append("Signals")
         if scanner_result is not None:

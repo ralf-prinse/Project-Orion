@@ -1,3 +1,33 @@
+# CHANGELOG
+
+## v1.0.5-alpha
+
+### Added
+
+* Added `IndicatorPresenter` for GUI indicator dashboard sections.
+* Added `GuiPage.INDICATORS`.
+* Added Indicators navigation entry.
+* Added GUI shell indicator dashboard builder.
+* Added unified dashboard support for `IndicatorResult`.
+* Added dedicated GUI indicator presenter unit tests.
+
+### Architecture
+
+Sprint 10.5 integrates deterministic Indicator Engine output into the GUI layer while preserving strict separation of responsibilities.
+
+The GUI presents `IndicatorResult` values but never calculates indicators, interprets values, generates signals or makes decisions.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/ui`
+* `tests`
+
+231 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+
 # PROJECT ORION
 
 ## v1.0.4-alpha

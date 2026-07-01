@@ -2,6 +2,7 @@ from ui.foundation.backtesting_presenter import BacktestingPresenter
 from ui.foundation.dashboard_presenter import DashboardPresenter
 from ui.foundation.explanation_presenter import ExplanationPresenter
 from ui.foundation.gui_shell import GuiShell
+from ui.foundation.indicator_presenter import IndicatorPresenter
 from ui.foundation.models import (
     GuiApplicationConfig,
     GuiMetric,
@@ -22,6 +23,7 @@ __all__ = [
     "DashboardPresenter",
     "ExplanationPresenter",
     "GuiShell",
+    "IndicatorPresenter",
     "GuiApplicationConfig",
     "GuiMetric",
     "GuiNavigationItem",

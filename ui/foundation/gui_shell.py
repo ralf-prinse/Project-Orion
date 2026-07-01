@@ -1,9 +1,10 @@
 from services.ai.models import AIExplanationResult
-from services.analysis.models import AnalysisResult
+from services.analysis.models import AnalysisResult, IndicatorResult
 from services.backtesting.models import BacktestResult
 from services.decisions.models import DecisionResult
 from services.signals.models import SignalResult
 from ui.foundation.analysis_presenter import AnalysisPresenter
+from ui.foundation.indicator_presenter import IndicatorPresenter
 from ui.foundation.backtesting_presenter import BacktestingPresenter
 from ui.foundation.dashboard_composer import DashboardComposer
 from ui.foundation.dashboard_presenter import DashboardPresenter
@@ -48,6 +49,7 @@ class GuiShell:
         decision_presenter: DecisionPresenter | None = None,
         signal_presenter: SignalPresenter | None = None,
         analysis_presenter: AnalysisPresenter | None = None,
+        indicator_presenter: IndicatorPresenter | None = None,
         dashboard_composer: DashboardComposer | None = None,
     ):
         self.config = config or GuiApplicationConfig()
@@ -65,6 +67,7 @@ class GuiShell:
         self.decision_presenter = decision_presenter or DecisionPresenter()
         self.signal_presenter = signal_presenter or SignalPresenter()
         self.analysis_presenter = analysis_presenter or AnalysisPresenter()
+        self.indicator_presenter = indicator_presenter or IndicatorPresenter()
         self.dashboard_composer = dashboard_composer or DashboardComposer(
             performance_presenter=self.performance_dashboard_presenter,
             backtesting_presenter=self.backtesting_presenter,
@@ -76,6 +79,7 @@ class GuiShell:
             decision_presenter=self.decision_presenter,
             signal_presenter=self.signal_presenter,
             analysis_presenter=self.analysis_presenter,
+            indicator_presenter=self.indicator_presenter,
         )
         self.state = GuiShellState(
             current_page=self._resolve_initial_page(self.config.default_page),
@@ -149,6 +153,12 @@ class GuiShell:
         self.state.status_message = "Analysis dashboard updated"
         return self.state
 
+    def build_indicator_dashboard(self, indicator_result: IndicatorResult) -> GuiShellState:
+        self.state.sections = self.indicator_presenter.create_sections(indicator_result)
+        self.state.current_page = GuiPage.INDICATORS
+        self.state.status_message = "Indicator dashboard updated"
+        return self.state
+
     def build_signal_dashboard(self, signal_result: SignalResult) -> GuiShellState:
         self.state.sections = self.signal_presenter.create_sections(signal_result)
         self.state.current_page = GuiPage.SIGNALS
@@ -187,6 +197,7 @@ class GuiShell:
         decision_result: DecisionResult | None = None,
         signal_result: SignalResult | None = None,
         analysis_result: AnalysisResult | None = None,
+        indicator_result: IndicatorResult | None = None,
     ) -> GuiShellState:
         self.state.sections = self.dashboard_composer.compose(
             performance_result=performance_result,
@@ -200,6 +211,7 @@ class GuiShell:
             decision_result=decision_result,
             signal_result=signal_result,
             analysis_result=analysis_result,
+            indicator_result=indicator_result,
         )
         self.state.current_page = GuiPage.DASHBOARD
         self.state.status_message = "Unified dashboard updated"

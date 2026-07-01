@@ -61,23 +61,24 @@ Recently Completed
 
 ✅ Sprint 10.4 — GUI Analysis Dashboard Integration
 
+✅ Sprint 10.5 — GUI Indicator Dashboard Integration
+
 
 Completed objectives:
 
-- Added AnalysisPresenter
-- Added deterministic analysis summary section
-- Added deterministic technical score sections
-- Added analysis notes diagnostics section
-- Added Analysis navigation page
-- Integrated AnalysisResult into the unified dashboard composer
-- Added GUI shell analysis dashboard builder
-- Preserved strict GUI/Analysis Layer separation
+- Added IndicatorPresenter
+- Added deterministic indicator summary section
+- Added trend, momentum, volatility, structure, volume and relative strength indicator sections
+- Added Indicators navigation page
+- Integrated IndicatorResult into the unified dashboard composer
+- Added GUI shell indicator dashboard builder
+- Preserved strict GUI/Indicator Engine separation
 - Added full unit test coverage
 
 
 Next Sprint
 
-☐ Sprint 10.5 — GUI Settings Foundation
+☐ Sprint 10.6 — GUI Settings Foundation
 
 Planned objectives:
 

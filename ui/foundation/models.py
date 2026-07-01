@@ -14,6 +14,7 @@ class GuiPage(str, Enum):
     DASHBOARD = "dashboard"
     DECISIONS = "decisions"
     ANALYSIS = "analysis"
+    INDICATORS = "indicators"
     SIGNALS = "signals"
     SCANNER = "scanner"
     PORTFOLIO = "portfolio"
@@ -71,7 +72,7 @@ class GuiApplicationConfig:
     application_name: str = "Project Orion"
     subtitle: str = "Deterministic Swing Trading Platform"
     default_page: GuiPage = GuiPage.DASHBOARD
-    version: str = "v1.0.4-alpha"
+    version: str = "v1.0.5-alpha"
 
 
 @dataclass
