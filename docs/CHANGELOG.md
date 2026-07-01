@@ -1,40 +1,38 @@
-## v0.8.9-alpha
+## v0.9.0-alpha
 
 ### Added
 
-* Added `services/paper_trading` package.
-* Added `PaperAccount`.
-* Added `PaperPosition`.
-* Added `PaperTradeRecord`.
-* Added `PaperTradingConfig`.
-* Added `PaperTradingContext`.
-* Added `PaperTradingResult`.
-* Added `PaperTradingEngine`.
-* Added `PaperTradingRegistry`.
-* Added `BasePaperTradingAnalyzer`.
+* Added `services/performance` package.
+* Added `PerformanceTrade`.
+* Added `EquityCurvePoint`.
+* Added `PerformanceConfig`.
+* Added `PerformanceContext`.
+* Added `PerformanceResult`.
+* Added `PerformanceEngine`.
+* Added `PerformanceRegistry`.
+* Added `BasePerformanceAnalyzer`.
 * Added `InputValidationAnalyzer`.
-* Added `TradeExecutionAnalyzer`.
-* Added `MarkToMarketAnalyzer`.
-* Added `PositionCloseAnalyzer`.
-* Added `AccountSummaryAnalyzer`.
-* Added dedicated Paper Trading unit tests.
+* Added `TradeMetricsAnalyzer`.
+* Added `EquityCurveAnalyzer`.
+* Added adapters for `BacktestResult` and closed `PaperAccount` trades.
+* Added dedicated Performance Analytics unit tests.
 
 ### Architecture
 
-Sprint 8.9 introduces a dedicated registry-driven Paper Trading Engine.
+Sprint 9.0 introduces a dedicated registry-driven Performance Analytics layer.
 
-The Paper Trading Engine simulates execution of existing deterministic `TradePlanResult` objects on a virtual account. It tracks cash balance, open positions, trade history, realized P/L, unrealized P/L and equity without connecting to brokers or making investment decisions.
+The Performance Analytics layer consumes already completed or simulated trade results and calculates professional deterministic metrics such as win rate, loss rate, gross profit, gross loss, net P/L, average win, average loss, expectancy, profit factor, payoff ratio, equity curve, total return and maximum drawdown.
 
-This layer consumes deterministic trade plans and remains separate from analysis, signal generation, decision making, position sizing, portfolio validation, risk management, backtesting and broker integration.
+The layer is intentionally separated from Backtesting and Paper Trading. Backtesting simulates historical execution, Paper Trading simulates forward virtual execution and Performance Analytics evaluates the results. It does not generate signals, make decisions, mutate portfolios, approve risk, create trade plans, execute broker orders or use AI reasoning.
 
 ### Validation
 
 Successfully validated through:
 
-* `tests/paper_trading`
+* `tests/performance`
 * `tests`
 
-128 tests passed.
+141 tests passed.
 
 No regressions introduced in the official `tests` regression suite.
 

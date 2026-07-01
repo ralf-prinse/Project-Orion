@@ -2,7 +2,7 @@
 
 # AI_CONTEXT
 
-**Version:** v0.8.9-alpha
+**Version:** v0.9.0-alpha
 
 **Document Version:** 2.0
 
@@ -331,7 +331,7 @@ No sprint is considered complete before all of these steps have been finished.
 
 ## Current Version
 
-Project Orion v0.8.9-alpha
+Project Orion v0.9.0-alpha
 
 ---
 
@@ -509,6 +509,7 @@ Next roadmap:
 - Trade Planner
 - Backtesting Foundation
 - Paper Trading Engine
+- Performance Analytics
 - Broker Integration
 - Professional Desktop GUI
 - Artificial Intelligence Explanation Layer
@@ -805,3 +806,33 @@ Validation:
 - `tests/paper_trading`
 - `tests`
 - 128 tests passed
+
+## Sprint 9.0 — Performance Analytics
+
+Implemented:
+
+- `services/performance` package
+- `PerformanceTrade`
+- `EquityCurvePoint`
+- `PerformanceConfig`
+- `PerformanceContext`
+- `PerformanceResult`
+- `PerformanceEngine`
+- `PerformanceRegistry`
+- `BasePerformanceAnalyzer`
+- `InputValidationAnalyzer`
+- `TradeMetricsAnalyzer`
+- `EquityCurveAnalyzer`
+
+Architecture:
+
+Performance Analytics is a dedicated deterministic evaluation layer. It consumes existing trade results and calculates metrics such as win rate, loss rate, gross profit, gross loss, net P/L, average win, average loss, expectancy, profit factor, payoff ratio, equity curve, total return and maximum drawdown. It can adapt Backtesting results and closed Paper Trading records.
+
+Performance Analytics does not make investment decisions, calculate indicators, generate signals, mutate portfolio state, approve risk, create trade plans, execute broker orders or use AI reasoning.
+
+Validation:
+
+- `tests/performance`
+- `tests`
+- 141 tests passed
+

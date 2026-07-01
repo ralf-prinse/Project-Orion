@@ -1,6 +1,6 @@
 Current Sprint
 
-✅ Sprint 8.9 — Paper Trading Engine
+✅ Sprint 9.0 — Performance Analytics
 
 
 Recently Completed
@@ -31,19 +31,21 @@ Recently Completed
 
 ✅ Sprint 8.9 — Paper Trading Engine
 
+✅ Sprint 9.0 — Performance Analytics
+
 
 Next Sprint
 
-☐ Sprint 9.0 — Performance Analytics
+☐ Sprint 9.1 — Professional Desktop GUI Foundation
 
 Planned objectives:
 
-- Introduce Performance Analytics package
-- Consume BacktestResult and PaperTradingResult where practical
-- Calculate trade performance metrics
-- Calculate equity and P/L summaries
-- Prepare GUI/reporting integration
-- Full unit test coverage
+- Introduce GUI application shell
+- Prepare dashboard structure
+- Prepare scan/performance views
+- Keep GUI free of trading logic
+- Prepare integration with deterministic engines
+- Full unit test coverage where practical
 
 
 Upcoming Roadmap
@@ -60,9 +62,7 @@ Upcoming Roadmap
 
 ✅ Paper Trading Engine
 
-☐ Performance Analytics
-
-☐ Performance Analytics
+✅ Performance Analytics
 
 ☐ Broker Integration
 

@@ -2,7 +2,7 @@
 
 # PROJECT STATUS
 
-Project Version: v0.8.9-alpha
+Project Version: v0.9.0-alpha
 
 **Document Version:** 2.0
 
@@ -12,7 +12,7 @@ Project Version: v0.8.9-alpha
 
 Current Milestone
 
-✅ Sprint 8.9 – Paper Trading Engine completed
+✅ Sprint 9.0 – Performance Analytics completed
 ---
 
 # 1. Executive Summary
@@ -42,7 +42,10 @@ Current implementation status:
 - ✅ Explainability Framework
 - ✅ Portfolio Layer
 - ✅ Risk Layer
-- ⏳ Trade Planning
+- ✅ Trade Planning
+- ✅ Backtesting Foundation
+- ✅ Paper Trading Engine
+- ✅ Performance Analytics
 - ⏳ Artificial Intelligence Layer
 - ⏳ Professional GUI
 ---
@@ -726,4 +729,37 @@ Validation:
 - `tests/paper_trading`
 - `tests`
 - 128 tests passed
+
+# Sprint 9.0 Update
+
+Sprint 9.0 introduced the Performance Analytics layer.
+
+Implemented components:
+
+- PerformanceTrade
+- EquityCurvePoint
+- PerformanceConfig
+- PerformanceContext
+- PerformanceResult
+- PerformanceEngine
+- PerformanceRegistry
+- BasePerformanceAnalyzer
+- InputValidationAnalyzer
+- TradeMetricsAnalyzer
+- EquityCurveAnalyzer
+
+Architecture notes:
+
+- Performance Analytics is a dedicated layer under `services/performance`.
+- Performance Analytics uses `AnalyzerRunner` and a registry-driven analyzer pipeline.
+- Performance Analytics consumes standardized `PerformanceTrade` objects.
+- Performance Analytics can adapt `BacktestResult` and closed `PaperAccount` trades.
+- Performance Analytics calculates deterministic trade metrics, P/L summaries, equity curve, total return and maximum drawdown.
+- Performance Analytics does not perform technical analysis, signal generation, decision making, position sizing, portfolio mutation, risk approval, trade planning, broker execution or AI reasoning.
+
+Validation:
+
+- `tests/performance`
+- `tests`
+- 141 tests passed
 
