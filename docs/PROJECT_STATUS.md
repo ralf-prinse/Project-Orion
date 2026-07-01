@@ -2,7 +2,7 @@
 
 # PROJECT STATUS
 
-Project Version: v0.8.4-alpha
+Project Version: v0.8.5-alpha
 
 **Document Version:** 2.0
 
@@ -12,7 +12,7 @@ Project Version: v0.8.4-alpha
 
 Current Milestone
 
-✅ Sprint 8.4 – Position Sizing Engine completed
+✅ Sprint 8.5 – Portfolio Engine completed
 ---
 
 # 1. Executive Summary
@@ -40,7 +40,7 @@ Current implementation status:
 - ✅ Signal Layer
 - ✅ Decision Layer Foundation
 - ✅ Explainability Framework
-- ⏳ Portfolio Layer
+- ✅ Portfolio Layer
 - ⏳ Risk Layer
 - ⏳ Trade Planning
 - ⏳ Artificial Intelligence Layer
@@ -559,3 +559,36 @@ Current validation result:
 ```
 
 Position sizing remains deterministic and does not make investment decisions. It only enriches the Decision Layer output with recommended sizing information.
+
+
+# Sprint 8.5 Update
+
+Sprint 8.5 introduced the Portfolio Engine.
+
+Implemented components:
+
+- PortfolioState
+- PortfolioPosition
+- PortfolioContext
+- PortfolioResult
+- PortfolioEngine
+- PortfolioRegistry
+- BasePortfolioAnalyzer
+- PortfolioSummaryAnalyzer
+- CashValidationAnalyzer
+- PositionCountAnalyzer
+- ExistingPositionAnalyzer
+- ExposureAnalyzer
+
+Architecture notes:
+
+- Portfolio Engine is a dedicated layer under `services/portfolio`.
+- Portfolio Engine uses `AnalyzerRunner` and a registry-driven analyzer pipeline.
+- Portfolio Engine evaluates portfolio state, cash, open positions, existing positions and exposure limits.
+- Portfolio Engine does not make technical decisions, calculate indicators, generate signals, perform position sizing, manage risk rules or create trade plans.
+
+Validation:
+
+- `tests/portfolio`
+- `tests`
+- 73 tests passed

@@ -669,3 +669,42 @@ Successfully validated through:
 63 tests passed.
 
 No regressions introduced in the official `tests` regression suite.
+
+## v0.8.5-alpha
+
+### Added
+
+* Added `services/portfolio` package.
+* Added `PortfolioState` model.
+* Added `PortfolioPosition` model.
+* Added `PortfolioContext` model.
+* Added `PortfolioResult` model.
+* Added `PortfolioEngine`.
+* Added `PortfolioRegistry`.
+* Added `BasePortfolioAnalyzer`.
+* Added `PortfolioSummaryAnalyzer`.
+* Added `CashValidationAnalyzer`.
+* Added `PositionCountAnalyzer`.
+* Added `ExistingPositionAnalyzer`.
+* Added `ExposureAnalyzer`.
+* Added dedicated Portfolio Engine unit tests.
+
+### Architecture
+
+Sprint 8.5 introduces a dedicated registry-driven Portfolio Engine.
+
+The Portfolio Engine evaluates portfolio state, cash availability, open position count, existing positions and exposure limits while remaining separate from technical analysis, signal generation, decision assembly, position sizing, risk management and trade planning.
+
+The new `PortfolioResult` model prepares Orion for future integration with the Decision Layer, Risk Manager, Trade Planner, GUI and reporting layer.
+
+### Validation
+
+Successfully validated through:
+
+* `tests/portfolio`
+* `tests`
+
+73 tests passed.
+
+No regressions introduced in the official `tests` regression suite.
+

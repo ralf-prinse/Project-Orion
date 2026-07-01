@@ -2,7 +2,7 @@
 
 # AI_CONTEXT
 
-**Version:** v0.8.4-alpha
+**Version:** v0.8.5-alpha
 
 **Document Version:** 2.0
 
@@ -331,7 +331,7 @@ No sprint is considered complete before all of these steps have been finished.
 
 ## Current Version
 
-Project Orion v0.8.4-alpha
+Project Orion v0.8.5-alpha
 
 ---
 
@@ -430,7 +430,7 @@ Current regression status:
 
 Current result:
 
-63 passing tests
+73 passing tests
 
 No known regressions.
 
@@ -462,6 +462,7 @@ Objectives:
 - portfolio state
 - portfolio validation
 - exposure management
+- registry-driven Portfolio Engine
 
 ---
 
@@ -662,3 +663,36 @@ Current validation result:
 ```
 
 Position sizing remains deterministic and does not make investment decisions. It only enriches the Decision Layer output with recommended sizing information.
+
+
+# Sprint 8.5 Update
+
+Sprint 8.5 introduced the Portfolio Engine.
+
+Implemented components:
+
+- PortfolioState
+- PortfolioPosition
+- PortfolioContext
+- PortfolioResult
+- PortfolioEngine
+- PortfolioRegistry
+- BasePortfolioAnalyzer
+- PortfolioSummaryAnalyzer
+- CashValidationAnalyzer
+- PositionCountAnalyzer
+- ExistingPositionAnalyzer
+- ExposureAnalyzer
+
+Architectural rules:
+
+- Portfolio Engine lives in `services/portfolio`.
+- Portfolio Engine is registry-driven and uses AnalyzerRunner.
+- Portfolio Engine evaluates portfolio state, cash, position count, existing positions and exposure.
+- Portfolio Engine does not perform technical analysis, signal generation, decision assembly, position sizing, risk management or trade planning.
+- Future Decision Layer integration should consume PortfolioResult instead of duplicating portfolio logic.
+
+Validation:
+
+- Official regression suite: `tests`
+- Result: 73 passing tests
