@@ -1,5 +1,182 @@
 # CHANGELOG
 
+# Sprint 4.0.1 — Production Foundation (COMPLETED)
+
+---
+
+## Added
+
+### Central Logging
+
+Added a centralized logging infrastructure.
+
+New component:
+
+- `LoggingService`
+
+Logging is now available throughout the backend.
+
+Current logging coverage:
+
+- ApplicationController
+- YahooProvider
+- IndicatorBuilder
+- TradingPipeline
+- AIMarketScanner
+- BacktestEngine
+
+The application now produces a complete audit trail from user interaction to deterministic trading result.
+
+---
+
+### Regression Testing
+
+Added a centralized regression test runner.
+
+New utility:
+
+- `run_tests.py`
+
+Current regression suite:
+
+- Trading Pipeline
+- Decision Smoke
+- Intelligence Layer
+- AI Market Scanner
+- AI Scanner Presenter
+- Backtest Visualizer
+
+Regression testing is now mandatory before every release.
+
+---
+
+### Production Workflow
+
+Introduced a standardized development workflow.
+
+Every sprint now follows:
+
+Feature
+
+↓
+
+Testing
+
+↓
+
+Documentation
+
+↓
+
+Git Commit
+
+↓
+
+GitHub Push
+
+A sprint is only considered complete after all five stages have been completed.
+
+---
+
+## Changed
+
+### Backend
+
+Replaced remaining operational `print()` usage with centralized logging in core services.
+
+Improved traceability across the deterministic trading pipeline.
+
+---
+
+### Quality Assurance
+
+Regression validation is now centralized through a single command:
+
+```powershell
+python run_tests.py
+```
+
+Current result:
+
+```
+Passed: 6
+Failed: 0
+```
+
+---
+
+### Documentation
+
+Documentation refreshed to align with the production architecture.
+
+Updated:
+
+- AI_CONTEXT.md
+- PROJECT_STATUS.md
+- TODO.md
+- CHANGELOG.md
+- ORION_MASTER_ARCHITECTURE.md
+
+---
+
+## Validation
+
+Validated:
+
+- LoggingService
+- YahooProvider
+- IndicatorBuilder
+- TradingPipeline
+- AIMarketScanner
+- ApplicationController
+- BacktestEngine
+- Regression Test Runner
+
+All regression tests passed successfully.
+
+---
+
+## Current Status
+
+Architecture
+
+🟢 Stable
+
+Production Infrastructure
+
+🟢 Stable
+
+Regression Testing
+
+🟢 Passing
+
+Logging
+
+🟢 Complete
+
+Technical Debt
+
+🟢 Low
+
+Documentation
+
+🟢 Updated
+
+---
+
+## Next Sprint
+
+Sprint 4.1
+
+Objectives:
+
+- Dashboard 2.0
+- Portfolio Summary
+- Equity Visualization
+- Confidence Gauge
+- Watchlists
+- Live Dashboard Refresh
+
 # Sprint 3.13 — AI Desktop Integration & Stabilization (COMPLETED)
 
 ---

@@ -15,6 +15,32 @@
 
 ---
 
+## Production Infrastructure
+
+### Logging
+
+- [x] Central LoggingService
+- [x] ApplicationController logging
+- [x] YahooProvider logging
+- [x] IndicatorBuilder logging
+- [x] TradingPipeline logging
+- [x] AIMarketScanner logging
+- [x] BacktestEngine logging
+
+---
+
+### Testing
+
+- [x] Central regression runner (`run_tests.py`)
+- [x] Trading Pipeline tests
+- [x] Intelligence tests
+- [x] AI Scanner tests
+- [x] AI Scanner Presenter tests
+- [x] Backtest tests
+- [x] Decision smoke tests
+
+---
+
 ## Trading Intelligence
 
 - [x] IndicatorBuilder
@@ -34,119 +60,144 @@
 
 ## Orchestration
 
-- [x] Trading Pipeline
-- [x] AI Market Scanner
+- [x] TradingPipeline
+- [x] AIMarketScanner
+- [x] BacktestEngine
+- [x] BacktestSimulator
+- [x] BacktestVisualizer
 
 ---
 
-## Desktop UI
+## Desktop
 
 - [x] Trading Workspace
 - [x] Trading Workspace Presenter
-- [x] Dashboard integration
-- [x] Scanner integration
+- [x] Dashboard
+- [x] Scanner
 - [x] AI Scanner Presenter
 - [x] Shared Trading Pipeline
+- [x] ApplicationController
 
 ---
 
 ## Market Data
 
-- [x] Live Yahoo Finance integration
-- [x] IndicatorBuilder connected to live data
-
----
-
-## Backtesting
-
-- [x] Backtest Engine
-- [x] Backtest Simulator
-- [x] Backtest Visualizer
-- [x] Equity curve
-- [x] Trade summaries
-- [x] Performance statistics
+- [x] Live Yahoo Finance
+- [x] Historical OHLCV
+- [x] IndicatorBuilder integration
 
 ---
 
 # 🚧 Current Sprint
 
-## Sprint 3.13 — Stabilization
+# Sprint 4.1 — Dashboard 2.0
 
-### Configuration
+## Dashboard
 
-- [x] TradingConfig introduced
-- [ ] Move remaining hardcoded values to TradingConfig
-- [ ] Add DecisionConfig
-- [ ] Add RiskConfig
-
-### Logging
-
-- [ ] Central logging framework
-- [ ] File logging
-- [ ] Trading event logging
-- [ ] Scanner event logging
-
-### Testing
-
-- [ ] Unified `run_tests.py`
-- [ ] ApplicationController integration tests
-- [ ] Trading Pipeline integration tests
-- [ ] Scanner integration tests
-- [ ] UI smoke tests
-
-### Documentation
-
-- [ ] Update Architecture
-- [ ] Update AI Context
-- [ ] Update Project Status
-- [ ] Update TODO
-- [ ] Update Changelog
+- [ ] Portfolio Summary
+- [ ] Cash Widget
+- [ ] Equity Widget
+- [ ] Today's P/L
+- [ ] Open Positions
+- [ ] Portfolio Exposure
 
 ---
 
-# 🚀 Sprint 4.0
+## Visualization
 
-## Desktop Experience
+- [ ] Equity Curve
+- [ ] Confidence Gauge
+- [ ] Pressure Gauge
+- [ ] Risk Gauge
+- [ ] Portfolio Allocation
 
-- [ ] Live dashboard
-- [ ] Equity chart
-- [ ] Confidence gauge
-- [ ] Pressure gauge
-- [ ] Risk badge
-- [ ] Position visualization
+---
 
 ## Scanner
 
-- [ ] User-defined watchlists
-- [ ] Custom scan universes
-- [ ] Scan filters
-- [ ] Export scan results
+- [ ] Best Trade Card
+- [ ] Top Opportunities
+- [ ] Market Health Indicator
+- [ ] AI Confidence Summary
 
-## Trading
+---
 
-- [ ] Automatic refresh
-- [ ] Live monitoring
-- [ ] Portfolio insights
+## Desktop UX
 
-## Infrastructure
+- [ ] Improved Dashboard Layout
+- [ ] Professional Card Styling
+- [ ] Better Status Bar
+- [ ] Dashboard Refresh Button
 
-- [ ] Broker abstraction
-- [ ] Paper trading improvements
-- [ ] Portfolio optimization
-- [ ] Live execution preparation
+---
+
+# 📋 Upcoming Sprints
+
+## Sprint 4.2
+
+Watchlists
+
+- [ ] Custom Watchlists
+- [ ] Save Watchlists
+- [ ] Load Watchlists
+- [ ] Scan Selected Watchlist
+
+---
+
+## Sprint 4.3
+
+Portfolio Workspace
+
+- [ ] Portfolio Overview
+- [ ] Position Table
+- [ ] Allocation
+- [ ] Unrealized P/L
+
+---
+
+## Sprint 4.4
+
+Live Monitoring
+
+- [ ] Auto Refresh
+- [ ] Background Scanner
+- [ ] Live Dashboard Updates
+
+---
+
+## Sprint 4.5
+
+Paper Trading
+
+- [ ] Portfolio Simulation
+- [ ] Virtual Orders
+- [ ] Position History
 
 ---
 
 # 🎯 Long-Term Goal
 
-Build a professional deterministic AI-assisted trading platform that combines:
+Develop Orion into a professional deterministic AI-assisted trading platform featuring:
 
-- Live market analysis
+- Live Market Analysis
 - Explainable AI
-- Portfolio intelligence
-- Historical backtesting
+- Portfolio Intelligence
+- Historical Backtesting
 - Watchlists
-- Paper trading
-- Future broker integration
+- Paper Trading
+- Broker Integration
 
-while preserving deterministic decision making as the single source of truth.
+while maintaining deterministic calculations as the single source of truth.
+
+---
+
+# Development Rules
+
+Every completed sprint must end with:
+
+- Passing regression tests
+- Updated documentation
+- Git commit
+- GitHub push
+
+No exceptions.

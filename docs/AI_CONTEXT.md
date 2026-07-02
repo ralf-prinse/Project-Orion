@@ -4,162 +4,312 @@
 
 # Current Phase
 
-## Sprint 3.13 — Stabilization
+## Sprint 4.0.1 — Production Foundation
 
-Project Orion has transitioned from a prototype into a deterministic AI-assisted desktop trading platform.
+Project Orion has evolved into a deterministic AI-assisted desktop trading platform.
 
-The backend architecture is considered stable.
+The architectural foundation is considered stable.
 
-Current development focuses on:
+Development has transitioned from feature construction to production hardening.
 
-- architecture stabilization
-- configuration centralization
-- UI integration
-- test coverage
+Current priorities are:
+
+- production stability
+- centralized configuration
+- centralized logging
+- regression testing
 - documentation
-- production readiness
+- professional desktop experience
 
-No new backend engines should be introduced before Sprint 4.0.
+Future development extends the architecture rather than redesigning it.
+
+---
+
+# Development Philosophy
+
+Project Orion follows several non-negotiable engineering principles.
+
+## Deterministic First
+
+Every trading decision must be reproducible.
+
+Identical market data must always generate identical output.
+
+Artificial Intelligence never performs calculations.
+
+---
+
+## Layer Separation
+
+Business logic exists only inside Services.
+
+Presentation logic exists only inside Presenters.
+
+Qt Widgets contain no business logic.
+
+ApplicationController coordinates communication between UI and backend.
+
+---
+
+## Production Workflow
+
+Every sprint follows the same workflow.
+
+Feature
+
+↓
+
+Testing
+
+↓
+
+Documentation
+
+↓
+
+Git Commit
+
+↓
+
+GitHub Push
+
+No sprint is considered complete until all five steps have finished.
 
 ---
 
 # Core Trading Flow
 
 ```
-Yahoo Finance
-        ↓
-IndicatorBuilder
-        ↓
-IndicatorPack
-        ↓
-Trading Pipeline
-        ↓
-Signal Fusion
-        ↓
-Market Intelligence
-        ↓
-Adaptive Decision
-        ↓
-Position Sizing
-        ↓
-AI Context
-        ↓
-AI Explanation
-```
+User
 
-Every calculation remains deterministic.
+↓
 
-Artificial Intelligence never changes investment decisions.
-
----
-
-# Desktop Flow
-
-```
-MainWindow
-        ↓
 ApplicationController
-        ↓
-Trading Workspace
 
-or
+↓
 
-Dashboard
+YahooProvider
 
-or
+↓
 
-Scanner
-        ↓
-Presenters
-        ↓
-Qt Widgets
+IndicatorBuilder
+
+↓
+
+IndicatorPack
+
+↓
+
+TradingPipeline
+
+↓
+
+Signal Fusion
+
+↓
+
+Market Intelligence
+
+↓
+
+Adaptive Decision
+
+↓
+
+Position Sizing
+
+↓
+
+AI Context
+
+↓
+
+AI Explanation
+
+↓
+
+Presenter
+
+↓
+
+Qt Desktop
 ```
 
-ApplicationController is now the central UI orchestrator.
+Every layer has exactly one responsibility.
 
 ---
 
-# Market Scanner
+# AI Market Scanner
 
-The legacy scanner has been superseded by the AI Market Scanner.
-
-Current flow:
+The AI Market Scanner uses the exact same Trading Pipeline as the Trading Workspace.
 
 ```
-Yahoo Finance
-        ↓
+ApplicationController
+
+↓
+
+YahooProvider
+
+↓
+
 IndicatorBuilder
-        ↓
-Trading Pipeline
-        ↓
+
+↓
+
+TradingPipeline
+
+↓
+
 AIMarketScanner
-        ↓
+
+↓
+
 AIScannerPresenter
-        ↓
+
+↓
+
 Scanner Workspace
 ```
 
-Trading and Scanner now share the exact same AI pipeline.
-
-There is only one source of truth.
+There is only one deterministic source of truth.
 
 ---
 
-# Current Components
+# Backtesting Flow
+
+Historical Dataset
+
+↓
+
+MarketScanner
+
+↓
+
+BacktestEngine
+
+↓
+
+BacktestSimulator
+
+↓
+
+Equity Curve
+
+↓
+
+Trade Log
+
+↓
+
+Backtest Visualizer
+
+---
+
+# Current Infrastructure
 
 Completed
+
+✅ TradingConfig
+
+✅ LoggingService
+
+✅ YahooProvider
 
 ✅ IndicatorBuilder
 
 ✅ TradingPipeline
 
-✅ TradingWorkspace
-
-✅ TradingWorkspacePresenter
-
 ✅ AIMarketScanner
 
-✅ AIScannerPresenter
-
-✅ TradingConfig
+✅ BacktestEngine
 
 ✅ ApplicationController
 
-✅ Live Yahoo integration
+✅ Trading Workspace
 
-✅ Dashboard integration
+✅ Dashboard
 
-✅ Scanner integration
+✅ Scanner
 
-✅ Backtesting
+---
+
+# Logging Architecture
+
+Every important backend component now logs to the centralized logging system.
+
+Current coverage
+
+✅ ApplicationController
+
+✅ YahooProvider
+
+✅ IndicatorBuilder
+
+✅ TradingPipeline
+
+✅ AIMarketScanner
+
+✅ BacktestEngine
+
+Log destination
+
+```
+logs/
+
+orion.log
+```
+
+The logging system now provides a complete audit trail from user action to AI explanation.
+
+---
+
+# Testing
+
+Regression testing is centralized.
+
+Official command
+
+```powershell
+python run_tests.py
+```
+
+Current health
+
+✅ All regression tests passing.
+
+Regression tests are mandatory before every Git commit.
 
 ---
 
 # Current Priority
 
-Sprint 3.13 Stabilization
+Sprint 4.1
 
 Objectives
 
-- Central configuration
-- Logging
-- Increased test coverage
-- Documentation
-- Production cleanup
+- Dashboard 2.0
+- Portfolio visualization
+- Equity charts
+- Watchlists
+- Live refresh
+- Portfolio analytics
 
-No architectural redesigns are planned.
+No backend redesign is planned.
+
+The current architecture is considered production-ready for continued expansion.
 
 ---
 
-# Sprint 4.0 Preview
+# Long-Term Vision
 
-Planned
+Project Orion will evolve into a professional AI-assisted desktop trading platform capable of:
 
-- Live dashboard
-- Watchlists
-- Auto refresh
-- Equity visualization
-- Portfolio intelligence
-- Broker integration preparation
+- deterministic market analysis
+- explainable AI
+- historical backtesting
+- portfolio intelligence
+- watchlists
+- paper trading
+- broker integration
 
-Backend architecture remains unchanged.
+while preserving deterministic decision making as the single source of truth.

@@ -4,15 +4,15 @@
 
 # Architecture Version
 
-**Architecture Freeze v1.1**
+**Architecture Freeze v1.2**
 
-Status:
+Status
 
-🟢 Stable
+🟢 Production Foundation Complete
 
-Current Phase:
+Current Phase
 
-Sprint 3.13 — Stabilization
+Sprint 4.1 — Dashboard Evolution
 
 ---
 
@@ -24,45 +24,45 @@ Every architectural layer has exactly one responsibility.
 
 Artificial Intelligence never performs investment calculations.
 
-Deterministic services remain the single source of truth.
+Artificial Intelligence explains deterministic results.
 
-Artificial Intelligence explains deterministic results and prepares the platform for future conversational interaction.
-
----
-
-# Core Principles
-
-## Deterministic Services
-
-Business logic exists only inside Services.
-
-Identical input always produces identical output.
+The deterministic pipeline remains the single source of truth.
 
 ---
 
-## Strong Layer Separation
+# Engineering Principles
 
-```
-State
-        ↓
-Services
-        ↓
+## Deterministic First
+
+Identical market data must always produce identical trading decisions.
+
+No randomness is permitted.
+
+---
+
+## Separation of Responsibilities
+
+Business Logic
+
+↓
+
 Orchestration
-        ↓
-Presenters
-        ↓
-Workspaces
-        ↓
-Qt Widgets
-```
 
-Business logic never exists inside the UI.
+↓
+
+Presentation
+
+↓
+
+Qt UI
+
+Every layer communicates through explicit models.
 
 ---
 
 ## Explainability
 
-Every trading recommendation must be:
+Every recommendation must be:
 
 - deterministic
 - reproducible
@@ -71,93 +71,111 @@ Every trading recommendation must be:
 
 ---
 
-## Strong Data Contracts
+## Production Workflow
 
-Services communicate exclusively through explicit models.
+Every sprint follows:
 
-Examples:
+Feature
 
-- IndicatorPack
-- MarketSignal
-- DecisionInput
-- PositionContext
-- TradeDecision
-- AIContext
+↓
 
-Temporary runtime objects are prohibited.
+Testing
+
+↓
+
+Documentation
+
+↓
+
+Git Commit
+
+↓
+
+GitHub Push
+
+A sprint is not finished before all five stages have completed.
 
 ---
 
-# Current Trading Architecture
+# Production Architecture
 
 ```
-Yahoo Finance
+User
+        ↓
+ApplicationController
+        ↓
+YahooProvider
         ↓
 IndicatorBuilder
         ↓
 IndicatorPack
         ↓
-Signal Fusion Engine
+TradingPipeline
         ↓
-Market Intelligence Engine
+Signal Fusion
         ↓
-Adaptive Decision Engine
+Market Intelligence
         ↓
-Position Sizing Engine
+Adaptive Decision
+        ↓
+Position Sizing
         ↓
 AI Context Builder
         ↓
 AI Explanation Engine
         ↓
-Trading Pipeline
+Presenters
+        ↓
+Qt Desktop
 ```
 
-This deterministic pipeline represents the single source of truth.
+This deterministic pipeline is the only source of trading decisions.
 
 ---
 
-# Multi-Asset Architecture
+# AI Market Scanner
 
 ```
-Trading Pipeline
+ApplicationController
+        ↓
+YahooProvider
+        ↓
+IndicatorBuilder
+        ↓
+TradingPipeline
         ↓
 AIMarketScanner
-        ↓
-Opportunity Ranking
         ↓
 AIScannerPresenter
         ↓
 Scanner Workspace
 ```
 
-Trading Workspace and Scanner Workspace now share the exact same Trading Pipeline.
+Trading Workspace and AI Scanner always share the exact same Trading Pipeline.
 
-No duplicate decision logic exists.
+No duplicate business logic exists.
 
 ---
 
-# Desktop Architecture
+# Backtesting Architecture
 
 ```
-MainWindow
+Historical Dataset
         ↓
-ApplicationController
+MarketScanner
         ↓
-Trading
-Scanner
-Dashboard
-Portfolio
-History
-Settings
+BacktestEngine
         ↓
-Presenters
+BacktestSimulator
         ↓
-Qt Workspaces
+Trade Log
+        ↓
+Equity Curve
+        ↓
+BacktestVisualizer
 ```
 
-ApplicationController is the central UI orchestrator.
-
-MainWindow contains no business logic.
+Backtesting reuses deterministic production logic.
 
 ---
 
@@ -166,119 +184,165 @@ MainWindow contains no business logic.
 ```
 TradingConfig
         ↓
+YahooProvider
+
 IndicatorBuilder
+
+TradingPipeline
+
 ApplicationController
-Backtest
-Scanner
+
+AIMarketScanner
+
+Backtesting
 ```
 
 Configuration is centralized.
 
-Hardcoded trading parameters should not exist elsewhere.
+Hardcoded values should not exist elsewhere.
 
 ---
 
-# Trading Intelligence Layer
+# Logging Architecture
 
-Completed:
+```
+ApplicationController
+        ↓
+YahooProvider
+        ↓
+IndicatorBuilder
+        ↓
+TradingPipeline
+        ↓
+AIMarketScanner
+        ↓
+BacktestEngine
+```
 
-- Signal Fusion Engine
-- Market Intelligence Engine
-- Adaptive Decision Engine
-- Position Sizing Engine
+All important backend components use LoggingService.
 
-These services are deterministic and stateless.
+Output:
+
+```
+logs/orion.log
+```
+
+Logging provides a complete audit trail.
 
 ---
 
-# Artificial Intelligence Layer
+# Regression Testing
 
-Completed:
+Regression validation is centralized.
 
-- AI Context Builder
-- AI Explanation Engine
+Official command
 
-AI provides explanations only.
+```powershell
+python run_tests.py
+```
 
-AI never influences deterministic calculations.
-
----
-
-# Orchestration Layer
-
-Completed:
+Current suite
 
 - Trading Pipeline
-- AIMarketScanner
-- Backtest Engine
-- Backtest Simulator
+- Decision Smoke
+- Intelligence Layer
+- AI Market Scanner
+- AI Scanner Presenter
 - Backtest Visualizer
 
-Orchestration coordinates services.
-
-It performs no calculations itself.
+Regression testing is mandatory before releases.
 
 ---
 
-# Desktop Components
+# Current Production Components
 
-Completed:
-
-- Trading Workspace
-- Trading Workspace Presenter
-- Dashboard Workspace
-- Scanner Workspace
-- AIScannerPresenter
-- ApplicationController
-
-Desktop responsibilities are fully separated from business logic.
-
----
-
-# Current Status
-
-Completed:
-
-✅ Live Yahoo Finance
-
-✅ IndicatorBuilder
-
-✅ Trading Pipeline
-
-✅ AI Market Scanner
-
-✅ Trading Workspace
-
-✅ Scanner Workspace
-
-✅ ApplicationController
+Completed
 
 ✅ TradingConfig
 
-✅ Backtesting
+✅ LoggingService
 
-Architecture Quality:
+✅ YahooProvider
 
-🟢 Stable
+✅ IndicatorBuilder
 
-Technical Debt:
+✅ TradingPipeline
 
-🟢 Low
+✅ Signal Fusion Engine
+
+✅ Market Intelligence Engine
+
+✅ Adaptive Decision Engine
+
+✅ Position Sizing Engine
+
+✅ AI Context Builder
+
+✅ AI Explanation Engine
+
+✅ AIMarketScanner
+
+✅ BacktestEngine
+
+✅ BacktestSimulator
+
+✅ BacktestVisualizer
+
+✅ Trading Workspace
+
+✅ Dashboard
+
+✅ Scanner
+
+✅ ApplicationController
 
 ---
 
-# Sprint 4.0 Vision
+# Project Health
 
-The backend architecture is considered complete.
+Architecture
 
-Future development focuses on:
+🟢 Stable
 
-- central logging
-- automated testing
-- dashboard enhancements
-- watchlists
-- equity visualization
-- live monitoring
-- broker abstraction
+Backend
 
-The architecture will be extended rather than redesigned.
+🟢 Stable
+
+Desktop
+
+🟢 Stable
+
+Logging
+
+🟢 Complete
+
+Regression Tests
+
+🟢 Passing
+
+Technical Debt
+
+🟢 Low
+
+Documentation
+
+🟢 Current
+
+---
+
+# Sprint 4.1 Vision
+
+Development now shifts from backend infrastructure to user experience.
+
+Primary objectives:
+
+- Dashboard 2.0
+- Portfolio Overview
+- Equity Visualization
+- Confidence Gauges
+- Watchlists
+- Live Refresh
+
+No architectural redesign is expected.
+
+Future development extends the existing production architecture.
