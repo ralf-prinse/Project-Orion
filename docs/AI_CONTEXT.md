@@ -1,299 +1,165 @@
 # ORION AI CONTEXT
 
-## 🧠 Current Focus
+---
 
-Orion is no longer an analytics dashboard.
+# Current Phase
 
-It has evolved into a modular AI-assisted trading decision platform built on a deterministic service architecture.
+## Sprint 3.13 — Stabilization
 
-The current focus is to stabilize the AI trading core before integrating live market data and the Qt user interface.
+Project Orion has transitioned from a prototype into a deterministic AI-assisted desktop trading platform.
+
+The backend architecture is considered stable.
+
+Current development focuses on:
+
+- architecture stabilization
+- configuration centralization
+- UI integration
+- test coverage
+- documentation
+- production readiness
+
+No new backend engines should be introduced before Sprint 4.0.
 
 ---
 
-# Current Architecture
+# Core Trading Flow
 
-The trading system is organized into independent layers.
-
-Indicator Data
+```
+Yahoo Finance
         ↓
-Signal Fusion Engine
+IndicatorBuilder
         ↓
-Market Intelligence Engine
-        ↓
-Adaptive Decision Engine
-        ↓
-Position Sizing Engine
-        ↓
-AI Context Builder
-        ↓
-AI Explanation Engine
+IndicatorPack
         ↓
 Trading Pipeline
         ↓
-Market Scanner
+Signal Fusion
         ↓
-Backtest Engine
+Market Intelligence
         ↓
-Backtest Visualizer
+Adaptive Decision
+        ↓
+Position Sizing
+        ↓
+AI Context
+        ↓
+AI Explanation
+```
 
-Each layer has a single responsibility.
+Every calculation remains deterministic.
+
+Artificial Intelligence never changes investment decisions.
 
 ---
 
-# Core Architecture Rules
+# Desktop Flow
 
-Services
-- Pure deterministic logic
-- No UI
-- No rendering
-- No state mutation
+```
+MainWindow
+        ↓
+ApplicationController
+        ↓
+Trading Workspace
 
+or
+
+Dashboard
+
+or
+
+Scanner
+        ↓
 Presenters
-- UI mapping only
+        ↓
+Qt Widgets
+```
 
-Workspaces
-- UI composition only
-
-Renderers
-- Drawing only
-
-Data Flow
-
-State
-→ Services
-→ Presenters
-→ Workspaces
-→ Renderers
-
-The UI never performs calculations.
+ApplicationController is now the central UI orchestrator.
 
 ---
 
-# Trading Intelligence
+# Market Scanner
 
-## Signal Fusion Engine
+The legacy scanner has been superseded by the AI Market Scanner.
 
-Responsible for combining normalized indicators into one market pressure model.
+Current flow:
 
-Outputs:
+```
+Yahoo Finance
+        ↓
+IndicatorBuilder
+        ↓
+Trading Pipeline
+        ↓
+AIMarketScanner
+        ↓
+AIScannerPresenter
+        ↓
+Scanner Workspace
+```
 
-- pressure_score
-- buy_pressure
-- sell_pressure
-- strength
+Trading and Scanner now share the exact same AI pipeline.
 
-This is now the primary trading signal.
-
----
-
-## Market Intelligence
-
-Provides contextual market information.
-
-Outputs include:
-
-- regime
-- volatility state
-- risk score
-
-It no longer owns the primary trading score.
+There is only one source of truth.
 
 ---
 
-## Adaptive Decision Engine
+# Current Components
 
-Consumes MarketSignal.
+Completed
 
-Produces:
+✅ IndicatorBuilder
 
-- BUY
-- SELL
-- HOLD
+✅ TradingPipeline
 
-with confidence and reasoning.
+✅ TradingWorkspace
 
-The decision engine no longer performs position sizing.
+✅ TradingWorkspacePresenter
 
----
+✅ AIMarketScanner
 
-## Position Sizing
+✅ AIScannerPresenter
 
-Consumes:
+✅ TradingConfig
 
-DecisionInput
+✅ ApplicationController
 
-Uses:
+✅ Live Yahoo integration
 
-- available cash
-- normalized signal score
-- volatility
+✅ Dashboard integration
 
-Outputs:
+✅ Scanner integration
 
-- position size
-
-Only sizing.
-No trading decisions.
+✅ Backtesting
 
 ---
 
-## AI Context Builder
+# Current Priority
 
-Produces a complete AI reasoning object.
+Sprint 3.13 Stabilization
 
-AIContext contains:
+Objectives
 
-- signal information
-- market regime
-- volatility
-- risk
-- decision
-- confidence
-- explanation inputs
-- execution information
+- Central configuration
+- Logging
+- Increased test coverage
+- Documentation
+- Production cleanup
 
-This object is intended for future LLM reasoning.
+No architectural redesigns are planned.
 
 ---
 
-## AI Explanation Engine
+# Sprint 4.0 Preview
 
-Produces human-readable reasoning.
+Planned
 
-Example:
+- Live dashboard
+- Watchlists
+- Auto refresh
+- Equity visualization
+- Portfolio intelligence
+- Broker integration preparation
 
-- Strong BUY signal
-- Bullish regime
-- Low volatility
-- Buy pressure dominates
-- High confidence
-
-The explanation layer never influences decisions.
-
----
-
-# Multi-Asset System
-
-MarketScanner executes the full trading pipeline for multiple assets.
-
-Responsibilities:
-
-- execute pipeline
-- collect results
-- rank opportunities
-- identify actionable trades
-
----
-
-# Backtesting
-
-Current backtesting stack:
-
-Backtest Engine
-
-↓
-
-Backtest Simulator
-
-↓
-
-Backtest Visualizer
-
-Current capabilities:
-
-- deterministic simulation
-- fees
-- slippage
-- equity curve
-- trade log
-- performance summary
-
----
-
-# Stabilization Status
-
-Architecture Freeze v1.0 completed.
-
-Major improvements:
-
-- Removed temporary runtime objects
-- Introduced explicit data models
-- DecisionInput introduced
-- MarketSignal standardized
-- PositionContext standardized
-- TradingPipeline simplified
-- Scanner stabilized
-- Backtest stack stabilized
-
----
-
-# Current Project Status
-
-The backend trading architecture is considered stable.
-
-Implemented:
-
-✅ Signal Fusion
-
-✅ Market Intelligence
-
-✅ Adaptive Decision Engine
-
-✅ Position Sizing
-
-✅ AI Context
-
-✅ AI Explanation
-
-✅ Trading Pipeline
-
-✅ Market Scanner
-
-✅ Backtest Engine
-
-✅ Backtest Simulator
-
-✅ Backtest Visualizer
-
----
-
-# Immediate Next Phase
-
-The next development phase is UI integration.
-
-Goals:
-
-- Trading Workspace
-- Live pipeline execution
-- Decision visualization
-- AI explanation panel
-- Equity curve visualization
-- Scanner dashboard
-
-No additional AI features should be added before the UI is connected to the stabilized backend.
-
----
-
-# Long-Term Vision
-
-Orion becomes an AI-native trading platform capable of transforming:
-
-Market Data
-
-+
-
-Portfolio State
-
-+
-
-Future News & Sentiment
-
-+
-
-Risk Models
-
-↓
-
-Explainable AI Trading Decisions
-
-with a clean, deterministic and production-ready architecture.
+Backend architecture remains unchanged.

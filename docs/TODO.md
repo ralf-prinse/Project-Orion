@@ -2,19 +2,22 @@
 
 ---
 
-# Completed
+# ✅ Completed
 
 ## Core Architecture
 
 - [x] Deterministic service architecture
-- [x] Multi-workspace desktop architecture
+- [x] Desktop workspace architecture
 - [x] Presenter architecture
-- [x] Chart rendering engine
+- [x] ApplicationController architecture
+- [x] Central TradingConfig
+- [x] Architecture Freeze v1.1
 
 ---
 
 ## Trading Intelligence
 
+- [x] IndicatorBuilder
 - [x] Signal Fusion Engine
 - [x] Market Intelligence Engine
 - [x] Adaptive Decision Engine
@@ -32,7 +35,25 @@
 ## Orchestration
 
 - [x] Trading Pipeline
-- [x] Market Scanner
+- [x] AI Market Scanner
+
+---
+
+## Desktop UI
+
+- [x] Trading Workspace
+- [x] Trading Workspace Presenter
+- [x] Dashboard integration
+- [x] Scanner integration
+- [x] AI Scanner Presenter
+- [x] Shared Trading Pipeline
+
+---
+
+## Market Data
+
+- [x] Live Yahoo Finance integration
+- [x] IndicatorBuilder connected to live data
 
 ---
 
@@ -41,125 +62,91 @@
 - [x] Backtest Engine
 - [x] Backtest Simulator
 - [x] Backtest Visualizer
+- [x] Equity curve
+- [x] Trade summaries
+- [x] Performance statistics
 
 ---
 
-## Architecture
+# 🚧 Current Sprint
 
-- [x] Architecture Stabilization
-- [x] Architecture Freeze v1.0
+## Sprint 3.13 — Stabilization
 
----
+### Configuration
 
-# Current Sprint
+- [x] TradingConfig introduced
+- [ ] Move remaining hardcoded values to TradingConfig
+- [ ] Add DecisionConfig
+- [ ] Add RiskConfig
 
-## Sprint 3.11 — Desktop Trading Workspace
+### Logging
 
-### Trading Workspace
+- [ ] Central logging framework
+- [ ] File logging
+- [ ] Trading event logging
+- [ ] Scanner event logging
 
-- [ ] Create Trading Workspace
-- [ ] Trading Workspace layout
-- [ ] Trading toolbar
-- [ ] Symbol selector
-- [ ] Execute pipeline button
+### Testing
 
----
+- [ ] Unified `run_tests.py`
+- [ ] ApplicationController integration tests
+- [ ] Trading Pipeline integration tests
+- [ ] Scanner integration tests
+- [ ] UI smoke tests
 
-### Trading Presenter
+### Documentation
 
-- [ ] TradingWorkspacePresenter
-- [ ] Trading result mapping
-- [ ] AI explanation mapping
-- [ ] Risk mapping
-
----
-
-### Trading Dashboard
-
-- [ ] BUY / SELL / HOLD panel
-- [ ] Market pressure widget
-- [ ] Confidence widget
-- [ ] Position sizing widget
-- [ ] Risk widget
+- [ ] Update Architecture
+- [ ] Update AI Context
+- [ ] Update Project Status
+- [ ] Update TODO
+- [ ] Update Changelog
 
 ---
 
-### Scanner Workspace
+# 🚀 Sprint 4.0
 
-- [ ] Scanner Workspace
-- [ ] Opportunity ranking table
-- [ ] Actionable trades panel
-- [ ] Asset comparison view
+## Desktop Experience
 
----
+- [ ] Live dashboard
+- [ ] Equity chart
+- [ ] Confidence gauge
+- [ ] Pressure gauge
+- [ ] Risk badge
+- [ ] Position visualization
 
-### Backtest Workspace
+## Scanner
 
-- [ ] Equity curve chart
-- [ ] Trade log table
-- [ ] Performance summary
-- [ ] Statistics cards
+- [ ] User-defined watchlists
+- [ ] Custom scan universes
+- [ ] Scan filters
+- [ ] Export scan results
 
----
+## Trading
 
-# Future Sprint
-
-## Live Market Integration
-
-- [ ] Live market feed
 - [ ] Automatic refresh
-- [ ] Multi-symbol monitoring
-- [ ] Session awareness
+- [ ] Live monitoring
+- [ ] Portfolio insights
 
----
+## Infrastructure
 
-## Portfolio Intelligence
-
+- [ ] Broker abstraction
+- [ ] Paper trading improvements
 - [ ] Portfolio optimization
-- [ ] Exposure monitoring
-- [ ] Allocation recommendations
-- [ ] Portfolio heatmap
+- [ ] Live execution preparation
 
 ---
 
-## AI Expansion
+# 🎯 Long-Term Goal
 
-- [ ] News ingestion
-- [ ] Sentiment analysis
-- [ ] Macro event analysis
-- [ ] AI portfolio insights
+Build a professional deterministic AI-assisted trading platform that combines:
 
----
+- Live market analysis
+- Explainable AI
+- Portfolio intelligence
+- Historical backtesting
+- Watchlists
+- Paper trading
+- Future broker integration
 
-## Broker Integration
-
-- [ ] Paper trading integration
-- [ ] Broker abstraction layer
-- [ ] Order execution
-- [ ] Position synchronization
-
----
-
-# Technical Improvements
-
-- [ ] Introduce PipelineResult dataclass
-- [ ] Introduce ScannerResult dataclass
-- [ ] Introduce BacktestResult dataclass
-- [ ] Replace remaining dictionary outputs with typed models
-- [ ] Increase automated test coverage
-- [ ] Add integration tests for Trading Pipeline
-
----
-
-# Long-Term Goal
-
-Build a professional desktop trading platform that combines:
-
-- deterministic trading logic
-- explainable AI
-- portfolio intelligence
-- live market monitoring
-- historical backtesting
-- future broker connectivity
-
-while maintaining a clean, modular and production-ready architecture.
+while preserving deterministic decision making as the single source of truth.
