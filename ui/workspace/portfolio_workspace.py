@@ -1,4 +1,7 @@
-from ui.foundation.models import GuiSection
+from PySide6.QtWidgets import QHBoxLayout, QWidget
+
+from ui.foundation.models import GuiSection, GuiWorkspace
+from ui.widgets.metric_card import MetricCard
 from ui.workspace.base_workspace import BaseWorkspace
 from ui.workspace.workspace_panel import WorkspacePanel
 
@@ -7,8 +10,8 @@ class PortfolioWorkspace(BaseWorkspace):
     """
     Presentation-only portfolio workspace.
 
-    This workspace displays deterministic portfolio information produced by
-    Orion services. It never performs portfolio calculations itself.
+    This workspace displays the complete GuiWorkspace produced by portfolio
+    workspace presenters. It owns layout only and performs no calculations.
     """
 
     def __init__(self, theme):
@@ -18,54 +21,76 @@ class PortfolioWorkspace(BaseWorkspace):
             intro="Bekijk de huidige portefeuille, allocatie en risico-overzicht.",
         )
 
-        self.overview_panel = WorkspacePanel(
-            theme=self.theme,
-            title="Portfolio Overview",
-            body="Nog geen portefeuillegegevens beschikbaar.",
-        )
+        self._cards: list[MetricCard] = []
+        self._panels: list[WorkspacePanel] = []
+        self._card_row: QWidget | None = None
 
-        self.positions_panel = WorkspacePanel(
-            theme=self.theme,
-            title="Open Positions",
-            body="Er zijn momenteel geen open posities.",
-        )
+    def set_workspace(self, workspace: GuiWorkspace):
+        """
+        Render the complete portfolio workspace model.
+        """
 
-        self.exposure_panel = WorkspacePanel(
-            theme=self.theme,
-            title="Exposure",
-            body="Exposure-overzicht wordt later gekoppeld.",
-        )
+        self._clear_rendered_content()
 
-        self._build_layout()
+        if workspace.cards:
+            self._card_row = self._create_card_row(workspace)
+            self.add_workspace_widget(self._card_row)
 
-    def _build_layout(self):
-        self.add_workspace_widget(self.overview_panel)
-        self.add_workspace_widget(self.positions_panel)
-        self.add_workspace_widget(self.exposure_panel)
+        self.set_sections(workspace.sections)
 
     def set_sections(self, sections: list[GuiSection]):
-        self.overview_panel.setParent(None)
-        self.positions_panel.setParent(None)
-        self.exposure_panel.setParent(None)
+        """
+        Render section panels.
+
+        This method is retained for compatibility with existing callers.
+        Prefer set_workspace() when rendering complete workspace models.
+        """
+
+        for panel in self._panels:
+            panel.setParent(None)
+
+        self._panels.clear()
 
         for section in sections:
-            self.add_workspace_widget(
-                WorkspacePanel.from_section(
-                    theme=self.theme,
-                    section=section,
-                )
+            panel = WorkspacePanel.from_section(
+                theme=self.theme,
+                section=section,
             )
-
-    def set_overview(self, text: str):
-        self.overview_panel.set_body(text)
-
-    def set_positions(self, text: str):
-        self.positions_panel.set_body(text)
-
-    def set_exposure(self, text: str):
-        self.exposure_panel.set_body(text)
+            self._panels.append(panel)
+            self.add_workspace_widget(panel)
 
     def clear(self):
-        self.overview_panel.set_body("Nog geen portefeuillegegevens beschikbaar.")
-        self.positions_panel.set_body("Er zijn momenteel geen open posities.")
-        self.exposure_panel.set_body("Exposure-overzicht wordt later gekoppeld.")
+        self._clear_rendered_content()
+
+    def _create_card_row(self, workspace: GuiWorkspace) -> QWidget:
+        row = QWidget()
+
+        layout = QHBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 12)
+        layout.setSpacing(12)
+
+        for card in workspace.cards:
+            widget = MetricCard(
+                theme=self.theme,
+                card=card,
+            )
+            self._cards.append(widget)
+            layout.addWidget(widget)
+
+        row.setLayout(layout)
+        return row
+
+    def _clear_rendered_content(self):
+        if self._card_row is not None:
+            self._card_row.setParent(None)
+            self._card_row = None
+
+        for card in self._cards:
+            card.setParent(None)
+
+        self._cards.clear()
+
+        for panel in self._panels:
+            panel.setParent(None)
+
+        self._panels.clear()

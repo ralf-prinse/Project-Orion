@@ -89,8 +89,8 @@ class OrionWindow(QMainWindow):
     def _initialize_settings_workspace(self):
         universe = self.universe_manager.get_universe(self.active_universe)
 
-        self.settings_page.set_settings(
-            self.settings_presenter.create_settings_summary(
+        self.settings_page.set_sections(
+            self.settings_presenter.create_sections(
                 universe_name=universe.name,
                 symbol_count=len(
                     self.universe_manager.get_symbols(self.active_universe)

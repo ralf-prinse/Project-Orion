@@ -1,3 +1,4 @@
+from ui.foundation.models import GuiSection
 from ui.workspace.base_workspace import BaseWorkspace
 from ui.workspace.workspace_panel import WorkspacePanel
 
@@ -6,8 +7,8 @@ class SettingsWorkspace(BaseWorkspace):
     """
     Presentation-only settings workspace.
 
-    This workspace displays application settings and configuration summaries.
-    It does not load providers, mutate configuration or perform business logic.
+    Displays GuiSections produced by SettingsPresenter.
+    The workspace owns layout only and performs no business logic.
     """
 
     def __init__(self, theme):
@@ -17,30 +18,24 @@ class SettingsWorkspace(BaseWorkspace):
             intro="Bekijk de actieve applicatie-instellingen en configuratie.",
         )
 
-        self.settings_panel = WorkspacePanel(
-            theme=self.theme,
-            title="Actieve instellingen",
-            body="Instellingen worden later gekoppeld.",
-        )
+        self._panels: list[WorkspacePanel] = []
 
-        self.application_panel = WorkspacePanel(
-            theme=self.theme,
-            title="Applicatie",
-            body="Applicatiegegevens worden later gekoppeld.",
-        )
+    def set_sections(self, sections: list[GuiSection]):
+        """
+        Render presenter-produced GuiSections.
+        """
 
-        self._build_layout()
+        # Remove existing panels
+        for panel in self._panels:
+            panel.setParent(None)
 
-    def _build_layout(self):
-        self.add_workspace_widget(self.settings_panel)
-        self.add_workspace_widget(self.application_panel)
+        self._panels.clear()
 
-    def set_settings(self, text: str):
-        self.settings_panel.set_body(text)
-
-    def set_application_info(self, text: str):
-        self.application_panel.set_body(text)
+        # Add new panels
+        for section in sections:
+            panel = WorkspacePanel.from_section(self.theme, section)
+            self._panels.append(panel)
+            self.add_workspace_widget(panel)
 
     def clear(self):
-        self.settings_panel.set_body("Instellingen worden later gekoppeld.")
-        self.application_panel.set_body("Applicatiegegevens worden later gekoppeld.")
+        self.set_sections([])

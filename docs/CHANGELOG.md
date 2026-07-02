@@ -10,59 +10,150 @@ The format is inspired by *Keep a Changelog*.
 
 # [Unreleased]
 
-## Next Focus
-
-### Epic 2 — Professional Desktop Experience
-
-Planned:
-
-* Continue GuiShell decomposition
-* Professional Dashboard Workspace
-* Scanner Workspace
-* Portfolio Workspace
-* Performance Workspace
-* AI Workspace
-* Settings Workspace
-* Workspace layout persistence
-
----
-
-# [v1.0.15-alpha] — Workspace Framework Phase 2
+# [v1.0.16-alpha] — Workspace Composition Foundation
 
 ## Added
 
-### Workspace Architecture
+### Workspace Composition
 
-- Completed migration to dedicated workspace pages
-- Added `HistoryWorkspace`
-- Added `SettingsWorkspace`
-- Introduced `HistoryPresenter`
-- Introduced `SettingsPresenter`
-- Introduced reusable `GuiSection` presentation workflow
-- Began migration from HTML-based rendering to presenter-driven rendering
+- Introduced `GuiWorkspace` as the standard workspace presentation model.
+- Introduced `WorkspaceCoordinator`.
+- Introduced `PortfolioWorkspacePresenter`.
 
-### GUI Foundation
+### Portfolio Analytics
 
-- Expanded `DashboardPresenter`
-- Connected `PortfolioWorkspace` to `PortfolioPresenter`
-- Simplified `MainWindow`
-- Removed obsolete workspace factory methods
-- Continued migration towards a composition-root architecture
+- Added `PortfolioAnalyticsResult`.
+- Added `PortfolioAnalyticsService`.
+- Added `PortfolioStateAdapter`.
 
-### Engineering
+### Professional Desktop Components
 
-- Introduced reusable presentation infrastructure
-- Continued separation between deterministic services and GUI
-- Reduced presentation responsibilities inside `MainWindow`
-- Improved consistency across workspace implementations
+- Introduced `GuiMetricCard`.
+- Introduced reusable `MetricCard`.
+- Introduced `PortfolioMetricCardPresenter`.
 
-### Validation
+### Documentation
+
+Fully synchronized:
+
+- AI_CONTEXT.md
+- CURRENT_STATE.md
+- PROJECT_STATUS.md
+- PRESENTER_ARCHITECTURE.md
+- ORION_MASTER_ARCHITECTURE.md
+- TODO.md
+- CHANGELOG.md
+
+---
+
+## Changed
+
+### Desktop Presentation Architecture
+
+The desktop architecture evolved from a Presenter Architecture into a
+Workspace Composition Architecture.
+
+Official presentation pipeline:
+
+```text
+Deterministic Service
+        │
+        ▼
+WorkspaceCoordinator
+        │
+        ▼
+WorkspacePresenter
+        │
+        ▼
+GuiWorkspace
+├── GuiMetricCard
+└── GuiSection
+        │
+        ▼
+Workspace
+        │
+        ▼
+Reusable Qt Widgets
+        │
+        ▼
+MainWindow
+```
+
+### Portfolio
+
+Portfolio presentation now supports:
+
+- workspace composition
+- KPI presentation models
+- analytics composition
+- reusable presentation components
+
+### Architecture
+
+Epic 3 foundation has been completed.
+
+Future development now focuses primarily on professional desktop features rather
+than architectural redesign.
+
+---
+
+## Validation
 
 Regression validation completed successfully.
 
 ```text
-334 tests passed
+343 tests passed
 ```
+
+---
+
+## Notes
+
+This release establishes the Workspace Composition Architecture as the official
+desktop architecture for Project Orion.
+
+Future desktop functionality—including charts, AI workspaces, broker
+integration, reporting and advanced dashboards—will extend this architecture
+rather than replacing it.
+
+## Next Focus
+
+### Epic 3 — Professional Desktop Features
+
+Planned:
+
+- Desktop UX polish
+- Portfolio Analytics
+- Professional Charts
+- AI Workspace
+- Docking & Layout Persistence
+- Multi-monitor Support
+- Broker Integration
+- Advanced Reporting
+
+---
+
+# [v1.0.15-alpha] — Desktop Architecture Completion
+
+## Added
+
+### Presentation Architecture
+
+- Introduced `PRESENTER_ARCHITECTURE.md`.
+- Introduced `TradeAdvicePresenter`.
+- Standardized `GuiSection` as Orion's primary presentation model.
+- Introduced `WorkspacePanel.from_section()`.
+
+### Workspaces
+
+Completed migration of:
+
+- DashboardWorkspace
+- ScannerWorkspace
+- PortfolioWorkspace
+- HistoryWorkspace
+
+to the standardized GuiSection presentation workflow.
 
 ### Documentation
 
@@ -72,7 +163,83 @@ Updated:
 - CURRENT_STATE.md
 - PROJECT_STATUS.md
 - TODO.md
-- CHANGELOG.md
+- PRESENTER_ARCHITECTURE.md
+
+---
+
+## Changed
+
+### MainWindow
+
+MainWindow now primarily acts as Orion's composition root.
+
+Responsibilities:
+
+- dependency wiring
+- workspace orchestration
+- presenter coordination
+- navigation
+
+Presentation formatting responsibilities were removed.
+
+### Presentation Layer
+
+Presentation rendering is now standardized.
+
+Pipeline:
+
+```text
+Service
+    ↓
+Presenter
+    ↓
+GuiSection
+    ↓
+WorkspacePanel
+    ↓
+Workspace
+    ↓
+MainWindow
+```
+
+### Desktop Architecture
+
+Completed migration from legacy presentation rendering to presenter-driven rendering.
+
+Epic 2 is now considered architecturally complete.
+
+---
+
+## Removed
+
+- GuiSectionRenderer
+- Legacy trade advice rendering
+- Legacy HTML generation inside MainWindow
+- Legacy action-card formatting
+
+---
+
+## Validation
+
+Regression validation completed successfully.
+
+```text
+334 tests passed
+```
+
+---
+
+## Architecture
+
+Desktop presentation architecture is now considered stable.
+
+Future development will primarily focus on Epic 3:
+
+- Professional Desktop UX
+- Portfolio Analytics
+- AI Workspace
+- Professional Charts
+- Broker Integration
 
 # [v1.0.14-alpha] — Workspace Framework Phase 1
 

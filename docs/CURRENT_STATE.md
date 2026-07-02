@@ -2,37 +2,70 @@
 
 # CURRENT_STATE.md
 
+**Purpose:** Current implementation snapshot
+
+**Status:** Active
+
 **Last Updated:** July 2026
 
 ---
 
-# Current Development Phase
+# Executive Summary
 
-**Alpha Development**
+Project Orion has completed both the deterministic trading engine (Epic 1) and
+the desktop presentation architecture (Epic 2).
 
-Project Orion has completed the deterministic trading foundation and is currently focused on building a professional desktop application.
+Epic 3 is now actively in development.
+
+The focus has shifted from architectural stabilization toward professional
+desktop functionality while preserving the established architecture.
+
+During the first Epic 3 sprints the workspace architecture has been extended to
+support richer presentation models without increasing GUI complexity.
+
+The architecture is now considered stable enough for long-term feature
+development.
 
 ---
 
-# Current Epic
+# Overall Progress
 
-## Epic 2 — Professional Desktop Experience
+## Epic 1 — Deterministic Trading Engine
 
-**Status:** 🚧 In Progress
+Status:
+
+✅ Complete
+
+Implemented:
+
+- Market Data
+- Historical Data
+- Indicators
+- Signal Engine
+- Decision Engine
+- Risk Engine
+- Portfolio Engine
+- Trade Planner
+- Performance Analytics
+- Backtesting
+- Paper Trading
+- AI Explanations
+
+Epic 1 is feature complete and considered stable.
 
 ---
 
-# Current Milestone
+## Epic 2 — Desktop Architecture
 
-## Workspace Framework completed
+Status:
 
-The Workspace Framework is now the foundation of the desktop application.
+✅ Complete
 
-Completed:
+Implemented:
 
+- Workspace Framework
 - WorkspaceController
-- DashboardRouter
-- BaseWorkspace
+- GuiSection
 - WorkspacePanel
 - DashboardWorkspace
 - ScannerWorkspace
@@ -40,50 +73,269 @@ Completed:
 - HistoryWorkspace
 - SettingsWorkspace
 
-Navigation is now completely workspace-driven.
+Presentation:
 
-MainWindow has been significantly simplified and primarily acts as the application's composition root.
+- DashboardPresenter
+- PortfolioPresenter
+- HistoryPresenter
+- SettingsPresenter
+- TradeAdvicePresenter
 
----
+Completed architectural migrations:
 
-# Current Architecture Status
+- GuiSectionRenderer removed
+- WorkspacePanel.from_section() standardized
+- MainWindow simplified
+- SettingsPresenter migrated to GuiSection
+- PortfolioWorkspace simplified
+- SettingsWorkspace simplified
 
-Implemented infrastructure:
-
-- Layered deterministic architecture
-- Dependency Injection
-- Registry Pattern
-- Event Bus
-- Configuration Framework
-- Explainability Framework
-- Scan Orchestrator
-- Professional GUI Foundation
-- Workspace Framework
-- Presenter Framework
-
-Presentation architecture now follows:
-
-```text
-Deterministic Services
-        ↓
-Presenters
-        ↓
-GuiSection models
-        ↓
-Workspace Panels
-        ↓
-Workspace Pages
-        ↓
-MainWindow
-```
+Epic 2 is fully completed.
 
 ---
 
-# Recently Completed
+## Epic 3 — Professional Desktop Features
 
-### Workspace Migration
+Status:
 
-Completed:
+🚧 In Progress
+
+Completed so far:
+
+### Sprint 3.1
+
+- WorkspacePanel professionalized
+- Settings migration completed
+- Portfolio workspace cleanup
+
+### Sprint 3.2
+
+Portfolio Analytics foundation implemented.
+
+Added:
+
+- PortfolioAnalyticsResult
+- PortfolioAnalyticsService
+
+### Sprint 3.3
+
+Workspace composition introduced.
+
+Added:
+
+- PortfolioWorkspacePresenter
+
+### Sprint 3.4
+
+Professional KPI infrastructure.
+
+Added:
+
+- GuiMetricCard
+- MetricCard widget
+- PortfolioMetricCardPresenter
+
+### Sprint 3.5
+
+Generalized workspace presentation.
+
+Added:
+
+- GuiWorkspace
+- WorkspaceCoordinator
+- PortfolioStateAdapter
+
+Current regression suite:
+
+343 passing tests
+
+---
+
+# Workspace Composition Architecture
+
+Epic 3 introduced the Workspace Composition Architecture.
+
+The official desktop presentation pipeline is now:
+
+Deterministic Service
+
+↓
+
+WorkspaceCoordinator
+
+↓
+
+WorkspacePresenter
+
+↓
+
+GuiWorkspace
+
+├── GuiMetricCard
+
+└── GuiSection
+
+↓
+
+Workspace
+
+↓
+
+Qt Widgets
+
+This architecture replaces the earlier Presenter → GuiSection → Workspace
+pipeline as the official desktop standard.
+
+---
+
+# Current Presentation Components
+
+## GuiWorkspace
+
+GuiWorkspace is now the standard presentation model returned by workspace
+presenters.
+
+It groups all presentation components required by one workspace while exposing
+a single stable API.
+
+Current supported presentation components:
+
+- GuiMetricCard
+- GuiSection
+
+Future extensions may include:
+
+- GuiChart
+- GuiTable
+- GuiAlert
+- GuiTimeline
+- GuiTree
+- GuiDockLayout
+
+The public Workspace API should remain stable as new presentation components
+are introduced.
+
+---
+
+## GuiMetricCard
+
+Purpose:
+
+Display high-level KPIs.
+
+Current usage:
+
+- Portfolio Value
+- Cash
+- Exposure
+- Open Positions
+
+GuiMetricCards are rendered by MetricCard widgets.
+
+---
+
+## GuiSection
+
+Purpose:
+
+Display grouped information.
+
+Examples:
+
+- Portfolio Analytics
+- Open Positions
+- Trade Advice
+- Scanner Results
+- History
+
+GuiSections continue to represent the primary detailed presentation model.
+
+---
+
+# WorkspaceCoordinator
+
+WorkspaceCoordinator has been introduced as the orchestration layer between
+MainWindow and workspace presenters.
+
+Responsibilities:
+
+- Build complete GuiWorkspace objects
+- Coordinate workspace presenters
+- Keep MainWindow small
+- Prevent presentation composition inside the GUI
+
+MainWindow should never manually compose cards or sections.
+
+---
+
+# Portfolio Architecture
+
+The Portfolio subsystem now follows the architecture below.
+
+Runtime Portfolio
+
+↓
+
+PortfolioStateAdapter
+
+↓
+
+PortfolioState
+
+↓
+
+PortfolioEngine
+
+↓
+
+PortfolioResult
+
+PortfolioState is also used by:
+
+↓
+
+PortfolioAnalyticsService
+
+↓
+
+PortfolioAnalyticsResult
+
+↓
+
+Presentation Layer
+
+This architecture cleanly separates:
+
+- runtime portfolio state
+- deterministic portfolio validation
+- portfolio analytics
+- presentation
+
+---
+
+# Current Presenter Catalogue
+
+Implemented:
+
+- DashboardPresenter
+- PortfolioPresenter
+- PortfolioAnalyticsPresenter
+- PortfolioMetricCardPresenter
+- PortfolioWorkspacePresenter
+- HistoryPresenter
+- SettingsPresenter
+- TradeAdvicePresenter
+
+Each presenter should own exactly one responsibility.
+
+Workspace presenters compose multiple presenters without performing business
+logic.
+
+---
+
+# Current Workspace Catalogue
+
+Implemented:
 
 - DashboardWorkspace
 - ScannerWorkspace
@@ -91,111 +343,227 @@ Completed:
 - HistoryWorkspace
 - SettingsWorkspace
 
-Old page factories have been removed where possible.
+Planned:
+
+- AIWorkspace
+- PerformanceWorkspace
+- BacktestingWorkspace
+- BrokerWorkspace
+
+Every workspace should eventually consume a GuiWorkspace.
 
 ---
 
-### MainWindow Refactoring
+# MainWindow
 
-Completed:
+MainWindow remains Orion's composition root.
 
-- deterministic navigation
-- WorkspaceController integration
-- DashboardRouter integration
-- reduced UI responsibilities
-- composition-root architecture
+Responsibilities:
 
-Remaining responsibility:
+- dependency wiring
+- application startup
+- navigation
+- workspace switching
 
-- orchestration only
+Presentation composition is delegated to WorkspaceCoordinator.
 
----
-
-### Presenter Migration
-
-Completed:
-
-- DashboardPresenter expanded
-- SettingsPresenter introduced
-- HistoryPresenter introduced
-- PortfolioPresenter integrated with PortfolioWorkspace
-
-Migration towards GuiSection-based presentation has started.
-
----
-
-# Current Priorities
-
-Immediate priorities:
-
-1. Complete GuiSection migration
-2. Remove remaining HTML-based presentation
-3. Continue MainWindow simplification
-4. Improve reusable WorkspacePanel rendering
-5. Professional desktop layout
-6. Docking architecture
-7. Workspace persistence
-
----
-
-# Current Development Workflow
-
-Every implementation follows the same process:
-
-1. Review existing implementation
-2. Review architecture
-3. Implement one logical change
-4. Replace complete files where practical
-5. Execute regression tests
-6. Synchronize documentation
-7. Commit
-8. Push
+Business logic remains delegated to deterministic services.
 
 ---
 
 # Regression Status
 
-Current validation:
+Current regression suite:
 
-```text
-334 tests passed
-```
+343 passing tests
 
-Regression testing is executed after every completed implementation step.
+Regression testing remains mandatory.
 
----
+Every architectural change should include dedicated regression tests.
 
-# Repository Rules
-
-The Git repository is the single source of truth.
-
-Never assume implementation exists unless it is present in the repository.
+No architectural refactor should reduce test coverage.
 
 ---
 
-# Notes for Future Development
+# Technical Debt
 
-Current focus is no longer the deterministic trading engines.
+Current technical debt is considered low.
 
-The analytical platform is considered stable.
+Remaining items:
 
-Current engineering effort is concentrated on the presentation architecture and professional desktop experience while preserving strict separation between business logic and GUI.
+- WorkspaceCoordinator integration into MainWindow
+- Portfolio dashboard rendering using GuiWorkspace
+- MetricCard integration in PortfolioWorkspace
+- Removal of remaining compatibility methods after migration
+
+None of these items affect architectural stability.
 
 ---
 
-# Ready for Next Session
+# Documentation Status
 
-Continue with:
+The following documentation is maintained as the authoritative source for
+Project Orion.
 
-**Epic 2 — GuiSection Migration**
+- AI_CONTEXT.md
+- ORION_MASTER_ARCHITECTURE.md
+- PRESENTER_ARCHITECTURE.md
+- PROJECT_STATUS.md
+- CHANGELOG.md
+- TODO.md
 
-Priority:
+Documentation is updated after every completed architectural sprint and kept in
+sync with the implementation.
 
-1. Simplify WorkspacePanel rendering
-2. Eliminate unnecessary presentation layers
-3. Complete Presenter migration
-4. Remove remaining HTML presentation from MainWindow
-5. Continue professional desktop framework
+---
+
+# Immediate Priorities
+
+Current focus:
+
+## Sprint 3.6 — Professional Portfolio Dashboard
+
+Objectives:
+
+- Integrate WorkspaceCoordinator into MainWindow
+- Render GuiWorkspace directly
+- Display MetricCards inside PortfolioWorkspace
+- Complete Portfolio dashboard integration
+- Improve professional desktop UX
+
+After Sprint 3.6 the project will continue with:
+
+- Professional Charts
+- AI Workspace
+- Scanner enhancements
+- Broker integration
+- Reporting and export
+- Layout persistence
+- Docking support
+
+---
+
+# Current Assessment
+
+## Epic 1 — Deterministic Trading Engine
+
+████████████████████████████████████ 100%
+
+Status:
+
+Stable
+
+No major architectural work planned.
+
+---
+
+## Epic 2 — Desktop Architecture
+
+████████████████████████████████████ 100%
+
+Status:
+
+Complete
+
+The desktop architecture is now considered stable.
+
+---
+
+## Epic 3 — Professional Desktop Features
+
+██████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 15%
+
+Status:
+
+Foundation completed.
+
+Professional desktop functionality is now being built on top of the completed
+architecture.
+
+---
+
+# Current Architectural Assessment
+
+The Orion architecture has reached a stable foundation.
+
+The application now consists of clearly separated layers:
+
+Deterministic Services
+
+↓
+
+WorkspaceCoordinator
+
+↓
+
+WorkspacePresenters
+
+↓
+
+GuiWorkspace
+
+├── GuiMetricCard
+
+└── GuiSection
+
+↓
+
+Workspace
+
+↓
+
+Reusable Qt Widgets
+
+↓
+
+MainWindow
+
+This layered composition model is considered the baseline architecture for
+Epic 3.
+
+Future development should prioritize delivering professional desktop features
+rather than introducing additional architectural layers.
+
+Architectural expansion should only occur when a concrete feature clearly
+requires it.
+
+---
+
+# Development Focus
+
+From this point forward the primary objective is feature delivery.
+
+New work should focus on:
+
+- professional dashboards
+- portfolio analytics
+- advanced visualization
+- AI workspace
+- broker connectivity
+- reporting
+- usability
+- desktop experience
+
+The existing architecture should be reused wherever possible.
+
+---
+
+# Definition of Current State
+
+Project Orion has successfully transitioned from architectural construction to
+feature-oriented development.
+
+The deterministic trading engine is complete.
+
+The desktop architecture is complete.
+
+The workspace composition architecture is established.
+
+Professional desktop functionality is now the primary development focus.
+
+Current regression status:
+
+343 passing tests
 
 ---
 

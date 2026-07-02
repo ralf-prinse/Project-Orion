@@ -165,67 +165,149 @@ Business logic never belongs inside:
 
 # 5. GUI Architecture
 
-The GUI is presentation-only.
+The desktop application follows the Workspace Composition Architecture.
+
+The deterministic trading engine remains completely independent from the GUI.
+
+The GUI is responsible only for presenting deterministic information.
+
+No business logic is allowed inside Qt widgets.
+
+---
+
+## MainWindow
+
+MainWindow remains Orion's composition root.
 
 Responsibilities:
 
-**MainWindow**
-
-- composition root
 - dependency wiring
-- workspace orchestration
+- application startup
+- navigation
+- workspace switching
 
-**WorkspaceController**
+MainWindow should never:
 
-- deterministic navigation
+- perform calculations
+- build presentation models
+- format business data
 
-**DashboardRouter**
-
-- routes presentation models to workspaces
-
-**Presenters**
-
-- convert deterministic models into GUI models
-
-**Workspace Pages**
-
-- own Qt widgets only
-- never contain business logic
-
-The GUI never performs:
-
-- calculations
-- trading logic
-- risk validation
-- signal generation
-- decision making
-
-Future architecture:
-
-MainWindow (Composition Root)
-        │
-        ▼
-WorkspaceController
-        │
-        ▼
-DashboardRouter
-        │
-        ▼
-Presenters
-        │
-        ▼
-GuiSection Models
-        │
-        ▼
-Workspace Panels
-        │
-        ▼
-Workspace Pages
-        │
-        ▼
-Qt Widgets
 ---
 
+## WorkspaceCoordinator
+
+WorkspaceCoordinator coordinates complete workspace presentation.
+
+Responsibilities:
+
+- coordinate workspace presenters
+- build GuiWorkspace models
+- keep MainWindow small
+
+WorkspaceCoordinator performs orchestration only.
+
+---
+
+## WorkspacePresenters
+
+Workspace presenters compose complete workspace presentation.
+
+Responsibilities:
+
+- coordinate specialized presenters
+- coordinate presentation services
+- produce one GuiWorkspace
+
+Workspace presenters never perform business calculations.
+
+---
+
+## Specialized Presenters
+
+Specialized presenters transform deterministic models into presentation models.
+
+Examples:
+
+- PortfolioPresenter
+- PortfolioAnalyticsPresenter
+- PortfolioMetricCardPresenter
+- HistoryPresenter
+- SettingsPresenter
+- TradeAdvicePresenter
+
+Each presenter owns a single presentation responsibility.
+
+---
+
+## Presentation Models
+
+Current presentation models:
+
+- GuiWorkspace
+- GuiMetricCard
+- GuiSection
+- GuiMetric
+
+GuiWorkspace groups all presentation models required by one workspace.
+
+Future presentation models may include:
+
+- GuiChart
+- GuiTable
+- GuiAlert
+- GuiTimeline
+
+---
+
+## Rendering Layer
+
+Reusable rendering widgets include:
+
+- MetricCard
+- WorkspacePanel
+
+Rendering widgets own Qt controls only.
+
+They never communicate with deterministic services.
+
+---
+
+## Official Desktop Pipeline
+
+The official desktop architecture is:
+
+MainWindow
+
+↓
+
+WorkspaceCoordinator
+
+↓
+
+WorkspacePresenter
+
+↓
+
+GuiWorkspace
+
+├── GuiMetricCard
+
+└── GuiSection
+
+↓
+
+Workspace
+
+↓
+
+Reusable Qt Widgets
+
+↓
+
+Desktop Application
+
+This architecture is considered stable and should remain the standard desktop
+presentation architecture for future development.
 # 6. Core Infrastructure
 
 Current shared infrastructure:

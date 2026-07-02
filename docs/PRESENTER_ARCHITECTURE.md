@@ -2,7 +2,7 @@
 
 # PRESENTER_ARCHITECTURE.md
 
-**Purpose:** Desktop Presentation Architecture
+**Purpose:** Desktop Presentation & Workspace Composition Architecture
 
 **Status:** Active
 
@@ -12,61 +12,81 @@
 
 # 1. Purpose
 
-This document defines the presentation architecture of Project Orion.
+This document defines the official desktop presentation architecture of
+Project Orion.
 
-Its purpose is to ensure that the desktop application remains modular,
-maintainable, deterministic and easy to extend.
+Its purpose is to ensure that every desktop feature follows the same layered
+presentation model while keeping deterministic business logic completely
+separated from the graphical user interface.
 
-The presentation architecture is intentionally separated from the deterministic
-business architecture described in `ORION_MASTER_ARCHITECTURE.md`.
-
----
-
-# 2. Core Philosophy
-
-The GUI is a presentation layer.
-
-It never owns business logic.
-
-It never performs calculations.
-
-It never makes trading decisions.
-
-Every visual element originates from deterministic models produced by Orion's
-core services.
+The desktop architecture is intentionally independent from the deterministic
+engine architecture described in ORION_MASTER_ARCHITECTURE.md.
 
 ---
 
-# 3. Presentation Flow
+# 2. Architectural Philosophy
 
-Every screen follows exactly the same direction of data flow.
+Project Orion follows a Workspace Composition Architecture.
 
-```text
+Business logic remains completely deterministic.
+
+Presentation is built through reusable presentation models.
+
+Qt widgets perform rendering only.
+
+Every layer owns exactly one responsibility.
+
+The architecture favors:
+
+- Composition
+- Small classes
+- Stable public APIs
+- Reusable presentation models
+- Thin GUI
+
+---
+
+# 3. Official Presentation Pipeline
+
+The official desktop pipeline is now:
+
 Deterministic Service
-        │
-        ▼
-Presenter
-        │
-        ▼
-GuiSection
-        │
-        ▼
-WorkspacePanel
-        │
-        ▼
+
+↓
+
+WorkspaceCoordinator
+
+↓
+
+WorkspacePresenter
+
+↓
+
+GuiWorkspace
+
+├── GuiMetricCard
+
+└── GuiSection
+
+↓
+
 Workspace
-        │
-        ▼
+
+↓
+
+Reusable Qt Widgets
+
+↓
+
 MainWindow
-```
 
 Data always flows downward.
 
-No presentation component may modify deterministic models.
+No presentation layer may modify deterministic business models.
 
 ---
 
-# 4. Responsibilities
+# 4. Layer Responsibilities
 
 ## Deterministic Services
 
@@ -76,131 +96,254 @@ Responsible for:
 - market analysis
 - signals
 - decisions
-- portfolio management
+- portfolio validation
 - risk management
-- trade planning
+- analytics
 
 Never responsible for:
 
 - Qt
 - widgets
+- formatting
 - layouts
-- styling
 - presentation
+
+---
+
+## WorkspaceCoordinator
+
+WorkspaceCoordinator is responsible for workspace orchestration.
+
+Responsibilities:
+
+- coordinate workspace presenters
+- build GuiWorkspace objects
+- keep MainWindow small
+
+WorkspaceCoordinator never performs calculations.
+
+---
+
+## WorkspacePresenter
+
+Workspace presenters coordinate presentation.
+
+Responsibilities:
+
+- compose multiple presenters
+- coordinate presentation services
+- return one GuiWorkspace
+
+Workspace presenters never perform business calculations.
 
 ---
 
 ## Presenters
 
-Presenters transform deterministic models into presentation models.
+Presenters convert deterministic models into presentation models.
 
-Responsible for:
+Responsibilities:
 
-- GuiSection creation
-- GuiMetric creation
-- labels
-- formatting
-- descriptions
-- presentation grouping
+- create GuiSection
+- create GuiMetricCard
+- format labels
+- format values
+- group presentation data
 
-Never responsible for:
+Presenters never perform:
 
 - calculations
 - service orchestration
 - database access
 - portfolio mutation
-- risk calculations
+
+---
+
+## GuiWorkspace
+
+GuiWorkspace is the standard presentation model returned by every workspace
+presenter.
+
+It groups all presentation components required by one workspace while exposing
+a single stable public API.
+
+Current presentation components:
+
+- GuiMetricCard
+- GuiSection
+
+Future presentation components may include:
+
+- GuiChart
+- GuiTable
+- GuiTimeline
+- GuiAlert
+- GuiDockLayout
+
+GuiWorkspace intentionally contains presentation data only.
+
+It never contains business logic.
+
+---
+
+## GuiMetricCard
+
+GuiMetricCard represents one highlighted KPI.
+
+Typical examples:
+
+- Portfolio Value
+- Cash
+- Exposure
+- Open Positions
+
+GuiMetricCard contains only display information.
+
+Typical properties:
+
+- title
+- value
+- subtitle
+- trend
+
+GuiMetricCard is rendered by MetricCard.
 
 ---
 
 ## GuiSection
 
-GuiSection is the standard presentation model.
+GuiSection represents grouped presentation data.
 
-A GuiSection contains only display data.
+Typical examples:
 
-Typical contents:
+- Portfolio Analytics
+- Position Analytics
+- Trade Advice
+- Scanner Results
+- History
+
+A GuiSection contains:
 
 - title
 - description
 - metrics
 
-GuiSection contains no business logic.
+GuiSection remains Orion's standard detailed presentation model.
+
+---
+
+## Workspace
+
+Each workspace owns only layout.
+
+Responsibilities:
+
+- arrange presentation widgets
+- render GuiWorkspace
+- manage widget lifetime
+
+Workspaces never:
+
+- calculate
+- query services
+- build presentation models
+
+Preferred public API:
+
+```python
+set_workspace(workspace: GuiWorkspace)
+```
+
+Compatibility methods such as:
+
+```python
+set_sections(...)
+```
+
+may temporarily exist during migration but should eventually disappear.
+
+---
+
+## MetricCard
+
+MetricCard is Orion's reusable KPI renderer.
+
+Responsibilities:
+
+- render GuiMetricCard
+- own Qt widgets
+- display highlighted metrics
+
+MetricCard never communicates with deterministic services.
 
 ---
 
 ## WorkspacePanel
 
-WorkspacePanel is Orion's reusable renderer.
+WorkspacePanel is Orion's reusable section renderer.
 
 Responsibilities:
 
-- render GuiSections
-- render titles
-- render metrics
+- render GuiSection
+- render GuiMetric objects
 - own Qt widgets
 
-WorkspacePanel never communicates with services.
-
----
-
-## Workspaces
-
-Every workspace owns only presentation layout.
-
-Responsibilities:
-
-- arrange WorkspacePanels
-- manage widgets
-- expose presentation APIs
-
-Preferred public API:
-
-```python
-set_sections(sections)
-```
-
-Temporary compatibility methods may exist during migrations but should eventually
-be removed.
+WorkspacePanel never performs calculations.
 
 ---
 
 ## MainWindow
 
-MainWindow is the composition root.
+MainWindow remains the application's composition root.
 
 Responsibilities:
 
 - dependency wiring
-- workspace creation
+- application startup
 - navigation
-- orchestration
+- workspace switching
 
-MainWindow should never contain:
+MainWindow should never:
 
-- HTML generation
-- presentation formatting
-- business calculations
+- format presentation
+- build GuiWorkspace
+- compose presentation models
+- perform business calculations
+
+Presentation composition belongs to WorkspaceCoordinator.
 
 ---
 
-# 5. Standard Rendering Pipeline
+# 5. Current Presentation Components
 
-The preferred rendering pipeline is:
+Implemented:
 
-```text
-Portfolio
-        │
-PortfolioPresenter
-        │
-GuiSection
-        │
-WorkspacePanel.from_section()
-        │
-PortfolioWorkspace
-```
+- GuiWorkspace
+- GuiMetricCard
+- GuiSection
+- GuiMetric
 
-The same pattern applies to every workspace.
+Rendering widgets:
+
+- MetricCard
+- WorkspacePanel
+
+Current workspaces:
+
+- DashboardWorkspace
+- ScannerWorkspace
+- PortfolioWorkspace
+- HistoryWorkspace
+- SettingsWorkspace
+
+Future workspaces:
+
+- AIWorkspace
+- PerformanceWorkspace
+- BrokerWorkspace
+- BacktestingWorkspace
+
+Every new workspace should consume a GuiWorkspace.
 
 ---
 
@@ -210,67 +353,36 @@ Implemented:
 
 - DashboardPresenter
 - PortfolioPresenter
+- PortfolioAnalyticsPresenter
+- PortfolioMetricCardPresenter
+- PortfolioWorkspacePresenter
 - HistoryPresenter
 - SettingsPresenter
 - TradeAdvicePresenter
 
-Planned:
+Future presenters:
 
-- PerformancePresenter
-- AIExplanationPresenter
-- BacktestPresenter
-- PaperTradingPresenter
+- AIWorkspacePresenter
+- PerformanceWorkspacePresenter
+- BrokerWorkspacePresenter
 
----
-
-# 7. Current Workspace Catalogue
-
-Implemented:
-
-- DashboardWorkspace
-- ScannerWorkspace
-- PortfolioWorkspace
-- HistoryWorkspace
-- SettingsWorkspace
-
-Future:
-
-- PerformanceWorkspace
-- AIWorkspace
+Workspace presenters should remain small and compose specialized presenters
+rather than accumulating responsibilities.
 
 ---
 
-# 8. Migration Status
+# 7. Migration Status
 
-## Portfolio
-
-Status:
-
-✅ GuiSection based
-
----
-
-## History
-
-Status:
-
-✅ GuiSection based
-
----
-
-## Settings
-
-Status:
-
-✅ Presenter based
-
----
+The migration from the original Presenter Architecture to the Workspace
+Composition Architecture is complete.
 
 ## Dashboard
 
 Status:
 
-🚧 Migration in progress
+✅ Complete
+
+Uses standardized presentation models.
 
 ---
 
@@ -278,11 +390,48 @@ Status:
 
 Status:
 
-🚧 Migration in progress
+✅ Complete
+
+Uses standardized presentation models.
 
 ---
 
-# 9. Architectural Rules
+## Portfolio
+
+Status:
+
+✅ Complete
+
+Uses:
+
+- PortfolioWorkspacePresenter
+- PortfolioMetricCardPresenter
+- PortfolioAnalyticsPresenter
+- GuiWorkspace
+
+---
+
+## History
+
+Status:
+
+✅ Complete
+
+Uses standardized presentation models.
+
+---
+
+## Settings
+
+Status:
+
+✅ Complete
+
+Fully migrated to GuiSection-based presentation.
+
+---
+
+# 8. Architectural Rules
 
 ## Rule 1
 
@@ -292,96 +441,173 @@ Business logic never belongs inside Qt widgets.
 
 ## Rule 2
 
-Presenters own presentation formatting.
+Deterministic services never create presentation models.
 
 ---
 
 ## Rule 3
 
-MainWindow remains a composition root.
+WorkspaceCoordinator owns workspace composition.
 
 ---
 
 ## Rule 4
 
-GuiSection is the preferred presentation model.
+WorkspacePresenters own presentation composition.
 
 ---
 
 ## Rule 5
 
-WorkspacePanel is the preferred renderer.
+Specialized presenters own formatting.
+
+Examples:
+
+- PortfolioPresenter
+- PortfolioAnalyticsPresenter
+- PortfolioMetricCardPresenter
 
 ---
 
 ## Rule 6
 
+GuiWorkspace is the standard presentation model for complete workspaces.
+
+---
+
+## Rule 7
+
+GuiSection remains the standard detailed presentation model.
+
+---
+
+## Rule 8
+
+GuiMetricCard remains the standard KPI presentation model.
+
+---
+
+## Rule 9
+
+Reusable widgets perform rendering only.
+
+Examples:
+
+- MetricCard
+- WorkspacePanel
+
+---
+
+## Rule 10
+
 Data always flows downward.
 
-```text
-Service
-    ↓
-Presenter
-    ↓
+Deterministic Service
+
+↓
+
+WorkspaceCoordinator
+
+↓
+
+WorkspacePresenter
+
+↓
+
+GuiWorkspace
+
+↓
+
 Workspace
-    ↓
-Qt
-```
+
+↓
+
+Qt Widgets
 
 Never in reverse.
 
 ---
 
-# 10. Long-Term Vision
+# 9. Long-Term Vision
 
-The desktop application should evolve without changing the presentation
-architecture.
+The presentation architecture should remain stable while desktop functionality
+continues to expand.
 
-Future additions may include:
+Future presentation components may include:
 
-- tables
-- charts
-- docking
-- layout persistence
-- multi-monitor support
-- AI workspace
-- plugins
+- Professional Charts
+- Data Tables
+- Timeline Views
+- Docking Layouts
+- AI Panels
+- Broker Widgets
+- Reporting Views
+- Multi-monitor Dashboards
 
-These features should integrate into the existing presentation pipeline rather
-than introducing alternative architectures.
+These features should extend the Workspace Composition Architecture rather than
+introducing alternative presentation patterns.
 
 ---
 
-# 11. Definition of Done
+# 10. Definition of Done
 
 A presentation feature is considered complete when:
 
-- deterministic service exists
-- presenter exists
-- GuiSections are produced
-- Workspace renders GuiSections
-- MainWindow only orchestrates
-- regression tests pass
-- documentation is synchronized
+✓ Deterministic service exists
+
+✓ Presentation models exist
+
+✓ Specialized presenters exist
+
+✓ Workspace presenter composes the presentation
+
+✓ GuiWorkspace is produced
+
+✓ Workspace renders GuiWorkspace
+
+✓ MainWindow only orchestrates
+
+✓ Regression tests pass
+
+✓ Documentation is synchronized
 
 ---
 
-# 12. Guiding Principle
+# 11. Guiding Principle
 
-A developer should be able to understand any Orion workspace by reading:
+A developer should be able to understand any Orion workspace by following the
+same layered structure:
 
-```
-Service
+Deterministic Service
+
 ↓
-Presenter
+
+WorkspaceCoordinator
+
 ↓
+
+WorkspacePresenter
+
+↓
+
+GuiWorkspace
+
+↓
+
 Workspace
-```
 
-Nothing more.
+↓
 
-If additional layers become necessary, they should be introduced only when they
-provide a clear architectural benefit.
+Reusable Qt Widgets
+
+↓
+
+MainWindow
+
+Every new feature should integrate naturally into this architecture.
+
+If additional abstraction is considered, it should only be introduced when it
+clearly reduces long-term complexity and supports concrete functionality.
 
 ---
 

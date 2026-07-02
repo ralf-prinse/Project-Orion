@@ -21,6 +21,7 @@ class GuiPage(str, Enum):
     SIGNALS = "signals"
     SCANNER = "scanner"
     PORTFOLIO = "portfolio"
+    HISTORY = "history"
     RISK = "risk"
     BACKTESTING = "backtesting"
     PAPER_TRADING = "paper_trading"
@@ -45,14 +46,23 @@ class GuiNavigationItem:
 class GuiMetric:
     """
     Presentation-safe metric for cards, dashboards and reports.
-
-    The GUI layer receives already calculated values from deterministic engines.
-    It may format and group them, but it must not calculate trading decisions.
     """
 
     label: str
     value: str
     helper_text: str = ""
+
+
+@dataclass(frozen=True)
+class GuiMetricCard:
+    """
+    Presentation-safe KPI card.
+    """
+
+    title: str
+    value: str
+    subtitle: str = ""
+    trend: str = ""
 
 
 @dataclass(frozen=True)
@@ -64,6 +74,19 @@ class GuiSection:
     title: str
     metrics: list[GuiMetric] = field(default_factory=list)
     description: str = ""
+
+
+@dataclass(frozen=True)
+class GuiWorkspace:
+    """
+    Complete presentation model for one workspace.
+
+    A workspace can contain multiple presentation component types while keeping
+    the public workspace API stable.
+    """
+
+    cards: list[GuiMetricCard] = field(default_factory=list)
+    sections: list[GuiSection] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -82,9 +105,6 @@ class GuiApplicationConfig:
 class GuiShellState:
     """
     Runtime state of the GUI shell.
-
-    This state is intentionally small. Engine state, portfolio state and trade
-    state stay inside their own layers and are only projected into view models.
     """
 
     current_page: GuiPage = GuiPage.DASHBOARD

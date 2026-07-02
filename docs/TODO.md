@@ -2,228 +2,289 @@
 
 # TODO.md
 
-**Status:** Active Development
+**Purpose:** Development roadmap
+
+**Status:** Active
+
+**Last Updated:** July 2026
 
 ---
 
-# Development Roadmap
+# Executive Summary
 
-Project Orion is developed through Epics.
+Project Orion has successfully completed the deterministic trading engine
+(Epic 1) and the desktop presentation architecture (Epic 2).
 
-Every Epic consists of Features.
+Epic 3 is now focused on delivering professional desktop functionality on top
+of the completed architecture.
 
-Every Feature consists of small deterministic implementation tasks.
+The architecture is considered stable.
 
-Architecture always takes precedence over implementation speed.
+Future work should prioritize user value over architectural expansion.
 
----
+Current regression status:
 
-# EPIC 1 — Deterministic Trading Platform
-
-**Status:** ✅ Completed
-
-Completed:
-
-- Universe Layer
-- Market Data Layer
-- Historical Data Layer
-- Indicator Engine
-- Analysis Layer
-- Signal Layer
-- Decision Layer
-- Portfolio Engine
-- Risk Manager
-- Trade Planner
-- Backtesting
-- Paper Trading
-- Performance Analytics
-- Explainability Framework
-- AI Explanation Layer
-- Dependency Injection
-- Event Bus
-- Scan Orchestrator
-- Configuration Framework
+343 passing tests
 
 ---
 
-# EPIC 2 — Professional Desktop Experience
+# Current Sprint
 
-**Status:** 🚧 In Progress
+## Sprint 3.6 — Professional Portfolio Dashboard
 
-Goal:
+Status:
 
-Transform Orion into a professional desktop trading platform while preserving complete separation between deterministic business logic and presentation.
+🚧 In Progress
 
----
+Objectives:
 
-# Feature 2.1 — Workspace Framework
+- Integrate WorkspaceCoordinator into MainWindow
+- Render GuiWorkspace directly
+- Display GuiMetricCards
+- Complete Portfolio dashboard
+- Improve Portfolio workspace UX
 
-**Status:** ✅ Completed
+Definition of Done:
 
-Completed:
-
-- WorkspaceController
-- DashboardRouter
-- BaseWorkspace
-- WorkspacePanel
-- DashboardWorkspace
-- ScannerWorkspace
-- PortfolioWorkspace
-- HistoryWorkspace
-- SettingsWorkspace
-- Workspace navigation
-- MainWindow composition-root migration
+- GuiWorkspace rendered by PortfolioWorkspace
+- MetricCards visible
+- Regression tests passing
+- Documentation updated
+- Git committed
 
 ---
 
-# Feature 2.2 — Presenter Architecture
+# Short-Term Roadmap
 
-**Status:** 🚧 In Progress
+## Sprint 3.7 — Professional Charts
 
-Completed:
+Objectives:
 
-- DashboardPresenter
-- PortfolioPresenter
-- HistoryPresenter
-- SettingsPresenter
+- Introduce reusable chart component
+- Add portfolio value chart
+- Add performance chart
+- Preserve Workspace Composition Architecture
 
-Remaining:
+Deliverables:
 
-- Complete presenter migration
-- Remove remaining HTML presentation
-- Standardize GuiSection rendering
-
----
-
-# Feature 2.3 — GuiSection Migration
-
-**Status:** 🚧 In Progress
-
-Tasks:
-
-- Simplify WorkspacePanel rendering
-- Migrate remaining workspaces to WorkspacePanel.from_section()
-- Migrate DashboardWorkspace
-- Migrate HistoryWorkspace
-- Migrate ScannerWorkspace
-- Eliminate remaining HTML rendering
+- GuiChart
+- Chart widget
+- Chart presenter
+- Portfolio chart integration
 
 ---
 
-# Feature 2.4 — Professional Desktop UX
+## Sprint 3.8 — Scanner Improvements
 
-**Status:** 🟡 Planned
+Objectives:
 
-Tasks:
+- Better scanner overview
+- Scanner statistics
+- KPI cards
+- Improved filtering
+- Better scan summaries
 
-- Professional dashboard layout
-- Docking architecture
+---
+
+## Sprint 3.9 — AI Workspace
+
+Objectives:
+
+- Dedicated AI workspace
+- Deterministic explanation panels
+- Trade explanation summaries
+- Decision breakdown
+- Explanation history
+
+---
+
+# Medium-Term Roadmap
+
+## Performance Workspace
+
+Goals:
+
+- Equity curve
+- Performance KPIs
+- Drawdown analysis
+- Monthly returns
+- Benchmark comparison
+
+---
+
+## Broker Integration
+
+Goals:
+
+- Broker abstraction
+- Order preview
+- Order validation
+- Broker adapters
+- Live portfolio synchronization
+
+---
+
+## Reporting
+
+Goals:
+
+- PDF export
+- CSV export
+- Portfolio reports
+- Trade reports
+- Performance reports
+
+---
+
+## Desktop UX
+
+Goals:
+
+- Docking support
 - Layout persistence
+- Custom dashboards
+- Workspace personalization
 - Keyboard shortcuts
-- Toolbar
-- Status bar
-- Theme improvements
-- Responsive layouts
 
 ---
 
-# Feature 2.5 — Portfolio Experience
+# Long-Term Vision
 
-**Status:** 🟡 Planned
+Future development may include:
 
-Tasks:
-
-- Position cards
-- Exposure overview
-- Allocation overview
-- Portfolio metrics
-- Performance integration
-
----
-
-# Feature 2.6 — AI Workspace
-
-**Status:** 🟡 Planned
-
-Tasks:
-
-- AI explanations
-- Trade summaries
-- Recommendation explanations
-- Daily overview
-
----
-
-# EPIC 3 — Advanced Trading Platform
-
-**Status:** 🔵 Future
-
-Potential features:
-
-- Broker integration
-- Watchlists
-- Alerts
-- Market calendar
-- Earnings calendar
-- Multi-monitor support
+- Multi-account support
+- Multi-monitor layouts
+- Plugin architecture
 - Cloud synchronization
+- Mobile companion application
+- Advanced screening
+- Watchlists
+- Notifications
+- Strategy comparison
+- Portfolio optimization
+
+These features should extend the existing architecture rather than replacing it.
 
 ---
 
-# EPIC 4 — AI Assistant
+# Technical Debt
 
-**Status:** 🔵 Future
+Current technical debt is low.
 
-Potential features:
+Open items:
 
-- Natural language interaction
-- Portfolio coaching
-- Scan summaries
-- Daily reports
-- Workflow assistance
+- Complete WorkspaceCoordinator integration
+- Complete GuiWorkspace migration
+- Remove temporary compatibility methods
+- Continue reducing MainWindow responsibilities where appropriate
 
-AI remains explanation-only.
+None of these items block feature development.
 
 ---
 
-# Continuous Engineering Tasks
+# Architectural Principles
 
-Always active:
+Every future feature should respect the following principles:
 
-- Keep documentation synchronized
-- Keep regression tests green
-- Preserve deterministic behaviour
-- Review architecture before implementation
-- Minimize technical debt
-- Prefer complete file replacements
-- Keep GUI presentation-only
+- Deterministic First
+- Thin GUI
+- Stable Public APIs
+- Composition over Inheritance
+- Single Responsibility Principle
+- Reusable presentation models
+- Workspace Composition Architecture
+
+Architecture should only evolve when a concrete feature clearly requires it.
+
+---
+
+# Development Workflow
+
+Every completed task follows the same sequence:
+
+Architecture Review
+
+↓
+
+Implementation
+
+↓
+
+Regression Tests
+
+↓
+
+Documentation
+
+↓
+
+Git Commit
+
+↓
+
+Push
 
 ---
 
 # Definition of Done
 
-A task is complete when:
+A task is considered complete only when:
 
-- Architecture reviewed
-- Existing implementation reviewed
-- One logical responsibility implemented
-- Regression tests passed
-- Documentation synchronized
-- Commit created
-- Changes pushed
+✓ Feature implemented
+
+✓ Regression tests passing
+
+✓ Documentation updated
+
+✓ Architecture remains consistent
+
+✓ Git commit completed
 
 ---
 
-# Immediate Next Focus
+# Current Priorities
 
-Priority order:
+Priority 1
 
-1. Simplify WorkspacePanel rendering
-2. Migrate remaining workspaces to GuiSection-based panels
-3. Complete GuiSection migration
-4. Complete presenter migration
-5. Remove remaining HTML rendering
-6. Professional desktop UX
+Professional Portfolio Dashboard
+
+Priority 2
+
+Professional Charts
+
+Priority 3
+
+AI Workspace
+
+Priority 4
+
+Scanner Enhancements
+
+Priority 5
+
+Broker Integration
+
+Priority 6
+
+Reporting & Export
+
+Priority 7
+
+Desktop UX Improvements
+
+---
+
+# Overall Direction
+
+Project Orion has transitioned from architecture-first development to
+feature-first development.
+
+The deterministic engine is complete.
+
+The desktop architecture is complete.
+
+Future work should focus on delivering a professional trading experience while
+preserving the existing architecture.
 
 ---
 

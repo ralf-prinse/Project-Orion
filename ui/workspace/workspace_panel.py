@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QFrame, QLabel, QVBoxLayout, QWidget
 
 from ui.foundation.models import GuiSection
 
@@ -17,30 +17,49 @@ class WorkspacePanel(QWidget):
         theme,
         title: str,
         body: str = "",
+        badge: str | None = None,
     ):
         super().__init__()
 
         self.theme = theme
 
+        self.container = QFrame()
+        self.container.setObjectName("WorkspacePanelContainer")
+        self.container.setStyleSheet(self._container_style())
+
         self.title_label = QLabel(title)
+        self.title_label.setWordWrap(True)
         self.title_label.setStyleSheet(
-            self.theme.title_style() + "; margin-bottom: 12px;"
+            self.theme.title_style() + "; margin-bottom: 6px;"
         )
+
+        self.badge_label = QLabel(badge or "")
+        self.badge_label.setVisible(bool(badge))
+        self.badge_label.setStyleSheet(self._badge_style())
 
         self.body_label = QLabel(body)
         self.body_label.setAlignment(Qt.AlignTop)
         self.body_label.setWordWrap(True)
         self.body_label.setStyleSheet(
-            self.theme.muted_text_style() + "; padding: 12px;"
+            self.theme.muted_text_style() + "; padding-top: 8px;"
         )
 
-        layout = QVBoxLayout()
-        layout.setAlignment(Qt.AlignTop)
+        panel_layout = QVBoxLayout()
+        panel_layout.setAlignment(Qt.AlignTop)
+        panel_layout.setContentsMargins(18, 18, 18, 18)
+        panel_layout.setSpacing(8)
 
-        layout.addWidget(self.title_label)
-        layout.addWidget(self.body_label)
+        panel_layout.addWidget(self.title_label)
+        panel_layout.addWidget(self.badge_label)
+        panel_layout.addWidget(self.body_label)
 
-        self.setLayout(layout)
+        self.container.setLayout(panel_layout)
+
+        root_layout = QVBoxLayout()
+        root_layout.setContentsMargins(0, 0, 0, 0)
+        root_layout.addWidget(self.container)
+
+        self.setLayout(root_layout)
 
     @classmethod
     def from_section(cls, theme, section: GuiSection) -> "WorkspacePanel":
@@ -64,7 +83,7 @@ class WorkspacePanel(QWidget):
             parts.append(f"<p>{section.description}</p>")
 
         if section.metrics:
-            parts.append("<ul>")
+            parts.append("<div>")
 
             for metric in section.metrics:
                 helper = (
@@ -74,10 +93,14 @@ class WorkspacePanel(QWidget):
                 )
 
                 parts.append(
-                    f"<li><b>{metric.label}:</b> {metric.value}{helper}</li>"
+                    "<p>"
+                    f"<b>{metric.label}</b><br>"
+                    f"<span>{metric.value}</span>"
+                    f"{helper}"
+                    "</p>"
                 )
 
-            parts.append("</ul>")
+            parts.append("</div>")
 
         if not parts:
             return "No information available."
@@ -89,3 +112,28 @@ class WorkspacePanel(QWidget):
 
     def set_body(self, text: str):
         self.body_label.setText(text)
+
+    def set_badge(self, badge: str | None):
+        self.badge_label.setText(badge or "")
+        self.badge_label.setVisible(bool(badge))
+
+    def _container_style(self) -> str:
+        return """
+        QFrame#WorkspacePanelContainer {
+            background-color: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 16px;
+        }
+        """
+
+    def _badge_style(self) -> str:
+        return """
+        QLabel {
+            background-color: #111827;
+            color: #d1d5db;
+            border: 1px solid #4b5563;
+            border-radius: 10px;
+            padding: 4px 10px;
+            font-size: 12px;
+        }
+        """
