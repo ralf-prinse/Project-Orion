@@ -4,69 +4,213 @@
 
 # Epic Status
 
-## Epic 1 — Deterministic Engine
-✔ COMPLETE
+## Epic 1 — Deterministic Core
+✅ COMPLETE
 
 ## Epic 2 — Desktop Architecture
-✔ COMPLETE
+✅ COMPLETE
 
-## Epic 3 — Professional Desktop Experience
+## Epic 3 — Analytics Platform
+✅ COMPLETE
+
+## Epic 4 — AI Trading Architecture
 🚧 ACTIVE
+
+## Epic 5 — Live Trading Platform
+📋 PLANNED
 
 ---
 
 # Current Sprint
 
-## Sprint 3.8.1 — Benchmark System
+## Sprint 3.10.5 — Architecture Stabilization
 
-### Implemented
+### Completed
 
-- BenchmarkService
-- Portfolio vs benchmark comparison logic
-- Alpha calculation foundation
+### Trading Intelligence
+
+- Signal Fusion Engine
+- Market Intelligence Engine
+- Adaptive Decision Engine
+- Position Sizing Engine
+
+### AI Layer
+
+- AI Context Builder
+- AI Explanation Engine
+
+### Orchestration
+
+- Trading Pipeline
+- Market Scanner
+
+### Backtesting
+
+- Backtest Engine
+- Backtest Simulator
+- Backtest Visualizer
 
 ---
 
-### In Progress
+# Current Architecture
 
-- BenchmarkPresenter
-- Benchmark visualization layer
+Current execution flow:
+
+IndicatorPack
+↓
+SignalFusionEngine
+↓
+MarketIntelligenceEngine
+↓
+AdaptiveDecisionEngine
+↓
+PositionSizer
+↓
+AIContextBuilder
+↓
+AIExplainer
+↓
+TradingPipeline
+↓
+MarketScanner
+↓
+BacktestEngine
+↓
+BacktestVisualizer
 
 ---
 
-# Architecture Status
+# Stabilization Progress
 
-System remains stable:
+Completed during Sprint 3.10.5
 
-Deterministic Services  
-↓  
-Performance Layer  
-↓  
-BenchmarkService  
-↓  
-WorkspaceCoordinator  
-↓  
-Presenter Layer  
-↓  
-GuiWorkspace  
-↓  
-ChartRenderer  
+- Removed temporary runtime objects (`type(...)`)
+- Introduced explicit MarketSignal model
+- Introduced DecisionInput model
+- Standardized PositionContext
+- Simplified TradingPipeline
+- Stabilized MarketScanner
+- Stabilized BacktestEngine
+- Stabilized BacktestSimulator
+- Stabilized BacktestVisualizer
+
+Architecture quality has improved significantly and the pipeline now follows explicit model contracts.
+
+---
+
+# Current Capabilities
+
+Trading Engine
+
+✅ Signal Fusion
+
+✅ Market Regime Detection
+
+✅ Volatility Analysis
+
+✅ Adaptive BUY / SELL / HOLD
+
+✅ Position Sizing
+
+---
+
+AI Layer
+
+✅ AI Context
+
+✅ Explainable Decisions
+
+✅ Human-readable trade reasoning
+
+---
+
+Portfolio Analysis
+
+✅ Multi-asset scanning
+
+✅ Opportunity ranking
+
+✅ Actionable trade filtering
+
+---
+
+Backtesting
+
+✅ Deterministic simulation
+
+✅ Fee model
+
+✅ Slippage model
+
+✅ Equity curve generation
+
+✅ Trade log generation
+
+✅ Performance summary
 
 ---
 
 # Stability
 
-- 348 tests passing
-- No architectural regressions
-- Chart system stable
-- Workspace Composition stable
+Current backend architecture is considered stable.
+
+Status
+
+✅ Deterministic services
+
+✅ Clean service separation
+
+✅ Stable orchestration
+
+✅ Strong data contracts
+
+✅ Explainable AI layer
+
+No known architectural regressions.
 
 ---
 
-# Focus
+# Current Focus
 
-Current development focus:
+The backend foundation is complete.
 
-- Benchmark system completion
-- Performance visualization
-- Portfolio analytics enhancement
+The next milestone is connecting the existing Qt desktop application to the new AI trading backend.
+
+Planned work:
+
+- Trading Workspace
+- Trading Presenter
+- AI Decision Panel
+- Scanner Workspace
+- Backtest Workspace
+- Equity Curve visualization
+- Live execution workflow
+
+---
+
+# Immediate Goal
+
+Transition from
+
+Backend AI Trading Engine
+
+↓
+
+Integrated Desktop Trading Platform
+
+using the existing Orion workspace architecture.
+
+---
+
+# Long-Term Vision
+
+Orion evolves into a production-ready AI-assisted trading platform featuring:
+
+- deterministic execution
+- explainable AI decisions
+- portfolio intelligence
+- live market scanning
+- historical backtesting
+- future news & sentiment integration
+- future broker integration
+- professional desktop interface
