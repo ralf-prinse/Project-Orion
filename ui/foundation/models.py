@@ -69,6 +69,8 @@ class GuiMetricCard:
     status: str = "default"
     size: str = "normal"
 
+    column_span: int = 1
+
 
 @dataclass(frozen=True)
 class GuiSection:

@@ -15,14 +15,14 @@ class DashboardCardStyle:
     status: str = "default"
     accent_color: str = ""
     size: str = "normal"
+    column_span: int = 1
 
 
 class DashboardCardCatalog:
     """
     Central catalog for Dashboard MetricCard presentation styles.
 
-    This keeps icons, statuses, accents and card sizing centralized
-    instead of scattering styling metadata across presenters.
+    Keeps all presentation metadata centralized.
     """
 
     _styles: dict[str, DashboardCardStyle] = {
@@ -36,49 +36,41 @@ class DashboardCardCatalog:
             icon="💶",
             status="success",
             accent_color="#22c55e",
-            size="normal",
         ),
         "Equity Widget": DashboardCardStyle(
             icon="📈",
             status="info",
             accent_color="#38bdf8",
-            size="normal",
         ),
         "Today's P/L": DashboardCardStyle(
             icon="📊",
             status="default",
             accent_color="#9ca3af",
-            size="normal",
         ),
         "Open Positions": DashboardCardStyle(
             icon="📌",
             status="default",
             accent_color="#a78bfa",
-            size="normal",
         ),
         "Portfolio Exposure": DashboardCardStyle(
             icon="🧭",
             status="warning",
             accent_color="#f59e0b",
-            size="normal",
         ),
         "Confidence Gauge": DashboardCardStyle(
             icon="🎯",
             status="info",
             accent_color="#3b82f6",
-            size="normal",
         ),
         "Pressure Gauge": DashboardCardStyle(
             icon="⚖️",
             status="default",
             accent_color="#9ca3af",
-            size="normal",
         ),
         "Risk Gauge": DashboardCardStyle(
             icon="🛡️",
             status="warning",
             accent_color="#f59e0b",
-            size="normal",
         ),
         "Best Trade Card": DashboardCardStyle(
             icon="⭐",
@@ -91,25 +83,24 @@ class DashboardCardCatalog:
             status="info",
             accent_color="#3b82f6",
             size="hero",
+            column_span=3,
         ),
         "Portfolio Allocation": DashboardCardStyle(
             icon="🥧",
             status="default",
             accent_color="#a78bfa",
-            size="normal",
         ),
         "Equity Curve": DashboardCardStyle(
             icon="📉",
             status="default",
             accent_color="#9ca3af",
-            size="normal",
         ),
     }
 
     @classmethod
     def apply(cls, card: GuiMetricCard) -> GuiMetricCard:
         """
-        Returns a new GuiMetricCard with centralized dashboard styling applied.
+        Returns a GuiMetricCard enriched with centralized presentation metadata.
         """
 
         style = cls._styles.get(card.title, DashboardCardStyle())
@@ -123,12 +114,17 @@ class DashboardCardCatalog:
             accent_color=card.accent_color or style.accent_color,
             status=card.status if card.status != "default" else style.status,
             size=card.size if card.size != "normal" else style.size,
+            column_span=(
+                card.column_span
+                if card.column_span != 1
+                else style.column_span
+            ),
         )
 
     @classmethod
     def apply_all(cls, cards: list[GuiMetricCard]) -> list[GuiMetricCard]:
         """
-        Applies dashboard card styling to a list of cards.
+        Applies centralized presentation metadata to all dashboard cards.
         """
 
         return [

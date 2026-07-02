@@ -3,7 +3,6 @@ from PySide6.QtWidgets import QGridLayout, QWidget
 
 from ui.foundation.dashboard_widget_factory import DashboardWidgetFactory
 from ui.foundation.models import GuiMetricCard
-from ui.widgets.market_health_banner import MarketHealthBanner
 
 
 class DashboardGrid(QWidget):
@@ -13,6 +12,7 @@ class DashboardGrid(QWidget):
     Presentation only.
 
     Widget creation is delegated to DashboardWidgetFactory.
+    Layout is driven entirely by GuiMetricCard metadata.
     """
 
     def __init__(self, theme):
@@ -54,11 +54,23 @@ class DashboardGrid(QWidget):
         row = index // columns
         column = index % columns
 
-        if isinstance(widget, MarketHealthBanner):
-            self.layout.addWidget(widget, row, 0, 1, columns)
+        span = max(1, min(card.column_span, columns))
+
+        if span > 1:
+            self.layout.addWidget(
+                widget,
+                row,
+                0,
+                1,
+                span,
+            )
             return
 
-        self.layout.addWidget(widget, row, column)
+        self.layout.addWidget(
+            widget,
+            row,
+            column,
+        )
 
     def add_cards(self, cards: list[GuiMetricCard]):
         for card in cards:
