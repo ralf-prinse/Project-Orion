@@ -1,10 +1,8 @@
 from PySide6.QtWidgets import QPushButton
 
 from ui.foundation.dashboard_2_presenter import Dashboard2Presenter
-from ui.foundation.dashboard_card_model import DashboardCardModel
-from ui.foundation.models import GuiSection
+from ui.foundation.models import GuiMetricCard, GuiSection
 from ui.workspace.base_workspace import BaseWorkspace
-from ui.workspace.dashboard_card import DashboardCard
 from ui.workspace.dashboard_grid import DashboardGrid
 
 
@@ -42,19 +40,9 @@ class DashboardWorkspace(BaseWorkspace):
         self.add_workspace_widget(self.scan_button)
         self.add_workspace_widget(self.dashboard_grid)
 
-    def set_cards(self, cards: list[DashboardCardModel]):
+    def set_cards(self, cards: list[GuiMetricCard]):
         self.dashboard_grid.clear()
-
-        for card in cards:
-            self.dashboard_grid.add_card(
-                DashboardCard(
-                    theme=self.theme,
-                    title=card.title,
-                    value=card.value,
-                    subtitle=card.subtitle,
-                    footer=card.footer,
-                )
-            )
+        self.dashboard_grid.add_cards(cards)
 
     def set_sections(self, sections: list[GuiSection]):
         """
@@ -65,27 +53,27 @@ class DashboardWorkspace(BaseWorkspace):
             self.set_cards(self.dashboard_2_presenter.create_default_cards())
             return
 
-        cards: list[DashboardCardModel] = []
+        cards: list[GuiMetricCard] = []
 
         for section in sections:
             metrics = section.metrics or []
 
-            if metrics:
-                value = metrics[0].value
-                subtitle = " | ".join(
+            value = metrics[0].value if metrics else ""
+            subtitle = (
+                " | ".join(
                     f"{metric.label}: {metric.value}"
                     for metric in metrics[1:]
                 )
-            else:
-                value = ""
-                subtitle = section.description
+                if len(metrics) > 1
+                else section.description
+            )
 
             cards.append(
-                DashboardCardModel(
+                GuiMetricCard(
                     title=section.title,
                     value=value,
                     subtitle=subtitle,
-                    footer=section.description,
+                    trend=section.description,
                 )
             )
 
@@ -94,11 +82,11 @@ class DashboardWorkspace(BaseWorkspace):
     def set_status_text(self, text: str):
         self.set_cards(
             [
-                DashboardCardModel(
+                GuiMetricCard(
                     title="Market Overview",
                     value="Status",
                     subtitle=text,
-                    footer="Laatste dashboardmelding.",
+                    trend="Laatste dashboardmelding.",
                 )
             ]
         )

@@ -1,12 +1,13 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QGridLayout, QWidget
 
-from ui.workspace.dashboard_card import DashboardCard
+from ui.foundation.models import GuiMetricCard
+from ui.widgets.metric_card import MetricCard
 
 
 class DashboardGrid(QWidget):
     """
-    Responsive grid containing reusable DashboardCards.
+    Responsive grid containing reusable MetricCard widgets.
 
     Presentation only.
     """
@@ -23,7 +24,7 @@ class DashboardGrid(QWidget):
 
         self.setLayout(self.layout)
 
-        self.cards: list[DashboardCard] = []
+        self.cards: list[MetricCard] = []
 
     def clear(self):
         while self.layout.count():
@@ -34,8 +35,13 @@ class DashboardGrid(QWidget):
 
         self.cards.clear()
 
-    def add_card(self, card: DashboardCard):
-        self.cards.append(card)
+    def add_card(self, card: GuiMetricCard):
+        metric_card = MetricCard(
+            theme=self.theme,
+            card=card,
+        )
+
+        self.cards.append(metric_card)
 
         index = len(self.cards) - 1
 
@@ -44,8 +50,8 @@ class DashboardGrid(QWidget):
         row = index // columns
         column = index % columns
 
-        self.layout.addWidget(card, row, column)
+        self.layout.addWidget(metric_card, row, column)
 
-    def add_cards(self, cards: list[DashboardCard]):
+    def add_cards(self, cards: list[GuiMetricCard]):
         for card in cards:
             self.add_card(card)

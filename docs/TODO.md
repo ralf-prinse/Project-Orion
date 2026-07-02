@@ -83,6 +83,7 @@ Failed: 0
 - [x] DashboardWorkspace
 - [x] DashboardData
 - [x] Dashboard2Presenter
+- [x] Shared MetricCard Presentation
 - [x] Scanner Workspace
 - [x] Trading Workspace Presenter
 - [x] AI Scanner Presenter
@@ -117,29 +118,39 @@ Completed
 
 ## Architecture Refactor
 
-Highest priority
+Completed
 
-- [ ] Replace DashboardCard with MetricCard
-- [ ] Replace DashboardCardModel with GuiMetricCard
-- [ ] Refactor DashboardGrid
-- [ ] Refactor DashboardWorkspace
-- [ ] Simplify Dashboard2Presenter
-- [ ] Remove remaining temporary dashboard presentation code
+- [x] Replace DashboardCard with MetricCard
+- [x] Replace DashboardCardModel with GuiMetricCard
+- [x] Refactor DashboardGrid
+- [x] Refactor DashboardWorkspace
+- [x] Simplify Dashboard2Presenter
+- [x] Remove remaining temporary dashboard presentation code
+
+Sprint 4.1 dashboard architecture migration is complete.
+
+Dashboard now fully reuses Orion's shared presentation framework.
 
 ---
 
 ## Dashboard Polish
 
+Current priority
+
+- [ ] Dashboard Widget Library
 - [ ] KPI Hero Cards
 - [ ] Market Health Banner
 - [ ] Professional Status Bar
 - [ ] Responsive Dashboard Layout
 - [ ] Improved Card Spacing
 - [ ] Better Typography
+- [ ] Theme Standardization
 
 ---
 
 ## Visualization
+
+Current priority
 
 - [ ] Equity Curve Chart
 - [ ] Portfolio Allocation Chart
@@ -151,10 +162,13 @@ Highest priority
 
 ## Desktop UX
 
-- [ ] Dashboard Widget Library
-- [ ] MetricCard Standardization
-- [ ] Widget Reuse
+Current priority
+
+- [ ] Dashboard Animations
 - [ ] Professional Dashboard Theme
+- [ ] Workspace Polish
+- [ ] Shared Widget Library
+- [ ] Desktop Performance Improvements
 
 ---
 
@@ -211,16 +225,57 @@ Paper Trading
 
 Develop Orion into a professional deterministic AI-assisted trading platform featuring:
 
+- Professional Desktop Dashboard
+- Portfolio Intelligence
 - Live Market Analysis
 - Explainable AI
-- Professional Dashboard
-- Portfolio Intelligence
 - Historical Backtesting
 - Watchlists
 - Paper Trading
 - Broker Integration
 
 while maintaining deterministic calculations as the only source of trading decisions.
+
+---
+
+# Current Release Status
+
+Version
+
+v1.2.0-alpha
+
+Sprint
+
+Sprint 4.1 — Dashboard 2.0
+
+Architecture
+
+✅ Stable
+
+Backend
+
+✅ Production Stable
+
+Dashboard Presentation Architecture
+
+✅ Completed
+
+Regression Tests
+
+```
+Passed: 6
+Failed: 0
+```
+
+Current Focus
+
+- Dashboard Widget Library
+- Professional Dashboard UX
+- Hero KPI Cards
+- Equity Curve
+- Allocation Visualization
+- Gauge Widgets
+- Desktop Polish
 
 ---
 

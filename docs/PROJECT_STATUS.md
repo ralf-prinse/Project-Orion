@@ -24,7 +24,7 @@ Project Orion is a deterministic AI-assisted desktop trading platform.
 
 The backend architecture is considered production-stable.
 
-Current development is focused on the desktop experience, visualization and user interaction.
+Current development is focused entirely on the professional desktop experience, visualization and reusable presentation components.
 
 Artificial Intelligence never determines investment decisions.
 
@@ -70,9 +70,9 @@ This guarantees one deterministic source of truth.
 
 ---
 
-# Current Dashboard Architecture
+# Dashboard Architecture
 
-Dashboard 2.0 now introduces a dedicated presentation flow.
+Dashboard is now fully integrated into Orion's shared presentation framework.
 
 ```
 ApplicationController
@@ -81,14 +81,20 @@ DashboardData
         ↓
 Dashboard2Presenter
         ↓
-DashboardWorkspace
+GuiMetricCard
+        ↓
+MetricCard
         ↓
 DashboardGrid
+        ↓
+DashboardWorkspace
 ```
 
 Dashboard contains presentation logic only.
 
 No trading calculations exist inside the UI.
+
+The previous temporary Dashboard presentation layer has been fully removed.
 
 ---
 
@@ -150,6 +156,16 @@ No trading calculations exist inside the UI.
 
 ✅ Dashboard 2.0 Foundation
 
+✅ DashboardData
+
+✅ Dashboard2Presenter
+
+✅ DashboardGrid
+
+✅ DashboardWorkspace
+
+✅ Shared MetricCard Presentation
+
 ✅ Scanner Workspace
 
 ✅ Trading Workspace Presenter
@@ -169,6 +185,10 @@ Completed
 ✅ DashboardData
 
 ✅ Dashboard2Presenter
+
+✅ GuiMetricCard Integration
+
+✅ MetricCard Integration
 
 ✅ Portfolio Summary
 
@@ -196,7 +216,7 @@ Completed
 
 ✅ Equity Curve placeholder
 
-Dashboard now displays deterministic portfolio and scanner information.
+Dashboard now displays deterministic portfolio and scanner information using the shared Orion presentation architecture.
 
 ---
 
@@ -254,15 +274,15 @@ Architecture
 
 Backend
 
-🟢 Stable
+🟢 Production Ready
 
 Desktop
 
-🟢 Improving
+🟢 Active Development
 
 Dashboard
 
-🟢 Active Development
+🟢 Architecture Complete
 
 Logging
 
@@ -282,31 +302,53 @@ Documentation
 
 ---
 
+# Sprint 4.1 Summary
+
+Completed during Sprint 4.1:
+
+✅ Dashboard presentation architecture
+
+✅ DashboardData presentation model
+
+✅ Dashboard2Presenter
+
+✅ Migration to GuiMetricCard
+
+✅ Migration to MetricCard
+
+✅ DashboardGrid refactor
+
+✅ DashboardWorkspace refactor
+
+✅ Removal of temporary Dashboard presentation layer
+
+✅ Regression validation (6 / 0)
+
+---
+
 # Immediate Next Step
 
-Continue Sprint 4.1.
+Sprint 4.1 architectural work has been completed.
 
-Highest priority:
+The Dashboard now fully reuses Orion's shared presentation framework.
 
-Refactor Dashboard 2.0 to reuse the existing presentation architecture.
+The next development focus shifts toward professional desktop UX.
 
-Migration target:
+Priority roadmap:
 
-```
-Dashboard2Presenter
-        ↓
-GuiMetricCard
-        ↓
-MetricCard
-        ↓
-DashboardGrid
-        ↓
-DashboardWorkspace
-```
+- Reusable Dashboard Widget Library
+- Hero KPI Cards
+- Market Health Banner
+- Professional Status Bar
+- Improved Dashboard Layout
+- Better Typography
+- Equity Curve Chart
+- Portfolio Allocation Chart
+- Professional Gauge Widgets
 
-Temporary dashboard presentation components have been removed.
+The deterministic backend remains unchanged.
 
-Dashboard will fully standardize on the existing MetricCard infrastructure.
+No additional trading logic is planned during this phase.
 
 ---
 
@@ -319,6 +361,7 @@ Watchlists
 - Custom Watchlists
 - Saved Watchlists
 - Scanner Filters
+- Favorite Symbols
 
 ---
 
@@ -340,20 +383,71 @@ Live Dashboard
 - Auto Refresh
 - Background Scanner
 - Live Dashboard Updates
+- Live Market Health
+
+---
+
+## Sprint 4.5
+
+Paper Trading
+
+- Portfolio Simulation
+- Virtual Orders
+- Position History
+- Trade Replay
 
 ---
 
 # Long-Term Vision
 
-Project Orion will evolve into a professional deterministic AI-assisted desktop trading platform featuring:
+Project Orion will evolve into a professional deterministic AI-assisted trading platform featuring:
 
+- Professional Desktop Dashboard
+- Portfolio Intelligence
 - Live Market Analysis
 - Explainable AI
-- Portfolio Intelligence
-- Professional Dashboard
 - Historical Backtesting
 - Watchlists
 - Paper Trading
 - Broker Integration
 
 while maintaining deterministic trading calculations as the only source of investment decisions.
+
+---
+
+# Current Release Summary
+
+Version
+
+v1.2.0-alpha
+
+Current Sprint
+
+Sprint 4.1 — Dashboard 2.0
+
+Backend
+
+🟢 Production Stable
+
+Desktop
+
+🟢 Active Development
+
+Dashboard
+
+🟢 Shared Presentation Architecture Complete
+
+Regression Tests
+
+```
+Passed: 6
+Failed: 0
+```
+
+Documentation
+
+🟢 Current
+
+Git Status
+
+Ready for commit after documentation update.

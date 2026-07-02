@@ -1,6 +1,5 @@
-from ui.foundation.dashboard_card_model import DashboardCardModel
 from ui.foundation.dashboard_data import DashboardData
-from ui.foundation.models import GuiMetric, GuiSection
+from ui.foundation.models import GuiMetric, GuiMetricCard, GuiSection
 
 
 class Dashboard2Presenter:
@@ -8,9 +7,10 @@ class Dashboard2Presenter:
     Creates Dashboard 2.0 presentation models.
 
     Presentation-only.
+    Produces GuiMetricCard models for the shared MetricCard widget.
     """
 
-    def create_cards(self, data: DashboardData | None = None) -> list[DashboardCardModel]:
+    def create_cards(self, data: DashboardData | None = None) -> list[GuiMetricCard]:
         if data is None:
             return self.create_default_cards()
 
@@ -44,94 +44,94 @@ class Dashboard2Presenter:
         risk_score = best_trade.risk_score if best_trade else 0.0
 
         return [
-            DashboardCardModel(
+            GuiMetricCard(
                 title="Portfolio Summary",
                 value=self._money(equity),
                 subtitle=f"Cash: {self._money(cash)} | Open Positions: {open_positions}",
-                footer="Live portfolio snapshot.",
+                trend="Live portfolio snapshot.",
             ),
-            DashboardCardModel(
+            GuiMetricCard(
                 title="Cash Widget",
                 value=self._money(cash),
                 subtitle="Available portfolio cash.",
-                footer="Loaded from PortfolioState.",
+                trend="Loaded from PortfolioState.",
             ),
-            DashboardCardModel(
+            GuiMetricCard(
                 title="Equity Widget",
                 value=self._money(equity),
                 subtitle=f"Positions: {self._money(position_value)}",
-                footer="Cash plus open position value.",
+                trend="Cash plus open position value.",
             ),
-            DashboardCardModel(
+            GuiMetricCard(
                 title="Today's P/L",
                 value="€0.00",
                 subtitle="Change: 0.00%",
-                footer="Daily P/L will connect to performance history later.",
+                trend="Daily P/L will connect to performance history later.",
             ),
-            DashboardCardModel(
+            GuiMetricCard(
                 title="Open Positions",
                 value=str(open_positions),
                 subtitle=f"Position value: {self._money(position_value)}",
-                footer="Current open portfolio positions.",
+                trend="Current open portfolio positions.",
             ),
-            DashboardCardModel(
+            GuiMetricCard(
                 title="Portfolio Exposure",
                 value=f"{exposure:.2f}%",
                 subtitle=f"Cash: {self._money(cash)}",
-                footer="Derived from deterministic portfolio state.",
+                trend="Derived from deterministic portfolio state.",
             ),
-            DashboardCardModel(
+            GuiMetricCard(
                 title="Confidence Gauge",
                 value=average_confidence,
                 subtitle=f"Best trade confidence: {best_confidence}",
-                footer="Based on deterministic scanner output.",
+                trend="Based on deterministic scanner output.",
             ),
-            DashboardCardModel(
+            GuiMetricCard(
                 title="Pressure Gauge",
                 value=pressure_label,
                 subtitle=f"Best trade: {best_symbol}",
-                footer="Based on best ranked scanner item.",
+                trend="Based on best ranked scanner item.",
             ),
-            DashboardCardModel(
+            GuiMetricCard(
                 title="Risk Gauge",
                 value=self._risk_label_from_score(risk_score, exposure),
                 subtitle=f"Scanner risk: {self._percentage(risk_score)} | Exposure: {exposure:.2f}%",
-                footer="Display-only risk indication.",
+                trend="Display-only risk indication.",
             ),
-            DashboardCardModel(
+            GuiMetricCard(
                 title="Best Trade Card",
                 value=best_symbol,
                 subtitle=f"{best_decision} | Confidence: {best_confidence}",
-                footer="Highest ranked deterministic scanner opportunity.",
+                trend="Highest ranked deterministic scanner opportunity.",
             ),
-            DashboardCardModel(
+            GuiMetricCard(
                 title="Market Health",
                 value=market_health,
                 subtitle=f"Scanned: {total_scanned} | Failed: {total_failed}",
-                footer="Summary of current scanner health.",
+                trend="Summary of current scanner health.",
             ),
-            DashboardCardModel(
+            GuiMetricCard(
                 title="Portfolio Allocation",
                 value=f"Cash {self._cash_percentage(cash, equity):.2f}%",
                 subtitle=f"Positions {exposure:.2f}%",
-                footer="Portfolio allocation overview.",
+                trend="Portfolio allocation overview.",
             ),
-            DashboardCardModel(
+            GuiMetricCard(
                 title="Equity Curve",
                 value="Waiting",
                 subtitle="0 points",
-                footer="Historical equity visualization later.",
+                trend="Historical equity visualization later.",
             ),
         ]
 
-    def create_default_cards(self) -> list[DashboardCardModel]:
+    def create_default_cards(self) -> list[GuiMetricCard]:
         return self.create_cards(DashboardData())
 
     def create_default_sections(self) -> list[GuiSection]:
         return [
             GuiSection(
                 title=card.title,
-                description=card.footer,
+                description=card.trend,
                 metrics=[
                     GuiMetric("Value", card.value),
                     GuiMetric("Info", card.subtitle),
