@@ -8,27 +8,20 @@ from services.orchestration.ai_market_scanner import AIMarketScanner
 from services.orchestration.trading_pipeline import TradingPipeline
 
 from ui.foundation.ai_scanner_presenter import AIScannerPresenter
+from ui.foundation.dashboard_2_presenter import Dashboard2Presenter
+from ui.foundation.dashboard_data import DashboardData
 from ui.foundation.trading_workspace_presenter import TradingWorkspacePresenter
 
 
 class ApplicationController:
     """
     Central application controller for Orion.
-
-    Responsibilities
-    ----------------
-    - Connect UI actions to backend services
-    - Keep MainWindow free of business logic
-    - Coordinate Trading Workspace
-    - Coordinate AI Scanner Workspace
     """
 
     def __init__(self, window):
         self.window = window
 
-        self.logger = LoggingService.get_logger(
-            "ApplicationController"
-        )
+        self.logger = LoggingService.get_logger("ApplicationController")
 
         self.config = DEFAULT_TRADING_CONFIG
 
@@ -41,6 +34,9 @@ class ApplicationController:
         self.trading_pipeline = TradingPipeline()
 
         self.trading_presenter = TradingWorkspacePresenter()
+        self.dashboard_presenter = Dashboard2Presenter()
+
+        self.latest_scanner_result = None
 
         self.ai_market_scanner = AIMarketScanner(
             provider=self.provider,
@@ -49,6 +45,15 @@ class ApplicationController:
         )
 
         self.ai_scanner_presenter = AIScannerPresenter()
+
+    def refresh_dashboard(self):
+        data = DashboardData(
+            portfolio_state=self.window.portfolio,
+            scanner_result=self.latest_scanner_result,
+        )
+
+        cards = self.dashboard_presenter.create_cards(data)
+        self.window.dashboard_page.set_cards(cards)
 
     # ==========================================================
     # TRADING
@@ -111,6 +116,8 @@ class ApplicationController:
                 "Analyse voltooid."
             )
 
+            self.refresh_dashboard()
+
             pipeline = result["pipeline"]
 
             self.logger.info(
@@ -161,22 +168,18 @@ class ApplicationController:
                 interval=self.config.market_data.history_interval,
             )
 
+            self.latest_scanner_result = scan_result
+
             sections = self.ai_scanner_presenter.create_sections(
                 scan_result=scan_result,
                 max_items=self.config.scanner.max_results,
-            )
-
-            self.window.dashboard_page.set_sections(
-                sections
             )
 
             self.window.scanner_page.set_sections(
                 sections
             )
 
-            self.window.dashboard_page.set_status_text(
-                "AI Scanner analyse voltooid."
-            )
+            self.refresh_dashboard()
 
             self.window.scanner_page.set_status_text(
                 "AI Scanner analyse voltooid."

@@ -11,7 +11,7 @@
 - [x] Presenter architecture
 - [x] ApplicationController architecture
 - [x] Central TradingConfig
-- [x] Architecture Freeze v1.1
+- [x] Architecture Freeze v1.2
 
 ---
 
@@ -38,6 +38,13 @@
 - [x] AI Scanner Presenter tests
 - [x] Backtest tests
 - [x] Decision smoke tests
+
+Current result:
+
+```
+Passed: 6
+Failed: 0
+```
 
 ---
 
@@ -71,20 +78,36 @@
 ## Desktop
 
 - [x] Trading Workspace
+- [x] Dashboard 2.0 Foundation
+- [x] DashboardGrid
+- [x] DashboardWorkspace
+- [x] DashboardData
+- [x] Dashboard2Presenter
+- [x] Scanner Workspace
 - [x] Trading Workspace Presenter
-- [x] Dashboard
-- [x] Scanner
 - [x] AI Scanner Presenter
 - [x] Shared Trading Pipeline
 - [x] ApplicationController
 
 ---
 
-## Market Data
+## Dashboard Features
 
-- [x] Live Yahoo Finance
-- [x] Historical OHLCV
-- [x] IndicatorBuilder integration
+Completed
+
+- [x] Portfolio Summary
+- [x] Cash Widget
+- [x] Equity Widget
+- [x] Today's P/L placeholder
+- [x] Open Positions
+- [x] Portfolio Exposure
+- [x] Confidence Gauge
+- [x] Pressure Gauge
+- [x] Risk Gauge
+- [x] Best Trade Card
+- [x] Market Health
+- [x] Portfolio Allocation
+- [x] Equity Curve placeholder
 
 ---
 
@@ -92,42 +115,46 @@
 
 # Sprint 4.1 — Dashboard 2.0
 
-## Dashboard
+## Architecture Refactor
 
-- [ ] Portfolio Summary
-- [ ] Cash Widget
-- [ ] Equity Widget
-- [ ] Today's P/L
-- [ ] Open Positions
-- [ ] Portfolio Exposure
+Highest priority
+
+- [ ] Replace DashboardCard with MetricCard
+- [ ] Replace DashboardCardModel with GuiMetricCard
+- [ ] Refactor DashboardGrid
+- [ ] Refactor DashboardWorkspace
+- [ ] Simplify Dashboard2Presenter
+- [ ] Remove remaining temporary dashboard presentation code
+
+---
+
+## Dashboard Polish
+
+- [ ] KPI Hero Cards
+- [ ] Market Health Banner
+- [ ] Professional Status Bar
+- [ ] Responsive Dashboard Layout
+- [ ] Improved Card Spacing
+- [ ] Better Typography
 
 ---
 
 ## Visualization
 
-- [ ] Equity Curve
-- [ ] Confidence Gauge
-- [ ] Pressure Gauge
-- [ ] Risk Gauge
-- [ ] Portfolio Allocation
-
----
-
-## Scanner
-
-- [ ] Best Trade Card
-- [ ] Top Opportunities
-- [ ] Market Health Indicator
-- [ ] AI Confidence Summary
+- [ ] Equity Curve Chart
+- [ ] Portfolio Allocation Chart
+- [ ] Confidence Gauge Widget
+- [ ] Pressure Gauge Widget
+- [ ] Risk Gauge Widget
 
 ---
 
 ## Desktop UX
 
-- [ ] Improved Dashboard Layout
-- [ ] Professional Card Styling
-- [ ] Better Status Bar
-- [ ] Dashboard Refresh Button
+- [ ] Dashboard Widget Library
+- [ ] MetricCard Standardization
+- [ ] Widget Reuse
+- [ ] Professional Dashboard Theme
 
 ---
 
@@ -140,7 +167,8 @@ Watchlists
 - [ ] Custom Watchlists
 - [ ] Save Watchlists
 - [ ] Load Watchlists
-- [ ] Scan Selected Watchlist
+- [ ] Scanner Filters
+- [ ] Favorite Symbols
 
 ---
 
@@ -148,10 +176,11 @@ Watchlists
 
 Portfolio Workspace
 
-- [ ] Portfolio Overview
+- [ ] Position Overview
 - [ ] Position Table
-- [ ] Allocation
+- [ ] Allocation Visualization
 - [ ] Unrealized P/L
+- [ ] Portfolio Charts
 
 ---
 
@@ -162,6 +191,8 @@ Live Monitoring
 - [ ] Auto Refresh
 - [ ] Background Scanner
 - [ ] Live Dashboard Updates
+- [ ] Live Market Health
+- [ ] Live Portfolio Metrics
 
 ---
 
@@ -172,6 +203,7 @@ Paper Trading
 - [ ] Portfolio Simulation
 - [ ] Virtual Orders
 - [ ] Position History
+- [ ] Trade Replay
 
 ---
 
@@ -181,13 +213,14 @@ Develop Orion into a professional deterministic AI-assisted trading platform fea
 
 - Live Market Analysis
 - Explainable AI
+- Professional Dashboard
 - Portfolio Intelligence
 - Historical Backtesting
 - Watchlists
 - Paper Trading
 - Broker Integration
 
-while maintaining deterministic calculations as the single source of truth.
+while maintaining deterministic calculations as the only source of trading decisions.
 
 ---
 

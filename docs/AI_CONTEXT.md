@@ -4,24 +4,17 @@
 
 # Current Phase
 
-## Sprint 4.0.1 — Production Foundation
+## Sprint 4.1 — Dashboard 2.0
 
-Project Orion has evolved into a deterministic AI-assisted desktop trading platform.
+Project Orion has completed its deterministic backend foundation.
 
-The architectural foundation is considered stable.
+The backend is now considered stable.
 
-Development has transitioned from feature construction to production hardening.
+Current development is focused entirely on the professional desktop experience.
 
-Current priorities are:
+No new trading logic is currently being added.
 
-- production stability
-- centralized configuration
-- centralized logging
-- regression testing
-- documentation
-- professional desktop experience
-
-Future development extends the architecture rather than redesigning it.
+Development focuses on presentation, visualization and workspace architecture while preserving the deterministic backend.
 
 ---
 
@@ -37,6 +30,10 @@ Identical market data must always generate identical output.
 
 Artificial Intelligence never performs calculations.
 
+Artificial Intelligence only explains deterministic results.
+
+The Trading Pipeline remains the single source of truth.
+
 ---
 
 ## Layer Separation
@@ -48,6 +45,8 @@ Presentation logic exists only inside Presenters.
 Qt Widgets contain no business logic.
 
 ApplicationController coordinates communication between UI and backend.
+
+Widgets are purely responsible for rendering presentation models.
 
 ---
 
@@ -73,7 +72,7 @@ Git Commit
 
 GitHub Push
 
-No sprint is considered complete until all five steps have finished.
+No sprint is considered complete until all five stages have finished.
 
 ---
 
@@ -81,61 +80,35 @@ No sprint is considered complete until all five steps have finished.
 
 ```
 User
-
-↓
-
+        ↓
 ApplicationController
-
-↓
-
+        ↓
 YahooProvider
-
-↓
-
+        ↓
 IndicatorBuilder
-
-↓
-
+        ↓
 IndicatorPack
-
-↓
-
+        ↓
 TradingPipeline
-
-↓
-
+        ↓
 Signal Fusion
-
-↓
-
+        ↓
 Market Intelligence
-
-↓
-
+        ↓
 Adaptive Decision
-
-↓
-
+        ↓
 Position Sizing
-
-↓
-
+        ↓
 AI Context
-
-↓
-
+        ↓
 AI Explanation
-
-↓
-
-Presenter
-
-↓
-
+        ↓
+Presenters
+        ↓
 Qt Desktop
 ```
 
-Every layer has exactly one responsibility.
+Every architectural layer owns exactly one responsibility.
 
 ---
 
@@ -145,63 +118,124 @@ The AI Market Scanner uses the exact same Trading Pipeline as the Trading Worksp
 
 ```
 ApplicationController
-
-↓
-
+        ↓
 YahooProvider
-
-↓
-
+        ↓
 IndicatorBuilder
-
-↓
-
+        ↓
 TradingPipeline
-
-↓
-
+        ↓
 AIMarketScanner
-
-↓
-
+        ↓
 AIScannerPresenter
-
-↓
-
+        ↓
 Scanner Workspace
 ```
 
 There is only one deterministic source of truth.
 
+No duplicate trading logic may exist.
+
 ---
 
-# Backtesting Flow
+# Dashboard 2.0
 
-Historical Dataset
+Dashboard 2.0 is now under active development.
 
-↓
+Completed:
 
-MarketScanner
+✅ DashboardGrid
 
-↓
+✅ DashboardWorkspace
 
-BacktestEngine
+✅ DashboardData
 
-↓
+✅ Dashboard2Presenter
 
-BacktestSimulator
+✅ Portfolio Summary
 
-↓
+✅ Cash Widget
 
-Equity Curve
+✅ Equity Widget
 
-↓
+✅ Open Positions
 
-Trade Log
+✅ Portfolio Exposure
 
-↓
+✅ Confidence Gauge
 
-Backtest Visualizer
+✅ Pressure Gauge
+
+✅ Risk Gauge
+
+✅ Best Trade Card
+
+✅ Market Health
+
+✅ Portfolio Allocation
+
+✅ Equity Curve placeholder
+
+Dashboard data now flows through:
+
+```
+ApplicationController
+        ↓
+DashboardData
+        ↓
+Dashboard2Presenter
+        ↓
+DashboardWorkspace
+```
+
+---
+
+# UI Architecture
+
+The desktop UI now follows a presentation-driven architecture.
+
+ApplicationController coordinates all communication.
+
+Presenters transform deterministic backend output into presentation models.
+
+Qt Widgets render presentation models only.
+
+Business logic is prohibited inside widgets.
+
+---
+
+# Important Architectural Discovery
+
+During Sprint 4.1 an existing reusable widget infrastructure was discovered.
+
+Already present:
+
+- GuiMetricCard
+- MetricCard
+- GuiWorkspace
+- GuiChart
+
+Temporary DashboardCard and DashboardCardModel were introduced during early Dashboard development.
+
+These temporary components have now been removed.
+
+Next sprint begins the migration toward the existing MetricCard architecture.
+
+Target architecture:
+
+```
+Dashboard2Presenter
+        ↓
+GuiMetricCard
+        ↓
+MetricCard
+        ↓
+DashboardGrid
+        ↓
+DashboardWorkspace
+```
+
+This removes duplicate presentation components and standardizes dashboard rendering.
 
 ---
 
@@ -225,19 +259,19 @@ Completed
 
 ✅ ApplicationController
 
+✅ Dashboard 2.0 Foundation
+
 ✅ Trading Workspace
 
-✅ Dashboard
-
-✅ Scanner
+✅ Scanner Workspace
 
 ---
 
-# Logging Architecture
+# Logging
 
-Every important backend component now logs to the centralized logging system.
+Centralized logging is active.
 
-Current coverage
+Coverage:
 
 ✅ ApplicationController
 
@@ -251,31 +285,32 @@ Current coverage
 
 ✅ BacktestEngine
 
-Log destination
+Destination:
 
 ```
-logs/
-
-orion.log
+logs/orion.log
 ```
 
-The logging system now provides a complete audit trail from user action to AI explanation.
+The logging system provides a complete audit trail from user interaction to deterministic trading result.
 
 ---
 
 # Testing
 
-Regression testing is centralized.
+Regression testing remains centralized.
 
-Official command
+Official command:
 
 ```powershell
 python run_tests.py
 ```
 
-Current health
+Current result throughout Sprint 4.1:
 
-✅ All regression tests passing.
+```
+Passed: 6
+Failed: 0
+```
 
 Regression tests are mandatory before every Git commit.
 
@@ -283,33 +318,31 @@ Regression tests are mandatory before every Git commit.
 
 # Current Priority
 
-Sprint 4.1
+Complete Dashboard 2.0 using the existing Orion presentation architecture.
 
-Objectives
+Immediate objectives:
 
-- Dashboard 2.0
-- Portfolio visualization
-- Equity charts
-- Watchlists
-- Live refresh
-- Portfolio analytics
+- migrate Dashboard to MetricCard
+- remove remaining temporary dashboard presentation models
+- introduce reusable dashboard widget library
+- improve professional desktop experience
+- preserve deterministic backend
 
 No backend redesign is planned.
-
-The current architecture is considered production-ready for continued expansion.
 
 ---
 
 # Long-Term Vision
 
-Project Orion will evolve into a professional AI-assisted desktop trading platform capable of:
+Project Orion will evolve into a professional deterministic AI-assisted trading platform featuring:
 
-- deterministic market analysis
-- explainable AI
-- historical backtesting
-- portfolio intelligence
-- watchlists
-- paper trading
-- broker integration
+- Live Market Analysis
+- Explainable AI
+- Portfolio Intelligence
+- Professional Dashboard
+- Historical Backtesting
+- Watchlists
+- Paper Trading
+- Broker Integration
 
-while preserving deterministic decision making as the single source of truth.
+while preserving deterministic calculations as the only source of trading decisions.

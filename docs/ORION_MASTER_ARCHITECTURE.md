@@ -8,11 +8,11 @@
 
 Status
 
-🟢 Production Foundation Complete
+🟢 Production Foundation Stable
 
 Current Phase
 
-Sprint 4.1 — Dashboard Evolution
+🚧 Sprint 4.1 — Dashboard 2.0
 
 ---
 
@@ -20,13 +20,15 @@ Sprint 4.1 — Dashboard Evolution
 
 Project Orion is a deterministic AI-assisted desktop trading platform.
 
-Every architectural layer has exactly one responsibility.
+Every architectural layer owns exactly one responsibility.
 
 Artificial Intelligence never performs investment calculations.
 
-Artificial Intelligence explains deterministic results.
+Artificial Intelligence only explains deterministic results.
 
-The deterministic pipeline remains the single source of truth.
+The deterministic Trading Pipeline is the single source of truth.
+
+No business logic may exist inside the UI.
 
 ---
 
@@ -37,6 +39,8 @@ The deterministic pipeline remains the single source of truth.
 Identical market data must always produce identical trading decisions.
 
 No randomness is permitted.
+
+No AI-generated trading decisions are permitted.
 
 ---
 
@@ -56,13 +60,13 @@ Presentation
 
 Qt UI
 
-Every layer communicates through explicit models.
+Every layer communicates through explicit presentation models.
 
 ---
 
 ## Explainability
 
-Every recommendation must be:
+Every recommendation must always be:
 
 - deterministic
 - reproducible
@@ -93,11 +97,11 @@ Git Commit
 
 GitHub Push
 
-A sprint is not finished before all five stages have completed.
+No sprint is complete before all five stages finish successfully.
 
 ---
 
-# Production Architecture
+# Production Trading Architecture
 
 ```
 User
@@ -129,7 +133,7 @@ Presenters
 Qt Desktop
 ```
 
-This deterministic pipeline is the only source of trading decisions.
+This deterministic Trading Pipeline remains the only source of trading decisions.
 
 ---
 
@@ -151,9 +155,77 @@ AIScannerPresenter
 Scanner Workspace
 ```
 
-Trading Workspace and AI Scanner always share the exact same Trading Pipeline.
+Trading Workspace and AI Scanner always consume the exact same Trading Pipeline.
 
-No duplicate business logic exists.
+No duplicate business logic may exist.
+
+---
+
+# Dashboard 2.0 Architecture
+
+Dashboard has become an independent presentation layer.
+
+Current architecture:
+
+```
+ApplicationController
+        ↓
+DashboardData
+        ↓
+Dashboard2Presenter
+        ↓
+DashboardWorkspace
+        ↓
+DashboardGrid
+```
+
+Dashboard owns presentation only.
+
+Trading calculations remain inside the backend.
+
+---
+
+# IMPORTANT ARCHITECTURAL DECISION
+
+During Sprint 4.1 an existing reusable presentation framework was discovered.
+
+Already available:
+
+- GuiMetricCard
+- MetricCard
+- GuiWorkspace
+- GuiChart
+
+Temporary Dashboard-specific components were introduced during the first Dashboard implementation:
+
+- DashboardCard
+- DashboardCardModel
+
+These temporary components have now been removed from the project.
+
+Future Dashboard development MUST use the existing presentation framework.
+
+Target architecture:
+
+```
+ApplicationController
+        ↓
+DashboardData
+        ↓
+Dashboard2Presenter
+        ↓
+GuiMetricCard
+        ↓
+MetricCard
+        ↓
+DashboardGrid
+        ↓
+DashboardWorkspace
+```
+
+This becomes the official Dashboard architecture.
+
+Duplicate widget hierarchies are not permitted.
 
 ---
 
@@ -175,7 +247,7 @@ Equity Curve
 BacktestVisualizer
 ```
 
-Backtesting reuses deterministic production logic.
+Backtesting always reuses deterministic production logic.
 
 ---
 
@@ -197,9 +269,9 @@ AIMarketScanner
 Backtesting
 ```
 
-Configuration is centralized.
+Configuration remains centralized.
 
-Hardcoded values should not exist elsewhere.
+Hardcoded values are prohibited.
 
 ---
 
@@ -219,21 +291,21 @@ AIMarketScanner
 BacktestEngine
 ```
 
-All important backend components use LoggingService.
+All production services use LoggingService.
 
-Output:
+Destination
 
 ```
 logs/orion.log
 ```
 
-Logging provides a complete audit trail.
+Logging provides a complete deterministic audit trail.
 
 ---
 
 # Regression Testing
 
-Regression validation is centralized.
+Regression validation remains centralized.
 
 Official command
 
@@ -250,13 +322,22 @@ Current suite
 - AI Scanner Presenter
 - Backtest Visualizer
 
-Regression testing is mandatory before releases.
+Current status
+
+```
+Passed: 6
+Failed: 0
+```
+
+Regression testing is mandatory before every Git commit.
 
 ---
 
 # Current Production Components
 
 Completed
+
+## Backend
 
 ✅ TradingConfig
 
@@ -288,13 +369,29 @@ Completed
 
 ✅ BacktestVisualizer
 
-✅ Trading Workspace
+---
 
-✅ Dashboard
-
-✅ Scanner
+## Desktop
 
 ✅ ApplicationController
+
+✅ Trading Workspace
+
+✅ Dashboard 2.0 Foundation
+
+✅ DashboardData
+
+✅ Dashboard2Presenter
+
+✅ DashboardWorkspace
+
+✅ DashboardGrid
+
+✅ Scanner Workspace
+
+✅ Trading Workspace Presenter
+
+✅ AI Scanner Presenter
 
 ---
 
@@ -306,11 +403,15 @@ Architecture
 
 Backend
 
-🟢 Stable
+🟢 Production Ready
 
 Desktop
 
-🟢 Stable
+🟢 Active Development
+
+Dashboard
+
+🟢 Active Development
 
 Logging
 
@@ -330,19 +431,37 @@ Documentation
 
 ---
 
-# Sprint 4.1 Vision
+# Sprint 4.1 Remaining Work
 
-Development now shifts from backend infrastructure to user experience.
+Highest priority:
 
-Primary objectives:
+- Migrate Dashboard to MetricCard
+- Standardize on GuiMetricCard
+- Remove remaining temporary presentation code
+- Introduce reusable dashboard widget library
+- Add professional dashboard widgets
+- Equity chart
+- Allocation chart
+- Gauge widgets
+- Hero KPI cards
 
-- Dashboard 2.0
-- Portfolio Overview
-- Equity Visualization
-- Confidence Gauges
+Backend expansion is NOT planned.
+
+Future work is focused on desktop presentation while preserving the deterministic backend.
+
+---
+
+# Long-Term Vision
+
+Project Orion will evolve into a professional deterministic AI-assisted trading platform featuring:
+
+- Professional Desktop Dashboard
+- Portfolio Intelligence
+- Live Market Analysis
+- Explainable AI
+- Historical Backtesting
 - Watchlists
-- Live Refresh
+- Paper Trading
+- Broker Integration
 
-No architectural redesign is expected.
-
-Future development extends the existing production architecture.
+while maintaining deterministic calculations as the only source of trading decisions.

@@ -1,380 +1,162 @@
-# CHANGELOG
-
-# Sprint 4.0.1 — Production Foundation (COMPLETED)
+# Sprint 4.1 — Dashboard 2.0 (IN PROGRESS)
 
 ---
 
 ## Added
 
-### Central Logging
+### Dashboard 2.0 Foundation
 
-Added a centralized logging infrastructure.
+Added a dedicated dashboard presentation layer.
 
-New component:
+New components:
 
-- `LoggingService`
+- DashboardWorkspace
+- DashboardGrid
+- DashboardData
+- Dashboard2Presenter
 
-Logging is now available throughout the backend.
-
-Current logging coverage:
-
-- ApplicationController
-- YahooProvider
-- IndicatorBuilder
-- TradingPipeline
-- AIMarketScanner
-- BacktestEngine
-
-The application now produces a complete audit trail from user interaction to deterministic trading result.
-
----
-
-### Regression Testing
-
-Added a centralized regression test runner.
-
-New utility:
-
-- `run_tests.py`
-
-Current regression suite:
-
-- Trading Pipeline
-- Decision Smoke
-- Intelligence Layer
-- AI Market Scanner
-- AI Scanner Presenter
-- Backtest Visualizer
-
-Regression testing is now mandatory before every release.
-
----
-
-### Production Workflow
-
-Introduced a standardized development workflow.
-
-Every sprint now follows:
-
-Feature
-
-↓
-
-Testing
-
-↓
-
-Documentation
-
-↓
-
-Git Commit
-
-↓
-
-GitHub Push
-
-A sprint is only considered complete after all five stages have been completed.
-
----
-
-## Changed
-
-### Backend
-
-Replaced remaining operational `print()` usage with centralized logging in core services.
-
-Improved traceability across the deterministic trading pipeline.
-
----
-
-### Quality Assurance
-
-Regression validation is now centralized through a single command:
-
-```powershell
-python run_tests.py
-```
-
-Current result:
-
-```
-Passed: 6
-Failed: 0
-```
-
----
-
-### Documentation
-
-Documentation refreshed to align with the production architecture.
-
-Updated:
-
-- AI_CONTEXT.md
-- PROJECT_STATUS.md
-- TODO.md
-- CHANGELOG.md
-- ORION_MASTER_ARCHITECTURE.md
-
----
-
-## Validation
-
-Validated:
-
-- LoggingService
-- YahooProvider
-- IndicatorBuilder
-- TradingPipeline
-- AIMarketScanner
-- ApplicationController
-- BacktestEngine
-- Regression Test Runner
-
-All regression tests passed successfully.
-
----
-
-## Current Status
-
-Architecture
-
-🟢 Stable
-
-Production Infrastructure
-
-🟢 Stable
-
-Regression Testing
-
-🟢 Passing
-
-Logging
-
-🟢 Complete
-
-Technical Debt
-
-🟢 Low
-
-Documentation
-
-🟢 Updated
-
----
-
-## Next Sprint
-
-Sprint 4.1
-
-Objectives:
-
-- Dashboard 2.0
-- Portfolio Summary
-- Equity Visualization
-- Confidence Gauge
-- Watchlists
-- Live Dashboard Refresh
-
-# Sprint 3.13 — AI Desktop Integration & Stabilization (COMPLETED)
-
----
-
-## Added
-
-### Live Market Integration
-
-- Added `IndicatorBuilder`
-- Live Yahoo Finance integration
-- Deterministic indicator generation from historical market data
-
-IndicatorBuilder now converts historical OHLCV data into standardized `IndicatorPack` models.
-
----
-
-### Trading Configuration
-
-Added centralized configuration.
-
-New module:
-
-- `TradingConfig`
-
-Current configurable settings:
-
-- RSI period
-- Momentum period
-- Trend period
-- Volatility period
-- Yahoo history period
-- Yahoo interval
-- Default scanner universe
-- Scanner limits
-- Backtest fee model
-- Backtest slippage model
-
-Hardcoded trading parameters have been removed from multiple services.
-
----
-
-### AI Market Scanner
-
-Added:
-
-- AIMarketScanner
-
-Capabilities:
-
-- execute Trading Pipeline for multiple assets
-- rank opportunities
-- determine best trade
-- produce deterministic portfolio-wide scan results
-
-Trading and Scanner now share the exact same deterministic pipeline.
-
----
-
-### Desktop Integration
-
-Added:
-
-- Trading Workspace
-- Trading Workspace Presenter
-- AI Scanner Presenter
-- ApplicationController
-
-ApplicationController is now responsible for orchestrating:
-
-- Trading
-- Dashboard
-- Scanner
-
-The desktop UI now uses a centralized orchestration layer.
-
----
-
-## Changed
-
-### Trading Workspace
-
-Trading Workspace now performs:
-
-Yahoo Finance
-
-↓
-
-IndicatorBuilder
-
-↓
-
-Trading Pipeline
-
-↓
-
-AI Context
-
-↓
-
-AI Explanation
-
-↓
-
-Desktop Presentation
-
-No demo indicator data remains.
-
----
-
-### Scanner
-
-Legacy scanning flow has been replaced by the AI Market Scanner.
+Dashboard now receives deterministic portfolio and scanner data through a dedicated presentation flow.
 
 Current flow:
 
-Yahoo Finance
+ApplicationController
 
 ↓
 
-IndicatorBuilder
+DashboardData
 
 ↓
 
-Trading Pipeline
+Dashboard2Presenter
 
 ↓
 
-AIMarketScanner
-
-↓
-
-AIScannerPresenter
-
-↓
-
-Scanner Workspace
-
-Trading and Scanner now share one deterministic source of truth.
+DashboardWorkspace
 
 ---
 
-### Configuration
+### Dashboard Features
 
-IndicatorBuilder now consumes TradingConfig.
+Implemented:
 
-ApplicationController now consumes TradingConfig.
+- Portfolio Summary
+- Cash Widget
+- Equity Widget
+- Today's P/L placeholder
+- Open Positions
+- Portfolio Exposure
+- Confidence Gauge
+- Pressure Gauge
+- Risk Gauge
+- Best Trade Card
+- Market Health
+- Portfolio Allocation
+- Equity Curve placeholder
 
-Default scan symbols are configurable.
+Dashboard now displays deterministic portfolio information together with scanner output.
 
-Historical market settings are configurable.
+---
+
+### Desktop UI
+
+Improved dashboard presentation.
+
+Added:
+
+- Professional dashboard cards
+- Responsive dashboard grid
+- Three-column dashboard layout
+- Improved spacing
+- Professional typography
+- Hover styling
+- Status accent colours
+
+Desktop development is now focused on user experience while keeping all business logic inside the deterministic backend.
+
+---
+
+## Changed
+
+### Dashboard Integration
+
+ApplicationController now refreshes Dashboard 2.0 using deterministic presentation models.
+
+Dashboard no longer depends directly on scanner sections for its primary overview.
+
+Portfolio information and scanner information are prepared independently before presentation.
+
+---
+
+### Presentation Architecture
+
+Introduced DashboardData as an intermediate presentation model.
+
+Dashboard presenters are now responsible only for formatting deterministic backend output.
+
+Qt widgets remain presentation-only.
 
 ---
 
 ## Architecture
 
-ApplicationController introduced as the central desktop orchestrator.
+During Sprint 4.1 an existing presentation infrastructure was discovered.
 
-Current desktop flow:
+Existing reusable components:
 
-```text
-MainWindow
-        ↓
+- GuiMetricCard
+- MetricCard
+- GuiWorkspace
+
+Temporary DashboardCard and DashboardCardModel were introduced early during Dashboard 2.0 development.
+
+Decision:
+
+Dashboard will migrate to the existing MetricCard architecture.
+
+Target architecture:
+
 ApplicationController
-        ↓
-Trading
 
-or
+↓
 
-Scanner
+DashboardData
 
-or
+↓
 
-Dashboard
-        ↓
-Presenters
-        ↓
-Qt Workspaces
-```
+Dashboard2Presenter
 
-Business logic has been removed from the UI layer.
+↓
+
+GuiMetricCard
+
+↓
+
+MetricCard
+
+↓
+
+DashboardGrid
+
+↓
+
+DashboardWorkspace
+
+This removes duplicate presentation components and standardizes the desktop UI.
 
 ---
 
 ## Validation
 
-Validated components:
+Regression testing executed repeatedly during Sprint 4.1.
 
-- Trading Workspace
-- Trading Pipeline
-- AIMarketScanner
-- AI Scanner Presenter
-- IndicatorBuilder
-- TradingConfig
-- ApplicationController
-- Dashboard integration
-- Scanner integration
+Current result:
 
-All manual integration tests passed.
+```text
+Passed: 6
+Failed: 0
+```
+
+All implemented Dashboard functionality remains compatible with the current regression suite.
 
 ---
 
@@ -388,9 +170,17 @@ Backend
 
 🟢 Stable
 
-Desktop Integration
+Desktop
 
-🟢 Stable
+🟢 Active Development
+
+Dashboard
+
+🟢 Functional
+
+Regression Tests
+
+🟢 Passing
 
 Technical Debt
 
@@ -402,226 +192,15 @@ Documentation
 
 ---
 
-## Next Sprint
+## Next Step
 
-Sprint 4.0
+Complete the Dashboard presentation refactor.
 
-Objectives:
+Immediate objectives:
 
-- Central logging
-- Unified test runner
-- Dashboard polish
-- Equity visualization
-- Watchlists
-- Live refresh
-
-# Sprint 3.10.5 — Architecture Stabilization (COMPLETED)
-
-## Added
-
-### Trading Intelligence
-
-- Signal Fusion Engine
-- Market Intelligence Engine
-- Adaptive Decision Engine
-- Position Sizing Engine
-
----
-
-### Artificial Intelligence
-
-- AI Context Builder
-- AI Explanation Engine
-
-Added explainable AI layer capable of generating deterministic reasoning for every trading decision.
-
----
-
-### Trading Pipeline
-
-Added a fully orchestrated trading pipeline connecting:
-
-IndicatorPack
-
-↓
-
-Signal Fusion
-
-↓
-
-Market Intelligence
-
-↓
-
-Decision Engine
-
-↓
-
-Position Sizer
-
-↓
-
-AI Context
-
-↓
-
-AI Explanation
-
----
-
-### Market Scanner
-
-Added multi-asset scanning.
-
-Capabilities:
-
-- scan multiple assets
-- rank opportunities
-- identify actionable trades
-- deterministic ranking model
-
----
-
-### Backtesting
-
-Added
-
-- Backtest Engine
-- Backtest Simulator
-- Backtest Visualizer
-
-Capabilities:
-
-- deterministic trade simulation
-- transaction fee model
-- slippage model
-- equity curve generation
-- trade log generation
-- performance summaries
-
----
-
-## Changed
-
-### Decision Models
-
-Introduced standardized models:
-
-- MarketSignal
-- PositionContext
-- DecisionInput
-- TradeDecision
-- SizedTradeDecision
-
-These models now define service contracts across the trading architecture.
-
----
-
-### Trading Pipeline
-
-Refactored to remove temporary runtime objects.
-
-Removed:
-
-- dynamic `type(...)` objects
-- implicit contracts
-
-Pipeline now operates exclusively on explicit data models.
-
----
-
-### Market Scanner
-
-Refactored to use standardized pipeline outputs.
-
-Improved:
-
-- ranking
-- orchestration
-- architecture consistency
-
----
-
-### Backtesting
-
-Refactored:
-
-- Backtest Engine
-- Backtest Simulator
-- Backtest Visualizer
-
-Improved:
-
-- deterministic PnL calculation
-- fee handling
-- slippage handling
-- trade summaries
-- equity reporting
-
----
-
-## Architecture
-
-Architecture Freeze v1.0 established.
-
-Current execution flow:
-
-```text
-IndicatorPack
-        ↓
-Signal Fusion
-        ↓
-Market Intelligence
-        ↓
-Adaptive Decision
-        ↓
-Position Sizing
-        ↓
-AI Context
-        ↓
-AI Explanation
-        ↓
-Trading Pipeline
-        ↓
-Market Scanner
-        ↓
-Backtest Engine
-        ↓
-Backtest Visualizer
-```
-
----
-
-## Current Status
-
-Backend trading architecture
-
-🟢 Stable
-
-Architecture consistency
-
-🟢 High
-
-Technical debt
-
-🟢 Low
-
-Documentation
-
-🟢 Updated
-
----
-
-## Next Sprint
-
-### Sprint 3.11 — Desktop Trading Workspace
-
-Objectives
-
-- Trading Workspace
-- Trading Presenter
-- AI Decision Panel
-- Scanner Workspace
-- Backtest Workspace
-- Equity Curve integration
-- Qt Desktop integration
+- Replace DashboardCard with MetricCard
+- Replace DashboardCardModel with GuiMetricCard
+- Refactor DashboardGrid
+- Refactor DashboardWorkspace
+- Introduce reusable dashboard widgets
+- Continue Dashboard polish

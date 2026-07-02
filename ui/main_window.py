@@ -92,6 +92,7 @@ class OrionWindow(QMainWindow):
         self._initialize_portfolio_workspace()
         self._initialize_history_workspace()
         self._initialize_pages()
+        self.application_controller.refresh_dashboard()
 
     def _initialize_settings_workspace(self):
         universe = self.universe_manager.get_universe(self.active_universe)

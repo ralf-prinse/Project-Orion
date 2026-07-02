@@ -4,7 +4,7 @@
 
 ---
 
-## Project Version
+# Project Version
 
 **v1.2.0-alpha**
 
@@ -14,7 +14,7 @@ Status:
 
 Current Milestone:
 
-✅ Sprint 4.0.1 — Production Foundation Completed
+🚧 Sprint 4.1 — Dashboard 2.0
 
 ---
 
@@ -22,17 +22,19 @@ Current Milestone:
 
 Project Orion is a deterministic AI-assisted desktop trading platform.
 
-The platform combines deterministic technical analysis, centralized orchestration and explainable AI to produce transparent, reproducible trading decisions.
+The backend architecture is considered production-stable.
+
+Current development is focused on the desktop experience, visualization and user interaction.
 
 Artificial Intelligence never determines investment decisions.
 
-All trading decisions originate from deterministic calculations.
+All trading decisions originate exclusively from the deterministic Trading Pipeline.
 
-AI is responsible exclusively for contextual explanations and presentation.
+AI is responsible only for explaining deterministic results.
 
 ---
 
-# Current Architecture
+# Current Production Architecture
 
 ```
 User
@@ -62,29 +64,31 @@ Presenters
 Qt Desktop
 ```
 
-The Trading Workspace and AI Market Scanner both consume the exact same Trading Pipeline.
+Trading Workspace and AI Market Scanner always consume the exact same Trading Pipeline.
 
 This guarantees one deterministic source of truth.
 
 ---
 
-# Secondary Processing Flow
+# Current Dashboard Architecture
+
+Dashboard 2.0 now introduces a dedicated presentation flow.
 
 ```
-Historical Dataset
+ApplicationController
         ↓
-MarketScanner
+DashboardData
         ↓
-BacktestEngine
+Dashboard2Presenter
         ↓
-BacktestSimulator
+DashboardWorkspace
         ↓
-Trade Log
-        ↓
-Equity Curve
-        ↓
-Backtest Visualizer
+DashboardGrid
 ```
+
+Dashboard contains presentation logic only.
+
+No trading calculations exist inside the UI.
 
 ---
 
@@ -94,40 +98,21 @@ Backtest Visualizer
 
 ✅ TradingConfig
 
-Centralized configuration controls:
-
-- indicator periods
-- market history
-- scanner universe
-- scanner limits
-- backtest fees
-- slippage
-
 ---
 
 ## Market Data
 
 ✅ YahooProvider
 
-Capabilities:
-
-- Live Yahoo Finance
-- Historical OHLCV
-- Current market data
+✅ IndicatorBuilder
 
 ---
 
-## Intelligence
-
-✅ IndicatorBuilder
+## Trading Intelligence
 
 ✅ Signal Fusion Engine
 
 ✅ Market Intelligence Engine
-
----
-
-## Decision Layer
 
 ✅ Adaptive Decision Engine
 
@@ -163,13 +148,55 @@ Capabilities:
 
 ✅ Trading Workspace
 
+✅ Dashboard 2.0 Foundation
+
+✅ Scanner Workspace
+
 ✅ Trading Workspace Presenter
 
-✅ Dashboard
-
-✅ Scanner
-
 ✅ AI Scanner Presenter
+
+---
+
+## Dashboard 2.0
+
+Completed
+
+✅ DashboardGrid
+
+✅ DashboardWorkspace
+
+✅ DashboardData
+
+✅ Dashboard2Presenter
+
+✅ Portfolio Summary
+
+✅ Cash Widget
+
+✅ Equity Widget
+
+✅ Today's P/L placeholder
+
+✅ Open Positions
+
+✅ Portfolio Exposure
+
+✅ Confidence Gauge
+
+✅ Pressure Gauge
+
+✅ Risk Gauge
+
+✅ Best Trade Card
+
+✅ Market Health
+
+✅ Portfolio Allocation
+
+✅ Equity Curve placeholder
+
+Dashboard now displays deterministic portfolio and scanner information.
 
 ---
 
@@ -177,9 +204,9 @@ Capabilities:
 
 ## Logging
 
-Central logging implemented.
+Centralized logging implemented.
 
-Components:
+Coverage:
 
 - ApplicationController
 - YahooProvider
@@ -188,65 +215,34 @@ Components:
 - AIMarketScanner
 - BacktestEngine
 
-Output:
+Output
 
 ```
 logs/orion.log
 ```
 
-The application now provides a complete audit trail from user action to trading result.
+Complete audit trail available.
 
 ---
 
 ## Regression Testing
 
-Regression testing is centralized.
+Regression testing remains centralized.
 
-Official command:
+Official command
 
 ```powershell
 python run_tests.py
 ```
 
-Current status:
+Current status
 
-✅ All regression tests passing.
+```
+Passed: 6
+Failed: 0
+```
 
-Regression tests are required before every release.
-
----
-
-## Documentation
-
-Project documentation is synchronized with the production architecture.
-
-Documentation is updated after every completed sprint.
-
----
-
-# Development Workflow
-
-Every sprint follows the same sequence:
-
-Feature
-
-↓
-
-Testing
-
-↓
-
-Documentation
-
-↓
-
-Git Commit
-
-↓
-
-GitHub Push
-
-No sprint is considered complete before all five steps have been completed.
+Regression testing is mandatory before every release.
 
 ---
 
@@ -262,7 +258,11 @@ Backend
 
 Desktop
 
-🟢 Stable
+🟢 Improving
+
+Dashboard
+
+🟢 Active Development
 
 Logging
 
@@ -270,7 +270,7 @@ Logging
 
 Regression Testing
 
-🟢 Complete
+🟢 Passing
 
 Technical Debt
 
@@ -282,53 +282,78 @@ Documentation
 
 ---
 
-# Next Milestone
+# Immediate Next Step
 
-## Sprint 4.1 — Dashboard 2.0
+Continue Sprint 4.1.
 
-Objectives
+Highest priority:
 
-- Professional Dashboard
-- Portfolio Summary
-- Equity Charts
-- Confidence Gauge
-- Pressure Gauge
-- Risk Indicators
+Refactor Dashboard 2.0 to reuse the existing presentation architecture.
+
+Migration target:
+
+```
+Dashboard2Presenter
+        ↓
+GuiMetricCard
+        ↓
+MetricCard
+        ↓
+DashboardGrid
+        ↓
+DashboardWorkspace
+```
+
+Temporary dashboard presentation components have been removed.
+
+Dashboard will fully standardize on the existing MetricCard infrastructure.
 
 ---
 
-## Upcoming Milestones
+# Upcoming Milestones
 
-Sprint 4.2
+## Sprint 4.2
 
-- Watchlists
-- Custom universes
-- Scanner filters
+Watchlists
 
-Sprint 4.3
+- Custom Watchlists
+- Saved Watchlists
+- Scanner Filters
 
-- Portfolio Workspace
-- Position overview
-- Allocation visualization
+---
 
-Sprint 4.4
+## Sprint 4.3
 
-- Live Refresh
-- Background monitoring
-- Automatic updates
+Portfolio Workspace
+
+- Position Table
+- Allocation View
+- Unrealized P/L
+- Portfolio Charts
+
+---
+
+## Sprint 4.4
+
+Live Dashboard
+
+- Auto Refresh
+- Background Scanner
+- Live Dashboard Updates
 
 ---
 
 # Long-Term Vision
 
-Project Orion will evolve into a professional deterministic AI-assisted trading platform featuring:
+Project Orion will evolve into a professional deterministic AI-assisted desktop trading platform featuring:
 
-- Live market analysis
+- Live Market Analysis
 - Explainable AI
-- Portfolio intelligence
-- Historical backtesting
+- Portfolio Intelligence
+- Professional Dashboard
+- Historical Backtesting
 - Watchlists
-- Paper trading
-- Broker integration
+- Paper Trading
+- Broker Integration
 
-without compromising deterministic decision making.
+while maintaining deterministic trading calculations as the only source of investment decisions.

@@ -439,3 +439,1047 @@
 2026-07-02 20:48:37 | INFO     | BacktestEngine | Selected AAPL | BUY | confidence=0.857
 2026-07-02 20:48:37 | INFO     | BacktestEngine | Trade finished | net_pnl=0.4535 equity=10000.95
 2026-07-02 20:48:37 | INFO     | BacktestEngine | Backtest completed | trades=3 profit=0.95 final_equity=10000.95
+2026-07-02 21:03:06 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:03:06 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.704
+2026-07-02 21:03:06 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0040
+2026-07-02 21:03:06 | INFO     | TradingPipeline | Decision | BUY confidence=0.804
+2026-07-02 21:03:06 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.804 | position=701.87
+2026-07-02 21:03:07 | INFO     | AIMarketScanner | Starting market scan (3 symbols)
+2026-07-02 21:03:07 | INFO     | AIMarketScanner | Scanning MSFT
+2026-07-02 21:03:07 | INFO     | YahooProvider | Downloading history for MSFT (period=6mo interval=1d)
+2026-07-02 21:03:07 | INFO     | YahooProvider | 125 candles downloaded for MSFT
+2026-07-02 21:03:07 | INFO     | IndicatorBuilder | Building indicators for MSFT
+2026-07-02 21:03:07 | INFO     | IndicatorBuilder | Indicators ready for MSFT | RSI=50.15 Trend=0.959 Momentum=41.27 Volatility=0.02451
+2026-07-02 21:03:07 | INFO     | TradingPipeline | Starting pipeline for MSFT
+2026-07-02 21:03:07 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.737
+2026-07-02 21:03:07 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:03:07 | INFO     | TradingPipeline | Decision | BUY confidence=0.837
+2026-07-02 21:03:07 | INFO     | TradingPipeline | Pipeline completed for MSFT | BUY | confidence=0.837 | position=737.02
+2026-07-02 21:03:07 | INFO     | AIMarketScanner | MSFT complete | BUY | confidence=0.837
+2026-07-02 21:03:07 | INFO     | AIMarketScanner | Scanning NVDA
+2026-07-02 21:03:07 | INFO     | YahooProvider | Downloading history for NVDA (period=6mo interval=1d)
+2026-07-02 21:03:08 | INFO     | YahooProvider | 125 candles downloaded for NVDA
+2026-07-02 21:03:08 | INFO     | IndicatorBuilder | Building indicators for NVDA
+2026-07-02 21:03:08 | INFO     | IndicatorBuilder | Indicators ready for NVDA | RSI=39.24 Trend=0.922 Momentum=38.38 Volatility=0.02580
+2026-07-02 21:03:08 | INFO     | TradingPipeline | Starting pipeline for NVDA
+2026-07-02 21:03:08 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.693
+2026-07-02 21:03:08 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:03:08 | INFO     | TradingPipeline | Decision | BUY confidence=0.793
+2026-07-02 21:03:08 | INFO     | TradingPipeline | Pipeline completed for NVDA | BUY | confidence=0.793 | position=693.00
+2026-07-02 21:03:08 | INFO     | AIMarketScanner | NVDA complete | BUY | confidence=0.793
+2026-07-02 21:03:08 | INFO     | AIMarketScanner | Scanning AAPL
+2026-07-02 21:03:08 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-02 21:03:08 | INFO     | YahooProvider | 125 candles downloaded for AAPL
+2026-07-02 21:03:08 | INFO     | IndicatorBuilder | Building indicators for AAPL
+2026-07-02 21:03:08 | INFO     | IndicatorBuilder | Indicators ready for AAPL | RSI=57.88 Trend=1.000 Momentum=48.92 Volatility=0.02395
+2026-07-02 21:03:08 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:03:08 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.788
+2026-07-02 21:03:08 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:03:08 | INFO     | TradingPipeline | Decision | BUY confidence=0.888
+2026-07-02 21:03:08 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.888 | position=787.83
+2026-07-02 21:03:08 | INFO     | AIMarketScanner | AAPL complete | BUY | confidence=0.888
+2026-07-02 21:03:08 | INFO     | AIMarketScanner | Market scan completed | requested=3 scanned=3 failed=0
+2026-07-02 21:03:08 | INFO     | AIMarketScanner | Starting market scan (3 symbols)
+2026-07-02 21:03:08 | INFO     | AIMarketScanner | Scanning MSFT
+2026-07-02 21:03:08 | INFO     | YahooProvider | Downloading history for MSFT (period=6mo interval=1d)
+2026-07-02 21:03:09 | INFO     | YahooProvider | 125 candles downloaded for MSFT
+2026-07-02 21:03:09 | INFO     | IndicatorBuilder | Building indicators for MSFT
+2026-07-02 21:03:09 | INFO     | IndicatorBuilder | Indicators ready for MSFT | RSI=50.15 Trend=0.959 Momentum=41.27 Volatility=0.02451
+2026-07-02 21:03:09 | INFO     | TradingPipeline | Starting pipeline for MSFT
+2026-07-02 21:03:09 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.737
+2026-07-02 21:03:09 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:03:09 | INFO     | TradingPipeline | Decision | BUY confidence=0.837
+2026-07-02 21:03:09 | INFO     | TradingPipeline | Pipeline completed for MSFT | BUY | confidence=0.837 | position=737.02
+2026-07-02 21:03:09 | INFO     | AIMarketScanner | MSFT complete | BUY | confidence=0.837
+2026-07-02 21:03:09 | INFO     | AIMarketScanner | Scanning NVDA
+2026-07-02 21:03:09 | INFO     | YahooProvider | Downloading history for NVDA (period=6mo interval=1d)
+2026-07-02 21:03:10 | INFO     | YahooProvider | 125 candles downloaded for NVDA
+2026-07-02 21:03:10 | INFO     | IndicatorBuilder | Building indicators for NVDA
+2026-07-02 21:03:10 | INFO     | IndicatorBuilder | Indicators ready for NVDA | RSI=39.23 Trend=0.922 Momentum=38.37 Volatility=0.02580
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Starting pipeline for NVDA
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.693
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Decision | BUY confidence=0.793
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Pipeline completed for NVDA | BUY | confidence=0.793 | position=692.93
+2026-07-02 21:03:10 | INFO     | AIMarketScanner | NVDA complete | BUY | confidence=0.793
+2026-07-02 21:03:10 | INFO     | AIMarketScanner | Scanning AAPL
+2026-07-02 21:03:10 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-02 21:03:10 | INFO     | YahooProvider | 125 candles downloaded for AAPL
+2026-07-02 21:03:10 | INFO     | IndicatorBuilder | Building indicators for AAPL
+2026-07-02 21:03:10 | INFO     | IndicatorBuilder | Indicators ready for AAPL | RSI=57.87 Trend=1.000 Momentum=48.91 Volatility=0.02394
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.788
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Decision | BUY confidence=0.888
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.888 | position=787.79
+2026-07-02 21:03:10 | INFO     | AIMarketScanner | AAPL complete | BUY | confidence=0.888
+2026-07-02 21:03:10 | INFO     | AIMarketScanner | Market scan completed | requested=3 scanned=3 failed=0
+2026-07-02 21:03:10 | INFO     | BacktestEngine | Starting backtest (3 timesteps)
+2026-07-02 21:03:10 | INFO     | BacktestEngine | Processing timestep 0 (2 assets)
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.704
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0040
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Decision | BUY confidence=0.804
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.804 | position=701.87
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.527
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0045
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Decision | HOLD confidence=0.500
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Pipeline completed for AAPL | HOLD | confidence=0.500 | position=525.13
+2026-07-02 21:03:10 | INFO     | BacktestEngine | Selected TSLA | BUY | confidence=0.804
+2026-07-02 21:03:10 | INFO     | BacktestEngine | Trade finished | net_pnl=0.0614 equity=10000.06
+2026-07-02 21:03:10 | INFO     | BacktestEngine | Processing timestep 1 (2 assets)
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.760
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0037
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Decision | BUY confidence=0.860
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.860 | position=758.00
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.413
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0044
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Decision | SELL confidence=0.587
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Pipeline completed for AAPL | SELL | confidence=0.587 | position=411.75
+2026-07-02 21:03:10 | INFO     | BacktestEngine | Selected TSLA | BUY | confidence=0.860
+2026-07-02 21:03:10 | INFO     | BacktestEngine | Trade finished | net_pnl=0.4398 equity=10000.50
+2026-07-02 21:03:10 | INFO     | BacktestEngine | Processing timestep 2 (2 assets)
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.470
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0054
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Decision | HOLD confidence=0.500
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Pipeline completed for TSLA | HOLD | confidence=0.500 | position=468.21
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.757
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0033
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Decision | BUY confidence=0.857
+2026-07-02 21:03:10 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.857 | position=755.69
+2026-07-02 21:03:10 | INFO     | BacktestEngine | Selected AAPL | BUY | confidence=0.857
+2026-07-02 21:03:10 | INFO     | BacktestEngine | Trade finished | net_pnl=0.4535 equity=10000.95
+2026-07-02 21:03:10 | INFO     | BacktestEngine | Backtest completed | trades=3 profit=0.95 final_equity=10000.95
+2026-07-02 21:04:56 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:04:56 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.704
+2026-07-02 21:04:56 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0040
+2026-07-02 21:04:56 | INFO     | TradingPipeline | Decision | BUY confidence=0.804
+2026-07-02 21:04:56 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.804 | position=701.87
+2026-07-02 21:04:56 | INFO     | AIMarketScanner | Starting market scan (3 symbols)
+2026-07-02 21:04:56 | INFO     | AIMarketScanner | Scanning MSFT
+2026-07-02 21:04:56 | INFO     | YahooProvider | Downloading history for MSFT (period=6mo interval=1d)
+2026-07-02 21:04:57 | INFO     | YahooProvider | 125 candles downloaded for MSFT
+2026-07-02 21:04:57 | INFO     | IndicatorBuilder | Building indicators for MSFT
+2026-07-02 21:04:57 | INFO     | IndicatorBuilder | Indicators ready for MSFT | RSI=49.97 Trend=0.958 Momentum=41.18 Volatility=0.02446
+2026-07-02 21:04:57 | INFO     | TradingPipeline | Starting pipeline for MSFT
+2026-07-02 21:04:57 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.736
+2026-07-02 21:04:57 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:04:57 | INFO     | TradingPipeline | Decision | BUY confidence=0.836
+2026-07-02 21:04:57 | INFO     | TradingPipeline | Pipeline completed for MSFT | BUY | confidence=0.836 | position=736.04
+2026-07-02 21:04:57 | INFO     | AIMarketScanner | MSFT complete | BUY | confidence=0.836
+2026-07-02 21:04:57 | INFO     | AIMarketScanner | Scanning NVDA
+2026-07-02 21:04:57 | INFO     | YahooProvider | Downloading history for NVDA (period=6mo interval=1d)
+2026-07-02 21:04:57 | INFO     | YahooProvider | 125 candles downloaded for NVDA
+2026-07-02 21:04:57 | INFO     | IndicatorBuilder | Building indicators for NVDA
+2026-07-02 21:04:57 | INFO     | IndicatorBuilder | Indicators ready for NVDA | RSI=38.92 Trend=0.920 Momentum=38.18 Volatility=0.02588
+2026-07-02 21:04:57 | INFO     | TradingPipeline | Starting pipeline for NVDA
+2026-07-02 21:04:57 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.691
+2026-07-02 21:04:57 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:04:57 | INFO     | TradingPipeline | Decision | BUY confidence=0.791
+2026-07-02 21:04:57 | INFO     | TradingPipeline | Pipeline completed for NVDA | BUY | confidence=0.791 | position=691.01
+2026-07-02 21:04:57 | INFO     | AIMarketScanner | NVDA complete | BUY | confidence=0.791
+2026-07-02 21:04:57 | INFO     | AIMarketScanner | Scanning AAPL
+2026-07-02 21:04:57 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-02 21:04:57 | INFO     | YahooProvider | 125 candles downloaded for AAPL
+2026-07-02 21:04:57 | INFO     | IndicatorBuilder | Building indicators for AAPL
+2026-07-02 21:04:57 | INFO     | IndicatorBuilder | Indicators ready for AAPL | RSI=57.64 Trend=1.000 Momentum=48.78 Volatility=0.02380
+2026-07-02 21:04:57 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:04:57 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.787
+2026-07-02 21:04:57 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:04:57 | INFO     | TradingPipeline | Decision | BUY confidence=0.887
+2026-07-02 21:04:57 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.887 | position=786.99
+2026-07-02 21:04:57 | INFO     | AIMarketScanner | AAPL complete | BUY | confidence=0.887
+2026-07-02 21:04:57 | INFO     | AIMarketScanner | Market scan completed | requested=3 scanned=3 failed=0
+2026-07-02 21:04:58 | INFO     | AIMarketScanner | Starting market scan (3 symbols)
+2026-07-02 21:04:58 | INFO     | AIMarketScanner | Scanning MSFT
+2026-07-02 21:04:58 | INFO     | YahooProvider | Downloading history for MSFT (period=6mo interval=1d)
+2026-07-02 21:04:58 | INFO     | YahooProvider | 125 candles downloaded for MSFT
+2026-07-02 21:04:58 | INFO     | IndicatorBuilder | Building indicators for MSFT
+2026-07-02 21:04:58 | INFO     | IndicatorBuilder | Indicators ready for MSFT | RSI=49.97 Trend=0.958 Momentum=41.18 Volatility=0.02446
+2026-07-02 21:04:58 | INFO     | TradingPipeline | Starting pipeline for MSFT
+2026-07-02 21:04:58 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.736
+2026-07-02 21:04:58 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:04:58 | INFO     | TradingPipeline | Decision | BUY confidence=0.836
+2026-07-02 21:04:58 | INFO     | TradingPipeline | Pipeline completed for MSFT | BUY | confidence=0.836 | position=736.04
+2026-07-02 21:04:58 | INFO     | AIMarketScanner | MSFT complete | BUY | confidence=0.836
+2026-07-02 21:04:58 | INFO     | AIMarketScanner | Scanning NVDA
+2026-07-02 21:04:58 | INFO     | YahooProvider | Downloading history for NVDA (period=6mo interval=1d)
+2026-07-02 21:04:58 | INFO     | YahooProvider | 125 candles downloaded for NVDA
+2026-07-02 21:04:58 | INFO     | IndicatorBuilder | Building indicators for NVDA
+2026-07-02 21:04:58 | INFO     | IndicatorBuilder | Indicators ready for NVDA | RSI=38.92 Trend=0.920 Momentum=38.18 Volatility=0.02588
+2026-07-02 21:04:58 | INFO     | TradingPipeline | Starting pipeline for NVDA
+2026-07-02 21:04:58 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.691
+2026-07-02 21:04:58 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:04:58 | INFO     | TradingPipeline | Decision | BUY confidence=0.791
+2026-07-02 21:04:58 | INFO     | TradingPipeline | Pipeline completed for NVDA | BUY | confidence=0.791 | position=691.01
+2026-07-02 21:04:58 | INFO     | AIMarketScanner | NVDA complete | BUY | confidence=0.791
+2026-07-02 21:04:58 | INFO     | AIMarketScanner | Scanning AAPL
+2026-07-02 21:04:58 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-02 21:04:58 | INFO     | YahooProvider | 125 candles downloaded for AAPL
+2026-07-02 21:04:58 | INFO     | IndicatorBuilder | Building indicators for AAPL
+2026-07-02 21:04:58 | INFO     | IndicatorBuilder | Indicators ready for AAPL | RSI=57.63 Trend=1.000 Momentum=48.77 Volatility=0.02380
+2026-07-02 21:04:58 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:04:58 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.787
+2026-07-02 21:04:58 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:04:58 | INFO     | TradingPipeline | Decision | BUY confidence=0.887
+2026-07-02 21:04:58 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.887 | position=786.97
+2026-07-02 21:04:58 | INFO     | AIMarketScanner | AAPL complete | BUY | confidence=0.887
+2026-07-02 21:04:58 | INFO     | AIMarketScanner | Market scan completed | requested=3 scanned=3 failed=0
+2026-07-02 21:04:59 | INFO     | BacktestEngine | Starting backtest (3 timesteps)
+2026-07-02 21:04:59 | INFO     | BacktestEngine | Processing timestep 0 (2 assets)
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.704
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0040
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Decision | BUY confidence=0.804
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.804 | position=701.87
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.527
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0045
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Decision | HOLD confidence=0.500
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Pipeline completed for AAPL | HOLD | confidence=0.500 | position=525.13
+2026-07-02 21:04:59 | INFO     | BacktestEngine | Selected TSLA | BUY | confidence=0.804
+2026-07-02 21:04:59 | INFO     | BacktestEngine | Trade finished | net_pnl=0.0614 equity=10000.06
+2026-07-02 21:04:59 | INFO     | BacktestEngine | Processing timestep 1 (2 assets)
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.760
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0037
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Decision | BUY confidence=0.860
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.860 | position=758.00
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.413
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0044
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Decision | SELL confidence=0.587
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Pipeline completed for AAPL | SELL | confidence=0.587 | position=411.75
+2026-07-02 21:04:59 | INFO     | BacktestEngine | Selected TSLA | BUY | confidence=0.860
+2026-07-02 21:04:59 | INFO     | BacktestEngine | Trade finished | net_pnl=0.4398 equity=10000.50
+2026-07-02 21:04:59 | INFO     | BacktestEngine | Processing timestep 2 (2 assets)
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.470
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0054
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Decision | HOLD confidence=0.500
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Pipeline completed for TSLA | HOLD | confidence=0.500 | position=468.21
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.757
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0033
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Decision | BUY confidence=0.857
+2026-07-02 21:04:59 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.857 | position=755.69
+2026-07-02 21:04:59 | INFO     | BacktestEngine | Selected AAPL | BUY | confidence=0.857
+2026-07-02 21:04:59 | INFO     | BacktestEngine | Trade finished | net_pnl=0.4535 equity=10000.95
+2026-07-02 21:04:59 | INFO     | BacktestEngine | Backtest completed | trades=3 profit=0.95 final_equity=10000.95
+2026-07-02 21:08:53 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:08:53 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.704
+2026-07-02 21:08:53 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0040
+2026-07-02 21:08:53 | INFO     | TradingPipeline | Decision | BUY confidence=0.804
+2026-07-02 21:08:53 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.804 | position=701.87
+2026-07-02 21:08:54 | INFO     | AIMarketScanner | Starting market scan (3 symbols)
+2026-07-02 21:08:54 | INFO     | AIMarketScanner | Scanning MSFT
+2026-07-02 21:08:54 | INFO     | YahooProvider | Downloading history for MSFT (period=6mo interval=1d)
+2026-07-02 21:08:54 | INFO     | YahooProvider | 125 candles downloaded for MSFT
+2026-07-02 21:08:54 | INFO     | IndicatorBuilder | Building indicators for MSFT
+2026-07-02 21:08:54 | INFO     | IndicatorBuilder | Indicators ready for MSFT | RSI=50.37 Trend=0.961 Momentum=41.39 Volatility=0.02457
+2026-07-02 21:08:54 | INFO     | TradingPipeline | Starting pipeline for MSFT
+2026-07-02 21:08:54 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.738
+2026-07-02 21:08:54 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:08:54 | INFO     | TradingPipeline | Decision | BUY confidence=0.838
+2026-07-02 21:08:54 | INFO     | TradingPipeline | Pipeline completed for MSFT | BUY | confidence=0.838 | position=738.24
+2026-07-02 21:08:54 | INFO     | AIMarketScanner | MSFT complete | BUY | confidence=0.838
+2026-07-02 21:08:54 | INFO     | AIMarketScanner | Scanning NVDA
+2026-07-02 21:08:54 | INFO     | YahooProvider | Downloading history for NVDA (period=6mo interval=1d)
+2026-07-02 21:08:54 | INFO     | YahooProvider | 125 candles downloaded for NVDA
+2026-07-02 21:08:54 | INFO     | IndicatorBuilder | Building indicators for NVDA
+2026-07-02 21:08:54 | INFO     | IndicatorBuilder | Indicators ready for NVDA | RSI=38.83 Trend=0.919 Momentum=38.12 Volatility=0.02591
+2026-07-02 21:08:54 | INFO     | TradingPipeline | Starting pipeline for NVDA
+2026-07-02 21:08:54 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.691
+2026-07-02 21:08:54 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:08:54 | INFO     | TradingPipeline | Decision | BUY confidence=0.791
+2026-07-02 21:08:54 | INFO     | TradingPipeline | Pipeline completed for NVDA | BUY | confidence=0.791 | position=690.44
+2026-07-02 21:08:54 | INFO     | AIMarketScanner | NVDA complete | BUY | confidence=0.791
+2026-07-02 21:08:54 | INFO     | AIMarketScanner | Scanning AAPL
+2026-07-02 21:08:54 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-02 21:08:54 | INFO     | YahooProvider | 125 candles downloaded for AAPL
+2026-07-02 21:08:54 | INFO     | IndicatorBuilder | Building indicators for AAPL
+2026-07-02 21:08:54 | INFO     | IndicatorBuilder | Indicators ready for AAPL | RSI=58.01 Trend=1.000 Momentum=48.99 Volatility=0.02403
+2026-07-02 21:08:54 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:08:54 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.788
+2026-07-02 21:08:54 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:08:54 | INFO     | TradingPipeline | Decision | BUY confidence=0.888
+2026-07-02 21:08:54 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.888 | position=788.28
+2026-07-02 21:08:54 | INFO     | AIMarketScanner | AAPL complete | BUY | confidence=0.888
+2026-07-02 21:08:54 | INFO     | AIMarketScanner | Market scan completed | requested=3 scanned=3 failed=0
+2026-07-02 21:08:55 | INFO     | AIMarketScanner | Starting market scan (3 symbols)
+2026-07-02 21:08:55 | INFO     | AIMarketScanner | Scanning MSFT
+2026-07-02 21:08:55 | INFO     | YahooProvider | Downloading history for MSFT (period=6mo interval=1d)
+2026-07-02 21:08:56 | INFO     | YahooProvider | 125 candles downloaded for MSFT
+2026-07-02 21:08:56 | INFO     | IndicatorBuilder | Building indicators for MSFT
+2026-07-02 21:08:56 | INFO     | IndicatorBuilder | Indicators ready for MSFT | RSI=50.37 Trend=0.961 Momentum=41.40 Volatility=0.02457
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Starting pipeline for MSFT
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.738
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Decision | BUY confidence=0.838
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Pipeline completed for MSFT | BUY | confidence=0.838 | position=738.29
+2026-07-02 21:08:56 | INFO     | AIMarketScanner | MSFT complete | BUY | confidence=0.838
+2026-07-02 21:08:56 | INFO     | AIMarketScanner | Scanning NVDA
+2026-07-02 21:08:56 | INFO     | YahooProvider | Downloading history for NVDA (period=6mo interval=1d)
+2026-07-02 21:08:56 | INFO     | YahooProvider | 125 candles downloaded for NVDA
+2026-07-02 21:08:56 | INFO     | IndicatorBuilder | Building indicators for NVDA
+2026-07-02 21:08:56 | INFO     | IndicatorBuilder | Indicators ready for NVDA | RSI=38.81 Trend=0.919 Momentum=38.11 Volatility=0.02591
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Starting pipeline for NVDA
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.691
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Decision | BUY confidence=0.791
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Pipeline completed for NVDA | BUY | confidence=0.791 | position=690.35
+2026-07-02 21:08:56 | INFO     | AIMarketScanner | NVDA complete | BUY | confidence=0.791
+2026-07-02 21:08:56 | INFO     | AIMarketScanner | Scanning AAPL
+2026-07-02 21:08:56 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-02 21:08:56 | INFO     | YahooProvider | 125 candles downloaded for AAPL
+2026-07-02 21:08:56 | INFO     | IndicatorBuilder | Building indicators for AAPL
+2026-07-02 21:08:56 | INFO     | IndicatorBuilder | Indicators ready for AAPL | RSI=58.02 Trend=1.000 Momentum=49.00 Volatility=0.02404
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.789
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Decision | BUY confidence=0.889
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.889 | position=788.32
+2026-07-02 21:08:56 | INFO     | AIMarketScanner | AAPL complete | BUY | confidence=0.889
+2026-07-02 21:08:56 | INFO     | AIMarketScanner | Market scan completed | requested=3 scanned=3 failed=0
+2026-07-02 21:08:56 | INFO     | BacktestEngine | Starting backtest (3 timesteps)
+2026-07-02 21:08:56 | INFO     | BacktestEngine | Processing timestep 0 (2 assets)
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.704
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0040
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Decision | BUY confidence=0.804
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.804 | position=701.87
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.527
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0045
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Decision | HOLD confidence=0.500
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Pipeline completed for AAPL | HOLD | confidence=0.500 | position=525.13
+2026-07-02 21:08:56 | INFO     | BacktestEngine | Selected TSLA | BUY | confidence=0.804
+2026-07-02 21:08:56 | INFO     | BacktestEngine | Trade finished | net_pnl=0.0614 equity=10000.06
+2026-07-02 21:08:56 | INFO     | BacktestEngine | Processing timestep 1 (2 assets)
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.760
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0037
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Decision | BUY confidence=0.860
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.860 | position=758.00
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.413
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0044
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Decision | SELL confidence=0.587
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Pipeline completed for AAPL | SELL | confidence=0.587 | position=411.75
+2026-07-02 21:08:56 | INFO     | BacktestEngine | Selected TSLA | BUY | confidence=0.860
+2026-07-02 21:08:56 | INFO     | BacktestEngine | Trade finished | net_pnl=0.4398 equity=10000.50
+2026-07-02 21:08:56 | INFO     | BacktestEngine | Processing timestep 2 (2 assets)
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.470
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0054
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Decision | HOLD confidence=0.500
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Pipeline completed for TSLA | HOLD | confidence=0.500 | position=468.21
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.757
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0033
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Decision | BUY confidence=0.857
+2026-07-02 21:08:56 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.857 | position=755.69
+2026-07-02 21:08:56 | INFO     | BacktestEngine | Selected AAPL | BUY | confidence=0.857
+2026-07-02 21:08:56 | INFO     | BacktestEngine | Trade finished | net_pnl=0.4535 equity=10000.95
+2026-07-02 21:08:56 | INFO     | BacktestEngine | Backtest completed | trades=3 profit=0.95 final_equity=10000.95
+2026-07-02 21:18:07 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:18:07 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.704
+2026-07-02 21:18:07 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0040
+2026-07-02 21:18:07 | INFO     | TradingPipeline | Decision | BUY confidence=0.804
+2026-07-02 21:18:07 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.804 | position=701.87
+2026-07-02 21:18:08 | INFO     | AIMarketScanner | Starting market scan (3 symbols)
+2026-07-02 21:18:08 | INFO     | AIMarketScanner | Scanning MSFT
+2026-07-02 21:18:08 | INFO     | YahooProvider | Downloading history for MSFT (period=6mo interval=1d)
+2026-07-02 21:18:09 | INFO     | YahooProvider | 125 candles downloaded for MSFT
+2026-07-02 21:18:09 | INFO     | IndicatorBuilder | Building indicators for MSFT
+2026-07-02 21:18:09 | INFO     | IndicatorBuilder | Indicators ready for MSFT | RSI=50.46 Trend=0.961 Momentum=41.44 Volatility=0.02459
+2026-07-02 21:18:09 | INFO     | TradingPipeline | Starting pipeline for MSFT
+2026-07-02 21:18:09 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.739
+2026-07-02 21:18:09 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:18:09 | INFO     | TradingPipeline | Decision | BUY confidence=0.839
+2026-07-02 21:18:09 | INFO     | TradingPipeline | Pipeline completed for MSFT | BUY | confidence=0.839 | position=738.77
+2026-07-02 21:18:09 | INFO     | AIMarketScanner | MSFT complete | BUY | confidence=0.839
+2026-07-02 21:18:09 | INFO     | AIMarketScanner | Scanning NVDA
+2026-07-02 21:18:09 | INFO     | YahooProvider | Downloading history for NVDA (period=6mo interval=1d)
+2026-07-02 21:18:09 | INFO     | YahooProvider | 125 candles downloaded for NVDA
+2026-07-02 21:18:09 | INFO     | IndicatorBuilder | Building indicators for NVDA
+2026-07-02 21:18:09 | INFO     | IndicatorBuilder | Indicators ready for NVDA | RSI=39.02 Trend=0.921 Momentum=38.24 Volatility=0.02586
+2026-07-02 21:18:09 | INFO     | TradingPipeline | Starting pipeline for NVDA
+2026-07-02 21:18:09 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.692
+2026-07-02 21:18:09 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:18:09 | INFO     | TradingPipeline | Decision | BUY confidence=0.792
+2026-07-02 21:18:09 | INFO     | TradingPipeline | Pipeline completed for NVDA | BUY | confidence=0.792 | position=691.64
+2026-07-02 21:18:09 | INFO     | AIMarketScanner | NVDA complete | BUY | confidence=0.792
+2026-07-02 21:18:09 | INFO     | AIMarketScanner | Scanning AAPL
+2026-07-02 21:18:09 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-02 21:18:09 | INFO     | YahooProvider | 125 candles downloaded for AAPL
+2026-07-02 21:18:09 | INFO     | IndicatorBuilder | Building indicators for AAPL
+2026-07-02 21:18:09 | INFO     | IndicatorBuilder | Indicators ready for AAPL | RSI=57.92 Trend=1.000 Momentum=48.94 Volatility=0.02398
+2026-07-02 21:18:09 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:18:09 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.788
+2026-07-02 21:18:09 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:18:09 | INFO     | TradingPipeline | Decision | BUY confidence=0.888
+2026-07-02 21:18:09 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.888 | position=787.98
+2026-07-02 21:18:09 | INFO     | AIMarketScanner | AAPL complete | BUY | confidence=0.888
+2026-07-02 21:18:09 | INFO     | AIMarketScanner | Market scan completed | requested=3 scanned=3 failed=0
+2026-07-02 21:18:10 | INFO     | AIMarketScanner | Starting market scan (3 symbols)
+2026-07-02 21:18:10 | INFO     | AIMarketScanner | Scanning MSFT
+2026-07-02 21:18:10 | INFO     | YahooProvider | Downloading history for MSFT (period=6mo interval=1d)
+2026-07-02 21:18:11 | INFO     | YahooProvider | 125 candles downloaded for MSFT
+2026-07-02 21:18:11 | INFO     | IndicatorBuilder | Building indicators for MSFT
+2026-07-02 21:18:11 | INFO     | IndicatorBuilder | Indicators ready for MSFT | RSI=50.37 Trend=0.961 Momentum=41.39 Volatility=0.02457
+2026-07-02 21:18:11 | INFO     | TradingPipeline | Starting pipeline for MSFT
+2026-07-02 21:18:11 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.738
+2026-07-02 21:18:11 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:18:11 | INFO     | TradingPipeline | Decision | BUY confidence=0.838
+2026-07-02 21:18:11 | INFO     | TradingPipeline | Pipeline completed for MSFT | BUY | confidence=0.838 | position=738.28
+2026-07-02 21:18:11 | INFO     | AIMarketScanner | MSFT complete | BUY | confidence=0.838
+2026-07-02 21:18:11 | INFO     | AIMarketScanner | Scanning NVDA
+2026-07-02 21:18:11 | INFO     | YahooProvider | Downloading history for NVDA (period=6mo interval=1d)
+2026-07-02 21:18:11 | INFO     | YahooProvider | 125 candles downloaded for NVDA
+2026-07-02 21:18:11 | INFO     | IndicatorBuilder | Building indicators for NVDA
+2026-07-02 21:18:11 | INFO     | IndicatorBuilder | Indicators ready for NVDA | RSI=39.01 Trend=0.920 Momentum=38.24 Volatility=0.02586
+2026-07-02 21:18:11 | INFO     | TradingPipeline | Starting pipeline for NVDA
+2026-07-02 21:18:11 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.692
+2026-07-02 21:18:11 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:18:11 | INFO     | TradingPipeline | Decision | BUY confidence=0.792
+2026-07-02 21:18:11 | INFO     | TradingPipeline | Pipeline completed for NVDA | BUY | confidence=0.792 | position=691.59
+2026-07-02 21:18:11 | INFO     | AIMarketScanner | NVDA complete | BUY | confidence=0.792
+2026-07-02 21:18:11 | INFO     | AIMarketScanner | Scanning AAPL
+2026-07-02 21:18:11 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-02 21:18:12 | INFO     | YahooProvider | 125 candles downloaded for AAPL
+2026-07-02 21:18:12 | INFO     | IndicatorBuilder | Building indicators for AAPL
+2026-07-02 21:18:12 | INFO     | IndicatorBuilder | Indicators ready for AAPL | RSI=57.91 Trend=1.000 Momentum=48.94 Volatility=0.02397
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.788
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Decision | BUY confidence=0.888
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.888 | position=787.95
+2026-07-02 21:18:12 | INFO     | AIMarketScanner | AAPL complete | BUY | confidence=0.888
+2026-07-02 21:18:12 | INFO     | AIMarketScanner | Market scan completed | requested=3 scanned=3 failed=0
+2026-07-02 21:18:12 | INFO     | BacktestEngine | Starting backtest (3 timesteps)
+2026-07-02 21:18:12 | INFO     | BacktestEngine | Processing timestep 0 (2 assets)
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.704
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0040
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Decision | BUY confidence=0.804
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.804 | position=701.87
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.527
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0045
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Decision | HOLD confidence=0.500
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Pipeline completed for AAPL | HOLD | confidence=0.500 | position=525.13
+2026-07-02 21:18:12 | INFO     | BacktestEngine | Selected TSLA | BUY | confidence=0.804
+2026-07-02 21:18:12 | INFO     | BacktestEngine | Trade finished | net_pnl=0.0614 equity=10000.06
+2026-07-02 21:18:12 | INFO     | BacktestEngine | Processing timestep 1 (2 assets)
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.760
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0037
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Decision | BUY confidence=0.860
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.860 | position=758.00
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.413
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0044
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Decision | SELL confidence=0.587
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Pipeline completed for AAPL | SELL | confidence=0.587 | position=411.75
+2026-07-02 21:18:12 | INFO     | BacktestEngine | Selected TSLA | BUY | confidence=0.860
+2026-07-02 21:18:12 | INFO     | BacktestEngine | Trade finished | net_pnl=0.4398 equity=10000.50
+2026-07-02 21:18:12 | INFO     | BacktestEngine | Processing timestep 2 (2 assets)
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.470
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0054
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Decision | HOLD confidence=0.500
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Pipeline completed for TSLA | HOLD | confidence=0.500 | position=468.21
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.757
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0033
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Decision | BUY confidence=0.857
+2026-07-02 21:18:12 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.857 | position=755.69
+2026-07-02 21:18:12 | INFO     | BacktestEngine | Selected AAPL | BUY | confidence=0.857
+2026-07-02 21:18:12 | INFO     | BacktestEngine | Trade finished | net_pnl=0.4535 equity=10000.95
+2026-07-02 21:18:12 | INFO     | BacktestEngine | Backtest completed | trades=3 profit=0.95 final_equity=10000.95
+2026-07-02 21:22:29 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:22:29 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.704
+2026-07-02 21:22:29 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0040
+2026-07-02 21:22:29 | INFO     | TradingPipeline | Decision | BUY confidence=0.804
+2026-07-02 21:22:29 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.804 | position=701.87
+2026-07-02 21:22:30 | INFO     | AIMarketScanner | Starting market scan (3 symbols)
+2026-07-02 21:22:30 | INFO     | AIMarketScanner | Scanning MSFT
+2026-07-02 21:22:30 | INFO     | YahooProvider | Downloading history for MSFT (period=6mo interval=1d)
+2026-07-02 21:22:31 | INFO     | YahooProvider | 125 candles downloaded for MSFT
+2026-07-02 21:22:31 | INFO     | IndicatorBuilder | Building indicators for MSFT
+2026-07-02 21:22:31 | INFO     | IndicatorBuilder | Indicators ready for MSFT | RSI=50.53 Trend=0.962 Momentum=41.48 Volatility=0.02462
+2026-07-02 21:22:31 | INFO     | TradingPipeline | Starting pipeline for MSFT
+2026-07-02 21:22:31 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.739
+2026-07-02 21:22:31 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:22:31 | INFO     | TradingPipeline | Decision | BUY confidence=0.839
+2026-07-02 21:22:31 | INFO     | TradingPipeline | Pipeline completed for MSFT | BUY | confidence=0.839 | position=739.20
+2026-07-02 21:22:31 | INFO     | AIMarketScanner | MSFT complete | BUY | confidence=0.839
+2026-07-02 21:22:31 | INFO     | AIMarketScanner | Scanning NVDA
+2026-07-02 21:22:31 | INFO     | YahooProvider | Downloading history for NVDA (period=6mo interval=1d)
+2026-07-02 21:22:31 | INFO     | YahooProvider | 125 candles downloaded for NVDA
+2026-07-02 21:22:31 | INFO     | IndicatorBuilder | Building indicators for NVDA
+2026-07-02 21:22:31 | INFO     | IndicatorBuilder | Indicators ready for NVDA | RSI=39.02 Trend=0.921 Momentum=38.24 Volatility=0.02586
+2026-07-02 21:22:31 | INFO     | TradingPipeline | Starting pipeline for NVDA
+2026-07-02 21:22:31 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.692
+2026-07-02 21:22:31 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:22:31 | INFO     | TradingPipeline | Decision | BUY confidence=0.792
+2026-07-02 21:22:31 | INFO     | TradingPipeline | Pipeline completed for NVDA | BUY | confidence=0.792 | position=691.64
+2026-07-02 21:22:31 | INFO     | AIMarketScanner | NVDA complete | BUY | confidence=0.792
+2026-07-02 21:22:31 | INFO     | AIMarketScanner | Scanning AAPL
+2026-07-02 21:22:31 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-02 21:22:31 | INFO     | YahooProvider | 125 candles downloaded for AAPL
+2026-07-02 21:22:31 | INFO     | IndicatorBuilder | Building indicators for AAPL
+2026-07-02 21:22:31 | INFO     | IndicatorBuilder | Indicators ready for AAPL | RSI=57.70 Trend=1.000 Momentum=48.81 Volatility=0.02384
+2026-07-02 21:22:31 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:22:31 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.787
+2026-07-02 21:22:31 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:22:31 | INFO     | TradingPipeline | Decision | BUY confidence=0.887
+2026-07-02 21:22:31 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.887 | position=787.22
+2026-07-02 21:22:31 | INFO     | AIMarketScanner | AAPL complete | BUY | confidence=0.887
+2026-07-02 21:22:31 | INFO     | AIMarketScanner | Market scan completed | requested=3 scanned=3 failed=0
+2026-07-02 21:22:31 | INFO     | AIMarketScanner | Starting market scan (3 symbols)
+2026-07-02 21:22:31 | INFO     | AIMarketScanner | Scanning MSFT
+2026-07-02 21:22:31 | INFO     | YahooProvider | Downloading history for MSFT (period=6mo interval=1d)
+2026-07-02 21:22:32 | INFO     | YahooProvider | 125 candles downloaded for MSFT
+2026-07-02 21:22:32 | INFO     | IndicatorBuilder | Building indicators for MSFT
+2026-07-02 21:22:32 | INFO     | IndicatorBuilder | Indicators ready for MSFT | RSI=50.53 Trend=0.962 Momentum=41.48 Volatility=0.02462
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Starting pipeline for MSFT
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.739
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Decision | BUY confidence=0.839
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Pipeline completed for MSFT | BUY | confidence=0.839 | position=739.20
+2026-07-02 21:22:32 | INFO     | AIMarketScanner | MSFT complete | BUY | confidence=0.839
+2026-07-02 21:22:32 | INFO     | AIMarketScanner | Scanning NVDA
+2026-07-02 21:22:32 | INFO     | YahooProvider | Downloading history for NVDA (period=6mo interval=1d)
+2026-07-02 21:22:32 | INFO     | YahooProvider | 125 candles downloaded for NVDA
+2026-07-02 21:22:32 | INFO     | IndicatorBuilder | Building indicators for NVDA
+2026-07-02 21:22:32 | INFO     | IndicatorBuilder | Indicators ready for NVDA | RSI=39.00 Trend=0.920 Momentum=38.23 Volatility=0.02586
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Starting pipeline for NVDA
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.692
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Decision | BUY confidence=0.792
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Pipeline completed for NVDA | BUY | confidence=0.792 | position=691.50
+2026-07-02 21:22:32 | INFO     | AIMarketScanner | NVDA complete | BUY | confidence=0.792
+2026-07-02 21:22:32 | INFO     | AIMarketScanner | Scanning AAPL
+2026-07-02 21:22:32 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-02 21:22:32 | INFO     | YahooProvider | 125 candles downloaded for AAPL
+2026-07-02 21:22:32 | INFO     | IndicatorBuilder | Building indicators for AAPL
+2026-07-02 21:22:32 | INFO     | IndicatorBuilder | Indicators ready for AAPL | RSI=57.72 Trend=1.000 Momentum=48.83 Volatility=0.02385
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.787
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Decision | BUY confidence=0.887
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.887 | position=787.29
+2026-07-02 21:22:32 | INFO     | AIMarketScanner | AAPL complete | BUY | confidence=0.887
+2026-07-02 21:22:32 | INFO     | AIMarketScanner | Market scan completed | requested=3 scanned=3 failed=0
+2026-07-02 21:22:32 | INFO     | BacktestEngine | Starting backtest (3 timesteps)
+2026-07-02 21:22:32 | INFO     | BacktestEngine | Processing timestep 0 (2 assets)
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.704
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0040
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Decision | BUY confidence=0.804
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.804 | position=701.87
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.527
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0045
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Decision | HOLD confidence=0.500
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Pipeline completed for AAPL | HOLD | confidence=0.500 | position=525.13
+2026-07-02 21:22:32 | INFO     | BacktestEngine | Selected TSLA | BUY | confidence=0.804
+2026-07-02 21:22:32 | INFO     | BacktestEngine | Trade finished | net_pnl=0.0614 equity=10000.06
+2026-07-02 21:22:32 | INFO     | BacktestEngine | Processing timestep 1 (2 assets)
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.760
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0037
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Decision | BUY confidence=0.860
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.860 | position=758.00
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.413
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0044
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Decision | SELL confidence=0.587
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Pipeline completed for AAPL | SELL | confidence=0.587 | position=411.75
+2026-07-02 21:22:32 | INFO     | BacktestEngine | Selected TSLA | BUY | confidence=0.860
+2026-07-02 21:22:32 | INFO     | BacktestEngine | Trade finished | net_pnl=0.4398 equity=10000.50
+2026-07-02 21:22:32 | INFO     | BacktestEngine | Processing timestep 2 (2 assets)
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.470
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0054
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Decision | HOLD confidence=0.500
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Pipeline completed for TSLA | HOLD | confidence=0.500 | position=468.21
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.757
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0033
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Decision | BUY confidence=0.857
+2026-07-02 21:22:32 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.857 | position=755.69
+2026-07-02 21:22:32 | INFO     | BacktestEngine | Selected AAPL | BUY | confidence=0.857
+2026-07-02 21:22:32 | INFO     | BacktestEngine | Trade finished | net_pnl=0.4535 equity=10000.95
+2026-07-02 21:22:32 | INFO     | BacktestEngine | Backtest completed | trades=3 profit=0.95 final_equity=10000.95
+2026-07-02 21:25:56 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:25:56 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.704
+2026-07-02 21:25:56 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0040
+2026-07-02 21:25:56 | INFO     | TradingPipeline | Decision | BUY confidence=0.804
+2026-07-02 21:25:56 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.804 | position=701.87
+2026-07-02 21:25:56 | INFO     | AIMarketScanner | Starting market scan (3 symbols)
+2026-07-02 21:25:56 | INFO     | AIMarketScanner | Scanning MSFT
+2026-07-02 21:25:56 | INFO     | YahooProvider | Downloading history for MSFT (period=6mo interval=1d)
+2026-07-02 21:25:57 | INFO     | YahooProvider | 125 candles downloaded for MSFT
+2026-07-02 21:25:57 | INFO     | IndicatorBuilder | Building indicators for MSFT
+2026-07-02 21:25:57 | INFO     | IndicatorBuilder | Indicators ready for MSFT | RSI=50.58 Trend=0.962 Momentum=41.51 Volatility=0.02463
+2026-07-02 21:25:57 | INFO     | TradingPipeline | Starting pipeline for MSFT
+2026-07-02 21:25:57 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.740
+2026-07-02 21:25:57 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:25:57 | INFO     | TradingPipeline | Decision | BUY confidence=0.840
+2026-07-02 21:25:57 | INFO     | TradingPipeline | Pipeline completed for MSFT | BUY | confidence=0.840 | position=739.46
+2026-07-02 21:25:57 | INFO     | AIMarketScanner | MSFT complete | BUY | confidence=0.840
+2026-07-02 21:25:57 | INFO     | AIMarketScanner | Scanning NVDA
+2026-07-02 21:25:57 | INFO     | YahooProvider | Downloading history for NVDA (period=6mo interval=1d)
+2026-07-02 21:25:57 | INFO     | YahooProvider | 125 candles downloaded for NVDA
+2026-07-02 21:25:57 | INFO     | IndicatorBuilder | Building indicators for NVDA
+2026-07-02 21:25:57 | INFO     | IndicatorBuilder | Indicators ready for NVDA | RSI=38.92 Trend=0.920 Momentum=38.18 Volatility=0.02588
+2026-07-02 21:25:57 | INFO     | TradingPipeline | Starting pipeline for NVDA
+2026-07-02 21:25:57 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.691
+2026-07-02 21:25:57 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:25:57 | INFO     | TradingPipeline | Decision | BUY confidence=0.791
+2026-07-02 21:25:57 | INFO     | TradingPipeline | Pipeline completed for NVDA | BUY | confidence=0.791 | position=691.01
+2026-07-02 21:25:57 | INFO     | AIMarketScanner | NVDA complete | BUY | confidence=0.791
+2026-07-02 21:25:57 | INFO     | AIMarketScanner | Scanning AAPL
+2026-07-02 21:25:57 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-02 21:25:57 | INFO     | YahooProvider | 125 candles downloaded for AAPL
+2026-07-02 21:25:57 | INFO     | IndicatorBuilder | Building indicators for AAPL
+2026-07-02 21:25:57 | INFO     | IndicatorBuilder | Indicators ready for AAPL | RSI=57.73 Trend=1.000 Momentum=48.83 Volatility=0.02386
+2026-07-02 21:25:57 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:25:57 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.788
+2026-07-02 21:25:57 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:25:57 | INFO     | TradingPipeline | Decision | BUY confidence=0.888
+2026-07-02 21:25:57 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.888 | position=787.32
+2026-07-02 21:25:57 | INFO     | AIMarketScanner | AAPL complete | BUY | confidence=0.888
+2026-07-02 21:25:57 | INFO     | AIMarketScanner | Market scan completed | requested=3 scanned=3 failed=0
+2026-07-02 21:25:58 | INFO     | AIMarketScanner | Starting market scan (3 symbols)
+2026-07-02 21:25:58 | INFO     | AIMarketScanner | Scanning MSFT
+2026-07-02 21:25:58 | INFO     | YahooProvider | Downloading history for MSFT (period=6mo interval=1d)
+2026-07-02 21:25:58 | INFO     | YahooProvider | 125 candles downloaded for MSFT
+2026-07-02 21:25:58 | INFO     | IndicatorBuilder | Building indicators for MSFT
+2026-07-02 21:25:58 | INFO     | IndicatorBuilder | Indicators ready for MSFT | RSI=50.57 Trend=0.962 Momentum=41.51 Volatility=0.02463
+2026-07-02 21:25:58 | INFO     | TradingPipeline | Starting pipeline for MSFT
+2026-07-02 21:25:58 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.740
+2026-07-02 21:25:58 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:25:58 | INFO     | TradingPipeline | Decision | BUY confidence=0.840
+2026-07-02 21:25:58 | INFO     | TradingPipeline | Pipeline completed for MSFT | BUY | confidence=0.840 | position=739.41
+2026-07-02 21:25:58 | INFO     | AIMarketScanner | MSFT complete | BUY | confidence=0.840
+2026-07-02 21:25:58 | INFO     | AIMarketScanner | Scanning NVDA
+2026-07-02 21:25:58 | INFO     | YahooProvider | Downloading history for NVDA (period=6mo interval=1d)
+2026-07-02 21:25:58 | INFO     | YahooProvider | 125 candles downloaded for NVDA
+2026-07-02 21:25:58 | INFO     | IndicatorBuilder | Building indicators for NVDA
+2026-07-02 21:25:58 | INFO     | IndicatorBuilder | Indicators ready for NVDA | RSI=38.92 Trend=0.920 Momentum=38.18 Volatility=0.02588
+2026-07-02 21:25:58 | INFO     | TradingPipeline | Starting pipeline for NVDA
+2026-07-02 21:25:58 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.691
+2026-07-02 21:25:58 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:25:58 | INFO     | TradingPipeline | Decision | BUY confidence=0.791
+2026-07-02 21:25:58 | INFO     | TradingPipeline | Pipeline completed for NVDA | BUY | confidence=0.791 | position=691.01
+2026-07-02 21:25:58 | INFO     | AIMarketScanner | NVDA complete | BUY | confidence=0.791
+2026-07-02 21:25:58 | INFO     | AIMarketScanner | Scanning AAPL
+2026-07-02 21:25:58 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-02 21:25:59 | INFO     | YahooProvider | 125 candles downloaded for AAPL
+2026-07-02 21:25:59 | INFO     | IndicatorBuilder | Building indicators for AAPL
+2026-07-02 21:25:59 | INFO     | IndicatorBuilder | Indicators ready for AAPL | RSI=57.74 Trend=1.000 Momentum=48.83 Volatility=0.02386
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.788
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Decision | BUY confidence=0.888
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.888 | position=787.34
+2026-07-02 21:25:59 | INFO     | AIMarketScanner | AAPL complete | BUY | confidence=0.888
+2026-07-02 21:25:59 | INFO     | AIMarketScanner | Market scan completed | requested=3 scanned=3 failed=0
+2026-07-02 21:25:59 | INFO     | BacktestEngine | Starting backtest (3 timesteps)
+2026-07-02 21:25:59 | INFO     | BacktestEngine | Processing timestep 0 (2 assets)
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.704
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0040
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Decision | BUY confidence=0.804
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.804 | position=701.87
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.527
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0045
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Decision | HOLD confidence=0.500
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Pipeline completed for AAPL | HOLD | confidence=0.500 | position=525.13
+2026-07-02 21:25:59 | INFO     | BacktestEngine | Selected TSLA | BUY | confidence=0.804
+2026-07-02 21:25:59 | INFO     | BacktestEngine | Trade finished | net_pnl=0.0614 equity=10000.06
+2026-07-02 21:25:59 | INFO     | BacktestEngine | Processing timestep 1 (2 assets)
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.760
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0037
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Decision | BUY confidence=0.860
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.860 | position=758.00
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.413
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0044
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Decision | SELL confidence=0.587
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Pipeline completed for AAPL | SELL | confidence=0.587 | position=411.75
+2026-07-02 21:25:59 | INFO     | BacktestEngine | Selected TSLA | BUY | confidence=0.860
+2026-07-02 21:25:59 | INFO     | BacktestEngine | Trade finished | net_pnl=0.4398 equity=10000.50
+2026-07-02 21:25:59 | INFO     | BacktestEngine | Processing timestep 2 (2 assets)
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.470
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0054
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Decision | HOLD confidence=0.500
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Pipeline completed for TSLA | HOLD | confidence=0.500 | position=468.21
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.757
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0033
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Decision | BUY confidence=0.857
+2026-07-02 21:25:59 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.857 | position=755.69
+2026-07-02 21:25:59 | INFO     | BacktestEngine | Selected AAPL | BUY | confidence=0.857
+2026-07-02 21:25:59 | INFO     | BacktestEngine | Trade finished | net_pnl=0.4535 equity=10000.95
+2026-07-02 21:25:59 | INFO     | BacktestEngine | Backtest completed | trades=3 profit=0.95 final_equity=10000.95
+2026-07-02 21:28:38 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:28:38 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.704
+2026-07-02 21:28:38 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0040
+2026-07-02 21:28:38 | INFO     | TradingPipeline | Decision | BUY confidence=0.804
+2026-07-02 21:28:38 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.804 | position=701.87
+2026-07-02 21:28:39 | INFO     | AIMarketScanner | Starting market scan (3 symbols)
+2026-07-02 21:28:39 | INFO     | AIMarketScanner | Scanning MSFT
+2026-07-02 21:28:39 | INFO     | YahooProvider | Downloading history for MSFT (period=6mo interval=1d)
+2026-07-02 21:28:39 | INFO     | YahooProvider | 125 candles downloaded for MSFT
+2026-07-02 21:28:39 | INFO     | IndicatorBuilder | Building indicators for MSFT
+2026-07-02 21:28:39 | INFO     | IndicatorBuilder | Indicators ready for MSFT | RSI=50.47 Trend=0.961 Momentum=41.45 Volatility=0.02460
+2026-07-02 21:28:39 | INFO     | TradingPipeline | Starting pipeline for MSFT
+2026-07-02 21:28:39 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.739
+2026-07-02 21:28:39 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:28:39 | INFO     | TradingPipeline | Decision | BUY confidence=0.839
+2026-07-02 21:28:39 | INFO     | TradingPipeline | Pipeline completed for MSFT | BUY | confidence=0.839 | position=738.87
+2026-07-02 21:28:39 | INFO     | AIMarketScanner | MSFT complete | BUY | confidence=0.839
+2026-07-02 21:28:39 | INFO     | AIMarketScanner | Scanning NVDA
+2026-07-02 21:28:39 | INFO     | YahooProvider | Downloading history for NVDA (period=6mo interval=1d)
+2026-07-02 21:28:40 | INFO     | YahooProvider | 125 candles downloaded for NVDA
+2026-07-02 21:28:40 | INFO     | IndicatorBuilder | Building indicators for NVDA
+2026-07-02 21:28:40 | INFO     | IndicatorBuilder | Indicators ready for NVDA | RSI=39.08 Trend=0.921 Momentum=38.28 Volatility=0.02584
+2026-07-02 21:28:40 | INFO     | TradingPipeline | Starting pipeline for NVDA
+2026-07-02 21:28:40 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.692
+2026-07-02 21:28:40 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:28:40 | INFO     | TradingPipeline | Decision | BUY confidence=0.792
+2026-07-02 21:28:40 | INFO     | TradingPipeline | Pipeline completed for NVDA | BUY | confidence=0.792 | position=692.02
+2026-07-02 21:28:40 | INFO     | AIMarketScanner | NVDA complete | BUY | confidence=0.792
+2026-07-02 21:28:40 | INFO     | AIMarketScanner | Scanning AAPL
+2026-07-02 21:28:40 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-02 21:28:40 | INFO     | YahooProvider | 125 candles downloaded for AAPL
+2026-07-02 21:28:40 | INFO     | IndicatorBuilder | Building indicators for AAPL
+2026-07-02 21:28:40 | INFO     | IndicatorBuilder | Indicators ready for AAPL | RSI=57.68 Trend=1.000 Momentum=48.80 Volatility=0.02382
+2026-07-02 21:28:40 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:28:40 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.787
+2026-07-02 21:28:40 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:28:40 | INFO     | TradingPipeline | Decision | BUY confidence=0.887
+2026-07-02 21:28:40 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.887 | position=787.14
+2026-07-02 21:28:40 | INFO     | AIMarketScanner | AAPL complete | BUY | confidence=0.887
+2026-07-02 21:28:40 | INFO     | AIMarketScanner | Market scan completed | requested=3 scanned=3 failed=0
+2026-07-02 21:28:40 | INFO     | AIMarketScanner | Starting market scan (3 symbols)
+2026-07-02 21:28:40 | INFO     | AIMarketScanner | Scanning MSFT
+2026-07-02 21:28:40 | INFO     | YahooProvider | Downloading history for MSFT (period=6mo interval=1d)
+2026-07-02 21:28:41 | INFO     | YahooProvider | 125 candles downloaded for MSFT
+2026-07-02 21:28:41 | INFO     | IndicatorBuilder | Building indicators for MSFT
+2026-07-02 21:28:41 | INFO     | IndicatorBuilder | Indicators ready for MSFT | RSI=50.47 Trend=0.961 Momentum=41.45 Volatility=0.02460
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Starting pipeline for MSFT
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.739
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Decision | BUY confidence=0.839
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Pipeline completed for MSFT | BUY | confidence=0.839 | position=738.82
+2026-07-02 21:28:41 | INFO     | AIMarketScanner | MSFT complete | BUY | confidence=0.839
+2026-07-02 21:28:41 | INFO     | AIMarketScanner | Scanning NVDA
+2026-07-02 21:28:41 | INFO     | YahooProvider | Downloading history for NVDA (period=6mo interval=1d)
+2026-07-02 21:28:41 | INFO     | YahooProvider | 125 candles downloaded for NVDA
+2026-07-02 21:28:41 | INFO     | IndicatorBuilder | Building indicators for NVDA
+2026-07-02 21:28:41 | INFO     | IndicatorBuilder | Indicators ready for NVDA | RSI=39.09 Trend=0.921 Momentum=38.29 Volatility=0.02584
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Starting pipeline for NVDA
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.692
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Decision | BUY confidence=0.792
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Pipeline completed for NVDA | BUY | confidence=0.792 | position=692.06
+2026-07-02 21:28:41 | INFO     | AIMarketScanner | NVDA complete | BUY | confidence=0.792
+2026-07-02 21:28:41 | INFO     | AIMarketScanner | Scanning AAPL
+2026-07-02 21:28:41 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-02 21:28:41 | INFO     | YahooProvider | 125 candles downloaded for AAPL
+2026-07-02 21:28:41 | INFO     | IndicatorBuilder | Building indicators for AAPL
+2026-07-02 21:28:41 | INFO     | IndicatorBuilder | Indicators ready for AAPL | RSI=57.68 Trend=1.000 Momentum=48.80 Volatility=0.02383
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.787
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Decision | BUY confidence=0.887
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.887 | position=787.15
+2026-07-02 21:28:41 | INFO     | AIMarketScanner | AAPL complete | BUY | confidence=0.887
+2026-07-02 21:28:41 | INFO     | AIMarketScanner | Market scan completed | requested=3 scanned=3 failed=0
+2026-07-02 21:28:41 | INFO     | BacktestEngine | Starting backtest (3 timesteps)
+2026-07-02 21:28:41 | INFO     | BacktestEngine | Processing timestep 0 (2 assets)
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.704
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0040
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Decision | BUY confidence=0.804
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.804 | position=701.87
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.527
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0045
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Decision | HOLD confidence=0.500
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Pipeline completed for AAPL | HOLD | confidence=0.500 | position=525.13
+2026-07-02 21:28:41 | INFO     | BacktestEngine | Selected TSLA | BUY | confidence=0.804
+2026-07-02 21:28:41 | INFO     | BacktestEngine | Trade finished | net_pnl=0.0614 equity=10000.06
+2026-07-02 21:28:41 | INFO     | BacktestEngine | Processing timestep 1 (2 assets)
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.760
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0037
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Decision | BUY confidence=0.860
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.860 | position=758.00
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.413
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0044
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Decision | SELL confidence=0.587
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Pipeline completed for AAPL | SELL | confidence=0.587 | position=411.75
+2026-07-02 21:28:41 | INFO     | BacktestEngine | Selected TSLA | BUY | confidence=0.860
+2026-07-02 21:28:41 | INFO     | BacktestEngine | Trade finished | net_pnl=0.4398 equity=10000.50
+2026-07-02 21:28:41 | INFO     | BacktestEngine | Processing timestep 2 (2 assets)
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.470
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0054
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Decision | HOLD confidence=0.500
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Pipeline completed for TSLA | HOLD | confidence=0.500 | position=468.21
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.757
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0033
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Decision | BUY confidence=0.857
+2026-07-02 21:28:41 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.857 | position=755.69
+2026-07-02 21:28:41 | INFO     | BacktestEngine | Selected AAPL | BUY | confidence=0.857
+2026-07-02 21:28:41 | INFO     | BacktestEngine | Trade finished | net_pnl=0.4535 equity=10000.95
+2026-07-02 21:28:41 | INFO     | BacktestEngine | Backtest completed | trades=3 profit=0.95 final_equity=10000.95
+2026-07-02 21:33:40 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:33:40 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.704
+2026-07-02 21:33:40 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0040
+2026-07-02 21:33:40 | INFO     | TradingPipeline | Decision | BUY confidence=0.804
+2026-07-02 21:33:40 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.804 | position=701.87
+2026-07-02 21:33:41 | INFO     | AIMarketScanner | Starting market scan (3 symbols)
+2026-07-02 21:33:41 | INFO     | AIMarketScanner | Scanning MSFT
+2026-07-02 21:33:41 | INFO     | YahooProvider | Downloading history for MSFT (period=6mo interval=1d)
+2026-07-02 21:33:41 | INFO     | YahooProvider | 125 candles downloaded for MSFT
+2026-07-02 21:33:41 | INFO     | IndicatorBuilder | Building indicators for MSFT
+2026-07-02 21:33:41 | INFO     | IndicatorBuilder | Indicators ready for MSFT | RSI=50.43 Trend=0.961 Momentum=41.43 Volatility=0.02459
+2026-07-02 21:33:41 | INFO     | TradingPipeline | Starting pipeline for MSFT
+2026-07-02 21:33:41 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.739
+2026-07-02 21:33:41 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:33:41 | INFO     | TradingPipeline | Decision | BUY confidence=0.839
+2026-07-02 21:33:41 | INFO     | TradingPipeline | Pipeline completed for MSFT | BUY | confidence=0.839 | position=738.63
+2026-07-02 21:33:41 | INFO     | AIMarketScanner | MSFT complete | BUY | confidence=0.839
+2026-07-02 21:33:41 | INFO     | AIMarketScanner | Scanning NVDA
+2026-07-02 21:33:41 | INFO     | YahooProvider | Downloading history for NVDA (period=6mo interval=1d)
+2026-07-02 21:33:42 | INFO     | YahooProvider | 125 candles downloaded for NVDA
+2026-07-02 21:33:42 | INFO     | IndicatorBuilder | Building indicators for NVDA
+2026-07-02 21:33:42 | INFO     | IndicatorBuilder | Indicators ready for NVDA | RSI=39.38 Trend=0.923 Momentum=38.47 Volatility=0.02577
+2026-07-02 21:33:42 | INFO     | TradingPipeline | Starting pipeline for NVDA
+2026-07-02 21:33:42 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.694
+2026-07-02 21:33:42 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:33:42 | INFO     | TradingPipeline | Decision | BUY confidence=0.794
+2026-07-02 21:33:42 | INFO     | TradingPipeline | Pipeline completed for NVDA | BUY | confidence=0.794 | position=693.83
+2026-07-02 21:33:42 | INFO     | AIMarketScanner | NVDA complete | BUY | confidence=0.794
+2026-07-02 21:33:42 | INFO     | AIMarketScanner | Scanning AAPL
+2026-07-02 21:33:42 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-02 21:33:42 | INFO     | YahooProvider | 125 candles downloaded for AAPL
+2026-07-02 21:33:42 | INFO     | IndicatorBuilder | Building indicators for AAPL
+2026-07-02 21:33:42 | INFO     | IndicatorBuilder | Indicators ready for AAPL | RSI=57.99 Trend=1.000 Momentum=48.98 Volatility=0.02402
+2026-07-02 21:33:42 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:33:42 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.788
+2026-07-02 21:33:42 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:33:42 | INFO     | TradingPipeline | Decision | BUY confidence=0.888
+2026-07-02 21:33:42 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.888 | position=788.22
+2026-07-02 21:33:42 | INFO     | AIMarketScanner | AAPL complete | BUY | confidence=0.888
+2026-07-02 21:33:42 | INFO     | AIMarketScanner | Market scan completed | requested=3 scanned=3 failed=0
+2026-07-02 21:33:42 | INFO     | AIMarketScanner | Starting market scan (3 symbols)
+2026-07-02 21:33:42 | INFO     | AIMarketScanner | Scanning MSFT
+2026-07-02 21:33:42 | INFO     | YahooProvider | Downloading history for MSFT (period=6mo interval=1d)
+2026-07-02 21:33:43 | INFO     | YahooProvider | 125 candles downloaded for MSFT
+2026-07-02 21:33:43 | INFO     | IndicatorBuilder | Building indicators for MSFT
+2026-07-02 21:33:43 | INFO     | IndicatorBuilder | Indicators ready for MSFT | RSI=50.45 Trend=0.961 Momentum=41.44 Volatility=0.02459
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Starting pipeline for MSFT
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.739
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Decision | BUY confidence=0.839
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Pipeline completed for MSFT | BUY | confidence=0.839 | position=738.72
+2026-07-02 21:33:43 | INFO     | AIMarketScanner | MSFT complete | BUY | confidence=0.839
+2026-07-02 21:33:43 | INFO     | AIMarketScanner | Scanning NVDA
+2026-07-02 21:33:43 | INFO     | YahooProvider | Downloading history for NVDA (period=6mo interval=1d)
+2026-07-02 21:33:43 | INFO     | YahooProvider | 125 candles downloaded for NVDA
+2026-07-02 21:33:43 | INFO     | IndicatorBuilder | Building indicators for NVDA
+2026-07-02 21:33:43 | INFO     | IndicatorBuilder | Indicators ready for NVDA | RSI=39.38 Trend=0.923 Momentum=38.47 Volatility=0.02577
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Starting pipeline for NVDA
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.694
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Decision | BUY confidence=0.794
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Pipeline completed for NVDA | BUY | confidence=0.794 | position=693.83
+2026-07-02 21:33:43 | INFO     | AIMarketScanner | NVDA complete | BUY | confidence=0.794
+2026-07-02 21:33:43 | INFO     | AIMarketScanner | Scanning AAPL
+2026-07-02 21:33:43 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-02 21:33:43 | INFO     | YahooProvider | 125 candles downloaded for AAPL
+2026-07-02 21:33:43 | INFO     | IndicatorBuilder | Building indicators for AAPL
+2026-07-02 21:33:43 | INFO     | IndicatorBuilder | Indicators ready for AAPL | RSI=57.97 Trend=1.000 Momentum=48.97 Volatility=0.02400
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.788
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Decision | BUY confidence=0.888
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.888 | position=788.14
+2026-07-02 21:33:43 | INFO     | AIMarketScanner | AAPL complete | BUY | confidence=0.888
+2026-07-02 21:33:43 | INFO     | AIMarketScanner | Market scan completed | requested=3 scanned=3 failed=0
+2026-07-02 21:33:43 | INFO     | BacktestEngine | Starting backtest (3 timesteps)
+2026-07-02 21:33:43 | INFO     | BacktestEngine | Processing timestep 0 (2 assets)
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.704
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0040
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Decision | BUY confidence=0.804
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.804 | position=701.87
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.527
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0045
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Decision | HOLD confidence=0.500
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Pipeline completed for AAPL | HOLD | confidence=0.500 | position=525.13
+2026-07-02 21:33:43 | INFO     | BacktestEngine | Selected TSLA | BUY | confidence=0.804
+2026-07-02 21:33:43 | INFO     | BacktestEngine | Trade finished | net_pnl=0.0614 equity=10000.06
+2026-07-02 21:33:43 | INFO     | BacktestEngine | Processing timestep 1 (2 assets)
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.760
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0037
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Decision | BUY confidence=0.860
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.860 | position=758.00
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.413
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0044
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Decision | SELL confidence=0.587
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Pipeline completed for AAPL | SELL | confidence=0.587 | position=411.75
+2026-07-02 21:33:43 | INFO     | BacktestEngine | Selected TSLA | BUY | confidence=0.860
+2026-07-02 21:33:43 | INFO     | BacktestEngine | Trade finished | net_pnl=0.4398 equity=10000.50
+2026-07-02 21:33:43 | INFO     | BacktestEngine | Processing timestep 2 (2 assets)
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.470
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0054
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Decision | HOLD confidence=0.500
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Pipeline completed for TSLA | HOLD | confidence=0.500 | position=468.21
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.757
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0033
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Decision | BUY confidence=0.857
+2026-07-02 21:33:43 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.857 | position=755.69
+2026-07-02 21:33:43 | INFO     | BacktestEngine | Selected AAPL | BUY | confidence=0.857
+2026-07-02 21:33:43 | INFO     | BacktestEngine | Trade finished | net_pnl=0.4535 equity=10000.95
+2026-07-02 21:33:43 | INFO     | BacktestEngine | Backtest completed | trades=3 profit=0.95 final_equity=10000.95
+2026-07-02 21:35:46 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:35:46 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.704
+2026-07-02 21:35:46 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0040
+2026-07-02 21:35:46 | INFO     | TradingPipeline | Decision | BUY confidence=0.804
+2026-07-02 21:35:46 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.804 | position=701.87
+2026-07-02 21:35:46 | INFO     | AIMarketScanner | Starting market scan (3 symbols)
+2026-07-02 21:35:46 | INFO     | AIMarketScanner | Scanning MSFT
+2026-07-02 21:35:46 | INFO     | YahooProvider | Downloading history for MSFT (period=6mo interval=1d)
+2026-07-02 21:35:47 | INFO     | YahooProvider | 125 candles downloaded for MSFT
+2026-07-02 21:35:47 | INFO     | IndicatorBuilder | Building indicators for MSFT
+2026-07-02 21:35:47 | INFO     | IndicatorBuilder | Indicators ready for MSFT | RSI=50.43 Trend=0.961 Momentum=41.43 Volatility=0.02459
+2026-07-02 21:35:47 | INFO     | TradingPipeline | Starting pipeline for MSFT
+2026-07-02 21:35:47 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.739
+2026-07-02 21:35:47 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:35:47 | INFO     | TradingPipeline | Decision | BUY confidence=0.839
+2026-07-02 21:35:47 | INFO     | TradingPipeline | Pipeline completed for MSFT | BUY | confidence=0.839 | position=738.63
+2026-07-02 21:35:47 | INFO     | AIMarketScanner | MSFT complete | BUY | confidence=0.839
+2026-07-02 21:35:47 | INFO     | AIMarketScanner | Scanning NVDA
+2026-07-02 21:35:47 | INFO     | YahooProvider | Downloading history for NVDA (period=6mo interval=1d)
+2026-07-02 21:35:47 | INFO     | YahooProvider | 125 candles downloaded for NVDA
+2026-07-02 21:35:47 | INFO     | IndicatorBuilder | Building indicators for NVDA
+2026-07-02 21:35:47 | INFO     | IndicatorBuilder | Indicators ready for NVDA | RSI=39.50 Trend=0.924 Momentum=38.54 Volatility=0.02574
+2026-07-02 21:35:47 | INFO     | TradingPipeline | Starting pipeline for NVDA
+2026-07-02 21:35:47 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.695
+2026-07-02 21:35:47 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:35:47 | INFO     | TradingPipeline | Decision | BUY confidence=0.795
+2026-07-02 21:35:47 | INFO     | TradingPipeline | Pipeline completed for NVDA | BUY | confidence=0.795 | position=694.59
+2026-07-02 21:35:47 | INFO     | AIMarketScanner | NVDA complete | BUY | confidence=0.795
+2026-07-02 21:35:47 | INFO     | AIMarketScanner | Scanning AAPL
+2026-07-02 21:35:47 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-02 21:35:47 | INFO     | YahooProvider | 125 candles downloaded for AAPL
+2026-07-02 21:35:47 | INFO     | IndicatorBuilder | Building indicators for AAPL
+2026-07-02 21:35:47 | INFO     | IndicatorBuilder | Indicators ready for AAPL | RSI=58.00 Trend=1.000 Momentum=48.99 Volatility=0.02402
+2026-07-02 21:35:47 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:35:47 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.788
+2026-07-02 21:35:47 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:35:47 | INFO     | TradingPipeline | Decision | BUY confidence=0.888
+2026-07-02 21:35:47 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.888 | position=788.24
+2026-07-02 21:35:47 | INFO     | AIMarketScanner | AAPL complete | BUY | confidence=0.888
+2026-07-02 21:35:47 | INFO     | AIMarketScanner | Market scan completed | requested=3 scanned=3 failed=0
+2026-07-02 21:35:47 | INFO     | AIMarketScanner | Starting market scan (3 symbols)
+2026-07-02 21:35:47 | INFO     | AIMarketScanner | Scanning MSFT
+2026-07-02 21:35:47 | INFO     | YahooProvider | Downloading history for MSFT (period=6mo interval=1d)
+2026-07-02 21:35:48 | INFO     | YahooProvider | 125 candles downloaded for MSFT
+2026-07-02 21:35:48 | INFO     | IndicatorBuilder | Building indicators for MSFT
+2026-07-02 21:35:48 | INFO     | IndicatorBuilder | Indicators ready for MSFT | RSI=50.43 Trend=0.961 Momentum=41.43 Volatility=0.02459
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Starting pipeline for MSFT
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.739
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Decision | BUY confidence=0.839
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Pipeline completed for MSFT | BUY | confidence=0.839 | position=738.63
+2026-07-02 21:35:48 | INFO     | AIMarketScanner | MSFT complete | BUY | confidence=0.839
+2026-07-02 21:35:48 | INFO     | AIMarketScanner | Scanning NVDA
+2026-07-02 21:35:48 | INFO     | YahooProvider | Downloading history for NVDA (period=6mo interval=1d)
+2026-07-02 21:35:48 | INFO     | YahooProvider | 125 candles downloaded for NVDA
+2026-07-02 21:35:48 | INFO     | IndicatorBuilder | Building indicators for NVDA
+2026-07-02 21:35:48 | INFO     | IndicatorBuilder | Indicators ready for NVDA | RSI=39.52 Trend=0.924 Momentum=38.56 Volatility=0.02574
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Starting pipeline for NVDA
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.695
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Decision | BUY confidence=0.795
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Pipeline completed for NVDA | BUY | confidence=0.795 | position=694.73
+2026-07-02 21:35:48 | INFO     | AIMarketScanner | NVDA complete | BUY | confidence=0.795
+2026-07-02 21:35:48 | INFO     | AIMarketScanner | Scanning AAPL
+2026-07-02 21:35:48 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-02 21:35:48 | INFO     | YahooProvider | 125 candles downloaded for AAPL
+2026-07-02 21:35:48 | INFO     | IndicatorBuilder | Building indicators for AAPL
+2026-07-02 21:35:48 | INFO     | IndicatorBuilder | Indicators ready for AAPL | RSI=58.00 Trend=1.000 Momentum=48.99 Volatility=0.02402
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.788
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Decision | BUY confidence=0.888
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.888 | position=788.24
+2026-07-02 21:35:48 | INFO     | AIMarketScanner | AAPL complete | BUY | confidence=0.888
+2026-07-02 21:35:48 | INFO     | AIMarketScanner | Market scan completed | requested=3 scanned=3 failed=0
+2026-07-02 21:35:48 | INFO     | BacktestEngine | Starting backtest (3 timesteps)
+2026-07-02 21:35:48 | INFO     | BacktestEngine | Processing timestep 0 (2 assets)
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.704
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0040
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Decision | BUY confidence=0.804
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.804 | position=701.87
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.527
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0045
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Decision | HOLD confidence=0.500
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Pipeline completed for AAPL | HOLD | confidence=0.500 | position=525.13
+2026-07-02 21:35:48 | INFO     | BacktestEngine | Selected TSLA | BUY | confidence=0.804
+2026-07-02 21:35:48 | INFO     | BacktestEngine | Trade finished | net_pnl=0.0614 equity=10000.06
+2026-07-02 21:35:48 | INFO     | BacktestEngine | Processing timestep 1 (2 assets)
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.760
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0037
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Decision | BUY confidence=0.860
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.860 | position=758.00
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.413
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0044
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Decision | SELL confidence=0.587
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Pipeline completed for AAPL | SELL | confidence=0.587 | position=411.75
+2026-07-02 21:35:48 | INFO     | BacktestEngine | Selected TSLA | BUY | confidence=0.860
+2026-07-02 21:35:48 | INFO     | BacktestEngine | Trade finished | net_pnl=0.4398 equity=10000.50
+2026-07-02 21:35:48 | INFO     | BacktestEngine | Processing timestep 2 (2 assets)
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.470
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Market Intelligence | regime=SIDEWAYS volatility=LOW risk=0.0054
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Decision | HOLD confidence=0.500
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Pipeline completed for TSLA | HOLD | confidence=0.500 | position=468.21
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.757
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0033
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Decision | BUY confidence=0.857
+2026-07-02 21:35:48 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.857 | position=755.69
+2026-07-02 21:35:48 | INFO     | BacktestEngine | Selected AAPL | BUY | confidence=0.857
+2026-07-02 21:35:48 | INFO     | BacktestEngine | Trade finished | net_pnl=0.4535 equity=10000.95
+2026-07-02 21:35:48 | INFO     | BacktestEngine | Backtest completed | trades=3 profit=0.95 final_equity=10000.95
