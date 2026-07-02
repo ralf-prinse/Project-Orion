@@ -77,15 +77,36 @@ class GuiSection:
 
 
 @dataclass(frozen=True)
+class GuiChartPoint:
+    """
+    One presentation-safe data point for a chart.
+    """
+
+    label: str
+    value: float
+
+
+@dataclass(frozen=True)
+class GuiChart:
+    """
+    Presentation-safe chart model.
+    """
+
+    title: str
+    points: list[GuiChartPoint] = field(default_factory=list)
+    chart_type: str = "line"
+    description: str = ""
+    unit: str = ""
+
+
+@dataclass(frozen=True)
 class GuiWorkspace:
     """
     Complete presentation model for one workspace.
-
-    A workspace can contain multiple presentation component types while keeping
-    the public workspace API stable.
     """
 
     cards: list[GuiMetricCard] = field(default_factory=list)
+    charts: list[GuiChart] = field(default_factory=list)
     sections: list[GuiSection] = field(default_factory=list)
 
 

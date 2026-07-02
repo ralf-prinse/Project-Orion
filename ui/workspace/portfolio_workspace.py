@@ -1,6 +1,7 @@
-from PySide6.QtWidgets import QHBoxLayout, QWidget
+from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
 
 from ui.foundation.models import GuiSection, GuiWorkspace
+from ui.widgets.chart_widget import ChartWidget
 from ui.widgets.metric_card import MetricCard
 from ui.workspace.base_workspace import BaseWorkspace
 from ui.workspace.workspace_panel import WorkspacePanel
@@ -8,10 +9,13 @@ from ui.workspace.workspace_panel import WorkspacePanel
 
 class PortfolioWorkspace(BaseWorkspace):
     """
-    Presentation-only portfolio workspace.
+    Professional Portfolio Dashboard Workspace.
 
-    This workspace displays the complete GuiWorkspace produced by portfolio
-    workspace presenters. It owns layout only and performs no calculations.
+    UX goals:
+    - clear hierarchy (KPI → Charts → Sections)
+    - balanced chart layout
+    - readable spacing
+    - production-grade layout structure
     """
 
     def __init__(self, theme):
@@ -22,30 +26,26 @@ class PortfolioWorkspace(BaseWorkspace):
         )
 
         self._cards: list[MetricCard] = []
+        self._charts: list[ChartWidget] = []
         self._panels: list[WorkspacePanel] = []
+
         self._card_row: QWidget | None = None
+        self._chart_row: QWidget | None = None
 
     def set_workspace(self, workspace: GuiWorkspace):
-        """
-        Render the complete portfolio workspace model.
-        """
-
         self._clear_rendered_content()
 
         if workspace.cards:
             self._card_row = self._create_card_row(workspace)
             self.add_workspace_widget(self._card_row)
 
+        if workspace.charts:
+            self._chart_row = self._create_chart_row(workspace)
+            self.add_workspace_widget(self._chart_row)
+
         self.set_sections(workspace.sections)
 
     def set_sections(self, sections: list[GuiSection]):
-        """
-        Render section panels.
-
-        This method is retained for compatibility with existing callers.
-        Prefer set_workspace() when rendering complete workspace models.
-        """
-
         for panel in self._panels:
             panel.setParent(None)
 
@@ -56,18 +56,22 @@ class PortfolioWorkspace(BaseWorkspace):
                 theme=self.theme,
                 section=section,
             )
+
             self._panels.append(panel)
             self.add_workspace_widget(panel)
 
     def clear(self):
         self._clear_rendered_content()
 
+    # -----------------------------
+    # KPI LAYER
+    # -----------------------------
     def _create_card_row(self, workspace: GuiWorkspace) -> QWidget:
         row = QWidget()
 
         layout = QHBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 12)
-        layout.setSpacing(12)
+        layout.setContentsMargins(0, 0, 0, 16)
+        layout.setSpacing(14)
 
         for card in workspace.cards:
             widget = MetricCard(
@@ -80,17 +84,49 @@ class PortfolioWorkspace(BaseWorkspace):
         row.setLayout(layout)
         return row
 
+    # -----------------------------
+    # CHART LAYER (UX IMPROVED)
+    # -----------------------------
+    def _create_chart_row(self, workspace: GuiWorkspace) -> QWidget:
+        row = QWidget()
+
+        layout = QHBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 18)
+        layout.setSpacing(16)
+
+        # UX improvement: charts equal height & balanced width
+        for chart in workspace.charts:
+            widget = ChartWidget(
+                theme=self.theme,
+                chart=chart,
+            )
+
+            widget.setMinimumHeight(340)
+            widget.setMaximumHeight(380)
+
+            self._charts.append(widget)
+            layout.addWidget(widget)
+
+        row.setLayout(layout)
+        return row
+
     def _clear_rendered_content(self):
-        if self._card_row is not None:
+        if self._card_row:
             self._card_row.setParent(None)
             self._card_row = None
 
+        if self._chart_row:
+            self._chart_row.setParent(None)
+            self._chart_row = None
+
         for card in self._cards:
             card.setParent(None)
-
         self._cards.clear()
+
+        for chart in self._charts:
+            chart.setParent(None)
+        self._charts.clear()
 
         for panel in self._panels:
             panel.setParent(None)
-
         self._panels.clear()
