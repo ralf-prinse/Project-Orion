@@ -8,121 +8,194 @@
 
 # Current Development Phase
 
-Alpha
+**Alpha Development**
+
+Project Orion has completed the deterministic trading foundation and is currently focused on building a professional desktop application.
 
 ---
 
 # Current Epic
 
-Epic 2 — Professional Desktop Experience
+## Epic 2 — Professional Desktop Experience
+
+**Status:** 🚧 In Progress
 
 ---
 
-# Current Feature
+# Current Milestone
 
-Workspace Framework
+## Workspace Framework completed
 
----
+The Workspace Framework is now the foundation of the desktop application.
 
-# Current Task
+Completed:
 
-Workspace Framework Phase 1 completed.
+- WorkspaceController
+- DashboardRouter
+- BaseWorkspace
+- WorkspacePanel
+- DashboardWorkspace
+- ScannerWorkspace
+- PortfolioWorkspace
+- HistoryWorkspace
+- SettingsWorkspace
 
-WorkspaceController and DashboardRouter have been introduced.
-GuiShell has been refactored to delegate dashboard composition to DashboardRouter.
-MainWindow now uses WorkspaceController for deterministic navigation.
+Navigation is now completely workspace-driven.
 
----
-
-# Next Planned Tasks
-
-1. Continue GuiShell decomposition
-2. Introduce feature-oriented Workspace Pages
-3. Professional Dashboard Workspace
-4. Scanner Workspace
-5. Portfolio Workspace
-6. Performance Workspace
-7. AI Workspace
-8. Persistent workspace layouts
+MainWindow has been significantly simplified and primarily acts as the application's composition root.
 
 ---
 
-# Current Architecture
+# Current Architecture Status
 
-Implemented:
+Implemented infrastructure:
 
-- Layered Architecture
-- Registry Pattern
+- Layered deterministic architecture
 - Dependency Injection
+- Registry Pattern
 - Event Bus
 - Configuration Framework
 - Explainability Framework
 - Scan Orchestrator
 - Professional GUI Foundation
+- Workspace Framework
+- Presenter Framework
 
-Recently completed:
+Presentation architecture now follows:
 
-- WorkspaceController
-- DashboardRouter
-- GuiShell responsibility reduction (Phase 1)
-- MainWindow navigation decoupled from direct page switching
+```text
+Deterministic Services
+        ↓
+Presenters
+        ↓
+GuiSection models
+        ↓
+Workspace Panels
+        ↓
+Workspace Pages
+        ↓
+MainWindow
+```
+
+---
+
+# Recently Completed
+
+### Workspace Migration
+
+Completed:
+
+- DashboardWorkspace
+- ScannerWorkspace
+- PortfolioWorkspace
+- HistoryWorkspace
+- SettingsWorkspace
+
+Old page factories have been removed where possible.
+
+---
+
+### MainWindow Refactoring
+
+Completed:
+
+- deterministic navigation
+- WorkspaceController integration
+- DashboardRouter integration
+- reduced UI responsibilities
+- composition-root architecture
+
+Remaining responsibility:
+
+- orchestration only
+
+---
+
+### Presenter Migration
+
+Completed:
+
+- DashboardPresenter expanded
+- SettingsPresenter introduced
+- HistoryPresenter introduced
+- PortfolioPresenter integrated with PortfolioWorkspace
+
+Migration towards GuiSection-based presentation has started.
+
 ---
 
 # Current Priorities
 
-- Improve desktop architecture
-- Keep business logic deterministic
-- Expand reusable GUI components
-- Reduce technical debt
-- Improve navigation
+Immediate priorities:
+
+1. Complete GuiSection migration
+2. Remove remaining HTML-based presentation
+3. Continue MainWindow simplification
+4. Improve reusable WorkspacePanel rendering
+5. Professional desktop layout
+6. Docking architecture
+7. Workspace persistence
 
 ---
 
 # Current Development Workflow
 
-Every task follows the same sequence:
+Every implementation follows the same process:
 
 1. Review existing implementation
-2. Discuss architecture
-3. Modify one file at a time
-4. Execute tests
-5. Update documentation
-6. Commit
-7. Push
+2. Review architecture
+3. Implement one logical change
+4. Replace complete files where practical
+5. Execute regression tests
+6. Synchronize documentation
+7. Commit
+8. Push
+
+---
+
+# Regression Status
+
+Current validation:
+
+```text
+334 tests passed
+```
+
+Regression testing is executed after every completed implementation step.
 
 ---
 
 # Repository Rules
 
-The GitHub repository is the single source of truth.
+The Git repository is the single source of truth.
 
-No implementation should be assumed unless it exists in the repository.
-
----
-
-# Notes For Future Development
-
-Current focus is on architecture quality rather than feature quantity.
-
-Professional engineering practices take priority over implementation speed.
-
-Large speculative refactors should be avoided.
-
-Small verified improvements are preferred.
+Never assume implementation exists unless it is present in the repository.
 
 ---
 
-# Ready For Next Session
+# Notes for Future Development
 
-The next development session should continue with:
+Current focus is no longer the deterministic trading engines.
 
-Epic 2 → Workspace Framework
+The analytical platform is considered stable.
 
-Immediate focus:
+Current engineering effort is concentrated on the presentation architecture and professional desktop experience while preserving strict separation between business logic and GUI.
 
-- WorkspaceController
-- DashboardRouter
-- GuiShell refactoring
+---
+
+# Ready for Next Session
+
+Continue with:
+
+**Epic 2 — GuiSection Migration**
+
+Priority:
+
+1. Simplify WorkspacePanel rendering
+2. Eliminate unnecessary presentation layers
+3. Complete Presenter migration
+4. Remove remaining HTML presentation from MainWindow
+5. Continue professional desktop framework
 
 ---
 

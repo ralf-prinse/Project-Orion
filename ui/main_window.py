@@ -20,6 +20,7 @@ from ui.foundation.history_presenter import HistoryPresenter
 from ui.foundation.models import GuiPage
 from ui.foundation.portfolio_presenter import PortfolioPresenter
 from ui.foundation.settings_presenter import SettingsPresenter
+from ui.foundation.trade_advice_presenter import TradeAdvicePresenter
 from ui.workspace.dashboard_workspace import DashboardWorkspace
 from ui.workspace.history_workspace import HistoryWorkspace
 from ui.workspace.portfolio_workspace import PortfolioWorkspace
@@ -61,6 +62,7 @@ class OrionWindow(QMainWindow):
         self.history_presenter = HistoryPresenter()
         self.portfolio_presenter = PortfolioPresenter()
         self.settings_presenter = SettingsPresenter()
+        self.trade_advice_presenter = TradeAdvicePresenter()
 
         self.workspace_controller = WorkspaceController()
         self.pages = QStackedWidget()
@@ -164,7 +166,6 @@ class OrionWindow(QMainWindow):
         try:
             self.dashboard_page.set_status_text("Orion analyseert de markt...")
             self.scanner_page.set_status_text("Scanner analyseert de markt...")
-            self.scanner_page.set_summary_html("Resultaten worden opgehaald...")
 
             trade_plans = self.scanner_service.scan(
                 symbols=None,
@@ -178,20 +179,15 @@ class OrionWindow(QMainWindow):
                 execute=False,
             )
 
-            self.dashboard_page.set_advice_html(
-                self.format_advice(
-                    trade_plans=trade_plans,
-                    managed_trades=managed_trades,
-                )
+            trade_advice_sections = self.trade_advice_presenter.create_sections(
+                trade_plans=trade_plans,
+                managed_trades=managed_trades,
             )
 
+            self.dashboard_page.set_sections(trade_advice_sections)
+
             self.scanner_page.set_status_text("Scanneranalyse voltooid.")
-            self.scanner_page.set_summary_html(
-                self.format_advice(
-                    trade_plans=trade_plans,
-                    managed_trades=managed_trades,
-                )
-            )
+            self.scanner_page.set_sections(trade_advice_sections)
 
             self.portfolio_page.set_sections(
                 self.portfolio_presenter.create_sections(self.portfolio)
@@ -205,52 +201,6 @@ class OrionWindow(QMainWindow):
         except Exception as error:
             self.dashboard_page.set_status_text(f"Fout tijdens scan: {error}")
             self.scanner_page.set_status_text("Scanneranalyse mislukt.")
-            self.scanner_page.set_summary_html(f"Fout tijdens scan: {error}")
-
-    def format_advice(self, trade_plans, managed_trades):
-        buy_plans = [p for p in trade_plans if str(p.action).upper() == "BUY"]
-        hold_plans = [p for p in trade_plans if str(p.action).upper() == "HOLD"]
-        sell_plans = [p for p in trade_plans if str(p.action).upper() == "SELL"]
-
-        action_count = len(buy_plans) + len(hold_plans) + len(sell_plans)
-
-        if action_count == 0:
-            return """
-            <div style="background:#1f2937; border-radius:16px; padding:24px;">
-                <h1 style="color:#f9fafb;">GEEN ACTIE</h1>
-                <p>Ik heb de markt geanalyseerd.</p>
-                <p>Op dit moment zie ik geen swing-trade die sterk genoeg is.</p>
-                <p>Mijn advies: wacht af.</p>
-            </div>
-            """
-
-        html = """
-        <div style="background:#1f2937; border-radius:16px; padding:24px;">
-            <h2 style="color:#f9fafb;">Mijn handelsadvies</h2>
-        """
-
-        html += self.format_action_cards("KOPEN", "#22c55e", buy_plans)
-        html += self.format_action_cards("VASTHOUDEN", "#3b82f6", hold_plans)
-        html += self.format_action_cards("VERKOPEN", "#f97316", sell_plans)
-
-        html += "</div>"
-        return html
-
-    def format_action_cards(self, title, color, plans):
-        if not plans:
-            return ""
-
-        html = f"<h2 style='color:{color};'>{title}</h2>"
-
-        for plan in plans:
-            html += f"""
-            <div style="background:#111827; border-left:5px solid {color}; border-radius:12px; padding:16px; margin:12px 0;">
-                <h3 style="color:#f9fafb;">{plan.symbol}</h3>
-                <p>Aantal: <b>{plan.quantity}</b></p>
-            </div>
-            """
-
-        return html
 
     def stylesheet(self):
         return """

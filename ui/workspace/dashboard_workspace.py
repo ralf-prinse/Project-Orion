@@ -9,19 +9,14 @@ class DashboardWorkspace(BaseWorkspace):
     """
     Presentation-only dashboard workspace.
 
-    Owns the dashboard layout and presentation widgets only.
-    Never performs scans, trading logic, portfolio calculations or service
-    orchestration.
+    Owns dashboard presentation widgets only.
     """
 
     def __init__(self, theme, on_scan_requested):
         super().__init__(
             theme=theme,
             title="Goedemorgen Ralf.",
-            intro=(
-                "Orion zoekt uitsluitend naar kwalitatieve "
-                "deterministische swing-trades."
-            ),
+            intro="Orion zoekt uitsluitend naar kwalitatieve deterministische swing-trades.",
         )
 
         self.scan_button = QPushButton("Analyseer markt")
@@ -78,17 +73,7 @@ class DashboardWorkspace(BaseWorkspace):
     def set_status_text(self, text: str):
         self.market_panel.set_body(text)
 
-    def set_advice_html(self, html: str):
-        self.opportunities_panel.set_body(html)
-
-    def set_portfolio_snapshot(self, html: str):
-        self.portfolio_panel.set_body(html)
-
-    def set_recent_activity(self, html: str):
-        self.activity_panel.set_body(html)
-
-    @staticmethod
-    def primary_button_style():
+    def primary_button_style(self):
         return """
         QPushButton {
             background-color: #2563eb;

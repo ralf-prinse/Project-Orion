@@ -12,13 +12,13 @@
 
 This document provides the engineering context required to continue development of Project Orion.
 
-It is intentionally concise and focuses on the current architecture, engineering principles and development workflow.
+It intentionally contains only the current engineering context.
 
 Historical implementation details belong in `CHANGELOG.md`.
 
-Long-term architectural decisions belong in `ORION_MASTER_ARCHITECTURE.md`.
+Current implementation progress belongs in `CURRENT_STATE.md` and `PROJECT_STATUS.md`.
 
-Current progress belongs in `PROJECT_STATUS.md`.
+Long-term architectural decisions belong in `ORION_MASTER_ARCHITECTURE.md`.
 
 ---
 
@@ -26,106 +26,151 @@ Current progress belongs in `PROJECT_STATUS.md`.
 
 Project Orion is a professional desktop application for deterministic swing-trading analysis of the United States stock market.
 
-The objective is to analyse thousands of stocks through a transparent processing pipeline and identify high-quality trading opportunities.
+Its objective is to analyse thousands of stocks through a transparent processing pipeline and identify high-quality trading opportunities.
 
 Project Orion is **not** an automated trading bot.
 
-It is a decision-support platform.
+It is a deterministic decision-support platform.
 
-Artificial Intelligence is used only to explain deterministic results.
+Artificial Intelligence is used exclusively to explain deterministic outputs.
 
 AI never:
 
 - generates trading signals
 - approves trades
-- calculates risk
+- calculates indicators
+- validates portfolio risk
 - sizes positions
 - overrides deterministic engines
 
-Every recommendation produced by Orion must be:
+Every recommendation produced by Orion must remain:
 
 - deterministic
 - reproducible
 - explainable
 - testable
+- transparent
 
 ---
 
-# 3. Current Architecture
+# 3. High-Level Architecture
 
-Project Orion follows a layered architecture.
+Project Orion follows a layered deterministic architecture.
 
 ```
-Universe
-    ↓
-Market Data
-    ↓
-Historical Data
-    ↓
+Universe Layer
+        ↓
+Market Data Layer
+        ↓
+Historical Data Layer
+        ↓
 Indicator Engine
-    ↓
+        ↓
 Analysis Layer
-    ↓
+        ↓
 Signal Layer
-    ↓
+        ↓
 Decision Layer
-    ↓
+        ↓
 Portfolio Engine
-    ↓
+        ↓
 Risk Manager
-    ↓
+        ↓
 Trade Planner
-    ↓
+        ↓
 AI Explanation Layer
-    ↓
-GUI
+        ↓
+Desktop GUI
 ```
 
-Each layer has exactly one responsibility.
+Each processing layer owns exactly one responsibility.
 
-Business logic never belongs in the GUI.
+Business logic never belongs inside the GUI.
 
 ---
 
-# 4. Core Infrastructure
+# 4. Desktop GUI Architecture
 
-Current shared infrastructure includes:
+The desktop application follows a presentation-only architecture.
 
-- AnalyzerRunner
-- Registry Pattern
-- ApplicationContainer
-- ServiceRegistry
-- Event Bus
-- Scan Orchestrator
-- Configuration Framework
-- Explainability Framework
+```
+Deterministic Services
+        ↓
+Presenters
+        ↓
+GuiSection Models
+        ↓
+Workspace Panels
+        ↓
+Workspace Pages
+        ↓
+MainWindow (Composition Root)
+```
+
+Responsibilities:
+
+**Services**
+
+- deterministic calculations
+- business rules
+- orchestration
+
+**Presenters**
+
+- convert deterministic models into GUI models
+- never perform calculations
+
+**Workspace Pages**
+
+- display presentation models
+- own Qt widgets only
+
+**MainWindow**
+
+- composition root
+- dependency wiring
+- navigation
+- workspace orchestration
+
+---
+
+# 5. Shared GUI Infrastructure
+
+Current reusable GUI infrastructure includes:
+
 - WorkspaceController
 - DashboardRouter
-- Workspace Framework
+- BaseWorkspace
+- WorkspacePanel
+- DashboardWorkspace
+- ScannerWorkspace
+- PortfolioWorkspace
+- HistoryWorkspace
+- SettingsWorkspace
+- DashboardPresenter
+- PortfolioPresenter
+- HistoryPresenter
+- SettingsPresenter
 
-These components form the architectural foundation of Orion.
-
-Future functionality should reuse this infrastructure instead of introducing duplicate implementations.
+Future GUI functionality should extend this infrastructure rather than introducing duplicate implementations.
 
 ---
 
-# 5. Engineering Principles
+# 6. Engineering Principles
 
-Every contribution should follow these principles.
+Project Orion follows several non-negotiable principles.
 
 ## Architecture First
 
-Architecture takes priority over implementation speed.
-
-Short-term convenience must never introduce long-term technical debt.
+Architecture always takes precedence over implementation speed.
 
 ---
 
 ## Deterministic Behaviour
 
-Identical input must always produce identical output.
+Equal input always produces equal output.
 
-Randomness must never influence:
+No randomness may influence:
 
 - analysis
 - signals
@@ -138,13 +183,7 @@ Randomness must never influence:
 
 ## Single Responsibility
 
-Every module performs one clearly defined responsibility.
-
----
-
-## Registry-Driven Design
-
-Expandable processing layers should use registries rather than large conditional statements.
+Every module owns one clearly defined responsibility.
 
 ---
 
@@ -154,71 +193,75 @@ Shared behaviour should be implemented through composition whenever practical.
 
 ---
 
+## Presentation Only GUI
+
+The GUI never performs:
+
+- analysis
+- signal generation
+- decision making
+- portfolio calculations
+- risk calculations
+- trade planning
+
+---
+
 ## Explainability
 
-Every recommendation must be traceable.
+AI explains deterministic outputs.
 
-AI explains decisions.
-
-AI never creates decisions.
+AI never generates deterministic outputs.
 
 ---
 
 ## Testability
 
-All important infrastructure should be independently testable.
+Every reusable component should be independently testable.
 
----
-
-# 6. GUI Philosophy
-
-The GUI is presentation-only.
-
-It must never contain:
-
-- indicator calculations
-- analysis logic
-- signal generation
-- decision making
-- portfolio calculations
-- risk calculations
-
-The GUI consumes View Models produced by deterministic services.
-
-Presentation is completely separated from business logic.
+Regression tests remain mandatory after every logical change.
 
 ---
 
 # 7. Current Development Phase
 
-Project Orion has completed the analytical foundation of the platform.
+Project Orion has completed its deterministic trading foundation.
 
-Current focus has shifted towards building a professional desktop application on top of the existing architecture.
+Current focus is **Epic 2 – Professional Desktop Experience**.
 
-Current priorities include:
+Completed highlights:
 
-- Professional Workspace Framework
-- Dashboard architecture
-- GUI Design System adoption
-- Navigation architecture
-- Desktop user experience
+- Workspace Framework
+- WorkspaceController
+- DashboardRouter
+- BaseWorkspace
+- WorkspacePanel
+- Workspace migration
+- Presenter migration (Phase 1)
+- MainWindow simplification
+- Composition-root architecture
+
+Current work:
+
+- GuiSection migration
+- Presenter expansion
+- Professional desktop UX
 
 ---
 
 # 8. Development Workflow
 
-Every task follows the same workflow.
+Every implementation follows the same workflow.
 
-1. Review existing implementation.
-2. Review architecture.
-3. Modify one file at a time.
-4. Replace complete files instead of partial patches.
+1. Review the existing implementation.
+2. Review the architecture.
+3. Modify one logical responsibility.
+4. Prefer complete file replacements.
 5. Execute regression tests.
 6. Synchronize documentation.
 7. Commit.
 8. Push.
 
-Small verified changes are preferred over large speculative refactors.
+Small verified improvements are preferred over speculative rewrites.
 
 ---
 
@@ -228,62 +271,64 @@ General rules:
 
 - Prefer readability over cleverness.
 - Use explicit type hints.
-- Keep modules small.
+- Keep responsibilities small.
 - Avoid hidden behaviour.
+- Preserve deterministic behaviour.
 - Prefer composition.
 - Keep orchestration free from business logic.
-- Preserve deterministic behaviour.
-- Write complete implementations rather than fragmented snippets.
+- Keep GUI presentation-only.
 
 ---
 
 # 10. Documentation Rules
 
-Documentation is considered part of the software.
+Documentation is part of the software.
 
 Responsibilities:
 
-AI_CONTEXT.md
+**AI_CONTEXT.md**
 
 - engineering context
 - architecture overview
 - engineering philosophy
 - workflow
 
-PROJECT_STATUS.md
+**CURRENT_STATE.md**
 
-- current implementation status
+- current implementation snapshot
 
-CHANGELOG.md
+**PROJECT_STATUS.md**
+
+- detailed implementation status
+
+**CHANGELOG.md**
 
 - historical changes
 
-TODO.md
+**TODO.md**
 
 - upcoming work
 
-ORION_MASTER_ARCHITECTURE.md
+**ORION_MASTER_ARCHITECTURE.md**
 
-- long-term architectural vision
+- long-term architecture
 
 ---
 
-# 11. Development Workflow with ChatGPT
+# 11. ChatGPT Development Workflow
 
-Project Orion is developed through architecture-driven collaboration.
+Preferred collaboration:
 
-Preferred workflow:
-
-1. Review the existing implementation.
-2. Never assume code exists.
-3. Modify one complete file at a time.
-4. Provide complete file replacements rather than fragmented patches.
+1. Review existing code.
+2. Never assume implementation exists.
+3. Prefer complete file replacements.
+4. One logical change at a time.
 5. Execute regression tests.
-6. Update documentation.
+6. Synchronize documentation.
 7. Commit.
 8. Push.
 
-Large repository-wide speculative changes are avoided.
+Large speculative repository-wide rewrites should be avoided.
 
 ---
 
@@ -293,17 +338,22 @@ Future AI assistants should treat Orion as a professional software product.
 
 Always:
 
-- prefer complete file replacements
-- review the existing implementation before proposing changes
-- keep GUI presentation-only
+- review the repository first
 - preserve deterministic architecture
-- avoid speculative refactoring
-- synchronize documentation before committing
+- keep the GUI presentation-only
+- prefer composition
+- preserve existing engineering principles
+- keep documentation synchronized
+- provide complete file replacements whenever practical
 
-Never assume code exists unless it is present in the current repository.
+Never:
 
-Never claim patches, commits or successful test executions that have not actually been performed.
+- assume code exists
+- invent architecture
+- introduce business logic into the GUI
+- claim tests passed without execution
+- claim commits or pushes that have not occurred
 
-The repository is the single source of truth.
+The repository remains the single source of truth.
 
-This document should provide sufficient context for any future development session.
+End of document.

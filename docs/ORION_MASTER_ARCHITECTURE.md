@@ -169,10 +169,28 @@ The GUI is presentation-only.
 
 Responsibilities:
 
-- display data
-- navigation
-- layout
-- user interaction
+**MainWindow**
+
+- composition root
+- dependency wiring
+- workspace orchestration
+
+**WorkspaceController**
+
+- deterministic navigation
+
+**DashboardRouter**
+
+- routes presentation models to workspaces
+
+**Presenters**
+
+- convert deterministic models into GUI models
+
+**Workspace Pages**
+
+- own Qt widgets only
+- never contain business logic
 
 The GUI never performs:
 
@@ -184,28 +202,28 @@ The GUI never performs:
 
 Future architecture:
 
-Workspace
-
-↓
-
-Navigation
-
-↓
-
-Dashboard Router
-
-↓
-
+MainWindow (Composition Root)
+        │
+        ▼
+WorkspaceController
+        │
+        ▼
+DashboardRouter
+        │
+        ▼
 Presenters
-
-↓
-
-View Models
-
-↓
-
+        │
+        ▼
+GuiSection Models
+        │
+        ▼
+Workspace Panels
+        │
+        ▼
+Workspace Pages
+        │
+        ▼
 Qt Widgets
-
 ---
 
 # 6. Core Infrastructure

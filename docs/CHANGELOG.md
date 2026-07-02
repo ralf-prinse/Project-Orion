@@ -27,6 +27,53 @@ Planned:
 
 ---
 
+# [v1.0.15-alpha] — Workspace Framework Phase 2
+
+## Added
+
+### Workspace Architecture
+
+- Completed migration to dedicated workspace pages
+- Added `HistoryWorkspace`
+- Added `SettingsWorkspace`
+- Introduced `HistoryPresenter`
+- Introduced `SettingsPresenter`
+- Introduced reusable `GuiSection` presentation workflow
+- Began migration from HTML-based rendering to presenter-driven rendering
+
+### GUI Foundation
+
+- Expanded `DashboardPresenter`
+- Connected `PortfolioWorkspace` to `PortfolioPresenter`
+- Simplified `MainWindow`
+- Removed obsolete workspace factory methods
+- Continued migration towards a composition-root architecture
+
+### Engineering
+
+- Introduced reusable presentation infrastructure
+- Continued separation between deterministic services and GUI
+- Reduced presentation responsibilities inside `MainWindow`
+- Improved consistency across workspace implementations
+
+### Validation
+
+Regression validation completed successfully.
+
+```text
+334 tests passed
+```
+
+### Documentation
+
+Updated:
+
+- AI_CONTEXT.md
+- CURRENT_STATE.md
+- PROJECT_STATUS.md
+- TODO.md
+- CHANGELOG.md
+
 # [v1.0.14-alpha] — Workspace Framework Phase 1
 
 ## Added

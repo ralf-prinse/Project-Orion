@@ -14,8 +14,9 @@ The platform is designed to assist decision making through transparent calculati
 
 # Vision
 
-The long-term vision of Project Orion is to become a professional desktop trading platform that combines high-quality market analysis with a modern user experience.
+The long-term vision of Project Orion is to become a professional, deterministic desktop trading platform that combines high-quality market analysis with a modern, modular and maintainable user experience.
 
+The platform is designed around a layered architecture in which deterministic services, presentation models and desktop workspaces remain strictly separated.
 Every recommendation produced by Orion should be:
 
 - Deterministic
@@ -51,6 +52,9 @@ Technical debt should be minimised whenever practical.
 Project Orion is developed as a professional software product.
 
 Every implementation should be maintainable, modular and independently testable.
+The desktop application should evolve through reusable workspaces, presenters and presentation models rather than tightly coupled user interface code.
+
+Architecture should remain stable while individual components can evolve independently.
 
 ---
 

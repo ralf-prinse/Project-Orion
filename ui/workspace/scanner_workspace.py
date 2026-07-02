@@ -1,6 +1,4 @@
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
-
+from ui.foundation.models import GuiSection
 from ui.workspace.base_workspace import BaseWorkspace
 from ui.workspace.workspace_panel import WorkspacePanel
 
@@ -21,8 +19,6 @@ class ScannerWorkspace(BaseWorkspace):
             intro="Analyseer de markt en bekijk potentiële swing-trade kandidaten.",
         )
 
-        self.theme = theme
-
         self.status_panel = WorkspacePanel(
             theme=self.theme,
             title="Scan Status",
@@ -38,16 +34,22 @@ class ScannerWorkspace(BaseWorkspace):
         self._build_layout()
 
     def _build_layout(self):
-
         self.add_workspace_widget(self.status_panel)
         self.add_workspace_widget(self.results_panel)
 
+    def set_sections(self, sections: list[GuiSection]):
+        self.results_panel.setParent(None)
+
+        for section in sections:
+            self.add_workspace_widget(
+                WorkspacePanel.from_section(
+                    theme=self.theme,
+                    section=section,
+                )
+            )
 
     def set_status_text(self, text: str):
         self.status_panel.set_body(text)
-
-    def set_summary_html(self, html: str):
-        self.results_panel.set_body(html)
 
     def clear_results(self):
         self.status_panel.set_body("Scanner gereed.")
