@@ -18,9 +18,9 @@ from services.universe_manager import UniverseManager
 from ui.design import ORION_DARK_THEME
 from ui.foundation.history_presenter import HistoryPresenter
 from ui.foundation.models import GuiPage
-from ui.foundation.portfolio_presenter import PortfolioPresenter
 from ui.foundation.settings_presenter import SettingsPresenter
 from ui.foundation.trade_advice_presenter import TradeAdvicePresenter
+from ui.foundation.workspace_coordinator import WorkspaceCoordinator
 from ui.workspace.dashboard_workspace import DashboardWorkspace
 from ui.workspace.history_workspace import HistoryWorkspace
 from ui.workspace.portfolio_workspace import PortfolioWorkspace
@@ -43,6 +43,7 @@ class OrionWindow(QMainWindow):
 
         self.provider = YahooProvider()
         self.universe_manager = UniverseManager()
+
         self.scanner_service = ScannerService(
             provider=self.provider,
             universe_manager=self.universe_manager,
@@ -51,6 +52,7 @@ class OrionWindow(QMainWindow):
 
         self.portfolio_store = PortfolioStore()
         self.trade_history_store = TradeHistoryStore()
+
         self.trade_manager = TradeManager(
             portfolio_store=self.portfolio_store,
             trade_history_store=self.trade_history_store,
@@ -60,11 +62,12 @@ class OrionWindow(QMainWindow):
         self.active_universe = "swing"
 
         self.history_presenter = HistoryPresenter()
-        self.portfolio_presenter = PortfolioPresenter()
         self.settings_presenter = SettingsPresenter()
         self.trade_advice_presenter = TradeAdvicePresenter()
+        self.workspace_coordinator = WorkspaceCoordinator()
 
         self.workspace_controller = WorkspaceController()
+
         self.pages = QStackedWidget()
         self.workspace_page_indexes = {
             GuiPage.DASHBOARD: 0,
@@ -84,6 +87,7 @@ class OrionWindow(QMainWindow):
         self.settings_page = SettingsWorkspace(theme=self.theme)
 
         self._initialize_settings_workspace()
+        self._initialize_portfolio_workspace()
         self._initialize_pages()
 
     def _initialize_settings_workspace(self):
@@ -98,6 +102,13 @@ class OrionWindow(QMainWindow):
                 max_position_percentage=self.portfolio.max_position_percentage,
             )
         )
+
+    def _initialize_portfolio_workspace(self):
+        portfolio_workspace = self.workspace_coordinator.create_portfolio_workspace(
+            self.portfolio
+        )
+
+        self.portfolio_page.set_workspace(portfolio_workspace)
 
     def _initialize_pages(self):
         self.pages.addWidget(self.dashboard_page)
@@ -189,9 +200,7 @@ class OrionWindow(QMainWindow):
             self.scanner_page.set_status_text("Scanneranalyse voltooid.")
             self.scanner_page.set_sections(trade_advice_sections)
 
-            self.portfolio_page.set_sections(
-                self.portfolio_presenter.create_sections(self.portfolio)
-            )
+            self._initialize_portfolio_workspace()
 
             trades = self.trade_history_store.load()
             self.history_page.set_sections(
