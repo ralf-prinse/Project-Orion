@@ -2,14 +2,18 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QGridLayout, QWidget
 
 from ui.foundation.models import GuiMetricCard
+from ui.widgets.hero_metric_card import HeroMetricCard
 from ui.widgets.metric_card import MetricCard
 
 
 class DashboardGrid(QWidget):
     """
-    Responsive grid containing reusable MetricCard widgets.
+    Responsive grid containing reusable dashboard widgets.
 
     Presentation only.
+
+    Hero cards and standard metric cards are selected automatically
+    based on the GuiMetricCard presentation model.
     """
 
     def __init__(self, theme):
@@ -24,7 +28,7 @@ class DashboardGrid(QWidget):
 
         self.setLayout(self.layout)
 
-        self.cards: list[MetricCard] = []
+        self.cards: list[QWidget] = []
 
     def clear(self):
         while self.layout.count():
@@ -36,12 +40,19 @@ class DashboardGrid(QWidget):
         self.cards.clear()
 
     def add_card(self, card: GuiMetricCard):
-        metric_card = MetricCard(
-            theme=self.theme,
-            card=card,
-        )
 
-        self.cards.append(metric_card)
+        if card.size == "hero":
+            widget = HeroMetricCard(
+                theme=self.theme,
+                card=card,
+            )
+        else:
+            widget = MetricCard(
+                theme=self.theme,
+                card=card,
+            )
+
+        self.cards.append(widget)
 
         index = len(self.cards) - 1
 
@@ -50,7 +61,7 @@ class DashboardGrid(QWidget):
         row = index // columns
         column = index % columns
 
-        self.layout.addWidget(metric_card, row, column)
+        self.layout.addWidget(widget, row, column)
 
     def add_cards(self, cards: list[GuiMetricCard]):
         for card in cards:
