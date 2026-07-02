@@ -1,38 +1,29 @@
-from services.decision.decision_models import MarketSignal, PositionContext, DecisionInput
-from services.decision.decision_engine import DecisionEngine
+from services.decision.adaptive_decision_engine import AdaptiveDecisionEngine
+from services.decision.decision_models import MarketSignal
 
 
 def run():
-    print("🧪 Starting smoke test...")
+    print("🧪 Starting decision smoke test...")
 
-    engine = DecisionEngine()
+    engine = AdaptiveDecisionEngine()
 
     signal = MarketSignal(
         symbol="BTC",
-        score=75,
-        trend=1,
-        volatility=0.3,
-        momentum=0.6,
+        score=0.75,
+        trend=1.0,
+        volatility=0.30,
+        momentum=0.60,
     )
 
-    context = PositionContext(
-        cash=10000,
-        position_size=0,
-        exposure=0,
-    )
+    result = engine.evaluate(signal)
 
-    input_data = DecisionInput(signal=signal, context=context)
+    print("\nRESULT")
+    print("----------------------------")
+    print(f"Decision   : {result.decision}")
+    print(f"Confidence : {result.confidence:.3f}")
+    print(f"Reason     : {result.reason}")
 
-    result = engine.evaluate(input_data)
-
-    print("RESULT:")
-    print(result)
-
-    print("\nDecision:", result.decision)
-    print("Confidence:", result.confidence)
-    print("Position size:", result.position_size)
-
-    print("\n✅ Smoke test completed")
+    print("\n✅ Decision smoke test completed")
 
 
 if __name__ == "__main__":

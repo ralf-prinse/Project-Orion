@@ -2,18 +2,23 @@ import pandas as pd
 
 from config.trading_config import DEFAULT_TRADING_CONFIG, TradingConfig
 from services.intelligence.intelligence_models import IndicatorPack
+from services.logging_service import LoggingService
 
 
 class IndicatorBuilder:
     """
     Builds an IndicatorPack from historical market data.
 
-    This class contains deterministic calculations only.
-    Indicator periods are provided through TradingConfig.
+    Responsibilities
+    ----------------
+    - Calculate deterministic indicators
+    - Convert OHLCV history into IndicatorPack
+    - Log calculation lifecycle
     """
 
     def __init__(self, config: TradingConfig | None = None):
         self.config = config or DEFAULT_TRADING_CONFIG.indicators
+        self.logger = LoggingService.get_logger("IndicatorBuilder")
 
     def build(
         self,
@@ -21,7 +26,16 @@ class IndicatorBuilder:
         history: pd.DataFrame,
     ) -> IndicatorPack:
 
+        self.logger.info(
+            "Building indicators for %s",
+            symbol,
+        )
+
         if history.empty:
+            self.logger.error(
+                "No historical data available for %s",
+                symbol,
+            )
             raise ValueError("History may not be empty.")
 
         close = history["Close"]
@@ -33,7 +47,7 @@ class IndicatorBuilder:
 
         latest_volume = float(history["Volume"].iloc[-1])
 
-        return IndicatorPack(
+        indicator_pack = IndicatorPack(
             symbol=symbol,
             rsi=rsi,
             trend=trend,
@@ -41,6 +55,21 @@ class IndicatorBuilder:
             momentum=momentum,
             volume=latest_volume,
         )
+
+        self.logger.info(
+            (
+                "Indicators ready for %s | "
+                "RSI=%.2f Trend=%.3f "
+                "Momentum=%.2f Volatility=%.5f"
+            ),
+            symbol,
+            rsi,
+            trend,
+            momentum,
+            volatility,
+        )
+
+        return indicator_pack
 
     def _calculate_rsi(self, close: pd.Series) -> float:
         period = self.config.rsi_period

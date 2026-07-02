@@ -3,6 +3,7 @@ from config.trading_config import DEFAULT_TRADING_CONFIG
 from providers.yahoo_provider import YahooProvider
 
 from services.intelligence.indicator_builder import IndicatorBuilder
+from services.logging_service import LoggingService
 from services.orchestration.ai_market_scanner import AIMarketScanner
 from services.orchestration.trading_pipeline import TradingPipeline
 
@@ -24,6 +25,10 @@ class ApplicationController:
 
     def __init__(self, window):
         self.window = window
+
+        self.logger = LoggingService.get_logger(
+            "ApplicationController"
+        )
 
         self.config = DEFAULT_TRADING_CONFIG
 
@@ -60,6 +65,11 @@ class ApplicationController:
                     "Vul eerst een symbool in."
                 )
                 return
+
+            self.logger.info(
+                "User requested analysis for %s",
+                symbol,
+            )
 
             self.window.trading_page.set_status_text(
                 f"Live marktdata ophalen voor {symbol}..."
@@ -101,7 +111,24 @@ class ApplicationController:
                 "Analyse voltooid."
             )
 
+            pipeline = result["pipeline"]
+
+            self.logger.info(
+                (
+                    "Analysis completed | %s | %s | "
+                    "confidence=%.3f"
+                ),
+                pipeline["symbol"],
+                pipeline["decision"],
+                pipeline["confidence"],
+            )
+
         except Exception as error:
+
+            self.logger.exception(
+                "Trading analysis failed: %s",
+                error,
+            )
 
             self.window.trading_page.set_status_text(
                 f"Analyse mislukt: {error}"
@@ -114,6 +141,10 @@ class ApplicationController:
     def scan_ai_market(self):
 
         try:
+
+            self.logger.info(
+                "User started AI market scan"
+            )
 
             self.window.dashboard_page.set_status_text(
                 "AI Scanner analyseert markt..."
@@ -151,7 +182,22 @@ class ApplicationController:
                 "AI Scanner analyse voltooid."
             )
 
+            self.logger.info(
+                (
+                    "AI market scan completed | "
+                    "requested=%d scanned=%d failed=%d"
+                ),
+                scan_result.total_requested,
+                scan_result.total_scanned,
+                scan_result.total_failed,
+            )
+
         except Exception as error:
+
+            self.logger.exception(
+                "AI market scan failed: %s",
+                error,
+            )
 
             self.window.dashboard_page.set_status_text(
                 f"AI Scanner mislukt: {error}"

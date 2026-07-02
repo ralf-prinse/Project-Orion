@@ -3,6 +3,7 @@ from typing import Any
 
 from providers.yahoo_provider import YahooProvider
 from services.intelligence.indicator_builder import IndicatorBuilder
+from services.logging_service import LoggingService
 from services.orchestration.trading_pipeline import TradingPipeline
 
 
@@ -36,19 +37,17 @@ class AIMarketScanner:
     """
     AI-powered multi-asset scanner.
 
-    Flow:
+    Flow
+
     Symbol
         ↓
-    Yahoo historical data
+    YahooProvider
         ↓
     IndicatorBuilder
         ↓
     TradingPipeline
         ↓
     Ranked AI scan result
-
-    No UI logic.
-    No rendering.
     """
 
     def __init__(
@@ -57,6 +56,8 @@ class AIMarketScanner:
         indicator_builder: IndicatorBuilder | None = None,
         trading_pipeline: TradingPipeline | None = None,
     ):
+        self.logger = LoggingService.get_logger("AIMarketScanner")
+
         self.provider = provider or YahooProvider()
         self.indicator_builder = indicator_builder or IndicatorBuilder()
         self.trading_pipeline = trading_pipeline or TradingPipeline()
@@ -68,28 +69,66 @@ class AIMarketScanner:
         period: str = "6mo",
         interval: str = "1d",
     ) -> AIMarketScanResult:
-        scanned: list[AIMarketScanItem] = []
-        failed_symbols: list[str] = []
 
         cleaned_symbols = self._clean_symbols(symbols)
 
+        self.logger.info(
+            "Starting market scan (%d symbols)",
+            len(cleaned_symbols),
+        )
+
+        scanned: list[AIMarketScanItem] = []
+        failed_symbols: list[str] = []
+
         for symbol in cleaned_symbols:
+
             try:
+
+                self.logger.info(
+                    "Scanning %s",
+                    symbol,
+                )
+
                 item = self.scan_symbol(
                     symbol=symbol,
                     portfolio_state=portfolio_state,
                     period=period,
                     interval=interval,
                 )
+
                 scanned.append(item)
 
-            except Exception:
+                self.logger.info(
+                    "%s complete | %s | confidence=%.3f",
+                    item.symbol,
+                    item.decision,
+                    item.confidence,
+                )
+
+            except Exception as error:
+
                 failed_symbols.append(symbol)
+
+                self.logger.exception(
+                    "Scan failed for %s: %s",
+                    symbol,
+                    error,
+                )
 
         ranked = sorted(
             scanned,
             key=self._ranking_score,
             reverse=True,
+        )
+
+        self.logger.info(
+            (
+                "Market scan completed | "
+                "requested=%d scanned=%d failed=%d"
+            ),
+            len(cleaned_symbols),
+            len(ranked),
+            len(failed_symbols),
         )
 
         return AIMarketScanResult(
@@ -108,6 +147,7 @@ class AIMarketScanner:
         period: str = "6mo",
         interval: str = "1d",
     ) -> AIMarketScanItem:
+
         cleaned_symbol = symbol.strip().upper()
 
         if not cleaned_symbol:
@@ -132,7 +172,9 @@ class AIMarketScanner:
         pipeline = result["pipeline"]
         explanation = result["explanation"]
 
-        explanation_text = self._format_explanation(explanation)
+        explanation_text = self._format_explanation(
+            explanation
+        )
 
         return AIMarketScanItem(
             symbol=pipeline["symbol"],
@@ -154,6 +196,7 @@ class AIMarketScanner:
         scan_result: AIMarketScanResult,
         minimum_confidence: float = 0.60,
     ) -> list[AIMarketScanItem]:
+
         return [
             item
             for item in scan_result.ranked
@@ -161,10 +204,15 @@ class AIMarketScanner:
             and item.confidence >= minimum_confidence
         ]
 
-    def _clean_symbols(self, symbols: list[str]) -> list[str]:
+    def _clean_symbols(
+        self,
+        symbols: list[str],
+    ) -> list[str]:
+
         cleaned = []
 
         for symbol in symbols:
+
             value = symbol.strip().upper()
 
             if value and value not in cleaned:
@@ -172,7 +220,11 @@ class AIMarketScanner:
 
         return cleaned
 
-    def _ranking_score(self, item: AIMarketScanItem) -> float:
+    def _ranking_score(
+        self,
+        item: AIMarketScanItem,
+    ) -> float:
+
         return (
             item.pressure_score
             * item.confidence
@@ -180,10 +232,20 @@ class AIMarketScanner:
             - item.risk_score
         )
 
-    def _format_explanation(self, explanation: dict[str, Any]) -> str:
-        details = explanation.get("details", [])
+    def _format_explanation(
+        self,
+        explanation: dict[str, Any],
+    ) -> str:
+
+        details = explanation.get(
+            "details",
+            [],
+        )
 
         if not details:
             return "Geen AI-uitleg beschikbaar."
 
-        return "\n".join(f"• {line}" for line in details)
+        return "\n".join(
+            f"• {line}"
+            for line in details
+        )
