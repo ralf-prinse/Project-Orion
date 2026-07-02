@@ -1,3 +1,4 @@
+from ui.foundation.dashboard_card_catalog import DashboardCardCatalog
 from ui.foundation.dashboard_data import DashboardData
 from ui.foundation.models import GuiMetric, GuiMetricCard, GuiSection
 
@@ -8,6 +9,7 @@ class Dashboard2Presenter:
 
     Presentation-only.
     Produces GuiMetricCard models for the shared MetricCard widget.
+    Applies centralized Dashboard styling through DashboardCardCatalog.
     """
 
     def create_cards(self, data: DashboardData | None = None) -> list[GuiMetricCard]:
@@ -43,7 +45,7 @@ class Dashboard2Presenter:
         pressure_label = self._pressure_label(best_trade)
         risk_score = best_trade.risk_score if best_trade else 0.0
 
-        return [
+        cards = [
             GuiMetricCard(
                 title="Portfolio Summary",
                 value=self._money(equity),
@@ -123,6 +125,8 @@ class Dashboard2Presenter:
                 trend="Historical equity visualization later.",
             ),
         ]
+
+        return DashboardCardCatalog.apply_all(cards)
 
     def create_default_cards(self) -> list[GuiMetricCard]:
         return self.create_cards(DashboardData())

@@ -5,10 +5,6 @@ from enum import Enum
 class GuiPage(str, Enum):
     """
     Stable page identifiers for the professional Orion desktop shell.
-
-    These identifiers are intentionally independent from any specific GUI
-    toolkit. PySide6 widgets can consume them later without introducing trading
-    logic into the presentation layer.
     """
 
     DASHBOARD = "dashboard"
@@ -56,13 +52,22 @@ class GuiMetric:
 @dataclass(frozen=True)
 class GuiMetricCard:
     """
-    Presentation-safe KPI card.
+    Generic reusable KPI card used throughout Orion.
+
+    This model is presentation-only and intentionally contains no
+    business logic.
     """
 
     title: str
     value: str
+
     subtitle: str = ""
     trend: str = ""
+
+    icon: str = ""
+    accent_color: str = ""
+    status: str = "default"
+    size: str = "normal"
 
 
 @dataclass(frozen=True)
@@ -119,7 +124,7 @@ class GuiApplicationConfig:
     application_name: str = "Project Orion"
     subtitle: str = "Deterministic Swing Trading Platform"
     default_page: GuiPage = GuiPage.DASHBOARD
-    version: str = "v1.0.8-alpha"
+    version: str = "v1.2.0-alpha"
 
 
 @dataclass
@@ -134,4 +139,8 @@ class GuiShellState:
     status_message: str = "Ready"
 
     def enabled_navigation_items(self) -> list[GuiNavigationItem]:
-        return [item for item in self.navigation_items if item.enabled]
+        return [
+            item
+            for item in self.navigation_items
+            if item.enabled
+        ]
