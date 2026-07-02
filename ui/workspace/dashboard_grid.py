@@ -3,6 +3,7 @@ from PySide6.QtWidgets import QGridLayout, QWidget
 
 from ui.foundation.models import GuiMetricCard
 from ui.widgets.hero_metric_card import HeroMetricCard
+from ui.widgets.market_health_banner import MarketHealthBanner
 from ui.widgets.metric_card import MetricCard
 
 
@@ -12,8 +13,7 @@ class DashboardGrid(QWidget):
 
     Presentation only.
 
-    Hero cards and standard metric cards are selected automatically
-    based on the GuiMetricCard presentation model.
+    Widget selection is entirely driven by GuiMetricCard metadata.
     """
 
     def __init__(self, theme):
@@ -41,16 +41,7 @@ class DashboardGrid(QWidget):
 
     def add_card(self, card: GuiMetricCard):
 
-        if card.size == "hero":
-            widget = HeroMetricCard(
-                theme=self.theme,
-                card=card,
-            )
-        else:
-            widget = MetricCard(
-                theme=self.theme,
-                card=card,
-            )
+        widget = self._create_widget(card)
 
         self.cards.append(widget)
 
@@ -61,8 +52,34 @@ class DashboardGrid(QWidget):
         row = index // columns
         column = index % columns
 
+        if isinstance(widget, MarketHealthBanner):
+            self.layout.addWidget(widget, row, 0, 1, columns)
+            return
+
         self.layout.addWidget(widget, row, column)
 
     def add_cards(self, cards: list[GuiMetricCard]):
         for card in cards:
             self.add_card(card)
+
+    def _create_widget(self, card: GuiMetricCard) -> QWidget:
+        """
+        Factory for dashboard presentation widgets.
+        """
+
+        if card.title == "Market Health":
+            return MarketHealthBanner(
+                theme=self.theme,
+                card=card,
+            )
+
+        if card.size == "hero":
+            return HeroMetricCard(
+                theme=self.theme,
+                card=card,
+            )
+
+        return MetricCard(
+            theme=self.theme,
+            card=card,
+        )
