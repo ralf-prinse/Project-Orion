@@ -4,7 +4,7 @@
 
 # Architecture Version
 
-**Architecture Freeze v1.4**
+**Architecture Freeze v1.5**
 
 Status
 
@@ -12,7 +12,7 @@ Status
 
 Current Phase
 
-🚧 Sprint 4.3 — Unified Dashboard Workspace
+🚧 Sprint 4.4 — Production Chart Pipeline
 
 ---
 
@@ -26,7 +26,7 @@ Artificial Intelligence never performs investment calculations.
 
 Artificial Intelligence only explains deterministic results.
 
-The deterministic Trading Pipeline is the single source of truth.
+The deterministic Trading Pipeline remains the single source of truth.
 
 No business logic may exist inside the UI.
 
@@ -66,13 +66,15 @@ Presentation metadata remains centralized.
 
 Widget creation remains centralized.
 
+Rendering remains centralized.
+
 Workspace composition remains centralized.
 
 ---
 
 ## Explainability
 
-Every recommendation must always be:
+Every recommendation must always be
 
 - deterministic
 - reproducible
@@ -83,7 +85,7 @@ Every recommendation must always be:
 
 ## Production Workflow
 
-Every sprint follows:
+Every sprint follows
 
 Feature
 
@@ -143,30 +145,6 @@ The deterministic Trading Pipeline remains the only source of trading decisions.
 
 ---
 
-# AI Market Scanner
-
-```
-ApplicationController
-        ↓
-YahooProvider
-        ↓
-IndicatorBuilder
-        ↓
-TradingPipeline
-        ↓
-AIMarketScanner
-        ↓
-AIScannerPresenter
-        ↓
-Scanner Workspace
-```
-
-Trading Workspace and AI Scanner always consume the exact same Trading Pipeline.
-
-No duplicate business logic may exist.
-
----
-
 # Dashboard Evolution
 
 Sprint 4.1
@@ -177,21 +155,27 @@ Completed Dashboard migration.
 
 Sprint 4.2
 
-Introduced reusable Dashboard Widget Library.
+Completed reusable Dashboard Widget Library.
 
 ↓
 
 Sprint 4.3
 
-Introduces the Unified Dashboard Workspace architecture.
+Completed Unified Dashboard Workspace foundation.
 
-The dashboard is evolving from a collection of cards into a complete presentation workspace capable of rendering cards, charts and future presentation components from one presentation model.
+↓
+
+Sprint 4.4
+
+Introduces the first production chart pipeline.
+
+The dashboard now evolves from a card-based presentation into a complete workspace capable of rendering reusable cards, charts and future presentation components through one unified rendering pipeline.
 
 ---
 
 # Unified Dashboard Architecture
 
-Current production presentation flow:
+Current production presentation flow
 
 ```
 ApplicationController
@@ -201,19 +185,31 @@ DashboardData
 Dashboard2Presenter
         ↓
 DashboardWorkspacePresenter
+        │
+        ├──────── GuiMetricCard
+        │
+        └──────── EquityCurveChartPresenter
+                    ↓
+                 GuiChart
         ↓
 GuiWorkspace
         ↓
-DashboardWorkspace
-        ↓
-DashboardGrid
-        ↓
-DashboardWidgetFactory
-        ↓
-Widgets
+WorkspaceRenderer
+        ├──────── DashboardGrid
+        └──────── ChartRenderer
+                    ↓
+            ChartWidgetFactory
+                    ↓
+             LineChartWidget
 ```
 
-Responsibilities
+The presentation pipeline is now fully separated into composition, rendering and widget creation.
+
+Business logic remains prohibited throughout the presentation layer.
+
+---
+
+# Presentation Responsibilities
 
 ApplicationController
 
@@ -225,47 +221,62 @@ DashboardData
 
 Dashboard2Presenter
 
-- Produces dashboard presentation cards.
+- Produces reusable dashboard cards.
 
 DashboardWorkspacePresenter
 
 - Creates one GuiWorkspace.
-- Owns presentation orchestration.
+- Orchestrates presentation.
+- Produces dashboard charts.
 - Contains no business logic.
+
+EquityCurveChartPresenter
+
+- Produces GuiChart objects.
+- Performs no calculations.
+- Contains no Qt code.
 
 GuiWorkspace
 
-- Canonical dashboard presentation model.
-- Contains cards.
-- Contains charts.
-- Contains sections.
-- Contains presentation metadata only.
+- Canonical presentation model.
+- Owns cards.
+- Owns charts.
+- Owns sections.
+- Owns metadata.
 
-DashboardWorkspace
+WorkspaceRenderer
 
-- Renders GuiWorkspace.
-- Contains no trading logic.
-- Contains no calculations.
+- Renders complete workspaces.
+- Coordinates specialized renderers.
+- Contains no layout logic.
 
 DashboardGrid
 
-- Responsible only for layout.
+- Owns metric card layout only.
 
-DashboardWidgetFactory
+ChartRenderer
 
-- Responsible only for widget creation.
+- Renders GuiChart objects.
+- Delegates widget creation.
 
-Widgets
+ChartWidgetFactory
 
-- Render presentation models only.
+- Selects chart widgets.
+- Centralizes chart widget creation.
+
+LineChartWidget
+
+- Renders GuiChart.
+- Contains no business logic.
+- Contains no calculations.
 
 ---
 
 # GuiWorkspace
 
-GuiWorkspace becomes the canonical presentation object for every dashboard.
+GuiWorkspace is now the canonical presentation object for every dashboard.
 
-Current structure:
+Current structure
 
 ```
 GuiWorkspace
@@ -274,6 +285,8 @@ GuiWorkspace
 
 ├── charts
 
+├── chart_sections
+
 ├── sections
 
 ├── metadata
@@ -281,103 +294,96 @@ GuiWorkspace
 └── status
 ```
 
-Future dashboard components will integrate through GuiWorkspace rather than extending DashboardWorkspace directly.
+GuiWorkspace owns dashboard composition.
+
+DashboardWorkspace owns presentation only.
 
 Business logic remains prohibited.
 
-Presentation orchestration remains centralized.
+---
+
+# Chart Presentation Models
+
+Sprint 4.4 introduces reusable chart presentation models.
+
+Completed models
+
+✅ GuiChart
+
+✅ GuiChartType
+
+✅ GuiSeries
+
+✅ GuiAxis
+
+✅ GuiLegend
+
+✅ GuiChartSection
+
+These models are presentation-only.
+
+They perform
+
+- no calculations
+- no portfolio logic
+- no AI logic
+- no trading logic
+
+They exist solely to describe chart presentation.
 
 ---
 
-# GuiWorkspaceSection
+# Chart Rendering Architecture
 
-GuiWorkspaceSection provides reusable grouping of presentation objects.
+Chart rendering is now separated from workspace composition.
 
-Responsibilities:
+```
+GuiChart
+        ↓
+ChartRenderer
+        ↓
+ChartWidgetFactory
+        ↓
+LineChartWidget
+```
 
-- Group related dashboard items
-- Presentation only
-- No calculations
-- No business logic
+Future chart widgets
 
-This enables future dashboard layouts containing multiple logical dashboard sections without changing DashboardWorkspace itself.
+- AreaChartWidget
+- BarChartWidget
+- PieChartWidget
+- DonutChartWidget
+- HeatMapWidget
 
----
-
-# Widget Library
-
-The Widget Library introduced during Sprint 4.2 remains the foundation of the desktop presentation layer.
-
-Completed reusable widgets
-
-✅ MetricCard
-
-✅ HeroMetricCard
-
-✅ MarketHealthBanner
-
-✅ EquityCurveWidget (foundation)
-
-Future widgets
-
-- Portfolio Allocation Widget
-- Confidence Gauge
-- Pressure Gauge
-- Risk Gauge
-- Future Charts
-
-Every widget integrates exclusively through DashboardWidgetFactory.
-
-DashboardGrid should never require architectural changes when introducing new widgets.
+No workspace modifications are required when introducing additional chart widgets.
 
 ---
 
-# Dashboard Presentation Rules
+# Workspace Rendering
 
-Dashboard remains a presentation layer only.
-
-Dashboard components must never:
-
-- calculate indicators
-- calculate portfolio values
-- determine signals
-- calculate exposure
-- calculate risk
-- determine position sizing
-
-All deterministic calculations originate exclusively from the Trading Pipeline.
-
-Dashboard presenters transform deterministic output into presentation models.
-
-Qt widgets render presentation models only.
-
----
-
-# Dashboard Presentation Models
-
-Current presentation hierarchy
+Workspace rendering is centralized.
 
 ```
 GuiWorkspace
-        │
-        ├──────── GuiWorkspaceSection
-        │
-        ├──────── GuiMetricCard
-        │
-        └──────── Future Chart Models
+        ↓
+WorkspaceRenderer
+        ├──────── DashboardGrid
+        └──────── ChartRenderer
 ```
 
-GuiWorkspace owns the dashboard.
+WorkspaceRenderer orchestrates rendering only.
 
-Cards become one possible presentation element rather than the dashboard itself.
+Layout responsibilities remain delegated to specialized components.
 
-This architecture enables future expansion without modifying DashboardWorkspace.
+Business logic remains prohibited.
 
 ---
 
 # Widget Creation
 
 Widget creation remains centralized.
+
+Cards
 
 ```
 GuiMetricCard
@@ -389,124 +395,23 @@ MetricCard
 HeroMetricCard
 
 MarketHealthBanner
-
-Future Widgets
 ```
 
-DashboardGrid owns layout only.
-
-DashboardWidgetFactory owns widget creation only.
-
-Widgets own rendering only.
-
----
-
-# Backtesting Architecture
+Charts
 
 ```
-Historical Dataset
+GuiChart
         ↓
-MarketScanner
+ChartWidgetFactory
         ↓
-BacktestEngine
-        ↓
-BacktestSimulator
-        ↓
-Trade Log
-        ↓
-Equity Curve
-        ↓
-BacktestVisualizer
+LineChartWidget
+
+Future Chart Widgets
 ```
 
-Backtesting continues to reuse production trading logic.
+Factories never perform business logic.
 
-No duplicate calculation pipeline exists.
-
----
-
-# Configuration Architecture
-
-```
-TradingConfig
-        ↓
-YahooProvider
-        ↓
-IndicatorBuilder
-        ↓
-TradingPipeline
-        ↓
-ApplicationController
-        ↓
-Desktop
-```
-
-Configuration remains centralized.
-
-Hardcoded production values remain prohibited.
-
----
-
-# Logging Architecture
-
-```
-ApplicationController
-        ↓
-YahooProvider
-        ↓
-IndicatorBuilder
-        ↓
-TradingPipeline
-        ↓
-AIMarketScanner
-        ↓
-BacktestEngine
-```
-
-All production services use LoggingService.
-
-Destination
-
-```
-logs/orion.log
-```
-
-Logging provides a deterministic audit trail.
-
----
-
-# Regression Testing
-
-Regression validation remains centralized.
-
-Official production command
-
-```powershell
-python run_tests.py
-```
-
-Expected production result
-
-```
-Passed: 6
-Failed: 0
-```
-
-Sprint 4.3 additionally introduces dedicated architecture validation for the Unified Dashboard Workspace.
-
-Current result
-
-```
-run_tests.py
-Passed: 6
-Failed: 0
-
-Dashboard Workspace Presenter
-Passed: 1
-Failed: 0
-```
-
-Regression validation remains mandatory before every commit.
+Widgets never perform calculations.
 
 ---
 
@@ -548,11 +453,17 @@ Regression validation remains mandatory before every commit.
 
 ## Desktop
 
+### Core
+
 ✅ ApplicationController
 
 ✅ Trading Workspace
 
 ✅ Scanner Workspace
+
+---
+
+### Dashboard Presentation
 
 ✅ DashboardData
 
@@ -562,17 +473,47 @@ Regression validation remains mandatory before every commit.
 
 ✅ DashboardWorkspace
 
+✅ WorkspaceRenderer
+
 ✅ DashboardGrid
 
-✅ DashboardCardCatalog
+✅ ChartRenderer
 
-✅ DashboardWidgetFactory
+✅ ChartContainer
+
+---
+
+### Presentation Models
 
 ✅ GuiWorkspace
 
 ✅ GuiWorkspaceSection
 
+✅ GuiChart
+
+✅ GuiChartSection
+
 ✅ GuiMetricCard
+
+✅ GuiChartType
+
+✅ GuiSeries
+
+✅ GuiAxis
+
+✅ GuiLegend
+
+---
+
+### Widget Factories
+
+✅ DashboardWidgetFactory
+
+✅ ChartWidgetFactory
+
+---
+
+### Desktop Widgets
 
 ✅ MetricCard
 
@@ -580,227 +521,17 @@ Regression validation remains mandatory before every commit.
 
 ✅ MarketHealthBanner
 
+✅ LineChartWidget
+
 ✅ EquityCurveWidget (foundation)
 
 ---
 
-# Project Health
+# Regression Testing
 
-Architecture
+Regression validation remains centralized.
 
-🟢 Stable
-
-Backend
-
-🟢 Production Ready
-
-Desktop
-
-🟢 Active Development
-
-Dashboard
-
-🟢 Unified Workspace Migration Started
-
-Widget Library
-
-🟢 Stable
-
-Workspace Architecture
-
-🟢 Active
-
-Logging
-
-🟢 Complete
-
-Regression Tests
-
-🟢 Passing
-
-Technical Debt
-
-🟢 Low
-
-Documentation
-
-🟢 Current
-
----
-
-# Sprint 4.3 Foundation Completed
-
-Completed during the initial Sprint 4.3 migration:
-
-- GuiWorkspace introduced
-- GuiWorkspaceSection introduced
-- DashboardWorkspacePresenter introduced
-- DashboardWorkspace migrated to GuiWorkspace
-- Backward-compatible card rendering retained
-- Existing Widget Library reused
-- Existing DashboardGrid reused
-- Existing DashboardWidgetFactory reused
-- Existing GuiMetricCard models reused
-- Unified presentation pipeline established
-- Dedicated Dashboard Workspace Presenter regression test added
-
-Current validation:
-
-```
-run_tests.py
-
-Passed: 6
-Failed: 0
-
-Dashboard Workspace Presenter
-
-Passed: 1
-Failed: 0
-```
-
-The migration introduced no backend changes.
-
-No business logic moved into the UI.
-
-No duplicate presentation pipeline was introduced.
-
-The migration preserves complete backward compatibility while preparing the desktop for future dashboard visualization.
-
----
-
-# Current Development Focus
-
-The deterministic backend is considered feature complete.
-
-Current development focuses exclusively on desktop presentation architecture.
-
-Highest priorities
-
-- Expand GuiWorkspace
-- Introduce chart presentation models
-- Integrate EquityCurveWidget
-- Integrate Portfolio Allocation visualization
-- Introduce reusable Gauge widgets
-- Continue desktop UX improvements
-
-Backend expansion is intentionally paused during this architectural phase.
-
-The Trading Pipeline remains the only deterministic source of trading decisions.
-
----
-
-# Sprint 4.3 Roadmap
-
-Current sprint objectives
-
-✅ Introduce GuiWorkspace
-
-✅ Introduce GuiWorkspaceSection
-
-✅ Introduce DashboardWorkspacePresenter
-
-✅ Migrate DashboardWorkspace
-
-⬜ Introduce chart presentation models
-
-⬜ Render charts through GuiWorkspace
-
-⬜ Integrate EquityCurveWidget
-
-⬜ Integrate Portfolio Allocation visualization
-
-⬜ Introduce reusable Gauge widgets
-
-⬜ Continue desktop UX improvements
-
-Sprint 4.3 is intentionally divided into small production-safe migration steps.
-
-Every completed step must preserve complete backward compatibility.
-
----
-
-# Architecture Rules
-
-The following architectural rules are mandatory.
-
-## Business Logic
-
-Business logic belongs exclusively inside backend services.
-
-Qt widgets never perform calculations.
-
-Presenters transform deterministic backend output into presentation models.
-
-GuiWorkspace owns dashboard composition.
-
-DashboardGrid owns layout.
-
-DashboardWidgetFactory owns widget creation.
-
-Widgets own rendering.
-
-Business logic inside widgets is prohibited.
-
----
-
-## Artificial Intelligence
-
-Artificial Intelligence never:
-
-- calculates indicators
-- generates buy/sell signals
-- performs portfolio calculations
-- determines position sizing
-
-Artificial Intelligence only explains deterministic results generated by the Trading Pipeline.
-
----
-
-## Dashboard
-
-Dashboard is a presentation layer only.
-
-Dashboard presentation flows exclusively through:
-
-DashboardData
-
-↓
-
-Dashboard2Presenter
-
-↓
-
-DashboardWorkspacePresenter
-
-↓
-
-GuiWorkspace
-
-↓
-
-DashboardWorkspace
-
-↓
-
-DashboardGrid
-
-↓
-
-DashboardWidgetFactory
-
-↓
-
-Widgets
-
-Duplicate presentation pipelines are prohibited.
-
-Dashboard-specific business logic is prohibited.
-
----
-
-## Regression Testing
-
-Every architectural change concludes with
+Primary validation
 
 ```powershell
 python run_tests.py
@@ -813,45 +544,69 @@ Passed: 6
 Failed: 0
 ```
 
-Additional Sprint 4.3 validation
+Additional Sprint 4.4 validation
 
 ```powershell
 python -m pytest test_dashboard_workspace_presenter.py
+python -m pytest test_dashboard_workspace_charts.py
+python -m pytest test_equity_curve_chart_presenter.py
+python -m pytest test_workspace_renderer.py
+python -m pytest test_chart_renderer.py
+python -m pytest test_chart_widget_factory.py
+python -m pytest test_chart_models.py
+python -m pytest test_gui_chart.py
+python -m pytest test_chart_container.py
+python -m pytest test_line_chart_widget.py
 ```
 
-Expected result
+All validation suites currently pass.
 
-```
-1 passed
-```
-
-Regression validation is mandatory before every Git commit.
+Regression validation remains mandatory before every commit.
 
 ---
 
-## Production Workflow
+# Current Development Focus
 
-Every sprint follows exactly the same workflow.
+The deterministic backend remains feature complete.
 
-Feature
+Current development focuses on expanding the desktop presentation layer using the completed Workspace and Chart infrastructure.
 
-↓
+Current priorities
 
-Testing
+- Integrate real chart rendering
+- Connect LineChartWidget to a charting library
+- Portfolio Allocation visualization
+- Gauge widgets
+- Dashboard Layout 2.0
+- Live Dashboard updates
 
-↓
+No backend expansion is currently planned.
 
-Documentation
+---
 
-↓
+# Architecture Rules
 
-Git Commit
+Business logic belongs exclusively inside backend services.
 
-↓
+Presenters transform deterministic backend output into presentation models.
 
-GitHub Push
+GuiWorkspace owns dashboard composition.
 
-No sprint is considered complete until every stage succeeds.
+WorkspaceRenderer owns rendering orchestration.
+
+DashboardGrid owns card layout.
+
+ChartRenderer owns chart rendering.
+
+DashboardWidgetFactory owns dashboard widget creation.
+
+ChartWidgetFactory owns chart widget creation.
+
+Widgets render presentation models only.
+
+Business logic inside widgets or renderers is prohibited.
+
+Artificial Intelligence never performs deterministic calculations.
 
 ---
 
@@ -861,6 +616,7 @@ Project Orion will evolve into a professional deterministic AI-assisted desktop 
 
 - Professional Desktop Dashboard
 - Unified Dashboard Workspace
+- Production Chart Pipeline
 - Portfolio Intelligence
 - Live Market Analysis
 - Explainable AI
@@ -877,7 +633,7 @@ while preserving deterministic calculations as the only source of trading decisi
 
 Architecture Version
 
-**Architecture Freeze v1.4**
+**Architecture Freeze v1.5**
 
 Current Version
 
@@ -885,7 +641,7 @@ Current Version
 
 Current Sprint
 
-**Sprint 4.3 — Unified Dashboard Workspace**
+**Sprint 4.4 — Production Chart Pipeline**
 
 Sprint Status
 
@@ -899,33 +655,25 @@ Desktop
 
 🟢 Active Development
 
-Dashboard
+Workspace Foundation
 
-🟢 Unified Workspace Migration Started
+🟢 Completed
 
-Widget Library
+Chart Foundation
 
-🟢 Stable
+🟢 Completed
 
-Workspace Architecture
+Production Chart Pipeline
 
-🟢 Active
+🟢 Completed
 
-AI
+Visible Chart Integration
 
-🟢 Explainability Only
+🟢 In Progress
 
 Regression Tests
 
-```
-run_tests.py
-Passed: 6
-Failed: 0
-
-Dashboard Workspace Presenter
-Passed: 1
-Failed: 0
-```
+🟢 Passing
 
 Documentation
 
@@ -933,6 +681,6 @@ Documentation
 
 Git
 
-Ready for commit after remaining Sprint 4.3 documentation updates.
+Ready for commit after documentation synchronization.
 
 ---

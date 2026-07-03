@@ -3,6 +3,7 @@ from PySide6.QtWidgets import QPushButton
 from ui.foundation.dashboard_workspace_presenter import DashboardWorkspacePresenter
 from ui.foundation.models import GuiMetricCard, GuiSection
 from ui.foundation.workspace import GuiWorkspace
+from ui.foundation.workspace_renderer import WorkspaceRenderer
 from ui.workspace.base_workspace import BaseWorkspace
 from ui.workspace.dashboard_grid import DashboardGrid
 
@@ -33,6 +34,9 @@ class DashboardWorkspace(BaseWorkspace):
         self.scan_button.setStyleSheet(self.primary_button_style())
 
         self.dashboard_grid = DashboardGrid(theme=self.theme)
+        self.workspace_renderer = WorkspaceRenderer(
+            dashboard_grid=self.dashboard_grid
+        )
 
         self._build_layout()
 
@@ -46,15 +50,10 @@ class DashboardWorkspace(BaseWorkspace):
 
     def set_workspace(self, workspace: GuiWorkspace):
         """
-        Render a complete dashboard workspace.
-
-        During the initial Sprint 4.3 migration only dashboard cards
-        are rendered. Chart and section support will be added in the
-        following migration steps.
+        Render a complete dashboard workspace through WorkspaceRenderer.
         """
 
-        self.dashboard_grid.clear()
-        self.dashboard_grid.add_cards(workspace.cards)
+        self.workspace_renderer.render(workspace)
 
     def set_cards(self, cards: list[GuiMetricCard]):
         """

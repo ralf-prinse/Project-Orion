@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from typing import Any, List, Optional
 
+from ui.foundation.charts import GuiChart, GuiChartSection
+
 
 @dataclass(frozen=True)
 class GuiWorkspaceSection:
@@ -30,7 +32,8 @@ class GuiWorkspace:
     title: str
     subtitle: str = ""
     cards: List[Any] = field(default_factory=list)
-    charts: List[Any] = field(default_factory=list)
+    charts: List[GuiChart] = field(default_factory=list)
+    chart_sections: List[GuiChartSection] = field(default_factory=list)
     sections: List[GuiWorkspaceSection] = field(default_factory=list)
     status: str = "neutral"
     metadata: Optional[dict] = None
