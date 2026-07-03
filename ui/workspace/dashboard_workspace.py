@@ -1,7 +1,8 @@
 from PySide6.QtWidgets import QPushButton
 
-from ui.foundation.dashboard_2_presenter import Dashboard2Presenter
+from ui.foundation.dashboard_workspace_presenter import DashboardWorkspacePresenter
 from ui.foundation.models import GuiMetricCard, GuiSection
+from ui.foundation.workspace import GuiWorkspace
 from ui.workspace.base_workspace import BaseWorkspace
 from ui.workspace.dashboard_grid import DashboardGrid
 
@@ -25,7 +26,7 @@ class DashboardWorkspace(BaseWorkspace):
             ),
         )
 
-        self.dashboard_2_presenter = Dashboard2Presenter()
+        self.dashboard_workspace_presenter = DashboardWorkspacePresenter()
 
         self.scan_button = QPushButton("Analyseer markt")
         self.scan_button.clicked.connect(on_scan_requested)
@@ -34,15 +35,38 @@ class DashboardWorkspace(BaseWorkspace):
         self.dashboard_grid = DashboardGrid(theme=self.theme)
 
         self._build_layout()
-        self.set_cards(self.dashboard_2_presenter.create_default_cards())
+
+        self.set_workspace(
+            self.dashboard_workspace_presenter.create_default_workspace()
+        )
 
     def _build_layout(self):
         self.add_workspace_widget(self.scan_button)
         self.add_workspace_widget(self.dashboard_grid)
 
-    def set_cards(self, cards: list[GuiMetricCard]):
+    def set_workspace(self, workspace: GuiWorkspace):
+        """
+        Render a complete dashboard workspace.
+
+        During the initial Sprint 4.3 migration only dashboard cards
+        are rendered. Chart and section support will be added in the
+        following migration steps.
+        """
+
         self.dashboard_grid.clear()
-        self.dashboard_grid.add_cards(cards)
+        self.dashboard_grid.add_cards(workspace.cards)
+
+    def set_cards(self, cards: list[GuiMetricCard]):
+        """
+        Backward-compatible adapter for existing callers.
+        """
+
+        self.set_workspace(
+            GuiWorkspace(
+                title="Dashboard",
+                cards=cards,
+            )
+        )
 
     def set_sections(self, sections: list[GuiSection]):
         """
@@ -50,7 +74,9 @@ class DashboardWorkspace(BaseWorkspace):
         """
 
         if not sections:
-            self.set_cards(self.dashboard_2_presenter.create_default_cards())
+            self.set_workspace(
+                self.dashboard_workspace_presenter.create_default_workspace()
+            )
             return
 
         cards: list[GuiMetricCard] = []

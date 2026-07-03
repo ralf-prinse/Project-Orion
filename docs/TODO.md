@@ -11,7 +11,7 @@
 - [x] Presenter architecture
 - [x] ApplicationController architecture
 - [x] Central TradingConfig
-- [x] Architecture Freeze v1.2
+- [x] Architecture Freeze v1.4
 
 ---
 
@@ -38,12 +38,19 @@
 - [x] AI Scanner Presenter tests
 - [x] Backtest tests
 - [x] Decision smoke tests
+- [x] Dashboard Workspace Presenter tests
 
-Current result:
+Current validation
 
 ```
+run_tests.py
+
 Passed: 6
 Failed: 0
+
+Dashboard Workspace Presenter
+
+1 passed
 ```
 
 ---
@@ -78,13 +85,16 @@ Failed: 0
 ## Desktop
 
 - [x] Trading Workspace
-- [x] Dashboard 2.0 Foundation
-- [x] DashboardGrid
-- [x] DashboardWorkspace
 - [x] DashboardData
 - [x] Dashboard2Presenter
-- [x] Shared MetricCard Presentation
-- [x] Scanner Workspace
+- [x] DashboardWorkspacePresenter
+- [x] DashboardWorkspace
+- [x] GuiWorkspace
+- [x] GuiWorkspaceSection
+- [x] DashboardCardCatalog
+- [x] DashboardWidgetFactory
+- [x] DashboardGrid
+- [x] Shared Widget Library
 - [x] Trading Workspace Presenter
 - [x] AI Scanner Presenter
 - [x] Shared Trading Pipeline
@@ -92,140 +102,122 @@ Failed: 0
 
 ---
 
-## Dashboard Features
+## Dashboard Widget Library
 
 Completed
 
-- [x] Portfolio Summary
-- [x] Cash Widget
-- [x] Equity Widget
-- [x] Today's P/L placeholder
-- [x] Open Positions
-- [x] Portfolio Exposure
-- [x] Confidence Gauge
-- [x] Pressure Gauge
-- [x] Risk Gauge
-- [x] Best Trade Card
-- [x] Market Health
-- [x] Portfolio Allocation
-- [x] Equity Curve placeholder
+- [x] GuiMetricCard presentation metadata
+- [x] MetricCard
+- [x] HeroMetricCard
+- [x] MarketHealthBanner
+- [x] EquityCurveWidget foundation
+- [x] DashboardCardCatalog
+- [x] DashboardWidgetFactory
+- [x] Automatic widget selection
+- [x] Metadata-driven dashboard layout
+- [x] Column-span layout metadata
+
+Sprint 4.2 foundation remains complete.
 
 ---
 
 # 🚧 Current Sprint
 
-# Sprint 4.1 — Dashboard 2.0
+# Sprint 4.3 — Unified Dashboard Workspace
 
-## Architecture Refactor
+## Completed
 
-Completed
-
-- [x] Replace DashboardCard with MetricCard
-- [x] Replace DashboardCardModel with GuiMetricCard
-- [x] Refactor DashboardGrid
-- [x] Refactor DashboardWorkspace
-- [x] Simplify Dashboard2Presenter
-- [x] Remove remaining temporary dashboard presentation code
-
-Sprint 4.1 dashboard architecture migration is complete.
-
-Dashboard now fully reuses Orion's shared presentation framework.
+- [x] Introduce GuiWorkspace
+- [x] Introduce GuiWorkspaceSection
+- [x] Introduce DashboardWorkspacePresenter
+- [x] Migrate DashboardWorkspace
+- [x] Preserve backward compatibility
+- [x] Introduce Workspace Presenter regression test
 
 ---
 
-## Dashboard Polish
+## Presentation Architecture
 
-Current priority
+Current priorities
 
-- [ ] Dashboard Widget Library
-- [ ] KPI Hero Cards
-- [ ] Market Health Banner
-- [ ] Professional Status Bar
-- [ ] Responsive Dashboard Layout
-- [ ] Improved Card Spacing
-- [ ] Better Typography
-- [ ] Theme Standardization
+- [ ] Introduce chart presentation models
+- [ ] Add GuiChart base presentation model
+- [ ] Add GuiChartSection support
+- [ ] Render charts through GuiWorkspace
+- [ ] Support mixed card/chart layouts
+- [ ] Complete workspace composition pipeline
 
 ---
 
-## Visualization
+## Dashboard Widgets
 
-Current priority
+Current priorities
 
-- [ ] Equity Curve Chart
-- [ ] Portfolio Allocation Chart
-- [ ] Confidence Gauge Widget
-- [ ] Pressure Gauge Widget
-- [ ] Risk Gauge Widget
+- [ ] Integrate EquityCurveWidget
+- [ ] Portfolio Allocation Widget
+- [ ] Confidence Gauge
+- [ ] Pressure Gauge
+- [ ] Risk Gauge
+- [ ] Dashboard summary banner
+- [ ] Workspace header improvements
 
 ---
 
 ## Desktop UX
 
-Current priority
+Current priorities
 
-- [ ] Dashboard Animations
-- [ ] Professional Dashboard Theme
-- [ ] Workspace Polish
-- [ ] Shared Widget Library
-- [ ] Desktop Performance Improvements
+- [ ] Dashboard theme polish
+- [ ] Professional status bar
+- [ ] Improved spacing
+- [ ] Improved typography
+- [ ] Responsive layout refinements
+- [ ] Desktop performance improvements
+- [ ] Workspace loading states
+- [ ] Empty-state presentation
 
 ---
 
 # 📋 Upcoming Sprints
 
-## Sprint 4.2
-
-Watchlists
-
-- [ ] Custom Watchlists
-- [ ] Save Watchlists
-- [ ] Load Watchlists
-- [ ] Scanner Filters
-- [ ] Favorite Symbols
-
----
-
-## Sprint 4.3
-
-Portfolio Workspace
-
-- [ ] Position Overview
-- [ ] Position Table
-- [ ] Allocation Visualization
-- [ ] Unrealized P/L
-- [ ] Portfolio Charts
-
----
-
-## Sprint 4.4
-
-Live Monitoring
+## Sprint 4.4 — Live Dashboard
 
 - [ ] Auto Refresh
 - [ ] Background Scanner
 - [ ] Live Dashboard Updates
 - [ ] Live Market Health
 - [ ] Live Portfolio Metrics
+- [ ] Automatic Workspace Refresh
 
 ---
 
-## Sprint 4.5
+## Sprint 4.5 — Portfolio Workspace
 
-Paper Trading
+- [ ] Position Overview
+- [ ] Position Table
+- [ ] Allocation Visualization
+- [ ] Unrealized P/L
+- [ ] Portfolio Charts
+- [ ] Portfolio Timeline
+
+---
+
+## Sprint 4.6 — Paper Trading
 
 - [ ] Portfolio Simulation
 - [ ] Virtual Orders
 - [ ] Position History
 - [ ] Trade Replay
+- [ ] Strategy Comparison
 
 ---
 
 # 🎯 Long-Term Goal
 
-Develop Orion into a professional deterministic AI-assisted trading platform featuring:
+Develop Orion into a professional deterministic AI-assisted desktop trading platform featuring
 
 - Professional Desktop Dashboard
+- Unified Dashboard Workspace
 - Portfolio Intelligence
 - Live Market Analysis
 - Explainable AI
@@ -242,11 +234,15 @@ while maintaining deterministic calculations as the only source of trading decis
 
 Version
 
-v1.2.0-alpha
+**v1.2.0-alpha**
 
-Sprint
+Current Sprint
 
-Sprint 4.1 — Dashboard 2.0
+**Sprint 4.3 — Unified Dashboard Workspace**
+
+Sprint Status
+
+🚧 In Progress
 
 Architecture
 
@@ -256,32 +252,58 @@ Backend
 
 ✅ Production Stable
 
-Dashboard Presentation Architecture
+Dashboard
+
+✅ Unified Workspace Migration Started
+
+Workspace Foundation
 
 ✅ Completed
 
-Regression Tests
+Regression Status
 
-```
-Passed: 6
-Failed: 0
-```
+✅ Passing
 
-Current Focus
+---
 
-- Dashboard Widget Library
-- Professional Dashboard UX
-- Hero KPI Cards
-- Equity Curve
-- Allocation Visualization
-- Gauge Widgets
-- Desktop Polish
+# Current Focus
+
+Sprint 4.3 is intentionally divided into small production-safe migration steps.
+
+Completed
+
+✅ GuiWorkspace
+
+✅ GuiWorkspaceSection
+
+✅ DashboardWorkspacePresenter
+
+✅ DashboardWorkspace migration
+
+✅ Unified presentation pipeline
+
+✅ Dedicated Workspace Presenter test
+
+Current priorities
+
+- [ ] Introduce GuiChart presentation model
+- [ ] Introduce GuiChartSection
+- [ ] Expand GuiWorkspace with charts
+- [ ] Render mixed dashboard layouts
+- [ ] Integrate EquityCurveWidget
+- [ ] Integrate Portfolio Allocation visualization
+- [ ] Introduce reusable Gauge widgets
+- [ ] Continue desktop UX improvements
+
+The deterministic backend remains feature complete.
+
+Current development focuses exclusively on presentation architecture.
 
 ---
 
 # Development Rules
 
-Every completed sprint must end with:
+Every completed architectural step must end with
 
 - Passing regression tests
 - Updated documentation
@@ -289,3 +311,104 @@ Every completed sprint must end with:
 - GitHub push
 
 No exceptions.
+
+---
+
+# Validation Checklist
+
+Before every commit
+
+```powershell
+python run_tests.py
+```
+
+Expected result
+
+```
+Passed: 6
+Failed: 0
+```
+
+Additional Sprint 4.3 validation
+
+```powershell
+python -m pytest test_dashboard_workspace_presenter.py
+```
+
+Expected result
+
+```
+1 passed
+```
+
+Both validation suites must remain green.
+
+---
+
+# Sprint 4.3 Progress
+
+Foundation
+
+✅ Completed
+
+Workspace Presenter
+
+✅ Completed
+
+Workspace Model
+
+✅ Completed
+
+Workspace Migration
+
+✅ Completed
+
+Chart Infrastructure
+
+⬜ Planned
+
+Workspace Charts
+
+⬜ Planned
+
+Portfolio Visualization
+
+⬜ Planned
+
+Gauge Widgets
+
+⬜ Planned
+
+Desktop UX
+
+⬜ In Progress
+
+---
+
+# Definition of Done
+
+A Sprint 4.3 task is complete only when
+
+- Feature implemented
+- Existing architecture reused
+- No business logic added to the UI
+- Existing regression suite passes
+- Workspace Presenter test passes
+- Documentation updated
+- Git commit created
+- GitHub synchronized
+
+---
+
+# Next Immediate Goal
+
+Continue expanding GuiWorkspace until the complete dashboard is composed from a single presentation model containing
+
+- Cards
+- Charts
+- Sections
+- Future dashboard presentation objects
+
+This completes the transition from a card-based dashboard to a unified workspace-driven dashboard architecture.
+
+---
