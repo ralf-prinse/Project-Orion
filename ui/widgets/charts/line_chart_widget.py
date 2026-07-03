@@ -4,28 +4,34 @@ from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
 from ui.foundation.charts import GuiChart
+from ui.widgets.charts.chart_canvas_builder import ChartCanvasBuilder
 
 
 class LineChartWidget(QWidget):
     """
-    Presentation-only placeholder Line Chart widget.
+    Presentation-only Line Chart widget.
 
-    Sprint 4.4 foundation.
-
-    This widget intentionally does not render a real chart yet.
-    It renders GuiChart metadata only and will later be upgraded
-    to a QtCharts/PyQtGraph implementation.
+    Renders GuiChart metadata and delegates canvas composition
+    to ChartCanvasBuilder.
 
     No business logic.
     No calculations.
+    No painting logic.
     """
 
-    def __init__(self, chart: GuiChart, parent=None):
+    def __init__(
+        self,
+        chart: GuiChart,
+        canvas_builder: ChartCanvasBuilder | None = None,
+        parent=None,
+    ):
         super().__init__(parent)
 
         self._chart = chart
+        self._canvas_builder = canvas_builder or ChartCanvasBuilder()
 
         layout = QVBoxLayout(self)
+        layout.setSpacing(10)
 
         title = QLabel(chart.title)
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -40,20 +46,14 @@ class LineChartWidget(QWidget):
             color:gray;
         """)
 
-        point_count = sum(len(series.values) for series in chart.series)
-
-        info = QLabel(
-            f"{chart.chart_type.value.upper()} CHART\n\n"
-            f"Series: {len(chart.series)}\n"
-            f"Points: {point_count}"
+        self.canvas = self._canvas_builder.build_line_chart_canvas(
+            chart=chart,
+            parent=self,
         )
-        info.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         layout.addWidget(title)
         layout.addWidget(subtitle)
-        layout.addStretch()
-        layout.addWidget(info)
-        layout.addStretch()
+        layout.addWidget(self.canvas)
 
     @property
     def chart(self) -> GuiChart:

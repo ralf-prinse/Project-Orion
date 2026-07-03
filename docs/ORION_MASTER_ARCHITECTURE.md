@@ -4,7 +4,7 @@
 
 # Architecture Version
 
-**Architecture Freeze v1.5**
+**Architecture Freeze v1.6**
 
 Status
 
@@ -12,7 +12,7 @@ Status
 
 Current Phase
 
-🚧 Sprint 4.4 — Production Chart Pipeline
+🚧 Sprint 4.5 — ChartCanvas Framework
 
 ---
 
@@ -20,667 +20,407 @@ Current Phase
 
 Project Orion is a deterministic AI-assisted desktop trading platform.
 
-Every architectural layer owns exactly one responsibility.
+Every architectural layer has exactly one responsibility.
 
-Artificial Intelligence never performs investment calculations.
+AI never performs calculations.
 
-Artificial Intelligence only explains deterministic results.
+AI only explains deterministic outputs.
 
-The deterministic Trading Pipeline remains the single source of truth.
-
-No business logic may exist inside the UI.
+The Trading Pipeline is the single source of truth.
 
 ---
 
-# Engineering Principles
+# Core Principles
 
 ## Deterministic First
 
-Identical market data must always produce identical trading decisions.
+All trading decisions must be:
 
-No randomness is permitted.
+- reproducible
+- deterministic
+- traceable
 
-No AI-generated trading decisions are permitted.
+No randomness is allowed.
+
+No AI-generated trading decisions are allowed.
 
 ---
 
-## Separation of Responsibilities
+## Strict Layer Separation
+
+The architecture strictly enforces separation:
+
 
 Business Logic
-
 ↓
-
-Orchestration
-
+Services
 ↓
-
-Presentation
-
+Presenters
 ↓
+Presentation Models
+↓
+Renderers
+↓
+Widget Factories
+↓
+Widgets
+↓
+ChartCanvasBuilder
+↓
+ChartCanvas
+↓
+ChartLayers
+↓
+Qt Painting
 
-Qt UI
 
-Every layer communicates through explicit presentation models.
+Each layer has exactly one responsibility.
 
-Presentation metadata remains centralized.
-
-Widget creation remains centralized.
-
-Rendering remains centralized.
-
-Workspace composition remains centralized.
+No cross-layer business logic is allowed.
 
 ---
 
-## Explainability
+## Forbidden in UI Layer
 
-Every recommendation must always be
+Never allowed in:
 
-- deterministic
-- reproducible
-- traceable
-- explainable
+- Widgets
+- Renderers
+- ChartCanvas
+- ChartLayers
+- ChartCanvasBuilder
 
----
+Forbidden content:
 
-## Production Workflow
+- trading logic
+- AI logic
+- portfolio calculations
+- indicator calculations
 
-Every sprint follows
+Allowed ONLY in backend services:
 
-Feature
-
-↓
-
-Testing
-
-↓
-
-Documentation
-
-↓
-
-Git Commit
-
-↓
-
-GitHub Push
-
-No sprint is complete before all five stages finish successfully.
+- TradingPipeline
+- IndicatorBuilder
+- Signal Fusion Engine
+- Position Sizing Engine
 
 ---
 
 # Production Trading Architecture
 
-```
+
 User
-        ↓
+↓
 ApplicationController
-        ↓
+↓
 YahooProvider
-        ↓
+↓
 IndicatorBuilder
-        ↓
+↓
 IndicatorPack
-        ↓
+↓
 TradingPipeline
-        ↓
+↓
 Signal Fusion
-        ↓
+↓
 Market Intelligence
-        ↓
+↓
 Adaptive Decision
-        ↓
+↓
 Position Sizing
-        ↓
+↓
 AI Context Builder
-        ↓
+↓
 AI Explanation Engine
-        ↓
+↓
 Presenters
-        ↓
+↓
 Qt Desktop
-```
 
-The deterministic Trading Pipeline remains the only source of trading decisions.
 
 ---
 
-# Dashboard Evolution
+# Desktop Rendering Architecture
 
-Sprint 4.1
 
-Completed Dashboard migration.
-
-↓
-
-Sprint 4.2
-
-Completed reusable Dashboard Widget Library.
-
-↓
-
-Sprint 4.3
-
-Completed Unified Dashboard Workspace foundation.
-
-↓
-
-Sprint 4.4
-
-Introduces the first production chart pipeline.
-
-The dashboard now evolves from a card-based presentation into a complete workspace capable of rendering reusable cards, charts and future presentation components through one unified rendering pipeline.
-
----
-
-# Unified Dashboard Architecture
-
-Current production presentation flow
-
-```
-ApplicationController
-        ↓
-DashboardData
-        ↓
-Dashboard2Presenter
-        ↓
-DashboardWorkspacePresenter
-        │
-        ├──────── GuiMetricCard
-        │
-        └──────── EquityCurveChartPresenter
-                    ↓
-                 GuiChart
-        ↓
-GuiWorkspace
-        ↓
-WorkspaceRenderer
-        ├──────── DashboardGrid
-        └──────── ChartRenderer
-                    ↓
-            ChartWidgetFactory
-                    ↓
-             LineChartWidget
-```
-
-The presentation pipeline is now fully separated into composition, rendering and widget creation.
-
-Business logic remains prohibited throughout the presentation layer.
-
----
-
-# Presentation Responsibilities
-
-ApplicationController
-
-- Coordinates desktop communication.
-
-DashboardData
-
-- Aggregates deterministic backend results.
-
-Dashboard2Presenter
-
-- Produces reusable dashboard cards.
-
-DashboardWorkspacePresenter
-
-- Creates one GuiWorkspace.
-- Orchestrates presentation.
-- Produces dashboard charts.
-- Contains no business logic.
-
-EquityCurveChartPresenter
-
-- Produces GuiChart objects.
-- Performs no calculations.
-- Contains no Qt code.
-
-GuiWorkspace
-
-- Canonical presentation model.
-- Owns cards.
-- Owns charts.
-- Owns sections.
-- Owns metadata.
-
-WorkspaceRenderer
-
-- Renders complete workspaces.
-- Coordinates specialized renderers.
-- Contains no layout logic.
-
-DashboardGrid
-
-- Owns metric card layout only.
-
-ChartRenderer
-
-- Renders GuiChart objects.
-- Delegates widget creation.
-
-ChartWidgetFactory
-
-- Selects chart widgets.
-- Centralizes chart widget creation.
-
-LineChartWidget
-
-- Renders GuiChart.
-- Contains no business logic.
-- Contains no calculations.
-
----
-
-# GuiWorkspace
-
-GuiWorkspace is now the canonical presentation object for every dashboard.
-
-Current structure
-
-```
-GuiWorkspace
-
-├── cards
-
-├── charts
-
-├── chart_sections
-
-├── sections
-
-├── metadata
-
-└── status
-```
-
-GuiWorkspace owns dashboard composition.
-
-DashboardWorkspace owns presentation only.
-
-Business logic remains prohibited.
-
----
-
-# Chart Presentation Models
-
-Sprint 4.4 introduces reusable chart presentation models.
-
-Completed models
-
-✅ GuiChart
-
-✅ GuiChartType
-
-✅ GuiSeries
-
-✅ GuiAxis
-
-✅ GuiLegend
-
-✅ GuiChartSection
-
-These models are presentation-only.
-
-They perform
-
-- no calculations
-- no portfolio logic
-- no AI logic
-- no trading logic
-
-They exist solely to describe chart presentation.
-
----
-
-# Chart Rendering Architecture
-
-Chart rendering is now separated from workspace composition.
-
-```
 GuiChart
-        ↓
-ChartRenderer
-        ↓
+↓
 ChartWidgetFactory
-        ↓
+↓
 LineChartWidget
-```
+↓
+ChartCanvasBuilder
+↓
+ChartCanvas
+↓
+ChartLayers
 
-Future chart widgets
-
-- AreaChartWidget
-- BarChartWidget
-- PieChartWidget
-- DonutChartWidget
-- HeatMapWidget
-
-No workspace modifications are required when introducing additional chart widgets.
 
 ---
 
-# Workspace Rendering
+# ChartCanvas Framework
 
-Workspace rendering is centralized.
+The ChartCanvas Framework is the reusable rendering engine of Orion.
 
-```
-GuiWorkspace
-        ↓
-WorkspaceRenderer
-        ├──────── DashboardGrid
-        └──────── ChartRenderer
-```
-
-WorkspaceRenderer orchestrates rendering only.
-
-Layout responsibilities remain delegated to specialized components.
-
-Business logic remains prohibited.
+It replaces widget-owned painting with a layered rendering system.
 
 ---
 
-# Widget Creation
+## Core Components
 
-Widget creation remains centralized.
+### ChartCanvas
 
-Cards
+- owns paint lifecycle
+- delegates drawing to layers
+- contains no business logic
+- contains no calculations
 
-```
-GuiMetricCard
-        ↓
-DashboardWidgetFactory
-        ↓
-MetricCard
+---
 
-HeroMetricCard
+### ChartCanvasBuilder
 
-MarketHealthBanner
-```
+- composes ChartCanvas instances
+- translates GuiChart → ChartLayers
+- keeps widgets lightweight
+- centralizes composition logic
 
-Charts
+---
 
-```
+### ChartLayers
+
+Reusable drawing units:
+
+- AxisLayer
+- GridLayer
+- LineSeriesLayer
+- ValueLabelLayer
+- OverlayLayer
+
+Each layer is:
+
+- presentation-only
+- reusable
+- stateless where possible
+
+---
+
+# Rendering Flow
+
+
 GuiChart
-        ↓
+↓
 ChartWidgetFactory
-        ↓
+↓
 LineChartWidget
+↓
+ChartCanvasBuilder
+↓
+ChartCanvas
+↓
+ChartLayers
 
-Future Chart Widgets
-```
-
-Factories never perform business logic.
-
-Widgets never perform calculations.
-
----
-
-# Current Production Components
-
-## Backend
-
-✅ TradingConfig
-
-✅ LoggingService
-
-✅ YahooProvider
-
-✅ IndicatorBuilder
-
-✅ TradingPipeline
-
-✅ Signal Fusion Engine
-
-✅ Market Intelligence Engine
-
-✅ Adaptive Decision Engine
-
-✅ Position Sizing Engine
-
-✅ AI Context Builder
-
-✅ AI Explanation Engine
-
-✅ AIMarketScanner
-
-✅ BacktestEngine
-
-✅ BacktestSimulator
-
-✅ BacktestVisualizer
 
 ---
 
-## Desktop
+# Overlay System
 
-### Core
+OverlayLayer is the extension point for future visual features:
 
-✅ ApplicationController
+- crosshair
+- trade markers
+- annotations
+- selection highlights
+- indicator overlays
 
-✅ Trading Workspace
-
-✅ Scanner Workspace
-
----
-
-### Dashboard Presentation
-
-✅ DashboardData
-
-✅ Dashboard2Presenter
-
-✅ DashboardWorkspacePresenter
-
-✅ DashboardWorkspace
-
-✅ WorkspaceRenderer
-
-✅ DashboardGrid
-
-✅ ChartRenderer
-
-✅ ChartContainer
+It ensures extensibility without architectural changes.
 
 ---
 
-### Presentation Models
+# Responsibility Map
 
-✅ GuiWorkspace
+- ApplicationController → orchestration
+- Presenters → transformation
+- GuiWorkspace → composition
+- WidgetFactory → creation
+- Widgets → UI only
+- Builder → composition only
+- Canvas → painting only
+- Layers → drawing only
 
-✅ GuiWorkspaceSection
-
-✅ GuiChart
-
-✅ GuiChartSection
-
-✅ GuiMetricCard
-
-✅ GuiChartType
-
-✅ GuiSeries
-
-✅ GuiAxis
-
-✅ GuiLegend
+---
+# Roadmap Status
 
 ---
 
-### Widget Factories
+## Phase 1 — Backend Foundation
 
-✅ DashboardWidgetFactory
+✔ Completed
 
-✅ ChartWidgetFactory
-
----
-
-### Desktop Widgets
-
-✅ MetricCard
-
-✅ HeroMetricCard
-
-✅ MarketHealthBanner
-
-✅ LineChartWidget
-
-✅ EquityCurveWidget (foundation)
+- Deterministic Trading Pipeline
+- Indicator Engine
+- Signal Fusion
+- Position Sizing
+- Market Intelligence
+- Backtesting System
 
 ---
 
-# Regression Testing
+## Phase 2 — Desktop Foundation
 
-Regression validation remains centralized.
+✔ Completed
 
-Primary validation
-
-```powershell
-python run_tests.py
-```
-
-Expected production result
-
-```
-Passed: 6
-Failed: 0
-```
-
-Additional Sprint 4.4 validation
-
-```powershell
-python -m pytest test_dashboard_workspace_presenter.py
-python -m pytest test_dashboard_workspace_charts.py
-python -m pytest test_equity_curve_chart_presenter.py
-python -m pytest test_workspace_renderer.py
-python -m pytest test_chart_renderer.py
-python -m pytest test_chart_widget_factory.py
-python -m pytest test_chart_models.py
-python -m pytest test_gui_chart.py
-python -m pytest test_chart_container.py
-python -m pytest test_line_chart_widget.py
-```
-
-All validation suites currently pass.
-
-Regression validation remains mandatory before every commit.
+- ApplicationController
+- Workspace Architecture
+- Presenter Layer
+- Renderer Layer
+- Widget Factory Layer
 
 ---
 
-# Current Development Focus
+## Phase 3 — Chart System Foundation
 
-The deterministic backend remains feature complete.
+✔ Completed
 
-Current development focuses on expanding the desktop presentation layer using the completed Workspace and Chart infrastructure.
-
-Current priorities
-
-- Integrate real chart rendering
-- Connect LineChartWidget to a charting library
-- Portfolio Allocation visualization
-- Gauge widgets
-- Dashboard Layout 2.0
-- Live Dashboard updates
-
-No backend expansion is currently planned.
+- GuiChart models
+- ChartRenderer
+- ChartWidgetFactory
+- LineChartWidget
+- ChartContainer
 
 ---
 
-# Architecture Rules
-
-Business logic belongs exclusively inside backend services.
-
-Presenters transform deterministic backend output into presentation models.
-
-GuiWorkspace owns dashboard composition.
-
-WorkspaceRenderer owns rendering orchestration.
-
-DashboardGrid owns card layout.
-
-ChartRenderer owns chart rendering.
-
-DashboardWidgetFactory owns dashboard widget creation.
-
-ChartWidgetFactory owns chart widget creation.
-
-Widgets render presentation models only.
-
-Business logic inside widgets or renderers is prohibited.
-
-Artificial Intelligence never performs deterministic calculations.
-
----
-
-# Long-Term Vision
-
-Project Orion will evolve into a professional deterministic AI-assisted desktop trading platform featuring
-
-- Professional Desktop Dashboard
-- Unified Dashboard Workspace
-- Production Chart Pipeline
-- Portfolio Intelligence
-- Live Market Analysis
-- Explainable AI
-- Historical Backtesting
-- Watchlists
-- Paper Trading
-- Broker Integration
-
-while preserving deterministic calculations as the only source of trading decisions.
-
----
-
-# Architecture Status
-
-Architecture Version
-
-**Architecture Freeze v1.5**
-
-Current Version
-
-**v1.2.0-alpha**
-
-Current Sprint
-
-**Sprint 4.4 — Production Chart Pipeline**
-
-Sprint Status
+## Phase 4 — ChartCanvas Framework
 
 🚧 In Progress
 
-Backend
+This phase introduces a fully reusable rendering engine.
 
-🟢 Production Stable
+### Completed
 
-Desktop
-
-🟢 Active Development
-
-Workspace Foundation
-
-🟢 Completed
-
-Chart Foundation
-
-🟢 Completed
-
-Production Chart Pipeline
-
-🟢 Completed
-
-Visible Chart Integration
-
-🟢 In Progress
-
-Regression Tests
-
-🟢 Passing
-
-Documentation
-
-🟢 Current
-
-Git
-
-Ready for commit after documentation synchronization.
+✔ ChartCanvas  
+✔ ChartViewport  
+✔ ChartLayer abstraction  
+✔ AxisLayer  
+✔ GridLayer  
+✔ LineSeriesLayer  
+✔ ValueLabelLayer  
+✔ OverlayLayer  
+✔ ChartCanvasBuilder  
+✔ LineChartWidget refactor  
 
 ---
+
+### Current Focus
+
+- annotation system
+- crosshair system
+- indicator overlays
+- portfolio visualization
+- gauge widgets
+- advanced chart types
+
+---
+
+## Phase 5 — Desktop Visualization
+
+⬜ Planned
+
+- Portfolio Allocation charts
+- Heatmaps
+- Candlestick charts
+- Dashboard Layout 2.0
+- UX polishing
+
+---
+
+## Phase 6 — Live Dashboard
+
+⬜ Planned
+
+- real-time updates
+- background scanning
+- live portfolio metrics
+- live charts
+
+---
+
+## Phase 7 — Portfolio Intelligence
+
+⬜ Planned
+
+- portfolio analytics
+- risk modeling
+- allocation optimization
+- performance tracking
+
+---
+
+## Phase 8 — Paper Trading
+
+⬜ Planned
+
+- virtual trading engine
+- trade simulation
+- strategy comparison
+- replay system
+
+---
+
+# Architecture Freeze
+
+Version: v1.6
+
+Status: ACTIVE
+
+---
+
+## Rules (Non-Negotiable)
+
+- No business logic in UI
+- No AI logic in frontend
+- No calculations in widgets
+- No calculations in ChartCanvas
+- No calculations in ChartLayers
+- All trading logic lives in backend only
+
+---
+
+# System Health
+
+Backend:
+🟢 Stable
+
+Desktop:
+🟢 Active Development
+
+Chart System:
+🟢 Stable foundation + expansion phase
+
+---
+
+# Definition of Done
+
+A sprint task is ONLY complete when:
+
+✔ Implementation complete  
+✔ Tests pass  
+✔ No architecture violations  
+✔ Documentation updated  
+✔ Git commit created  
+✔ GitHub push done  
+
+---
+
+# Final Statement
+
+The ChartCanvas Framework is now the core rendering engine of Project Orion.
+
+All future visualization systems will be built on top of this architecture.
+
+The backend remains deterministic and unchanged.
+
+AI remains explainability-only.
+
+---
+
+# End of Architecture Document
