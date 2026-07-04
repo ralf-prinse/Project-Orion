@@ -69,6 +69,10 @@ class OrionWindow(QMainWindow):
             "settings": 6,
         }
 
+        # ----------------------------
+        # WORKSPACES
+        # ----------------------------
+
         self.dashboard_page = DashboardWorkspace(
             theme=self.theme,
             on_scan_requested=self.scan_market,
@@ -86,13 +90,29 @@ class OrionWindow(QMainWindow):
         self.history_page = HistoryWorkspace(theme=self.theme)
         self.settings_page = SettingsWorkspace(theme=self.theme)
 
-        self.application_controller = ApplicationController(self)
+        # ----------------------------
+        # CONTROLLER (FIXED)
+        # ----------------------------
+
+        self.application_controller = ApplicationController(
+            dashboard_workspace=self.dashboard_page,
+            trading_workspace=self.trading_page,
+        )
+
+        # ----------------------------
+        # INIT WORKSPACES
+        # ----------------------------
 
         self._initialize_settings_workspace()
         self._initialize_portfolio_workspace()
         self._initialize_history_workspace()
         self._initialize_pages()
+
         self.application_controller.refresh_dashboard()
+
+    # ----------------------------
+    # INIT METHODS
+    # ----------------------------
 
     def _initialize_settings_workspace(self):
         universe = self.universe_manager.get_universe(self.active_universe)
@@ -120,6 +140,10 @@ class OrionWindow(QMainWindow):
         self.history_page.set_sections(
             self.history_presenter.create_sections(trades)
         )
+
+    # ----------------------------
+    # UI SETUP
+    # ----------------------------
 
     def _initialize_pages(self):
         self.pages.addWidget(self.dashboard_page)
@@ -181,15 +205,27 @@ class OrionWindow(QMainWindow):
         sidebar.setLayout(layout)
         return sidebar
 
+    # ----------------------------
+    # NAVIGATION
+    # ----------------------------
+
     def navigate_to_workspace(self, page: str):
         index = self.workspace_page_indexes[page]
         self.pages.setCurrentIndex(index)
+
+    # ----------------------------
+    # ACTIONS
+    # ----------------------------
 
     def analyze_symbol(self, symbol: str):
         self.application_controller.analyze_symbol(symbol)
 
     def scan_market(self):
         self.application_controller.scan_ai_market()
+
+    # ----------------------------
+    # STYLES
+    # ----------------------------
 
     def stylesheet(self):
         return """

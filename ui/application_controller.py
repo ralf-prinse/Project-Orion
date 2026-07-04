@@ -1,211 +1,84 @@
-from config.trading_config import DEFAULT_TRADING_CONFIG
-
 from providers.yahoo_provider import YahooProvider
-
-from services.intelligence.indicator_builder import IndicatorBuilder
-from services.logging_service import LoggingService
-from services.orchestration.ai_market_scanner import AIMarketScanner
-from services.orchestration.trading_pipeline import TradingPipeline
-
-from ui.foundation.ai_scanner_presenter import AIScannerPresenter
-from ui.foundation.dashboard_2_presenter import Dashboard2Presenter
-from ui.foundation.dashboard_data import DashboardData
-from ui.foundation.trading_workspace_presenter import TradingWorkspacePresenter
+from ui.foundation.dashboard_workspace_presenter import DashboardWorkspacePresenter
+from ui.foundation.trading_workspace_presenter import TradingWorkspaceViewModel
 
 
 class ApplicationController:
     """
-    Central application controller for Orion.
+    Central UI controller.
+
+    Coordinates dashboard refresh, market scan and trading analysis.
+
+    No trading decisions.
+    No AI calculations.
     """
 
-    def __init__(self, window):
-        self.window = window
+    def __init__(self, dashboard_workspace, trading_workspace):
+        self.dashboard_workspace = dashboard_workspace
+        self.trading_workspace = trading_workspace
 
-        self.logger = LoggingService.get_logger("ApplicationController")
+        self.dashboard_presenter = DashboardWorkspacePresenter()
+        self.market_provider = YahooProvider()
 
-        self.config = DEFAULT_TRADING_CONFIG
-
-        self.provider = YahooProvider()
-
-        self.indicator_builder = IndicatorBuilder(
-            config=self.config.indicators
-        )
-
-        self.trading_pipeline = TradingPipeline()
-
-        self.trading_presenter = TradingWorkspacePresenter()
-        self.dashboard_presenter = Dashboard2Presenter()
-
-        self.latest_scanner_result = None
-
-        self.ai_market_scanner = AIMarketScanner(
-            provider=self.provider,
-            indicator_builder=self.indicator_builder,
-            trading_pipeline=self.trading_pipeline,
-        )
-
-        self.ai_scanner_presenter = AIScannerPresenter()
+        self.portfolio_state = None
+        self.dashboard_symbol = "SPY"
 
     def refresh_dashboard(self):
-        data = DashboardData(
-            portfolio_state=self.window.portfolio,
-            scanner_result=self.latest_scanner_result,
+        workspace = self.dashboard_presenter.create_workspace(
+            portfolio_state=self.portfolio_state,
+            chart_title=f"{self.dashboard_symbol} Price Curve",
+            chart_subtitle="Klik op Analyseer markt om live marktdata op te halen.",
+            chart_values=[],
         )
 
-        cards = self.dashboard_presenter.create_cards(data)
-        self.window.dashboard_page.set_cards(cards)
-
-    # ==========================================================
-    # TRADING
-    # ==========================================================
-
-    def analyze_symbol(self, symbol: str):
-
-        try:
-
-            symbol = symbol.strip().upper()
-
-            if not symbol:
-                self.window.trading_page.set_status_text(
-                    "Vul eerst een symbool in."
-                )
-                return
-
-            self.logger.info(
-                "User requested analysis for %s",
-                symbol,
-            )
-
-            self.window.trading_page.set_status_text(
-                f"Live marktdata ophalen voor {symbol}..."
-            )
-
-            history = self.provider.get_historical_data(
-                symbol=symbol,
-                period=self.config.market_data.history_period,
-                interval=self.config.market_data.history_interval,
-            )
-
-            self.window.trading_page.set_status_text(
-                f"Indicatoren berekenen voor {symbol}..."
-            )
-
-            indicators = self.indicator_builder.build(
-                symbol=symbol,
-                history=history,
-            )
-
-            self.window.trading_page.set_status_text(
-                "Trading Pipeline uitvoeren..."
-            )
-
-            result = self.trading_pipeline.run(
-                indicator_data=indicators,
-                portfolio_state=self.window.portfolio,
-            )
-
-            view_model = self.trading_presenter.create_view_model(
-                result
-            )
-
-            self.window.trading_page.set_view_model(
-                view_model
-            )
-
-            self.window.trading_page.set_status_text(
-                "Analyse voltooid."
-            )
-
-            self.refresh_dashboard()
-
-            pipeline = result["pipeline"]
-
-            self.logger.info(
-                (
-                    "Analysis completed | %s | %s | "
-                    "confidence=%.3f"
-                ),
-                pipeline["symbol"],
-                pipeline["decision"],
-                pipeline["confidence"],
-            )
-
-        except Exception as error:
-
-            self.logger.exception(
-                "Trading analysis failed: %s",
-                error,
-            )
-
-            self.window.trading_page.set_status_text(
-                f"Analyse mislukt: {error}"
-            )
-
-    # ==========================================================
-    # AI MARKET SCANNER
-    # ==========================================================
+        self.dashboard_workspace.set_workspace(workspace)
 
     def scan_ai_market(self):
+        print(f"Market scan triggered for {self.dashboard_symbol}")
 
+        chart_values = self._load_live_close_prices(self.dashboard_symbol)
+
+        workspace = self.dashboard_presenter.create_workspace(
+            portfolio_state=self.portfolio_state,
+            chart_title=f"{self.dashboard_symbol} Live Price Curve",
+            chart_subtitle="Live Yahoo Finance close-prijzen.",
+            chart_values=chart_values,
+        )
+
+        self.dashboard_workspace.set_workspace(workspace)
+
+    def analyze_symbol(self, symbol: str):
+        print(f"Analyzing {symbol}")
+
+        view_model = TradingWorkspaceViewModel(
+            decision="HOLD",
+            decision_reason=f"Mock analysis for {symbol}",
+            confidence="67%",
+            confidence_subtitle="Medium confidence",
+            pressure_score="45",
+            pressure_subtitle="Neutral pressure",
+            position_size="Medium",
+            position_subtitle="Balanced sizing",
+            risk_score="Low",
+            risk_subtitle="Controlled risk",
+            explanation=f"AI mock explanation for {symbol}",
+            status="Analyse voltooid",
+        )
+
+        self.trading_workspace.set_view_model(view_model)
+
+    def _load_live_close_prices(self, symbol: str) -> list[float]:
         try:
-
-            self.logger.info(
-                "User started AI market scan"
+            history = self.market_provider.get_historical_data(
+                symbol=symbol,
+                period="3mo",
+                interval="1d",
             )
 
-            self.window.dashboard_page.set_status_text(
-                "AI Scanner analyseert markt..."
-            )
+            closes = history["Close"].dropna().tolist()
 
-            self.window.scanner_page.set_status_text(
-                "AI Scanner analyseert markt..."
-            )
-
-            scan_result = self.ai_market_scanner.scan(
-                symbols=self.config.scanner.default_symbols,
-                portfolio_state=self.window.portfolio,
-                period=self.config.market_data.history_period,
-                interval=self.config.market_data.history_interval,
-            )
-
-            self.latest_scanner_result = scan_result
-
-            sections = self.ai_scanner_presenter.create_sections(
-                scan_result=scan_result,
-                max_items=self.config.scanner.max_results,
-            )
-
-            self.window.scanner_page.set_sections(
-                sections
-            )
-
-            self.refresh_dashboard()
-
-            self.window.scanner_page.set_status_text(
-                "AI Scanner analyse voltooid."
-            )
-
-            self.logger.info(
-                (
-                    "AI market scan completed | "
-                    "requested=%d scanned=%d failed=%d"
-                ),
-                scan_result.total_requested,
-                scan_result.total_scanned,
-                scan_result.total_failed,
-            )
+            return [float(value) for value in closes]
 
         except Exception as error:
-
-            self.logger.exception(
-                "AI market scan failed: %s",
-                error,
-            )
-
-            self.window.dashboard_page.set_status_text(
-                f"AI Scanner mislukt: {error}"
-            )
-
-            self.window.scanner_page.set_status_text(
-                f"AI Scanner mislukt: {error}"
-            )
+            print(f"Live market data error: {error}")
+            return []

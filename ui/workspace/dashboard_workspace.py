@@ -6,6 +6,7 @@ from ui.foundation.workspace import GuiWorkspace
 from ui.foundation.workspace_renderer import WorkspaceRenderer
 from ui.workspace.base_workspace import BaseWorkspace
 from ui.workspace.dashboard_grid import DashboardGrid
+from ui.workspace.chart_container import ChartContainer
 
 
 class DashboardWorkspace(BaseWorkspace):
@@ -34,8 +35,11 @@ class DashboardWorkspace(BaseWorkspace):
         self.scan_button.setStyleSheet(self.primary_button_style())
 
         self.dashboard_grid = DashboardGrid(theme=self.theme)
+        self.chart_container = ChartContainer()
+
         self.workspace_renderer = WorkspaceRenderer(
-            dashboard_grid=self.dashboard_grid
+            dashboard_grid=self.dashboard_grid,
+            chart_container=self.chart_container,
         )
 
         self._build_layout()
@@ -48,22 +52,32 @@ class DashboardWorkspace(BaseWorkspace):
         self.add_workspace_widget(self.scan_button)
         self.add_workspace_widget(self.dashboard_grid)
 
+        # Important:
+        # ChartContainer must be mounted in the dashboard layout,
+        # otherwise WorkspaceRenderer can render charts into it,
+        # but the charts will never become visible in the UI.
+        self.add_workspace_widget(self.chart_container)
+
     def set_workspace(self, workspace: GuiWorkspace):
         """
         Render a complete dashboard workspace through WorkspaceRenderer.
         """
-
         self.workspace_renderer.render(workspace)
 
     def set_cards(self, cards: list[GuiMetricCard]):
         """
         Backward-compatible adapter for existing callers.
         """
-
         self.set_workspace(
             GuiWorkspace(
                 title="Dashboard",
+                subtitle="",
                 cards=cards,
+                charts=[],
+                chart_sections=[],
+                sections=[],
+                status="neutral",
+                metadata={},
             )
         )
 
@@ -71,7 +85,6 @@ class DashboardWorkspace(BaseWorkspace):
         """
         Compatibility layer for existing GuiSection callers.
         """
-
         if not sections:
             self.set_workspace(
                 self.dashboard_workspace_presenter.create_default_workspace()

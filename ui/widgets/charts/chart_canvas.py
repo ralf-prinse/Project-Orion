@@ -1,41 +1,62 @@
 from __future__ import annotations
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QPointF
 from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import QWidget
 
 from ui.widgets.charts.chart_layers import ChartLayer, ChartViewport
+from ui.widgets.charts.crosshair_layer import CrosshairLayer
 
 
 class ChartCanvas(QWidget):
     """
-    Reusable presentation-only chart canvas.
+    Core rendering surface.
 
-    ChartCanvas owns the paint lifecycle and delegates actual drawing
-    to composable chart layers.
+    Responsibilities:
+    - paint lifecycle
+    - layer orchestration
+    - mouse interaction forwarding
 
     No business logic.
-    No calculations.
-    No trading logic.
+    No trading calculations.
+    No AI calculations.
     """
 
-    def __init__(self, layers: list[ChartLayer] | None = None, parent=None):
+    def __init__(self, layers: list[ChartLayer], parent=None):
         super().__init__(parent)
 
-        self.layers = layers or []
-        self.setMinimumHeight(220)
+        self._layers = layers
+        self._viewport = ChartViewport(56, 18, 1, 1)
 
-    def set_layers(self, layers: list[ChartLayer]) -> None:
-        self.layers = layers
-        self.update()
+        self._crosshair_layer = None
+        for layer in self._layers:
+            if isinstance(layer, CrosshairLayer):
+                self._crosshair_layer = layer
+                break
 
-    def viewport(self) -> ChartViewport:
-        margin_left = 44
-        margin_right = 24
-        margin_top = 24
-        margin_bottom = 36
+        self.setMinimumHeight(280)
+        self.setMouseTracking(True)
 
-        return ChartViewport(
+    def mouseMoveEvent(self, event):
+        if self._crosshair_layer:
+            pos = event.position()
+            self._crosshair_layer.set_mouse_position(
+                QPointF(pos.x(), pos.y())
+            )
+            self.update()
+
+    def leaveEvent(self, event):
+        if self._crosshair_layer:
+            self._crosshair_layer.set_mouse_position(None)
+            self.update()
+
+    def resizeEvent(self, event):
+        margin_left = 56
+        margin_right = 20
+        margin_top = 18
+        margin_bottom = 42
+
+        self._viewport = ChartViewport(
             x=margin_left,
             y=margin_top,
             width=max(1, self.width() - margin_left - margin_right),
@@ -43,12 +64,11 @@ class ChartCanvas(QWidget):
         )
 
     def paintEvent(self, event):
-        super().paintEvent(event)
-
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-        viewport = self.viewport()
-
-        for layer in self.layers:
-            layer.draw(painter, viewport)
+        for layer in self._layers:
+            try:
+                layer.draw(painter, self._viewport)
+            except Exception:
+                continue

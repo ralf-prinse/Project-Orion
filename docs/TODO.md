@@ -10,23 +10,32 @@
 - [x] Desktop workspace architecture
 - [x] Presenter architecture
 - [x] Renderer architecture
+- [x] Widget Factory architecture
 - [x] ApplicationController architecture
-- [x] Central TradingConfig
-- [x] Architecture Freeze v1.6
+- [x] Architecture Freeze v1.7
 
 ---
 
 ## Backend (Completed)
 
+- [x] Yahoo Provider abstraction
+- [x] Historical data provider
+- [x] Market Service
 - [x] TradingPipeline
 - [x] IndicatorBuilder
+- [x] IndicatorPack
 - [x] Signal Fusion Engine
 - [x] Market Intelligence Engine
 - [x] Adaptive Decision Engine
 - [x] Position Sizing Engine
+- [x] Risk Engine
 - [x] AI Context Builder
 - [x] AI Explanation Engine
 - [x] Backtest Engine Suite
+
+Backend architecture is considered production stable.
+
+No structural backend work is currently planned.
 
 ---
 
@@ -34,216 +43,433 @@
 
 - [x] GuiWorkspace
 - [x] Dashboard Workspace
+- [x] Trading Workspace
+- [x] Portfolio Workspace foundation
 - [x] WorkspaceRenderer
+- [x] DashboardGrid
 - [x] ChartRenderer
 - [x] ChartWidgetFactory
-- [x] LineChartWidget
 - [x] ChartContainer
-- [x] DashboardGrid
+- [x] LineChartWidget
+- [x] ApplicationController integration
 
 ---
 
-## Chart System Foundation
+## ChartCanvas Framework
+
+Completed:
 
 - [x] ChartCanvas
 - [x] ChartViewport
-- [x] ChartLayer
-- [x] AxisLayer
+- [x] ChartLayer abstraction
 - [x] GridLayer
+- [x] AxisLayer
+- [x] AxisLabelLayer
 - [x] LineSeriesLayer
 - [x] ValueLabelLayer
+- [x] CrosshairLayer foundation
+- [x] SignalLayer foundation
 - [x] OverlayLayer
 - [x] ChartCanvasBuilder
-- [x] LineChartWidget refactor
+- [x] ChartContainer integration
+- [x] Dashboard rendering integration
+
+---
+
+## Dashboard
+
+Completed:
+
+- [x] Dashboard cards
+- [x] Dashboard chart integration
+- [x] Dashboard chart summary
+- [x] Dashboard chart legend foundation
+- [x] Dashboard market scan button
+- [x] Yahoo Finance historical close-price integration
+- [x] Professional chart-card foundation
+
+Dashboard now renders fetched Yahoo Finance market history.
+
+The dashboard no longer displays demonstration chart data.
 
 ---
 
 ## Testing
 
-- [x] Central regression runner
-- [x] Presentation test suite
+Completed:
+
+- [x] Presentation tests
 - [x] ChartCanvas tests
 - [x] ChartLayer tests
+- [x] Renderer tests
+- [x] WidgetFactory tests
 - [x] LineChartWidget tests
-- [x] Factory tests
+- [x] Regression runner
+
+Current validation:
+
+- [x] Desktop application starts
+- [x] Dashboard renders
+- [x] Trading renders
+- [x] Dashboard chart renders
+- [x] Analyseer markt works
+- [x] Trading Analyze works
 
 ---
 
 # 🚧 Current Sprint
 
-## Sprint 4.5 — ChartCanvas Framework
+## Sprint 4.7 — Professional Chart UX
 
-### Completed
+Primary objective:
 
-✔ ChartCanvas foundation  
-✔ GridLayer implementation  
-✔ OverlayLayer system  
-✔ ChartCanvasBuilder  
-✔ LineChartWidget refactor  
+Transform the technically working ChartCanvas implementation into a production-quality visualization framework.
+
+Completed:
+
+- [x] ChartCanvas visible inside Dashboard
+- [x] Professional chart card
+- [x] Summary information
+- [x] Chart legend foundation
+- [x] Axis label foundation
+- [x] Yahoo Finance integration
+- [x] Dashboard rendering pipeline stabilization
+
+Current work:
+
+- [ ] Real X-axis market dates
+- [ ] Hover tooltip
+- [ ] Nearest datapoint detection
+- [ ] Crosshair snapping
+- [ ] Better axis formatting
+- [ ] Improved legend styling
+- [ ] Professional chart spacing
+- [ ] Production chart UX
 
 ---
-
-### In Progress
-
-- [ ] AnnotationLayer system
-- [ ] CrosshairLayer system
-- [ ] Indicator overlay system
-- [ ] Advanced chart layering pipeline
-
----
-
 # 📊 Current Focus Areas
 
-## Visualization Expansion
+## Professional Chart UX
 
-- Portfolio Allocation charts
-- Gauge widgets (Risk, Confidence, Pressure)
-- Heatmap rendering
-- Candlestick support
+Highest priority:
+
+- Real market date labels on X-axis
+- Adaptive Y-axis formatting
+- Hover tooltip with market data
+- Nearest datapoint detection
+- Crosshair snapping
+- Better legend positioning
+- Professional spacing
+- Chart resizing improvements
+- Better value formatting
+- Chart interaction polish
+
+---
+
+## Dashboard
+
+Current objectives:
+
+- [ ] Replace placeholder X-axis labels with Yahoo market dates
+- [ ] Tooltip showing:
+  - date
+  - close price
+  - percentage change
+- [ ] Better chart status indicator
+- [ ] Distinguish latest scan-data from future streaming data
+- [ ] Better legend styling
+- [ ] Multiple dashboard charts
+- [ ] Dashboard responsiveness
+- [ ] Better empty-state handling
+
+---
+
+## Trading Workspace
+
+Next objectives:
+
+- [ ] Remove remaining mock presentation model
+- [ ] Reconnect deterministic TradingPipeline
+- [ ] Trading chart
+- [ ] BUY markers
+- [ ] SELL markers
+- [ ] HOLD markers
+- [ ] Indicator overlays
+- [ ] Signal visualization
+- [ ] Confidence visualization
+- [ ] Risk visualization
+- [ ] Position visualization
+
+Trading will reuse the existing ChartCanvas Framework.
+
+---
+
+## Portfolio Workspace
+
+Planned:
+
+- [ ] Portfolio allocation chart
+- [ ] Portfolio overview table
+- [ ] Unrealized P/L
+- [ ] Realized P/L
+- [ ] Historical equity
+- [ ] Allocation breakdown
+- [ ] Portfolio timeline
+- [ ] Portfolio heatmap
+
+Portfolio visualization will reuse ChartCanvas.
+
+---
+
+## Performance Workspace
+
+Planned:
+
+- [ ] Equity curve
+- [ ] Drawdown chart
+- [ ] Monthly performance
+- [ ] Benchmark comparison
+- [ ] Rolling returns
+- [ ] Performance statistics
+- [ ] Risk statistics
+
+---
+
+## Scanner Workspace
+
+Planned:
+
+- [ ] Scanner dashboard
+- [ ] Opportunity timeline
+- [ ] Sector heatmap
+- [ ] Confidence gauges
+- [ ] Market breadth visualization
+- [ ] Scanner statistics
+- [ ] Opportunity ranking
 
 ---
 
 ## ChartCanvas Evolution
 
-- Layer pipeline expansion
-- reusable overlay system
-- performance optimizations
-- modular chart composition
+Next technical improvements:
+
+- [ ] Hover tooltip layer
+- [ ] Datapoint selection layer
+- [ ] Annotation layer
+- [ ] Multiple line-series support
+- [ ] Candlestick renderer
+- [ ] Area chart renderer
+- [ ] Zoom support
+- [ ] Pan support
+- [ ] Chart synchronization
+- [ ] Shared crosshair
+- [ ] Theme-aware rendering
+- [ ] Performance optimization
 
 ---
 
-## UI/UX Improvements
+## Live Dashboard
 
-- Dashboard Layout 2.0
-- spacing & alignment improvements
-- responsive resizing
-- professional chart styling
+Planned:
 
----
-
-# 🧠 Architecture Rules
-
-- No business logic in UI
-- No calculations in widgets
-- No AI logic in frontend
-- No trading logic outside backend
-- ChartCanvas = painting only
-- ChartLayers = drawing only
-- Builder = composition only
-- Widgets = UI only
+- [ ] Automatic refresh
+- [ ] Configurable refresh interval
+- [ ] Background market scanning
+- [ ] Scheduled updates
+- [ ] Live portfolio metrics
+- [ ] Streaming provider abstraction
+- [ ] WebSocket integration
+- [ ] Live notification framework
 
 ---
-
-# 🧪 Validation
-
-Before commit:
-
-```bash
-python run_tests.py
 
 # 🚀 Upcoming Sprints
 
 ---
 
-## Sprint 4.6 — Desktop Visualization
+## Sprint 4.8 — Trading Visualization
 
-Focus:
+Primary goals:
 
-- Portfolio Allocation visualization
-- Gauge widgets (Risk / Confidence / Pressure)
-- Candlestick chart support
-- Heatmap rendering
-- Dashboard Layout 2.0
-
----
-
-## Sprint 4.7 — Live Dashboard
-
-Focus:
-
-- Auto refresh system
-- Live market updates
-- Background scanner
-- Live portfolio metrics
-- Real-time dashboard updates
+- [ ] Restore deterministic TradingPipeline integration
+- [ ] Remove Trading mock presentation model
+- [ ] Trading chart
+- [ ] Indicator visualization
+- [ ] BUY / SELL markers
+- [ ] Position overlays
+- [ ] Confidence overlays
+- [ ] Risk overlays
+- [ ] AI explanation synchronization
 
 ---
 
-## Sprint 4.8 — Portfolio Workspace
+## Sprint 4.9 — Portfolio Visualization
 
-Focus:
+Primary goals:
 
-- Position overview table
-- Allocation breakdown
-- Unrealized P/L tracking
-- Portfolio timeline
-- Trade history visualization
-
----
-
-## Sprint 4.9 — Paper Trading
-
-Focus:
-
-- Virtual portfolio system
-- Simulated orders
-- Trade replay system
-- Strategy comparison tools
+- [ ] Portfolio allocation chart
+- [ ] Historical equity visualization
+- [ ] Unrealized P/L chart
+- [ ] Allocation timeline
+- [ ] Exposure analysis
+- [ ] Portfolio statistics
+- [ ] Historical portfolio replay
 
 ---
 
-# 🎯 Long-Term Roadmap
+## Sprint 5.0 — Live Dashboard
 
-Project Orion evolves into:
+Primary goals:
 
-- Professional desktop trading dashboard
-- Deterministic AI-assisted system
-- Real-time market visualization platform
-- Backtesting & simulation engine
-- Portfolio intelligence layer
-- Watchlist & screening system
-- Broker integration layer
-
----
-
-# ⚠️ Core Principle (ABSOLUTE)
-
-AI NEVER makes trading decisions.
-
-AI only explains deterministic outputs.
-
-All decisions come from:
-
-👉 TradingPipeline
+- [ ] Background refresh engine
+- [ ] Configurable refresh interval
+- [ ] Streaming market updates
+- [ ] Live dashboard widgets
+- [ ] Market notifications
+- [ ] Live portfolio updates
+- [ ] Watchlist support
 
 ---
 
-# 🧱 Architecture Stability
+## Sprint 5.x
 
-## Backend
+Long-term goals:
 
-🟢 Fully stable  
-No structural changes expected
-
----
-
-## UI
-
-🟡 Actively evolving  
-Focused on visualization only
-
----
-
-## Chart System
-
-🟢 Stable foundation  
-Now in expansion phase (layers & overlays)
+- [ ] Paper Trading
+- [ ] Replay Engine
+- [ ] Strategy Comparison
+- [ ] Broker abstraction
+- [ ] Broker integrations
+- [ ] Portfolio Intelligence
+- [ ] Scanner Intelligence
+- [ ] Multi-monitor desktop support
 
 ---
 
-# 🧪 Global Validation Rule
+# 🧠 Architecture Rules
+
+These rules are mandatory.
+
+Backend
+
+- Trading logic only inside backend services.
+- Indicator calculations only inside backend.
+- Risk calculations only inside backend.
+- AI never performs calculations.
+- TradingPipeline remains the single source of truth.
+
+Presentation
+
+- Widgets contain presentation only.
+- Renderers perform rendering orchestration only.
+- Presenters transform deterministic output only.
+- ChartCanvas paints only.
+- ChartLayers draw only.
+- ChartCanvasBuilder composes only.
+- ApplicationController orchestrates only.
+
+General
+
+- No duplicated rendering implementations.
+- No duplicated business logic.
+- No backend calculations inside UI.
+- Every new visualization must reuse ChartCanvas.
+- Every new chart must use GuiChart models.
+
+---
+
+# 🧪 Validation
 
 Before every commit:
 
-```bash
+```powershell
 python run_tests.py
+```
+
+Before every push:
+
+```powershell
+python app.py
+```
+
+Manual validation checklist:
+
+- [ ] Application starts
+- [ ] Dashboard renders
+- [ ] Trading renders
+- [ ] Portfolio renders
+- [ ] Navigation works
+- [ ] Analyseer markt works
+- [ ] Dashboard chart renders
+- [ ] Dashboard cards update
+- [ ] Trading Analyze works
+- [ ] No console exceptions
+- [ ] Window resize works
+
+---
+
+# 📋 Documentation Rules
+
+Every completed sprint requires:
+
+- [ ] Documentation updated
+- [ ] PROJECT_STATUS synchronized
+- [ ] AI_CONTEXT synchronized
+- [ ] ARCHITECTURE synchronized
+- [ ] TODO synchronized
+- [ ] CHANGELOG synchronized
+- [ ] Git commit created
+- [ ] GitHub push completed
+
+---
+
+# 🔄 New Chat Workflow
+
+Before every new Project Orion conversation:
+
+1. Finish the current sprint documentation.
+2. Commit all documentation changes.
+3. Push to GitHub.
+4. Create a new chat.
+5. Upload:
+   - the complete Project Orion ZIP;
+   - all updated `.md` files.
+6. The new chat must first:
+   - read every Markdown file completely;
+   - inspect the complete project source;
+   - analyse the current architecture;
+   - determine the current sprint;
+   - determine completed work;
+   - determine remaining work.
+7. Only after the complete project analysis may implementation begin.
+
+This workflow is mandatory.
+
+---
+
+# 🎯 Long-Term Vision
+
+Project Orion evolves into a professional deterministic AI-assisted desktop trading platform.
+
+The long-term vision includes:
+
+- reusable desktop architecture
+- reusable ChartCanvas Framework
+- professional dashboard
+- deterministic TradingPipeline
+- explainable AI
+- portfolio intelligence
+- scanner intelligence
+- historical analysis
+- paper trading
+- broker connectivity
+
+Artificial Intelligence never makes trading decisions.
+
+Artificial Intelligence explains deterministic outputs only.
+
+The TradingPipeline remains the single source of truth.
+
+---
+
+# End of TODO

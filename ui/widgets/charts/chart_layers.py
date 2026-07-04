@@ -48,33 +48,9 @@ class ChartLayer:
         raise NotImplementedError
 
 
-class AxisLayer(ChartLayer):
-    """
-    Draws basic X/Y chart axes.
-    """
-
-    def draw(self, painter: QPainter, viewport: ChartViewport) -> None:
-        pen = QPen(Qt.GlobalColor.gray)
-        pen.setWidth(1)
-        painter.setPen(pen)
-
-        painter.drawLine(
-            QPointF(viewport.left, viewport.bottom),
-            QPointF(viewport.right, viewport.bottom),
-        )
-
-        painter.drawLine(
-            QPointF(viewport.left, viewport.bottom),
-            QPointF(viewport.left, viewport.top),
-        )
-
-
 class GridLayer(ChartLayer):
     """
     Draws reusable presentation-only chart grid lines.
-
-    GridLayer is part of the ChartCanvas Framework.
-    It performs no business logic and consumes no trading data.
     """
 
     def __init__(
@@ -105,6 +81,122 @@ class GridLayer(ChartLayer):
                     QPointF(x, viewport.top),
                     QPointF(x, viewport.bottom),
                 )
+
+
+class AxisLayer(ChartLayer):
+    """
+    Draws basic X/Y chart axes.
+    """
+
+    def draw(self, painter: QPainter, viewport: ChartViewport) -> None:
+        pen = QPen(Qt.GlobalColor.gray)
+        pen.setWidth(1)
+        painter.setPen(pen)
+
+        painter.drawLine(
+            QPointF(viewport.left, viewport.bottom),
+            QPointF(viewport.right, viewport.bottom),
+        )
+
+        painter.drawLine(
+            QPointF(viewport.left, viewport.bottom),
+            QPointF(viewport.left, viewport.top),
+        )
+
+
+class AxisLabelLayer(ChartLayer):
+    """
+    Draws reusable presentation-only axis labels.
+
+    The layer receives already-prepared presentation values.
+    It does not access backend services and contains no trading logic.
+    """
+
+    def __init__(
+        self,
+        values: list[float],
+        x_labels: list[str] | None = None,
+        y_ticks: int = 4,
+        x_ticks: int = 4,
+    ):
+        self.values = values
+        self.x_labels = x_labels or []
+        self.y_ticks = y_ticks
+        self.x_ticks = x_ticks
+
+    def draw(self, painter: QPainter, viewport: ChartViewport) -> None:
+        if not self.values:
+            return
+
+        minimum = min(self.values)
+        maximum = max(self.values)
+
+        if maximum == minimum:
+            maximum = minimum + 1
+
+        painter.setPen(Qt.GlobalColor.gray)
+
+        self._draw_y_labels(
+            painter=painter,
+            viewport=viewport,
+            minimum=minimum,
+            maximum=maximum,
+        )
+
+        self._draw_x_labels(
+            painter=painter,
+            viewport=viewport,
+        )
+
+    def _draw_y_labels(
+        self,
+        painter: QPainter,
+        viewport: ChartViewport,
+        minimum: float,
+        maximum: float,
+    ) -> None:
+        if self.y_ticks <= 0:
+            return
+
+        for index in range(self.y_ticks + 1):
+            ratio = index / self.y_ticks
+            value = maximum - ((maximum - minimum) * ratio)
+            y = viewport.top + (viewport.height * ratio)
+
+            painter.drawText(
+                int(viewport.left - 52),
+                int(y + 4),
+                f"{value:.2f}",
+            )
+
+    def _draw_x_labels(
+        self,
+        painter: QPainter,
+        viewport: ChartViewport,
+    ) -> None:
+        value_count = len(self.values)
+
+        if value_count < 2 or self.x_ticks <= 0:
+            return
+
+        tick_count = min(self.x_ticks, value_count - 1)
+
+        for index in range(tick_count + 1):
+            ratio = index / tick_count
+            data_index = round(ratio * (value_count - 1))
+
+            label = str(data_index + 1)
+
+            if self.x_labels and data_index < len(self.x_labels):
+                label = str(self.x_labels[data_index])
+
+            x = viewport.left + viewport.width * ratio
+
+            painter.drawText(
+                int(x - 10),
+                int(viewport.bottom + 22),
+                label,
+            )
 
 
 class LineSeriesLayer(ChartLayer):
@@ -144,7 +236,7 @@ class LineSeriesLayer(ChartLayer):
             painter.drawLine(points[index], points[index + 1])
 
         point_pen = QPen(Qt.GlobalColor.white)
-        point_pen.setWidth(6)
+        point_pen.setWidth(5)
         painter.setPen(point_pen)
 
         for point in points:
@@ -167,5 +259,15 @@ class ValueLabelLayer(ChartLayer):
         maximum = max(self.values)
 
         painter.setPen(Qt.GlobalColor.gray)
-        painter.drawText(6, int(viewport.top + 5), f"{maximum:.2f}")
-        painter.drawText(6, int(viewport.bottom), f"{minimum:.2f}")
+
+        painter.drawText(
+            int(viewport.right - 72),
+            int(viewport.top + 14),
+            f"High {maximum:.2f}",
+        )
+
+        painter.drawText(
+            int(viewport.right - 72),
+            int(viewport.bottom - 6),
+            f"Low {minimum:.2f}",
+        )
