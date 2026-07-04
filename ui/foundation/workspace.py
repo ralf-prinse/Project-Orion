@@ -19,12 +19,35 @@ class GuiWorkspaceSection:
 
 
 @dataclass(frozen=True)
+class GuiWorkspacePanel:
+    """
+    Presentation-only panel model.
+
+    Panels allow Orion workspaces to display specialized UI blocks such as:
+    - live scanner output
+    - open positions
+    - alerts
+    - news
+    - broker status
+
+    The panel contains prepared presentation data only.
+    """
+
+    panel_type: str
+    title: str = ""
+    subtitle: str = ""
+    items: List[Any] = field(default_factory=list)
+    status: str = "neutral"
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
 class GuiWorkspace:
     """
     Canonical presentation model for a complete dashboard workspace.
 
-    GuiWorkspace is used by presenters to deliver cards, charts and sections
-    through one unified presentation pipeline.
+    GuiWorkspace is used by presenters to deliver cards, panels, charts
+    and sections through one unified presentation pipeline.
 
     This model contains presentation data only.
     """
@@ -32,6 +55,7 @@ class GuiWorkspace:
     title: str
     subtitle: str = ""
     cards: List[Any] = field(default_factory=list)
+    panels: List[GuiWorkspacePanel] = field(default_factory=list)
     charts: List[GuiChart] = field(default_factory=list)
     chart_sections: List[GuiChartSection] = field(default_factory=list)
     sections: List[GuiWorkspaceSection] = field(default_factory=list)

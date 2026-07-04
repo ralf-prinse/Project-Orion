@@ -25,6 +25,7 @@ class DashboardWorkspacePresenter:
         chart_title: str = "Market Price Curve",
         chart_subtitle: str = "Klik op Analyseer markt om actuele marktdata op te halen.",
         chart_values: list[float] | None = None,
+        chart_labels: list[str] | None = None,
         symbol: str = "SPY",
         period_label: str = "3 maanden",
         source_label: str = "Yahoo Finance",
@@ -33,10 +34,12 @@ class DashboardWorkspacePresenter:
         charts = []
 
         values = chart_values or []
+        labels = chart_labels or []
 
         if values:
             chart = self._create_price_chart(
                 values=values,
+                labels=labels,
                 symbol=symbol,
                 period_label=period_label,
                 source_label=source_label,
@@ -63,6 +66,7 @@ class DashboardWorkspacePresenter:
             chart_title="Market Price Curve",
             chart_subtitle="Klik op Analyseer markt om actuele marktdata op te halen.",
             chart_values=[],
+            chart_labels=[],
             symbol="SPY",
             period_label="3 maanden",
             source_label="Yahoo Finance",
@@ -108,6 +112,7 @@ class DashboardWorkspacePresenter:
     def _create_price_chart(
         self,
         values: list[float],
+        labels: list[str],
         symbol: str,
         period_label: str,
         source_label: str,
@@ -127,7 +132,7 @@ class DashboardWorkspacePresenter:
         series = GuiSeries(
             name=f"{symbol} Close",
             values=values,
-            labels=[],
+            labels=labels,
             metadata={
                 "symbol": symbol,
                 "period": period_label,
@@ -136,16 +141,16 @@ class DashboardWorkspacePresenter:
         )
 
         return GuiChart(
-            title=f"{symbol} • Price Curve",
+            title=title,
             chart_type=GuiChartType.LINE,
             series=[series],
-            subtitle=f"{period_label} • {source_label} • Close-prijzen",
-            x_axis=GuiAxis(label="Periode"),
+            subtitle=subtitle,
+            x_axis=GuiAxis(label="Datum"),
             y_axis=GuiAxis(label="Prijs"),
             legend=GuiLegend(visible=True),
             status="neutral",
             metadata={
-                "status_label": "Laatste scan-data",
+                "status_label": "Auto-refresh actief",
                 "last_value": f"{last_value:.2f}",
                 "change_percentage": f"{change_percentage:+.2f}%",
                 "high_value": f"{high_value:.2f}",
