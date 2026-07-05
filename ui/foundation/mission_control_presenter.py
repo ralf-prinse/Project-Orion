@@ -15,6 +15,7 @@ class MissionControlPresenter:
     """
 
     TOP_OPPORTUNITY_LIMIT = 5
+    REASON_PREVIEW_LIMIT = 4
 
     def present(
         self,
@@ -480,22 +481,27 @@ class MissionControlPresenter:
                 f"{self._priority_label(technical_score, signal_label)}"
             ),
             (
-                f"Advies: {signal_label} | Score: {technical_score} / 100 "
-                f"— {self._score_label(technical_score)}"
+                f"{signal_label} • Score {technical_score} / 100 "
+                f"• {self._score_label(technical_score)}"
             ),
             f"Koers: ${self._format_money(price)}",
-            f"Trend: {trend_label}",
-            f"Reden: {reason or 'Geen aanvullende scannerreden beschikbaar.'}",
         ]
 
         lines.extend(self._position_sizing_lines(sizing))
+
+        lines.extend(
+            [
+                f"Trend: {trend_label}",
+                self._reason_summary(reason),
+            ]
+        )
 
         return "\n".join(lines)
 
     def _position_sizing_lines(self, sizing) -> list[str]:
         if sizing is None:
             return [
-                "Position sizing: niet beschikbaar",
+                "Aantal aandelen: niet beschikbaar",
                 "Budgetstatus: geen handelskapitaal beschikbaar",
             ]
 
@@ -508,20 +514,44 @@ class MissionControlPresenter:
         if not is_affordable:
             return [
                 "Aantal aandelen: 0",
-                f"Benodigde investering: {self._format_eur(0.0)}",
                 f"Beschikbaar budget: {self._format_eur(available_cash)}",
                 "Budgetstatus: onvoldoende budget",
-                "Let op: indicatief, geen EUR/USD FX-conversie.",
+                "FX: indicatief, geen EUR/USD-conversie",
             ]
 
         return [
             f"Aantal aandelen: {shares}",
-            f"Benodigde investering: {self._format_eur(investment)}",
+            f"Investering: {self._format_eur(investment)}",
             f"Resterend budget: {self._format_eur(remaining_cash)}",
             f"Beschikbaar budget: {self._format_eur(available_cash)}",
             "Budgetstatus: binnen budget",
-            "Let op: indicatief, geen EUR/USD FX-conversie.",
+            "FX: indicatief, geen EUR/USD-conversie",
         ]
+
+    def _reason_summary(self, reason: str) -> str:
+        clean_reason = str(reason or "").strip()
+
+        if not clean_reason:
+            return "Setup: geen aanvullende scannerreden beschikbaar."
+
+        parts = [
+            part.strip()
+            for part in clean_reason.split(".")
+            if part.strip()
+        ]
+
+        if not parts:
+            return f"Setup: {clean_reason}"
+
+        visible = parts[: self.REASON_PREVIEW_LIMIT]
+        remaining = max(0, len(parts) - len(visible))
+
+        summary = " | ".join(visible)
+
+        if remaining:
+            summary = f"{summary} | +{remaining} meer"
+
+        return f"Setup: {summary}"
 
     def _rank_medal(self, index: int) -> str:
         if index == 1:
