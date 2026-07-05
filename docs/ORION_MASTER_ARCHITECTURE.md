@@ -8,11 +8,11 @@
 
 Documentation Version
 
-v1.10
+v1.11
 
 Architecture Version
 
-v1.9
+v2.0
 
 Status
 
@@ -20,7 +20,8 @@ Status
 
 Current Sprint
 
-🚧 Sprint 5.1 — Portfolio & Position Sizing Foundation
+🚧 Sprint 5.5 — Trade Lifecycle
+
 Last Updated
 
 2026-07-05
@@ -45,13 +46,15 @@ Project Orion is a deterministic AI-assisted desktop trading workstation for sho
 
 Its objective is not to predict markets.
 
-Its objective is to continuously discover deterministic trading opportunities, monitor active positions and explain every recommendation through transparent reasoning.
+Its objective is to continuously discover deterministic trading opportunities, analyse individual symbols, size positions, monitor active trades and explain every recommendation through transparent reasoning.
 
 Artificial Intelligence never generates trading decisions.
 
 Artificial Intelligence only explains deterministic output produced by backend services.
 
 Mission Control is the operational center of Orion.
+
+Trade Monitor / Trade Lifecycle is the next major functional area.
 
 ---
 
@@ -97,7 +100,7 @@ Artificial Intelligence may never:
 - calculate position size
 - override deterministic output
 
-AI always operates after the TradingPipeline has completed.
+AI always operates after deterministic backend services have completed.
 
 ---
 
@@ -105,32 +108,20 @@ AI always operates after the TradingPipeline has completed.
 
 Every architectural layer owns exactly one responsibility.
 
-```
-Business Services
-        │
-        ▼
+```text
+Providers
+    ↓
+Deterministic Services
+    ↓
+Controllers
+    ↓
 Presenters
-        │
-        ▼
+    ↓
 Presentation Models
-        │
-        ▼
-Workspace Renderer
-        │
-        ▼
-Widgets
-        │
-        ▼
-ChartCanvasBuilder
-        │
-        ▼
-ChartCanvas
-        │
-        ▼
-Chart Layers
-        │
-        ▼
-Qt Painter
+    ↓
+Workspaces
+    ↓
+Widgets / Panels / Charts
 ```
 
 Responsibilities never overlap.
@@ -138,6 +129,12 @@ Responsibilities never overlap.
 Business logic never enters the UI.
 
 Rendering never enters backend services.
+
+Controllers orchestrate only.
+
+Presenters format only.
+
+Workspaces render only.
 
 ---
 
@@ -163,7 +160,8 @@ Within seconds the user must understand:
 
 - current market state
 - strongest opportunities
-- portfolio health
+- available trading capital
+- recommended position size
 - active risks
 - required actions
 
@@ -177,8 +175,11 @@ Every development sprint must end with:
 
 - deterministic backend validation
 - successful automated tests
+- successful desktop launch
 - manual GUI validation
 - documentation synchronization
+- Git commit
+- GitHub push
 
 Every sprint should produce a visible improvement inside the desktop application.
 
@@ -188,43 +189,41 @@ Architecture remains stable while functionality grows incrementally.
 
 # High-Level System Overview
 
-```
-                 Market Data Providers
-                         │
-                         ▼
-                   Quote Services
-                         │
-                         ▼
-                 Technical Scanner
-                         │
-                         ▼
-                  Analysis Engine
-                         │
-                         ▼
-                  Market Scanner
-                         │
-                         ▼
-                  Trading Pipeline
-                         │
-             ┌───────────┴───────────┐
-             ▼                       ▼
-     Position Monitor        AI Context Builder
-             │                       │
-             ▼                       ▼
-       Exit Signals          AI Explanation
-             │
-             ▼
-      Presentation Models
-             │
-             ▼
-      Mission Control UI
+```text
+                    Market Data Providers
+                            │
+                            ▼
+                      Quote / History Data
+                            │
+                            ▼
+                    Technical Analysis Layer
+                            │
+          ┌─────────────────┴─────────────────┐
+          ▼                                   ▼
+   Trading Decision Flow              Exit Decision Flow
+          │                                   │
+          ▼                                   ▼
+    TradingPipeline                  ExitEvaluationService
+          │                                   │
+          ▼                                   ▼
+ BUY / HOLD / SELL                 HOLD / EXIT Advice
+          │                                   │
+          ▼                                   ▼
+  Trading Workspace               Trade Monitor / Position Monitor
+          │                                   │
+          └─────────────────┬─────────────────┘
+                            ▼
+                    AI Explainability Layer
+                            │
+                            ▼
+                    Desktop Presentation
 ```
 
 ---
 
 # System Objectives
 
-Project Orion continuously answers four questions.
+Project Orion continuously answers six questions.
 
 1. What is happening in the market right now?
 
@@ -232,7 +231,11 @@ Project Orion continuously answers four questions.
 
 3. Should a new position be opened?
 
-4. Should an existing position be closed?
+4. How large should the position be?
+
+5. Is an open trade still healthy?
+
+6. Should an existing trade be closed?
 
 Every subsystem ultimately supports one or more of these objectives.
 
@@ -242,125 +245,212 @@ Every subsystem ultimately supports one or more of these objectives.
 
 The architectural foundation is considered stable.
 
-Current development focuses on expanding functionality rather than restructuring architecture.
+Current development focuses on the Trade Lifecycle.
 
 Current priorities are:
 
 - Mission Control
-- Portfolio-aware trading
-- Position Sizing
-- Live Opportunities
-- Position Monitoring
 - Trading Workspace
+- Portfolio-aware position sizing
+- Trade Monitor
+- Exit Intelligence
+- Open Trade persistence
+- Trade History
 - Paper Trading
 
 The deterministic backend remains the single source of truth.
+
+TradingPipeline remains the only source of BUY / HOLD / SELL decisions.
+
+ExitEvaluationService is the deterministic source of open-trade exit advice.
+
+AI remains explainability-only.
 
 ---
 
 # Architecture Layers
 
-Project Orion consists of four major architectural layers.
-
-## Backend
-
-Owns:
-
-- market data
-- indicators
-- technical analysis
-- opportunity discovery
-- trading decisions
-- position sizing
-- risk management
-- position monitoring
-
-Never owns:
-
-- rendering
-- widgets
-- presentation
-- styling
+Project Orion consists of five major architectural layers.
 
 ---
 
-## Presentation
+## 1. Providers
 
-Owns:
+Providers own external data access.
 
-- formatting
-- presentation models
-- workspace composition
-- metadata
-- labels
-- summaries
+Providers may:
 
-Never owns:
+- retrieve market data
+- retrieve historical candle data
+- validate symbols
+- normalize provider responses
+- expose provider-specific errors
 
-- calculations
-- providers
-- AI
-- trading logic
+Providers may never:
 
----
+- create trading decisions
+- calculate final signals
+- format UI output
+- render widgets
+- call AI
 
-## Rendering
+Examples:
 
-Owns:
-
-- widget composition
-- layouts
-- panel rendering
-- chart rendering
-- interaction
-
-Never owns:
-
-- calculations
-- backend services
-- AI
-- providers
+- YahooProvider
+- YahooHistoricalDataProvider
 
 ---
 
-## Artificial Intelligence
+## 2. Deterministic Services
 
-Owns:
+Deterministic services own business logic.
 
-- explanations
-- summaries
-- natural language
-- reasoning
+They may:
 
-Never owns:
+- calculate indicators
+- analyse technical conditions
+- scan markets
+- evaluate opportunities
+- calculate position size
+- evaluate open trades
+- calculate exit score
+- produce deterministic decision data
 
-- BUY decisions
-- SELL decisions
-- EXIT decisions
-- confidence calculations
-- risk calculations
+They may never:
 
-Artificial Intelligence always consumes deterministic backend output.
+- render UI
+- own Qt widgets
+- produce natural-language AI output
+- execute broker orders unless explicitly designed as broker services
+
+Examples:
+
+- TradingPipeline
+- AnalysisEngine
+- RiskEngine
+- PositionSizingEngine
+- LiveScannerService
+- OpportunityService
+- PositionSizingService
+- PositionAnalysisService
+- PositionMonitorService
+- ExitEvaluationService
+
+---
+
+## 3. Controllers
+
+Controllers orchestrate user actions.
+
+They may:
+
+- receive user input from workspaces
+- call services
+- call presenters
+- update workspaces with view models
+- handle service errors
+
+They may never:
+
+- calculate indicators
+- create BUY / HOLD / SELL decisions
+- create exit decisions
+- format presentation text
+- render widgets
+
+Examples:
+
+- TradingController
+- MissionControlController
+- PositionMonitorController
+
+---
+
+## 4. Presentation
+
+Presentation components transform deterministic data into readable UI models.
+
+They may:
+
+- format labels
+- format values
+- create summaries
+- create panel text
+- produce ViewModels
+- prepare GuiWorkspace models
+
+They may never:
+
+- calculate indicators
+- create trading decisions
+- create exit decisions
+- fetch market data
+- call providers
+- render widgets
+
+Examples:
+
+- TradingWorkspacePresenter
+- MissionControlPresenter
+- PositionMonitorPresenter
+- HistoryPresenter
+- SettingsPresenter
+
+---
+
+## 5. Rendering
+
+Rendering components own desktop display.
+
+They may:
+
+- render workspaces
+- render panels
+- render widgets
+- render charts
+- handle layout
+- forward user actions
+
+They may never:
+
+- calculate business logic
+- call market providers
+- create deterministic decisions
+- call AI
+- calculate technical indicators
+
+Examples:
+
+- BaseWorkspace
+- MissionControlWorkspace
+- TradingWorkspace
+- PositionMonitorWorkspace
+- PortfolioWorkspace
+- WorkspacePanel
+- WorkspaceRenderer
+- ChartCanvas
+
+---
 
 # Backend Architecture
 
 The backend is the deterministic core of Orion.
 
-Every trading decision originates exclusively from backend services.
+Every trading decision originates exclusively from deterministic backend services.
 
 The backend owns:
 
 - market data acquisition
+- historical data acquisition
 - indicator calculations
 - technical analysis
 - market scanning
 - opportunity discovery
-- OpportunityService
-- trading decisions
-- PortfolioStore
+- position sizing
+- trade monitoring
+- exit evaluation
 - risk management
-- PositionSizingService
-- position monitoring
+- persistence
 - AI context generation
 
 The backend never owns:
@@ -373,55 +463,41 @@ The backend never owns:
 
 ---
 
-# Deterministic Backend Pipeline
+# Deterministic Decision Architecture
 
-The deterministic execution pipeline is:
+Project Orion now contains two deterministic decision flows.
 
-```
-Market Data Provider
-        │
-        ▼
-Quote Service
-        │
-        ▼
-Technical Scanner
-        │
-        ▼
-Analysis Engine
-        │
-        ▼
-Market Scanner
-        │
-        ▼
-Trading Pipeline
-        │
-        ▼
-Signal Output
-        │
-        ├──────────────┐
-        ▼              ▼
-Position Monitor   AI Context Builder
-        │              │
-        ▼              ▼
-Exit Signals    AI Explanation Engine
-```
-
-Every stage performs exactly one deterministic responsibility.
-
-No stage may perform work belonging to another layer.
+They are separate by design.
 
 ---
 
-# Trading Pipeline
+## 1. Entry Decision Flow
 
-TradingPipeline remains the single source of truth.
+The entry decision flow determines whether a new position should be opened.
+
+```text
+Symbol / Market Data
+        ↓
+YahooProvider
+        ↓
+IndicatorBuilder
+        ↓
+TradingPipeline
+        ↓
+BUY / HOLD / SELL
+        ↓
+TradingWorkspacePresenter
+        ↓
+Trading Workspace
+```
+
+TradingPipeline is the only source of BUY / HOLD / SELL decisions.
 
 No UI component may determine:
 
 - BUY
 - HOLD
 - SELL
-- EXIT
 - confidence
 - position size
 - risk
@@ -431,302 +507,38 @@ No AI component may determine:
 - BUY
 - HOLD
 - SELL
-- EXIT
-
-TradingPipeline combines deterministic output from:
-
-Presentation-ready opportunities are assembled afterwards by OpportunityService.
-
-OpportunityService never creates trading decisions.
-
-It combines deterministic output for Mission Control presentation only.
-
-- Technical Scanner
-- Analysis Engine
-- Market Scanner
-- Risk Engine
-- PositionSizing Engine
-
-Only after TradingPipeline has finished may AI receive context.
 
 ---
 
-## Trading Controller
+## 2. Exit Decision Flow
 
-Sprint 4.9 introduces the TradingController.
+The exit decision flow determines whether an existing trade should be held or exited.
 
-Responsibilities:
-
-- request historical market data
-- build IndicatorPack
-- execute TradingPipeline
-- invoke TradingWorkspacePresenter
-- update Trading Workspace
-
-TradingController never:
-
-- calculates indicators
-- creates trading signals
-- formats presentation
-- performs rendering
-
-Flow:
-
-```
-Trading Workspace
-
-        │
-        ▼
-
-TradingController
-
-        │
-        ▼
-
+```text
+Trade
+        ↓
+PositionAnalysisService
+        ↓
 YahooProvider
-
-        │
-        ▼
-
-IndicatorBuilder
-
-        │
-        ▼
-
-TradingPipeline
-
-        │
-        ▼
-
-TradingWorkspacePresenter
-
-        │
-        ▼
-
-Trading Workspace
+        ↓
+AnalysisEngine
+        ↓
+AnalysisResult
+        ↓
+PositionMonitorService
+        ↓
+ExitEvaluationService
+        ↓
+HOLD / EXIT Advice
+        ↓
+PositionMonitorPresenter
+        ↓
+Position Monitor Workspace
 ```
 
----
+ExitEvaluationService is the deterministic source of open-trade exit advice.
 
-# LiveScannerService
-
-LiveScannerService is responsible for orchestrating continuous market scanning.
-
-It coordinates existing backend services.
-
-It never performs trading calculations itself.
-
----
-
-## Responsibilities
-
-LiveScannerService owns:
-
-- scanner lifecycle
-- orchestration
-- refresh scheduling
-- provider coordination
-- immutable snapshots
-- scanner health
-- scan duration
-- error isolation
-
-It never owns:
-
-- indicator calculations
-- BUY decisions
-- SELL decisions
-- rendering
-- broker execution
-
----
-
-# Live Scanner Flow
-
-```
-Universe
-
-      │
-      ▼
-
-Quote Service
-
-      │
-      ▼
-
-Technical Scanner
-
-      │
-      ▼
-
-Analysis Engine
-
-      │
-      ▼
-
-Market Scanner
-
-      │
-      ▼
-
-LiveScannerSnapshot
-
-      │
-      ▼
-
-MissionControlPresenter
-
-      │
-      ▼
-
-Mission Control
-```
-
----
-
-# LiveScannerSnapshot
-
-Every completed scan produces one immutable snapshot.
-
-Current snapshot contains:
-
-- timestamp
-- symbols
-- quotes
-- technical results
-- errors
-- scan duration
-
-Future versions may additionally contain:
-
-- provider status
-- scanner health
-- BUY count
-- HOLD count
-- SELL count
-- market breadth
-- universe coverage
-
-Presentation always consumes snapshots.
-
-The UI never consumes backend services directly.
-
----
-
-# Live Refresh
-
-Mission Control refreshes automatically.
-
-Current implementation:
-
-```
-QTimer
-
-      │
-      ▼
-
-MissionControlController.refresh()
-
-      │
-      ▼
-
-LiveScannerService.scan_once()
-
-      │
-      ▼
-
-MissionControlPresenter
-
-      │
-      ▼
-
-Mission Control
-```
-
-Refresh timing remains configurable.
-
-Future streaming providers may replace polling without changing architecture.
-
----
-
-# Live Opportunities
-
-Sprint 4.9 introduces Live Opportunities.
-
-Objective:
-
-Automatically present the strongest deterministic trading candidates inside Mission Control.
-
-Conceptual flow:
-
-```
-LiveScannerSnapshot
-
-        │
-        ▼
-
-Top Ranked Symbols
-
-        │
-        ▼
-
-TradingPipeline
-
-        │
-        ▼
-
-OpportunityService
-
-        │
-        ▼
-
-Opportunity
-
-        │
-        ▼
-
-Mission Control
-```
-Opportunity currently contains
-
-- symbol
-- current market price
-- signal
-- technical score
-- trend
-- scanner reason
-
-Future versions will additionally contain
-
-- recommended share quantity
-- required investment
-- remaining capital
-- stop loss
-- target
-- confidence
-
-
-TradingPipeline remains the only decision engine.
-
-Mission Control never calculates opportunities.
-
----
-
-# Position Monitor
-
-After a position has been opened Orion continuously evaluates it.
-
-Input:
-
-- symbol
-- quantity
-- entry price
-- current price
-- stop-loss
-- target
-- elapsed time
-
-Output:
+No UI component may determine:
 
 - HOLD_POSITION
 - TAKE_PROFIT
@@ -734,775 +546,819 @@ Output:
 - TRAILING_STOP
 - EXIT_DUE_TO_WEAKNESS
 - EXIT_DUE_TO_TIME_LIMIT
+- exit score
+- exit reasons
 
-Position monitoring remains fully deterministic.
-
-Artificial Intelligence explains exit signals only.
-
----
-
-# Broker Strategy
-
-Phase 1
-
-Manual execution.
-
-Orion proposes.
-
-Trader executes.
+No AI component may determine exit advice.
 
 ---
 
-Phase 2
+# Shared Technical Analysis
 
-Paper Trading.
+The AnalysisEngine is shared infrastructure.
 
----
+It may be used by:
 
-Phase 3
+- TechnicalScanner
+- PositionAnalysisService
+- future Trade Monitor services
+- future Paper Trading analysis services
 
-Broker abstraction.
+The AnalysisEngine produces AnalysisResult.
 
----
+AnalysisResult may contain:
 
-Phase 4
+- trend_score
+- momentum_score
+- volatility_score
+- structure_score
+- volume_score
+- market_regime_score
+- relative_strength_score
+- candlestick_score
+- overall_score
+- notes
 
-Optional live execution.
+AnalysisEngine does not create BUY / SELL decisions.
 
-Live execution is only allowed after:
+AnalysisEngine provides deterministic technical scoring.
 
-- deterministic validation
-- extensive backtesting
-- successful paper trading
-- enforced risk controls
+TradingPipeline and ExitEvaluationService interpret technical analysis differently.
 
-# Mission Control Architecture
-
-Mission Control is the operational center of Orion.
-
-It replaces the former Dashboard as the primary workspace.
-
-Mission Control does not exist to display charts.
-
-Mission Control exists to provide immediate deterministic market awareness.
-
-Within seconds the user must understand:
-
-- overall market condition
-- strongest opportunities
-- scanner status
-- active positions
-- current risks
-- required actions
-
-Mission Control is always the first workspace shown after application startup.
+This prevents duplicate indicator logic.
 
 ---
 
-# Mission Control Philosophy
+# Service Architecture
 
-Mission Control is built entirely from reusable presentation panels.
+Every backend service owns one clearly defined responsibility.
 
-Every panel receives immutable presentation models.
-
-Panels never:
-
-- calculate
-- access providers
-- execute scanners
-- perform trading decisions
-- generate AI output
-
-Panels render deterministic presentation data only.
-Mission Control receives immutable Opportunity objects.
-
-Mission Control never performs position sizing calculations.
-
-Mission Control never calculates portfolio information.
-
-All deterministic calculations remain inside backend services.
+Services communicate through domain models rather than UI objects.
 
 ---
 
-# Current Workspace Composition
+## Market Data Layer
 
-Mission Control currently consists of:
+### YahooProvider
 
-```
-Mission Control
+Responsibilities
 
-├── Scanner Status
-├── Scan Duration
-├── Market Status
-├── Top Opportunities
-└── Chart Area (future expansion)
-```
+- Retrieve historical price data.
+- Retrieve current market prices.
+- Normalize provider responses.
+- Handle provider-specific errors.
 
-Future panels include:
+Never responsible for
 
-```
-Mission Control
-
-├── Scanner Status
-├── Scan Duration
-├── Market Status
-├── Top Opportunities
-├── Universe Coverage
-├── Open Positions
-├── Portfolio Overview
-├── Alerts
-├── News & Macro
-├── Market Breadth
-├── Watchlist
-└── Selected Instrument
-```
-
-Panels may be added without modifying the rendering architecture.
+- Trading decisions
+- Exit decisions
+- Indicator calculations
+- Presentation
 
 ---
 
-# MissionControlController
+## Analysis Layer
 
-MissionControlController coordinates the Mission Control workspace.
+### AnalysisEngine
 
-Responsibilities:
+Responsibilities
 
-- initialize workspace
-- request scanner refresh
-- receive LiveScannerSnapshot
-- invoke MissionControlPresenter
-- update MissionControlWorkspace
-- request OpportunityService
-- obtain Portfolio trading capital
-- coordinate PositionSizingService
+- Calculate deterministic technical analysis.
+- Produce AnalysisResult.
+- Calculate technical scores.
+- Aggregate indicator output.
 
-MissionControlController never:
+Never responsible for
 
-- performs calculations
-- scans markets
-- renders widgets
-- generates AI output
-
-Flow:
-
-```
-MissionControlController
-
-        │
-        ▼
-
-LiveScannerService
-
-        │
-        ▼
-
-MissionControlPresenter
-
-        │
-        ▼
-
-MissionControlWorkspace
-```
+- BUY / SELL decisions
+- EXIT decisions
+- Presentation
+- AI output
 
 ---
 
-# MissionControlWorkspace
+### IndicatorBuilder
 
-MissionControlWorkspace is the primary desktop workspace.
+Responsibilities
 
-Responsibilities:
+- Build reusable indicator packs.
+- Calculate deterministic indicators.
+- Supply TradingPipeline.
 
-- own Mission Control layout
-- expose Scan Market button
-- host DashboardGrid
-- host ChartContainer
-- receive immutable GuiWorkspace models
+Never responsible for
 
-MissionControlWorkspace never:
-
-- performs calculations
-- formats backend values
-- creates signals
-- accesses providers
+- Trading decisions
+- Exit decisions
 
 ---
 
-# GuiWorkspace
+## Trading Layer
 
-GuiWorkspace is the canonical presentation contract.
+### TradingPipeline
 
-Every workspace inside Orion is rendered from GuiWorkspace.
+Responsibilities
 
-Current structure:
+- Interpret deterministic technical analysis.
+- Generate BUY / HOLD / SELL.
+- Calculate confidence.
+- Calculate risk.
+- Calculate recommended position size.
 
-```
-GuiWorkspace
-
-├── cards
-├── panels
-├── charts
-├── sections
-├── metadata
-└── status
-```
-
-GuiWorkspace remains immutable.
-
-Backend services never create widgets directly.
+TradingPipeline is the only source of BUY / HOLD / SELL decisions.
 
 ---
 
-# GuiWorkspacePanel
+### OpportunityService
 
-GuiWorkspacePanel is the generic presentation model for reusable Mission Control panels.
+Responsibilities
 
-Every panel contains:
+- Assemble Mission Control opportunities.
+- Merge deterministic analysis.
+- Prepare presentation-ready opportunity objects.
 
-- panel_type
-- title
-- subtitle
+OpportunityService never creates trading decisions.
+
+---
+
+### PositionSizingService
+
+Responsibilities
+
+- Calculate recommended position size.
+- Validate available trading capital.
+- Calculate required investment.
+
+PositionSizingService never determines BUY or SELL.
+
+---
+
+## Trade Lifecycle Layer
+
+### Trade
+
+Trade is the central domain model of Orion.
+
+Trade represents an open or closed position.
+
+A Trade may contain
+
+- symbol
+- quantity
+- entry price
+- entry date
+- stop-loss
+- take-profit
+- trailing stop
+- highest price
+- lowest price
+- current price
+- realized profit
+- unrealized profit
 - status
-- items
-- metadata
+- notes
 
-Panels remain presentation-only.
+Trade contains data only.
 
-No backend objects are stored inside GuiWorkspacePanel.
-
----
-
-# Workspace Presenters
-
-Workspace Presenters transform deterministic backend output into immutable presentation models.
-
-Responsibilities:
-
-- formatting
-- summaries
-- labels
-- metadata
-- workspace composition
-
-Workspace Presenters never:
-
-- calculate indicators
-- calculate confidence
-- calculate risk
-- create BUY signals
-- create SELL signals
+Trade never performs business logic.
 
 ---
 
-# MissionControlPresenter
+### PositionAnalysisService
 
-MissionControlPresenter transforms immutable Opportunity objects and scanner snapshots into GuiWorkspace.
+Responsibilities
 
-Current panels:
+- Retrieve historical market data.
+- Execute AnalysisEngine.
+- Produce AnalysisResult for existing trades.
 
-- Scanner Status
-- Scan Duration
-- Market Status
-- Top Opportunities
-
-Future panels:
-
-- Universe Coverage
-- Open Positions
-- Portfolio Health
-- Alerts
-- Market Breadth
-- Performance Summary
-
-MissionControlPresenter contains presentation formatting only.
+PositionAnalysisService performs no trading decisions.
 
 ---
 
-# Portfolio Architecture
+### PositionMonitorService
 
-Portfolio is no longer an analytics dashboard.
+Responsibilities
 
-Portfolio is responsible for configuring the available trading capital.
+- Combine Trade information.
+- Combine AnalysisResult.
+- Delegate exit evaluation.
+- Produce PositionMonitorResult.
 
-Current flow
-
-Portfolio Workspace
-
-        │
-        ▼
-
-PortfolioStore
-
-        │
-        ▼
-
-MissionControlController
-
-        │
-        ▼
-
-OpportunityService
-
-        │
-        ▼
-
-PositionSizingService
-
-Mission Control
-
-Portfolio never performs calculations.
-
-Portfolio only manages deterministic configuration values.
+PositionMonitorService does not decide exits itself.
 
 ---
 
-# TradingWorkspacePresenter
+### ExitEvaluationService
 
-TradingWorkspacePresenter transforms TradingPipeline output into TradingWorkspaceViewModel.
+Responsibilities
 
-Responsibilities:
+- Evaluate open trades.
+- Calculate Exit Score.
+- Generate deterministic exit advice.
+- Generate deterministic exit reasons.
+- Evaluate trade health.
 
-- formatting
-- labels
-- presentation metadata
-- AI explanation formatting
+Supported decisions
 
-TradingWorkspacePresenter never:
+- HOLD_POSITION
+- TAKE_PROFIT
+- STOP_LOSS
+- EXIT_DUE_TO_WEAKNESS
 
-- executes TradingPipeline
-- performs calculations
-- generates AI output
+Future support
 
----
+- TRAILING_STOP
+- EXIT_DUE_TO_TIME_LIMIT
 
-# WorkspaceRenderer
-
-WorkspaceRenderer is the only component responsible for translating presentation models into desktop widgets.
-
-Responsibilities:
-
-- render GuiWorkspace
-- render cards
-- render panels
-- render charts
-- compose layouts
-
-WorkspaceRenderer never:
-
-- performs calculations
-- formats backend values
-- accesses providers
-- performs trading logic
-
----
-
-# DashboardGrid
-
-DashboardGrid owns the visual arrangement of reusable panels.
-
-Responsibilities:
-
-- panel placement
-- layout management
-- responsive resizing
-
-DashboardGrid never:
-
-- formats data
-- performs calculations
-- renders charts
-
----
-
-# Chart Architecture
-
-ChartCanvas remains the only rendering engine inside Orion.
-
-Every chart follows:
-
-```
-GuiChart
-
-      │
-      ▼
-
-ChartRenderer
-
-      │
-      ▼
-
-ChartWidgetFactory
-
-      │
-      ▼
-
-ChartCanvasBuilder
-
-      │
-      ▼
-
-ChartCanvas
-
-      │
-      ▼
-
-Chart Layers
-
-      │
-      ▼
-
-Qt Painter
-```
-
-No alternative rendering implementation is allowed.
-
----
-
-# Current Desktop Flow
-
-Current desktop execution flow:
-
-```
-Backend Services
-
-        │
-        ▼
-
-Workspace Presenter
-
-        │
-        ▼
-
-GuiWorkspace
-
-        │
-        ▼
-
-WorkspaceRenderer
-
-        │
-        ▼
-
-DashboardGrid
-
-        │
-        ▼
-
-Panels
-
-        │
-        ▼
-
-Qt Widgets
-```
-
-Rendering remains fully independent from deterministic backend services.
-
----
-
-# Manual Validation Workflow
-
-Every GUI sprint ends with:
-
-1. python run_tests.py
-2. Start Orion desktop application
-3. Manual GUI validation
-4. Screenshot review
-5. Documentation synchronization
-
-A sprint is not considered complete until manual GUI validation has been performed.
-
----
-
-# Current GUI Status
-
-Completed:
-
-✔ Mission Control is primary workspace
-
-✔ Trading Workspace integrated
-
-✔ WorkspaceRenderer panel support
-
-✔ GuiWorkspacePanel support
-
-✔ Scan Market button
-
-✔ Automatic Mission Control refresh
-
-✔ Scan Duration panel
-
-✔ Market Status panel
-
-✔ Top Opportunities panel
-
-Current desktop validation:
-
-✔ Application starts successfully
-
-✔ Navigation functions correctly
-
-✔ Mission Control renders correctly
-
-✔ Trading Workspace renders correctly
-
-✔ Regression tests pass (6/6)
-
-✔ Portfolio Workspace redesigned
-
-✔ Trading Capital persistence
-
-✔ Market Data age
-
-✔ Opportunity market prices
-
-# Presentation Architecture
-
-The presentation layer translates deterministic backend output into immutable presentation models.
-
-Presentation never performs calculations.
-
-Presentation never determines trading decisions.
-
-Presentation never accesses providers.
-
-Its only responsibility is preparing data for rendering.
-
----
-
-# Presentation Pipeline
-
-The complete presentation pipeline is:
-
-```
-Backend Services
-        │
-        ▼
-Workspace Presenters
-        │
-        ▼
-Presentation Models
-        │
-        ▼
-WorkspaceRenderer
-        │
-        ▼
-Qt Widgets
-```
-
-Presentation remains completely independent from business logic.
-
----
-
-# Workspace Rules
-
-Every workspace inside Orion follows identical rules.
-
-A workspace may:
-
-- receive presentation models
-- own layouts
-- own widgets
-- own interaction
-- forward user actions to controllers
-
-A workspace may never:
-
-- calculate indicators
-- execute TradingPipeline
-- access providers
-- calculate confidence
-- calculate risk
-- determine BUY / SELL decisions
+ExitEvaluationService is the only source of deterministic exit decisions.
 
 ---
 
 # Controller Architecture
 
-Controllers coordinate interaction between the UI and backend services.
+Controllers orchestrate.
 
-Controllers may:
+Controllers never calculate.
 
-- receive user actions
-- invoke backend services
-- invoke presenters
-- update workspaces
+Current controllers
 
-Controllers never:
+- MissionControlController
+- TradingController
+- PositionMonitorController
 
-- calculate indicators
-- perform rendering
-- create AI explanations
-- determine trading signals
+Typical controller flow
 
-Current controllers:
+```text
+Workspace
 
+↓
+
+Controller
+
+↓
+
+Deterministic Services
+
+↓
+
+Presenter
+
+↓
+
+Workspace
 ```
-MissionControlController
+
+Controllers own
+
+- orchestration
+- error handling
+- workflow coordination
+
+Controllers never own
+
+- calculations
+- AI
+- rendering
+- indicator logic
+
+---
+
+# Presenter Architecture
+
+Presenters convert deterministic output into presentation models.
+
+Presenters own
+
+- labels
+- summaries
+- formatting
+- readable explanations
+- UI models
+
+Presenters never own
+
+- calculations
+- trading logic
+- exit logic
+- provider access
+
+Current presenters
+
+- MissionControlPresenter
+- TradingWorkspacePresenter
+- PositionMonitorPresenter
+
+---
+
+# Workspace Architecture
+
+Workspaces own interaction.
+
+They never own business logic.
+
+Current workspaces
+
+- Mission Control
+- Trading Workspace
+- Portfolio
+- Position Monitor
+
+Future workspaces
+
+- Trade History
+- Paper Trading
+- Strategy Lab
+
+Every workspace follows the same pattern.
+
+```text
+User
+
+↓
+
+Workspace
+
+↓
+
+Controller
+
+↓
+
+Services
+
+↓
+
+Presenter
+
+↓
+
+Workspace
+```
+
+This keeps all desktop behaviour predictable, testable and reusable.
+
+---
+
+# Trade Lifecycle Architecture
+
+The Trade Lifecycle is Orion's newest architectural domain.
+
+Its purpose is to manage the complete lifecycle of a trade while preserving deterministic behaviour.
+
+Current lifecycle
+
+```text
+Opportunity
+
+↓
+
+Trading Analysis
+
+↓
+
+BUY Decision
+
+↓
+
+Position Sizing
+
+↓
+
+Trade Created
+
+↓
+
+Trade Monitoring
+
+↓
+
+Exit Intelligence
+
+↓
+
+Trade Closed
+
+↓
+
+Trade History
+```
+
+Only the first seven stages are currently implemented.
+
+Trade persistence and Trade History will follow in later sprints.
+
+---
+
+# Trade Lifecycle Responsibilities
+
+Each stage owns one responsibility.
+
+| Stage | Responsibility |
+|--------|----------------|
+| Opportunity | Discover deterministic opportunities |
+| Trading | Determine BUY / HOLD / SELL |
+| Position Sizing | Determine recommended position size |
+| Trade | Store lifecycle state |
+| Position Monitor | Monitor current trade |
+| Exit Evaluation | Determine deterministic exit advice |
+| Trade History | Preserve completed trades |
+
+Responsibilities never overlap.
+
+---
+
+# Mission Control Architecture
+
+Mission Control is the operational heart of Orion.
+
+Mission Control never performs calculations.
+
+Mission Control presents deterministic information produced by backend services.
+
+Mission Control currently presents
+
+- Market Status
+- Scanner Status
+- Scan Duration
+- Market Data
+- Universe Coverage
+- Top Opportunities
+- Current Market Price
+- Position Size
+- Required Investment
+- Remaining Capital
+- Budget Status
+
+Future versions will additionally present
+
+- Open Trades
+- Portfolio Exposure
+- Trade Health
+- Active Risk
+- Daily Performance
+
+Mission Control remains the first workspace users interact with.
+
+---
+
+# Trading Workspace Architecture
+
+Trading Workspace evaluates a single symbol.
+
+Flow
+
+```text
+User Symbol
+
+↓
 
 TradingController
+
+↓
+
+YahooProvider
+
+↓
+
+IndicatorBuilder
+
+↓
+
+TradingPipeline
+
+↓
+
+TradingWorkspacePresenter
+
+↓
+
+Trading Workspace
 ```
 
-Future controllers:
+Trading Workspace owns
 
+- BUY / HOLD / SELL presentation
+- Confidence presentation
+- Pressure presentation
+- Risk presentation
+- Position Size presentation
+- AI explanation
+
+Trading Workspace never owns
+
+- indicator calculations
+- provider logic
+- AI decision making
+
+---
+
+# Position Monitor Architecture
+
+Position Monitor is the first implementation of the Trade Lifecycle.
+
+Flow
+
+```text
+Trade
+
+↓
+
+PositionMonitorController
+
+↓
+
+PositionAnalysisService
+
+↓
+
+AnalysisEngine
+
+↓
+
+PositionMonitorService
+
+↓
+
+ExitEvaluationService
+
+↓
+
+PositionMonitorPresenter
+
+↓
+
+Position Monitor Workspace
 ```
-PortfolioController
 
-PerformanceController
+Position Monitor owns
 
-ScannerController
-```
+- Trade monitoring
+- Exit Intelligence presentation
+- Profit/Loss presentation
+- Trade Health presentation
 
----
+Position Monitor never owns
 
-# Rendering Rules
+- exit calculations
+- technical analysis
+- market data retrieval
 
-Rendering remains fully deterministic.
+Current implementation supports manual trade entry.
 
-Rendering owns:
-
-- widget creation
-- layouts
-- panel composition
-- chart composition
-- styling
-
-Rendering never owns:
-
-- providers
-- calculations
-- business logic
-- AI
+Future versions will load persisted trades automatically.
 
 ---
 
-# Panel Rules
+# Artificial Intelligence Architecture
 
-Every reusable panel follows the same rules.
+Artificial Intelligence exists only after deterministic processing has completed.
 
-Panels may:
+AI consumes deterministic output.
 
-- display labels
-- display values
-- display icons
-- display metadata
+AI produces natural-language explanations.
 
-Panels may never:
+AI may
 
-- calculate values
-- determine trading signals
-- access backend services
-- call providers
+- explain trades
+- explain opportunities
+- summarize technical analysis
+- explain risk
+- explain exit advice
 
-Panels always receive immutable GuiWorkspacePanel objects.
+AI may never
 
----
+- create BUY signals
+- create SELL signals
+- create EXIT signals
+- calculate indicators
+- calculate confidence
+- calculate risk
+- calculate position size
+- override deterministic output
 
-# Chart Rules
-
-ChartCanvas remains the only rendering engine.
-
-Every future visualization must reuse ChartCanvas.
-
-Examples:
-
-- candlesticks
-- moving averages
-- RSI
-- MACD
-- Bollinger Bands
-- volume
-- trade markers
-- annotations
-
-Alternative rendering implementations are forbidden.
+Deterministic services always remain authoritative.
 
 ---
 
-# Refresh Strategy
+# Dependency Rules
 
-Current refresh intervals:
+The following dependency rules are mandatory.
+
+Providers
+
+↓
+
+Services
+
+↓
+
+Controllers
+
+↓
+
+Presenters
+
+↓
+
+Workspaces
+
+↓
+
+Widgets
+
+↓
+
+Qt
+
+Higher layers may never depend on lower presentation layers.
+
+Widgets may never call services directly.
+
+Presenters may never call providers.
+
+Controllers may never perform calculations.
+
+Services may never render UI.
+
+These rules are mandatory for every future sprint.
+
+---
+
+# Future Architecture
+
+The current architecture is intentionally designed to support future expansion without requiring structural redesign.
+
+The planned evolution of Orion is:
+
+```text
+Market Intelligence
+
+↓
 
 Mission Control
 
-60 seconds
+↓
 
 Trading Workspace
 
-Manual analysis
+↓
 
-Scanner
+Position Sizing
 
-30 seconds (planned)
+↓
 
-Portfolio
+Trade Lifecycle
 
-30 seconds (planned)
+↓
 
-News
+Trade History
 
-2–5 minutes (planned)
+↓
 
-Future websocket providers may replace polling without changing presentation architecture.
+Paper Trading
+
+↓
+
+Broker Integration
+```
+
+Every new capability must fit within the existing architectural layers.
+
+No shortcut implementations are allowed.
 
 ---
 
-# Desktop Validation
+# Current Implementation Status
 
-Every completed sprint must pass the following validation sequence.
+## Completed
 
-Step 1
+### Deterministic Backend
 
-```
-python run_tests.py
-```
+- TradingPipeline
+- AnalysisEngine
+- TechnicalScanner
+- MarketScanner
+- RiskEngine
+- IndicatorBuilder
+- OpportunityService
+- PositionSizingService
+- PositionAnalysisService
+- PositionMonitorService
+- ExitEvaluationService
 
-Expected result:
+### Desktop
 
-```
-6 passed
-```
+- Workspace architecture
+- Presenter architecture
+- Mission Control
+- Trading Workspace
+- Portfolio
+- Position Monitor
+- Chart framework
+- Scrollable workspaces
 
-Step 2
+### Trade Lifecycle
 
-Start Orion
+Implemented
 
-```
-python app.py
-```
+- Trade domain model
+- Manual trade creation
+- Trade monitoring
+- Exit Intelligence
+- Shared AnalysisEngine
+- Exit Score
+- Exit Reasons
+- Trend Status
+- Momentum Status
+- Risk Status
 
-Step 3
+---
 
-Manual GUI validation.
+# Planned Implementation
 
-Verify:
+## Sprint 5.5
 
-- application starts
-- Mission Control opens
-- navigation works
-- Trading Workspace works
-- Scan Market button works
-- automatic refresh works
-- no console exceptions
+Trade Lifecycle
 
-Step 4
+- Improve Trade Monitor
+- Improve lifecycle presentation
+- Connect Trading Workspace to Trade creation
+- Prepare Open Trade persistence
+- Prepare Trade History
 
-Screenshot review.
+---
 
-Every GUI sprint is visually reviewed before implementation continues.
+## Sprint 6.0
 
-Step 5
+Paper Trading
 
-Documentation synchronization.
+- Virtual Broker
+- Order execution simulation
+- Portfolio tracking
+- Statistics
+- Performance reporting
 
-Only after documentation has been updated is the sprint considered complete.
+---
+
+## Future
+
+Broker Integration
+
+Possible future integrations
+
+- Interactive Brokers
+- Alpaca
+- Trading212
+- Degiro (if APIs become available)
+
+Broker integrations will never replace deterministic decision making.
+
+They only execute deterministic decisions.
+
+---
+
+# Architectural Rules
+
+Every future implementation must satisfy the following requirements.
+
+✔ One responsibility per class
+
+✔ One responsibility per service
+
+✔ Controllers orchestrate only
+
+✔ Presenters format only
+
+✔ Workspaces render only
+
+✔ Services calculate only
+
+✔ Providers retrieve data only
+
+✔ TradingPipeline remains the only BUY / HOLD / SELL decision engine
+
+✔ ExitEvaluationService remains the only deterministic EXIT decision engine
+
+✔ AnalysisEngine remains the shared technical analysis engine
+
+✔ AI remains explainability only
+
+✔ No duplicated indicator calculations
+
+✔ No duplicated business logic
+
+✔ No business logic inside Qt widgets
+
+✔ No direct provider access from UI
+
+✔ No rendering inside backend services
 
 ---
 
 # Development Workflow
 
-Every Orion sprint follows the same lifecycle.
+Every development sprint follows the same lifecycle.
 
-```
 Architecture
 
 ↓
@@ -1519,11 +1375,11 @@ Desktop Launch
 
 ↓
 
-GUI Validation
+Manual GUI Validation
 
 ↓
 
-Documentation
+Documentation Synchronization
 
 ↓
 
@@ -1532,409 +1388,26 @@ Git Commit
 ↓
 
 GitHub Push
-```
 
-This workflow is mandatory.
-
----
-
-# Current Roadmap
-
-
-
-## Sprint 5.2
-
-Position Sizing Presentation
-
-Objectives
-
-- recommended shares
-- investment
-- remaining capital
-- budget validation
+Only after documentation has been synchronized is a sprint considered complete.
 
 ---
 
-## Sprint 4.9.2
+# Source of Truth
 
-Market Health
+Project Orion has one primary source of truth.
 
-Objectives:
+1. GitHub repository
+2. ORION_MASTER_ARCHITECTURE.md
+3. AI_CONTEXT.md
+4. PROJECT_STATUS.md
+5. TODO.md
+6. CHANGELOG.md
 
-- Universe Coverage
-- Scanner Health
-- Last Refresh
-- Scan Duration improvements
-- Error Summary
+The GitHub repository always reflects the latest implementation.
 
----
-
-## Sprint 4.9.3
-
-Trading Workspace 2.0
-
-Objectives:
-
-- Entry
-- Stop Loss
-- Take Profit
-- Risk / Reward
-- Trade Checklist
-- enhanced AI explanation
+Documentation must always be synchronized with the repository before a new development sprint begins.
 
 ---
 
-## Sprint 4.9.4
-
-Position Monitor
-
-Objectives:
-
-- Open Positions
-- Exit Signals
-- Position Timeline
-- Portfolio Health
-- Exit Recommendations
-
----
-
-## Sprint 5.0
-
-Paper Trading
-
-Objectives:
-
-- virtual broker
-- simulated execution
-- order lifecycle
-- trade journal
-- performance tracking
-
----
-
-# Architecture Freeze
-
-Architecture Version
-
-v1.9
-
-Status
-
-ACTIVE
-
-Frozen principles:
-
-- deterministic backend
-- TradingPipeline is the only decision engine
-- AI explainability only
-- Mission Control is the primary workspace
-- presentation-only UI
-- GuiWorkspace presentation contract
-- reusable GuiWorkspacePanel architecture
-- ChartCanvas rendering engine
-- one controller responsibility
-- one presenter responsibility
-
-Architecture changes require explicit approval before implementation.
-
-# Definition of Done
-
-A sprint is complete only when all of the following criteria have been satisfied.
-
-## Implementation
-
-✔ Feature implemented
-
-✔ Architecture respected
-
-✔ No duplicated business logic
-
-✔ No business logic inside the UI
-
-✔ TradingPipeline remains the single source of truth
-
-✔ AI remains explainability only
-
----
-
-## Validation
-
-✔ Regression tests executed
-
-Expected result:
-
-```
-python run_tests.py
-
-6 passed
-```
-
-✔ Desktop application starts successfully
-
-```
-python app.py
-```
-
-✔ Manual GUI validation completed
-
-✔ Screenshot review completed
-
-✔ No console exceptions
-
----
-
-## Documentation
-
-✔ Documentation synchronized
-
-✔ Architecture version updated (if required)
-
-✔ Current sprint updated
-
-✔ TODO synchronized
-
-✔ CHANGELOG synchronized
-
-✔ AI_CONTEXT synchronized
-
----
-
-## Source Control
-
-✔ Git commit created
-
-✔ GitHub repository synchronized
-
----
-
-# Documentation Structure
-
-The official Orion documentation consists of exactly seven documents.
-
-```
-PROJECT_VISION.md
-
-ORION_MASTER_ARCHITECTURE.md
-
-TRADING_STRATEGY.md
-
-PROJECT_STATUS.md
-
-TODO.md
-
-CHANGELOG.md
-
-AI_CONTEXT.md
-```
-
-Responsibilities:
-
-PROJECT_VISION
-
-Long-term product vision.
-
----
-
-ORION_MASTER_ARCHITECTURE
-
-Single architectural source of truth.
-
----
-
-TRADING_STRATEGY
-
-Deterministic trading methodology.
-
----
-
-PROJECT_STATUS
-
-Current implementation status.
-
----
-
-TODO
-
-Remaining implementation work.
-
----
-
-CHANGELOG
-
-Historical implementation log.
-
----
-
-AI_CONTEXT
-
-Context required for every new Orion development session.
-
-No architectural duplication is allowed outside ORION_MASTER_ARCHITECTURE.md.
-
----
-
-# New Chat Protocol
-
-Every new Orion development session follows exactly the same workflow.
-
-## Phase 1
-
-Upload:
-
-- complete Project Orion ZIP
-- all synchronized documentation
-
----
-
-## Phase 2
-
-Before writing code:
-
-1. Read every documentation file completely.
-
-2. Analyse the complete project source tree.
-
-3. Determine:
-
-- Architecture Version
-- Documentation Version
-- Current Sprint
-- Completed work
-- Work in progress
-- Next logical implementation step
-
-No implementation begins before this analysis has been completed.
-
----
-
-## Phase 3
-
-Implementation rules.
-
-- No assumptions.
-- One complete file at a time.
-- No snippets.
-- Full revision files only.
-- Backend remains deterministic.
-- AI explainability only.
-- No business logic inside UI.
-- TradingPipeline remains the only decision engine.
-- Mission Control remains the primary workspace.
-- ChartCanvas remains the only rendering engine.
-
----
-
-## Phase 4
-
-Validation after every completed file.
-
-Run:
-
-```powershell
-python run_tests.py
-```
-
-Expected result:
-
-```
-6 passed
-```
-
----
-
-## Phase 5
-
-At the end of every sprint:
-
-1. Start Orion
-
-```powershell
-python app.py
-```
-
-2. Review the GUI.
-
-Every sprint must produce a visible GUI improvement.
-
-Examples:
-
-- richer Mission Control
-- improved Trading Workspace
-- better charts
-- improved layouts
-- additional deterministic information
-
-The GUI is reviewed before the next sprint begins.
-
----
-
-## Phase 6
-
-Documentation.
-
-Synchronize:
-
-- PROJECT_STATUS.md
-- TODO.md
-- CHANGELOG.md
-- AI_CONTEXT.md
-
-Update architecture documentation only when architectural changes have been introduced.
-
----
-
-# Orion Philosophy
-
-Project Orion is not designed to predict markets.
-
-Project Orion continuously identifies deterministic opportunities with controlled risk.
-
-Artificial Intelligence enhances explainability.
-
-Deterministic backend services generate decisions.
-
-Mission Control presents those decisions.
-
-The human trader remains responsible for execution.
-
-Professional architecture always has priority over implementation speed.
-
-Every sprint should make Orion feel more like a professional trading workstation.
-
----
-
-# Current State (v1.10)
-
-Architecture
-
-✔ Stable
-
-Backend
-
-✔ Stable
-
-Desktop Foundation
-
-✔ Stable
-
-Mission Control
-
-🚧 Active expansion
-
-Current Sprint
-
-Current Sprint
-
-🚧 Sprint 5.1 — Portfolio & Position Sizing Foundation
-
-Validation
-
-✔ 6 / 6 tests passed
-
-✔ Desktop application launches successfully
-
-✔ Manual GUI validation completed
-
----
-
-# End of ORION MASTER ARCHITECTURE
+# End of ORION_MASTER_ARCHITECTURE

@@ -1,56 +1,73 @@
-# PROJECT ORION
-
-# CHANGELOG
-
 ---
 
-# Documentation Information
-
-Documentation Version
-
-v1.10
-
-Architecture Version
-
-v1.9
-
-Last Updated
-
-2026-07-05
-
----
-
-# Sprint 5.1 — Portfolio & Position Sizing Foundation
+# Sprint 5.2 — Position Sizing Presentation
 
 Status
 
 ✅ Completed
 
+## Added
+
+- Recommended share quantity presentation.
+- Required investment presentation.
+- Remaining available capital.
+- Budget validation.
+- Human-readable trading explanations.
+- Improved opportunity presentation.
+
+## Changed
+
+- Mission Control now presents deterministic position sizing.
+- Trading Workspace explanations became easier to understand.
+- TradingPipeline remained unchanged.
+
 ---
+
+# Sprint 5.3 — Position Monitor Foundation
+
+Status
+
+✅ Completed
+
+## Added
+
+- Trade domain model.
+- PositionMonitorWorkspace.
+- PositionMonitorController.
+- PositionMonitorPresenter.
+- PositionMonitorService.
+- Manual trade monitoring workflow.
+- Profit/Loss overview.
+- Market Value overview.
+- Initial deterministic exit advice.
+
+## Changed
+
+- Desktop expanded with the first Trade Lifecycle workspace.
+- Workspace architecture extended without changing existing deterministic logic.
+
+---
+
+# Sprint 5.4 — Exit Intelligence Foundation
+
+Status
+
+✅ Completed
 
 ## Architecture
 
 ### Added
 
-- Opportunity domain model introduced.
-- OpportunityService introduced.
-- PositionSizingService introduced.
-- PortfolioStore integrated into the desktop workflow.
-- Trading Capital configuration workflow.
+- ExitEvaluationService.
+- PositionAnalysisService.
+- Shared AnalysisEngine integration.
+- Deterministic Exit Intelligence layer.
 
 ### Changed
 
-- Mission Control prepared for deterministic position sizing.
-- Portfolio redesigned into a configuration workspace.
-- Opportunity presentation expanded with current market price.
-- Market Data panel now reports market data age.
-- Desktop architecture remains fully deterministic.
-
-### Removed
-
-- Portfolio dashboard concept.
-- Portfolio analytics from Portfolio workspace.
-- Redundant portfolio presentation logic.
+- PositionMonitorService now delegates exit decisions to ExitEvaluationService.
+- Position Monitor now reuses the same AnalysisEngine as Trading Workspace.
+- No duplicate indicator calculations remain.
 
 ---
 
@@ -58,18 +75,18 @@ Status
 
 ### Added
 
-- OpportunityService
-- PositionSizingService
-- PortfolioStore desktop integration
-- Trading Capital persistence
-- Opportunity aggregation layer
+- ExitEvaluationService
+- PositionAnalysisService
+- Exit Score
+- Trend Status
+- Momentum Status
+- Risk Status
+- Exit Reasons
 
 ### Changed
 
-- MissionControlController now consumes OpportunityService.
-- Portfolio state is persisted between application launches.
-- Market data timestamps exposed to presentation layer.
-- Live scanner output prepared for deterministic position sizing.
+- Shared deterministic technical analysis between BUY and SELL workflows.
+- Exit decisions remain fully deterministic.
 
 ---
 
@@ -77,35 +94,18 @@ Status
 
 ### Added
 
-- Simplified Portfolio Workspace
-- Trading Capital input
-- Save workflow
-- Persistent Trading Capital
-- Opportunity market price presentation
-- Market data age presentation
+- Exit Intelligence panel.
+- Exit Score presentation.
+- Trend presentation.
+- Momentum presentation.
+- Risk presentation.
+- Exit Reasons presentation.
 
 ### Changed
 
-- Portfolio Workspace simplified to a single responsibility.
-- Mission Control opportunity cards enriched.
-- Scan Market workflow now prepares deterministic position sizing.
-- Desktop workflow aligned with Opportunity architecture.
-
----
-
-## Presentation
-
-### Added
-
-- Opportunity presentation model support.
-- Market price presentation.
-- Market data age presentation.
-
-### Changed
-
-- MissionControlPresenter expanded.
-- Mission Control cards now display richer deterministic information.
-- Presentation prepared for Position Sizing integration.
+- Position Monitor evolved into the first implementation of Orion's Trade Lifecycle.
+- Workspace scrolling improved.
+- Opportunity card layout stabilised.
 
 ---
 
@@ -125,17 +125,13 @@ Desktop validation
 
 ✔ Mission Control loads
 
-✔ Portfolio Workspace loads
-
 ✔ Trading Workspace loads
 
-✔ Navigation works
+✔ Portfolio Workspace loads
 
-✔ Scan Market works
+✔ Position Monitor loads
 
-✔ Auto Refresh works
-
-✔ Trading Capital persistence validated
+✔ Exit Intelligence operational
 
 ✔ Manual GUI validation completed
 
@@ -145,128 +141,33 @@ Desktop validation
 
 Completed
 
-✔ Opportunity architecture
+✔ Deterministic BUY pipeline
 
-✔ Portfolio persistence
+✔ Deterministic Position Sizing
 
-✔ PositionSizingService
+✔ Trade domain model
 
-✔ OpportunityService
+✔ Position Monitor
 
-✔ Mission Control pricing
+✔ Exit Intelligence
 
-✔ Market data freshness
+✔ Shared AnalysisEngine
 
-Current implementation status
+✔ Stable desktop architecture
 
-Mission Control currently displays
-
-- Signal
-- Technical score
-- Trend
-- Scanner reason
-- Current market price
-
-Portfolio currently manages
-
-- Available trading capital
-
-The backend is prepared for deterministic position sizing.
-
-GUI presentation of calculated position sizing begins in Sprint 5.2.
+The project has entered the Trade Lifecycle phase.
 
 ---
 
 # Next Sprint
 
-## Sprint 5.2 — Position Sizing Presentation
+## Sprint 5.5 — Trade Lifecycle
 
 Objectives
 
-- Show recommended share quantity.
-- Show required investment.
-- Show remaining available capital.
-- Show insufficient budget warnings.
-- Prepare deterministic FX conversion.
-- Continue enriching Mission Control.
-
----
-
-# Previous Milestones
-
-## Sprint 4.9.1 — Live Opportunities
-
-Completed
-
-- Mission Control introduced as primary workspace.
-- TradingController integrated.
-- LiveScannerService operational.
-- Scan Duration panel.
-- Scan Market workflow.
-- Rich Mission Control foundation.
-
----
-
-## Sprint 4.8
-
-Completed
-
-- Workspace architecture
-- Presenter architecture
-- ChartCanvas framework
-
----
-
-## Sprint 4.7 and earlier
-
-Completed
-
-- Deterministic backend foundation
-- TradingPipeline
-- TechnicalScanner
-- AnalysisEngine
-- MarketScanner
-- RiskEngine
-- AI Explanation Engine
-
----
-
-# Development Workflow
-
-Every sprint follows the same lifecycle.
-
-Architecture
-
-↓
-
-Implementation
-
-↓
-
-Regression Tests
-
-↓
-
-Desktop Launch
-
-↓
-
-GUI Validation
-
-↓
-
-Documentation Synchronization
-
-↓
-
-Git Commit
-
-↓
-
-GitHub Push
-
-Every sprint must end with a visible desktop improvement while preserving deterministic architecture.
-
----
-
-# End of CHANGELOG
+- Improve Trade Monitor presentation.
+- Prepare Open Trade persistence.
+- Prepare Trade History.
+- Improve Exit Intelligence readability.
+- Connect future trade creation workflow.
+- Continue evolving Orion into a complete trading workstation.

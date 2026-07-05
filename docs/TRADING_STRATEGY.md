@@ -94,14 +94,18 @@ Excluded
 
 # Deterministic Trading Flow
 
-Current deterministic workflow
+Project Orion now contains two deterministic decision workflows.
 
-```
+---
+
+## Entry Decision Workflow
+
+```text
 Universe
 
 ↓
 
-Yahoo Finance
+YahooProvider
 
 ↓
 
@@ -126,13 +130,45 @@ OpportunityService
 ↓
 
 Mission Control
+
+↓
+
+Trading Workspace
 ```
 
-Mission Control never creates trading decisions.
-
-Mission Control only presents deterministic output.
+TradingPipeline remains the only source of BUY / HOLD / SELL decisions.
 
 ---
+
+## Exit Decision Workflow
+
+```text
+Trade
+
+↓
+
+PositionAnalysisService
+
+↓
+
+AnalysisEngine
+
+↓
+
+PositionMonitorService
+
+↓
+
+ExitEvaluationService
+
+↓
+
+Trade Monitor (Position Monitor)
+```
+
+ExitEvaluationService remains the only source of deterministic exit decisions.
+
+Mission Control and Trade Monitor only present deterministic output.
 
 # Live Opportunities
 
@@ -313,19 +349,59 @@ Artificial Intelligence never generates confidence.
 
 # Position Monitoring
 
-After entry Orion continuously evaluates open positions.
+After a trade has been opened Orion continuously evaluates its health.
 
-Possible deterministic outcomes
+Position monitoring is now performed through the deterministic Trade Lifecycle.
+
+Current workflow
+
+```text
+Trade
+
+↓
+
+PositionAnalysisService
+
+↓
+
+AnalysisEngine
+
+↓
+
+PositionMonitorService
+
+↓
+
+ExitEvaluationService
+
+↓
+
+Trade Monitor
+```
+
+Current deterministic outputs
 
 - HOLD_POSITION
 - TAKE_PROFIT
 - STOP_LOSS
-- TRAILING_STOP
 - EXIT_DUE_TO_WEAKNESS
+
+Future outputs
+
+- TRAILING_STOP
 - EXIT_DUE_TO_TIME_LIMIT
+
+Current Exit Intelligence displays
+
+- Exit Score
+- Trend Status
+- Momentum Status
+- Risk Status
+- Exit Reasons
 
 Exit recommendations remain fully deterministic.
 
+Artificial Intelligence only explains deterministic exit advice.
 ---
 
 # AI Explainability
@@ -349,6 +425,47 @@ AI may never
 - override deterministic decisions
 
 ---
+
+# Trade Lifecycle Strategy
+
+Project Orion now supports two independent deterministic decision moments.
+
+## Entry Strategy
+
+The Entry Strategy determines whether a new trade should be opened.
+
+Decision engine
+
+TradingPipeline
+
+Outputs
+
+- BUY
+- HOLD
+- SELL
+
+---
+
+## Exit Strategy
+
+The Exit Strategy determines whether an existing trade should remain open.
+
+Decision engine
+
+ExitEvaluationService
+
+Outputs
+
+- HOLD_POSITION
+- TAKE_PROFIT
+- STOP_LOSS
+- EXIT_DUE_TO_WEAKNESS
+
+Both strategies reuse the same deterministic AnalysisEngine.
+
+Only the interpretation differs.
+
+This prevents duplicated technical-analysis logic while allowing independent optimisation of entry and exit behaviour.
 
 # Future Strategy Improvements
 
@@ -385,15 +502,15 @@ A successful Orion strategy
 
 Documentation Version
 
-v1.10
+v1.11
 
 Architecture Version
 
-v1.9
+v2.0
 
 Current Sprint
 
-🚧 Sprint 5.1 — Portfolio & Position Sizing Foundation
+🚧 Sprint 5.5 — Trade Lifecycle
 
 Current deterministic capabilities
 
@@ -405,12 +522,22 @@ Current deterministic capabilities
 
 ✔ PositionSizingService
 
-✔ Mission Control integration
+✔ Trade domain model
+
+✔ PositionAnalysisService
+
+✔ PositionMonitorService
+
+✔ ExitEvaluationService
+
+✔ Shared AnalysisEngine
+
+✔ Exit Intelligence
 
 Next milestone
 
-Sprint 5.2 — Position Sizing Presentation
-
+Sprint 5.5 — Trade Lifecycle
 ---
 
 # End of TRADING_STRATEGY
+

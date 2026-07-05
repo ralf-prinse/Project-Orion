@@ -6,15 +6,15 @@
 
 Documentation Version
 
-v1.10
+v1.11
 
 Architecture Version
 
-v1.9
+v2.0
 
 Current Sprint
 
-🚧 Sprint 5.1 — Portfolio & Position Sizing Foundation
+🚧 Sprint 5.5 — Trade Lifecycle
 
 Last Updated
 
@@ -38,6 +38,10 @@ Last Updated
 - [x] PortfolioStore
 - [x] OpportunityService
 - [x] PositionSizingService
+- [x] Trade domain model
+- [x] PositionAnalysisService
+- [x] PositionMonitorService
+- [x] ExitEvaluationService
 - [x] AI Context Builder
 - [x] AI Explanation Engine
 
@@ -56,6 +60,9 @@ Last Updated
 - [x] TradingWorkspace
 - [x] TradingController
 - [x] PortfolioWorkspace
+- [x] PositionMonitorWorkspace
+- [x] PositionMonitorController
+- [x] PositionMonitorPresenter
 - [x] ChartCanvas framework
 
 ---
@@ -71,8 +78,14 @@ Completed
 - [x] Universe Coverage
 - [x] Top Opportunities
 - [x] Opportunity Price
+- [x] Position sizing presentation
+- [x] Share quantity
+- [x] Required investment
+- [x] Remaining capital
+- [x] Budget validation
 - [x] Automatic Refresh
-- [x] Scan Market button
+- [x] Responsive Opportunity cards
+- [x] Scrollable layout
 
 ---
 
@@ -83,8 +96,44 @@ Completed
 - [x] Portfolio redesign
 - [x] Trading Capital configuration
 - [x] Save workflow
-- [x] Persistent PortfolioStore integration
+- [x] PortfolioStore integration
 - [x] Trading capital survives restart
+
+---
+
+## Trading Workspace
+
+Completed
+
+- [x] TradingPipeline integration
+- [x] BUY / HOLD / SELL
+- [x] Confidence
+- [x] Pressure
+- [x] Risk
+- [x] Position Size
+- [x] Human-readable explanations
+- [x] AI Explanation
+
+---
+
+## Position Monitor
+
+Completed
+
+- [x] Trade model
+- [x] Manual trade input
+- [x] PositionAnalysisService
+- [x] PositionMonitorService
+- [x] ExitEvaluationService
+- [x] Exit Score
+- [x] Trend Status
+- [x] Momentum Status
+- [x] Risk Status
+- [x] Exit Reasons
+- [x] Profit / Loss
+- [x] Market Value
+- [x] Shared AnalysisEngine
+- [x] Exit Intelligence panel
 
 ---
 
@@ -95,9 +144,10 @@ Completed
 - [x] Mission Control loads
 - [x] Portfolio loads
 - [x] Trading Workspace loads
+- [x] Position Monitor loads
 - [x] Scan Market works
-- [x] Auto Refresh works
-- [x] Trading Capital persistence works
+- [x] Exit Intelligence works
+- [x] Opportunity cards validated
 - [x] Manual GUI validation completed
 
 Latest validation
@@ -106,86 +156,74 @@ Latest validation
 
 ---
 
-# Sprint 5.1 — Portfolio & Position Sizing Foundation
+# Sprint 5.5 — Trade Lifecycle
 
-Completed
+Current Sprint
 
-- [x] PortfolioStore
-- [x] OpportunityService
-- [x] PositionSizingService
-- [x] Opportunity model
-- [x] Current market price in Mission Control
-- [x] Market data age
-- [x] Persistent Trading Capital
+## Trade Monitor
 
-Remaining
-
-- [ ] Position sizing presentation
+- [ ] Rename Position Monitor conceptually to Trade Monitor
+- [ ] Improve information hierarchy
+- [ ] Improve trade summary presentation
+- [ ] Improve Exit Intelligence presentation
+- [ ] Show trade health more visually
+- [ ] Improve professional desktop UX
 
 ---
 
-# Sprint 5.2 — Position Sizing Presentation
+## Trade Lifecycle
 
-Mission Control
-
-- [ ] Shares to buy
-- [ ] Required investment
-- [ ] Remaining capital
-- [ ] Budget exceeded warning
-- [ ] FX conversion support (EUR/USD)
-- [ ] Rich Opportunity cards
-
-Portfolio
-
-- [ ] Maximum position size
-- [ ] Maximum portfolio exposure
-- [ ] Risk percentage per trade
+- [ ] Introduce Open Trade workflow
+- [ ] Create trade directly from Trading Workspace
+- [ ] Create trade directly from Mission Control
+- [ ] Connect Position Monitor to persisted trades
+- [ ] Show current open trades
+- [ ] Prepare Trade History architecture
 
 ---
 
-# Sprint 5.3 — Market Health
+## Exit Intelligence
 
-- [ ] Scanner Health
-- [ ] Error Summary
-- [ ] Last Refresh
-- [ ] Market Breadth
-- [ ] Sector Strength
-- [ ] Market Regime
-
----
-
-# Sprint 5.4 — Trading Workspace 2.0
-
-- [ ] Entry Price
-- [ ] Stop Loss
-- [ ] Take Profit
-- [ ] Risk / Reward
-- [ ] Trade Checklist
-- [ ] Better AI explanation
-- [ ] Historical setup overview
+- [ ] Add Trailing Stop evaluation
+- [ ] Add Time-based Exit evaluation
+- [ ] Improve Exit Score weighting
+- [ ] Improve Exit explanations
+- [ ] Add technical indicator explanations
+- [ ] Add market regime influence
+- [ ] Add volatility interpretation
 
 ---
 
-# Sprint 5.5 — Position Monitor
+## Mission Control
 
-- [ ] Open Positions
-- [ ] Portfolio Health
-- [ ] Position Timeline
-- [ ] Exit recommendations
-- [ ] Alerts
+- [ ] Show open positions
+- [ ] Show portfolio exposure
+- [ ] Show available buying power
+- [ ] Show active trades
+- [ ] Show watchlist integration
+
+---
+
+## Trading Workspace
+
+- [ ] One-click trade creation
+- [ ] Display expected lifecycle
+- [ ] Improve trade checklist
+- [ ] Improve AI explanation readability
 
 ---
 
 # Sprint 6.0 — Paper Trading
 
-- [ ] Virtual broker
+- [ ] Virtual Broker
 - [ ] Order lifecycle
+- [ ] Trade execution simulation
 - [ ] Portfolio model
-- [ ] Simulated execution
 - [ ] Commission model
 - [ ] Slippage model
-- [ ] Trade Journal
-- [ ] Performance tracking
+- [ ] Performance statistics
+- [ ] Trade journal
+- [ ] Daily performance overview
 
 ---
 
@@ -216,12 +254,29 @@ Portfolio
 
 Explainability only
 
-- [ ] Better explanations
+- [ ] Better trade explanations
 - [ ] Daily Market Briefing
 - [ ] Weekly Market Summary
-- [ ] Trade Summaries
+- [ ] Trade summaries
+- [ ] Portfolio summaries
 
-AI will never generate trading decisions.
+AI will never generate deterministic trading decisions.
+
+---
+
+# Technical Debt
+
+Current technical debt
+
+- [ ] Rename Position Monitor to Trade Monitor throughout the application.
+- [ ] Introduce persistent TradeStore.
+- [ ] Connect Trade creation to Trading Workspace.
+- [ ] Connect Trade creation to Mission Control.
+- [ ] Remove remaining placeholder texts in Exit Intelligence.
+- [ ] Improve professional terminology throughout the desktop.
+- [ ] Extend automated regression tests for Trade Lifecycle.
+
+Current architecture is otherwise considered clean.
 
 ---
 
@@ -236,17 +291,18 @@ Before every release
 - [ ] Synchronize PROJECT_VISION.md
 - [ ] Synchronize TRADING_STRATEGY.md
 - [ ] Synchronize ORION_MASTER_ARCHITECTURE.md
-- [ ] Create fresh Project Orion ZIP
+
+GitHub is the primary source of truth.
 
 ---
 
 # Current Priority
 
-1. Position sizing presentation
-2. Mission Control
-3. Market Health
-4. Trading Workspace
-5. Position Monitor
+1. Trade Lifecycle
+2. Trade Monitor
+3. Open Trade persistence
+4. Trade History
+5. Exit Intelligence improvements
 6. Paper Trading
 
 ---
@@ -257,7 +313,8 @@ A task is complete only when
 
 - [x] Feature implemented
 - [x] Architecture respected
-- [x] TradingPipeline remains the only decision engine
+- [x] TradingPipeline remains the only BUY / HOLD / SELL decision engine
+- [x] ExitEvaluationService remains the only deterministic exit decision engine
 - [x] No business logic inside UI
 - [x] Regression tests pass
 - [x] Desktop launches
