@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from datetime import datetime
 
 
 @dataclass
@@ -9,6 +10,7 @@ class MarketQuote:
     volume: int
     previous_close: float | None = None
     change_percent: float | None = None
+    data_timestamp: datetime | None = None
 
 
 @dataclass
@@ -33,6 +35,6 @@ class MarketDataProvider(ABC):
     @abstractmethod
     def get_quotes(self, symbols: list[str]) -> list[MarketQuote]:
         """
-        Haal actuele quote-data op voor een lijst symbolen.
+        Haal quote-data op voor een lijst symbolen.
         """
         raise NotImplementedError

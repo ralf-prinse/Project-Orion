@@ -14,6 +14,7 @@ class WorkspaceRenderer:
 
     Responsibilities:
         - render cards through DashboardGrid
+        - render panels through DashboardGrid
         - render charts through ChartRenderer
         - place chart widgets into ChartContainer
 
@@ -38,6 +39,7 @@ class WorkspaceRenderer:
     def render(self, workspace: GuiWorkspace) -> None:
         self._dashboard_grid.clear()
         self._dashboard_grid.add_cards(workspace.cards)
+        self._dashboard_grid.add_panels(workspace.panels)
 
         self._chart_container.clear()
         chart_widgets = self._chart_renderer.render(workspace.charts)

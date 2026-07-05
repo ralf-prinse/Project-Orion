@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
+from time import perf_counter
 
 from services.scanner.quote_service import Quote, QuoteService
 from services.scanner.technical_scanner import TechnicalScanResult, TechnicalScanner
@@ -22,6 +23,8 @@ class LiveScannerSnapshot:
     quotes: tuple[Quote, ...]
     technical_results: tuple[TechnicalScanResult, ...]
     errors: tuple[str, ...] = field(default_factory=tuple)
+    duration_seconds: float = 0.0
+    latest_market_data_timestamp: datetime | None = None
 
     @property
     def total_symbols(self) -> int:
@@ -112,6 +115,7 @@ class LiveScannerService:
         """
 
         errors: list[str] = []
+        started_at = perf_counter()
         symbols: list[str] = []
         quotes: list[Quote] = []
         technical_results: list[TechnicalScanResult] = []
@@ -139,8 +143,32 @@ class LiveScannerService:
             quotes=tuple(quotes),
             technical_results=tuple(technical_results),
             errors=tuple(errors),
+            duration_seconds=round(perf_counter() - started_at, 3),
+            latest_market_data_timestamp=self._latest_market_data_timestamp(quotes),
         )
 
         self._last_snapshot = snapshot
 
         return snapshot
+
+    def _latest_market_data_timestamp(
+        self,
+        quotes: list[Quote],
+    ) -> datetime | None:
+        timestamps: list[datetime] = []
+
+        for quote in quotes:
+            timestamp = getattr(quote, "data_timestamp", None)
+
+            if timestamp is None:
+                continue
+
+            if timestamp.tzinfo is not None:
+                timestamp = timestamp.replace(tzinfo=None)
+
+            timestamps.append(timestamp)
+
+        if not timestamps:
+            return None
+
+        return max(timestamps)

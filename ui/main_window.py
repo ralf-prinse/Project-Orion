@@ -1,4 +1,4 @@
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import (
     QLabel,
     QHBoxLayout,
@@ -13,21 +13,21 @@ from services.portfolio_store import PortfolioStore
 from services.trade_history_store import TradeHistoryStore
 from services.universe_manager import UniverseManager
 
-from ui.application_controller import ApplicationController
 from ui.design import ORION_DARK_THEME
 
 from ui.foundation.history_presenter import HistoryPresenter
+from ui.foundation.mission_control_controller import MissionControlController
 from ui.foundation.settings_presenter import SettingsPresenter
+from ui.foundation.trading_controller import TradingController
 from ui.foundation.workspace_coordinator import WorkspaceCoordinator
 
-from ui.workspace.dashboard_workspace import DashboardWorkspace
 from ui.workspace.history_workspace import HistoryWorkspace
+from ui.workspace.mission_control_workspace import MissionControlWorkspace
+from ui.workspace.performance_workspace import PerformanceWorkspace
 from ui.workspace.portfolio_workspace import PortfolioWorkspace
 from ui.workspace.scanner_workspace import ScannerWorkspace
 from ui.workspace.settings_workspace import SettingsWorkspace
-from ui.workspace.performance_workspace import PerformanceWorkspace
 from ui.workspace.trading_workspace import TradingWorkspace
-
 from ui.workspace.workspace_controller import WorkspaceController
 
 
@@ -60,7 +60,7 @@ class OrionWindow(QMainWindow):
         self.pages = QStackedWidget()
 
         self.workspace_page_indexes = {
-            "dashboard": 0,
+            "mission_control": 0,
             "scanner": 1,
             "trading": 2,
             "portfolio": 3,
@@ -73,9 +73,12 @@ class OrionWindow(QMainWindow):
         # WORKSPACES
         # ----------------------------
 
-        self.dashboard_page = DashboardWorkspace(
+        self.mission_control_page = MissionControlWorkspace(
             theme=self.theme,
             on_scan_requested=self.scan_market,
+        )
+        self.mission_control_page.opportunity_selected.connect(
+            self._handle_mission_control_opportunity_selected
         )
 
         self.scanner_page = ScannerWorkspace(theme=self.theme)
@@ -85,18 +88,37 @@ class OrionWindow(QMainWindow):
             on_analyze_requested=self.analyze_symbol,
         )
 
-        self.portfolio_page = PortfolioWorkspace(theme=self.theme)
+        self.portfolio_page = PortfolioWorkspace(
+            theme=self.theme,
+            initial_cash=self.portfolio.cash,
+            currency=self.portfolio.currency,
+        
+        )
+        self.portfolio_page.capital_saved.connect(
+            self._handle_capital_saved
+        )
         self.performance_page = PerformanceWorkspace(theme=self.theme)
         self.history_page = HistoryWorkspace(theme=self.theme)
         self.settings_page = SettingsWorkspace(theme=self.theme)
 
         # ----------------------------
-        # CONTROLLER (FIXED)
+        # CONTROLLERS
         # ----------------------------
 
-        self.application_controller = ApplicationController(
-            dashboard_workspace=self.dashboard_page,
+        self.mission_control_controller = MissionControlController(
+            workspace=self.mission_control_page,
+            available_cash_provider=lambda: self.portfolio.cash,
+        )
+
+        self.mission_refresh_timer = QTimer(self)
+        self.mission_refresh_timer.setInterval(60_000)
+        self.mission_refresh_timer.timeout.connect(
+            self.mission_control_controller.refresh
+        )
+
+        self.trading_controller = TradingController(
             trading_workspace=self.trading_page,
+            portfolio_state=self.portfolio,
         )
 
         # ----------------------------
@@ -108,7 +130,8 @@ class OrionWindow(QMainWindow):
         self._initialize_history_workspace()
         self._initialize_pages()
 
-        self.application_controller.refresh_dashboard()
+        self.mission_control_controller.initialize()
+        self.mission_refresh_timer.start()
 
     # ----------------------------
     # INIT METHODS
@@ -146,7 +169,7 @@ class OrionWindow(QMainWindow):
     # ----------------------------
 
     def _initialize_pages(self):
-        self.pages.addWidget(self.dashboard_page)
+        self.pages.addWidget(self.mission_control_page)
         self.pages.addWidget(self.scanner_page)
         self.pages.addWidget(self.trading_page)
         self.pages.addWidget(self.portfolio_page)
@@ -184,7 +207,7 @@ class OrionWindow(QMainWindow):
         layout.addWidget(subtitle)
 
         buttons = [
-            ("Dashboard", "dashboard"),
+            ("Mission Control", "mission_control"),
             ("Scanner", "scanner"),
             ("Trading", "trading"),
             ("Portfolio", "portfolio"),
@@ -218,10 +241,29 @@ class OrionWindow(QMainWindow):
     # ----------------------------
 
     def analyze_symbol(self, symbol: str):
-        self.application_controller.analyze_symbol(symbol)
+        self.trading_controller.analyze_symbol(symbol)
+    def _handle_capital_saved(self, amount: float):
+        """
+        Save the available trading capital.
 
+        MainWindow owns the PortfolioStore and is therefore responsible
+        for persistence.
+        """
+
+        self.portfolio.cash = float(amount)
+        self.portfolio_store.save(self.portfolio)
     def scan_market(self):
-        self.application_controller.scan_ai_market()
+        self.mission_control_controller.refresh()
+
+    def _handle_mission_control_opportunity_selected(self, symbol: str):
+        normalized_symbol = str(symbol).strip().upper()
+
+        if not normalized_symbol:
+            return
+
+        self.navigate_to_workspace("trading")
+        self.trading_page.set_symbol(normalized_symbol)
+        self.trading_page.analyze_current_symbol()
 
     # ----------------------------
     # STYLES

@@ -14,6 +14,7 @@ class Quote:
     volume: int
     previous_close: float | None = None
     change_percent: float | None = None
+    data_timestamp: datetime | None = None
 
 
 @dataclass
@@ -147,6 +148,7 @@ class QuoteService:
             volume=market_quote.volume,
             previous_close=market_quote.previous_close,
             change_percent=market_quote.change_percent,
+            data_timestamp=market_quote.data_timestamp,
         )
 
     def _load_cache(self) -> dict:
@@ -255,6 +257,11 @@ class QuoteService:
                     if quote_data.get("change_percent") is not None
                     else None
                 ),
+                data_timestamp=(
+                    datetime.fromisoformat(quote_data["data_timestamp"])
+                    if quote_data.get("data_timestamp")
+                    else None
+                ),    
             )
         except Exception:
             return None

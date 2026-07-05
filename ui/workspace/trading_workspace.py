@@ -108,6 +108,7 @@ class TradingWorkspace(BaseWorkspace):
         top_cards_layout.addWidget(self.pressure_card)
 
         top_cards.setLayout(top_cards_layout)
+
         bottom_cards = QWidget()
         bottom_cards_layout = QHBoxLayout()
         bottom_cards_layout.setContentsMargins(0, 0, 0, 0)
@@ -132,6 +133,32 @@ class TradingWorkspace(BaseWorkspace):
             return
 
         self.on_analyze_requested(symbol)
+
+    def set_symbol(self, symbol: str) -> None:
+        """
+        Set the symbol input from an external workspace action.
+
+        Used by Mission Control when a live opportunity is selected.
+        Presentation only: this does not run analysis by itself.
+        """
+
+        normalized_symbol = str(symbol).strip().upper()
+
+        if not normalized_symbol:
+            self.set_status_text("Geen geldig symbool ontvangen.")
+            return
+
+        self.symbol_input.setText(normalized_symbol)
+        self.set_status_text(
+            f"Symbool {normalized_symbol} geladen vanuit Mission Control."
+        )
+
+    def analyze_current_symbol(self) -> None:
+        """
+        Trigger the existing analyze flow for the current input symbol.
+        """
+
+        self._handle_analyze_clicked()
 
     def set_view_model(self, view_model: TradingWorkspaceViewModel):
         self.decision_card.set_value(view_model.decision)

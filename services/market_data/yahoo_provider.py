@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from datetime import datetime
 from typing import Iterable
 import contextlib
 import io
@@ -154,7 +157,22 @@ class YahooMarketDataProvider(MarketDataProvider):
             volume=volume,
             previous_close=previous_close,
             change_percent=change_percent,
+            data_timestamp=self._extract_data_timestamp(valid_rows),
         )
+
+    def _extract_data_timestamp(self, valid_rows) -> datetime | None:
+        if valid_rows is None or valid_rows.empty:
+            return None
+
+        latest_index = valid_rows.index[-1]
+
+        if hasattr(latest_index, "to_pydatetime"):
+            return latest_index.to_pydatetime()
+
+        if isinstance(latest_index, datetime):
+            return latest_index
+
+        return None
 
     def _clean_symbols(self, symbols: Iterable[str]) -> list[str]:
         clean: list[str] = []

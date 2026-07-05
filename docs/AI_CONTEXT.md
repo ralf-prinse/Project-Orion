@@ -6,25 +6,25 @@
 
 Documentation Version
 
-v1.8
+v1.10
 
 Architecture Version
 
-v1.8
+v1.9
 
 Current Sprint
 
-🚧 Sprint 4.8 — Mission Control Foundation
+🚧 Sprint 5.1 — Portfolio & Position Sizing Foundation
 
 Last Updated
 
-2026-07-04
+2026-07-05
 
 ---
 
 # Purpose
 
-This document provides the minimum context required for a new Orion development session.
+This document provides the minimum context required for every new Orion development session.
 
 It complements:
 
@@ -32,39 +32,77 @@ It complements:
 - PROJECT_STATUS.md
 - TRADING_STRATEGY.md
 
-Architectural details are intentionally omitted here to avoid duplication.
+Architectural specifications intentionally exist only inside
+ORION_MASTER_ARCHITECTURE.md.
+
+This document contains only project state, development workflow and current implementation context.
 
 ---
 
 # Current Project State
 
-Project Orion has completed its deterministic backend foundation.
+Project Orion has completed its architectural foundation.
 
-Current development focuses on transforming the desktop application into **Mission Control**, a professional deterministic trading workstation.
+The deterministic backend is considered stable.
 
-The backend architecture is considered stable.
+Mission Control is now the operational center of Orion.
 
-The frontend architecture is transitioning from a dashboard-oriented application into a reusable panel-based Mission Control interface.
+Current development no longer focuses on creating architecture.
+
+Current development focuses on expanding visible desktop functionality while preserving the deterministic architecture.
+
+Every completed sprint must result in a visible improvement inside the desktop application.
 
 ---
 
 # Current Sprint
 
-## Sprint 4.8 — Mission Control Foundation
+## 🚧 Sprint 5.1 — Portfolio & Position Sizing Foundation
 
-Primary objectives:
+Completed during this sprint
 
-- LiveScannerService
-- Mission Control panels
-- TradingPipeline UI reintegration
-- Position Monitoring preparation
-- GuiWorkspace panel architecture
+✔ Portfolio Workspace redesigned
+
+✔ Portfolio reduced to Trading Capital configuration
+
+✔ PortfolioStore persistence connected
+
+✔ Trading capital survives application restart
+
+✔ Market Data panel displays market data age
+
+✔ Opportunity cards display current market price
+
+✔ OpportunityService introduced
+
+✔ PositionSizingService introduced
+
+✔ Mission Control prepared for position sizing
+
+Current implementation status
+
+Position sizing backend is available.
+
+Mission Control currently displays:
+
+- symbol
+- signal
+- score
+- trend
+- reason
+- latest price
+
+The next sprint expands this with:
+
+- shares to buy
+- required investment
+- remaining capital
 
 ---
 
 # Current Working Components
 
-Backend
+## Backend
 
 ✔ TradingPipeline
 
@@ -74,15 +112,31 @@ Backend
 
 ✔ AnalysisEngine
 
+✔ RiskEngine
+
 ✔ PositionSizingEngine
 
-✔ RiskEngine
+✔ IndicatorBuilder
+
+✔ YahooProvider
+
+✔ LiveScannerService
+
+✔ OpportunityService
+
+✔ PositionSizingService
+
+✔ PortfolioStore
 
 ✔ AI Context Builder
 
 ✔ AI Explanation Engine
 
-Desktop
+The deterministic backend remains the single source of truth.
+
+---
+
+## Desktop
 
 ✔ Workspace architecture
 
@@ -90,101 +144,300 @@ Desktop
 
 ✔ WorkspaceRenderer
 
+✔ GuiWorkspace
+
+✔ GuiWorkspacePanel
+
+✔ MissionControlWorkspace
+
+✔ MissionControlController
+
+✔ TradingWorkspace
+
+✔ TradingController
+
+✔ PortfolioWorkspace
+
 ✔ ChartCanvas Framework
 
-✔ Dashboard
+✔ Auto Refresh
 
-✔ Trading Workspace
+Mission Control remains the primary workspace.
 
-✔ LiveScannerService foundation
+---
 
-✔ GuiWorkspace panel support
+# Current Validation
 
-Current validation:
+Latest validation
 
-✔ python run_tests.py
+```powershell
+python run_tests.py
+```
 
-Latest result:
+Expected result
 
-6 passed
+✔ 6 passed
+
+Desktop validation
+
+```powershell
+python app.py
+```
+
+Validated
+
+✔ Application starts
+
+✔ Navigation works
+
+✔ Mission Control loads
+
+✔ Trading Workspace loads
+
+✔ Portfolio Workspace loads
+
+✔ Scan Market works
+
+✔ Auto Refresh works
+
+✔ Trading Capital persistence works
+
+✔ Manual GUI validation completed
+
+---
+
+# Current GUI State
+
+Mission Control currently contains
+
+✔ Scanner Status
+
+✔ Scan Duration
+
+✔ Market Data
+
+✔ Universe Coverage
+
+✔ Market Status
+
+✔ Top Opportunities
+
+✔ Opportunity Price
+
+✔ Scan Market button
+
+Portfolio currently contains
+
+✔ Trading Capital configuration
+
+✔ Persistent capital storage
+
+✔ Save button
+
+Trading currently contains
+
+✔ TradingPipeline analysis
+
+✔ BUY / HOLD / SELL
+
+✔ Confidence
+
+✔ Pressure
+
+✔ Risk
+
+✔ Position Size
+
+✔ AI Explanation
+
+The desktop now resembles a professional trading workstation rather than a dashboard.
+
+---
 
 # Development Rules
 
 Every Orion implementation must follow these rules.
 
-Backend
+## Backend
 
-- Trading logic only inside backend services.
-- TradingPipeline remains the single source of truth.
+- Trading logic exists only inside backend services.
+- TradingPipeline remains the only decision engine.
 - LiveScannerService performs orchestration only.
-- Position monitoring remains deterministic.
+- OpportunityService builds presentation-ready opportunities.
+- PositionSizingService calculates deterministic position sizing only.
+- PortfolioStore owns persistence of trading capital.
+- Controllers coordinate services but never perform calculations.
 
-Presentation
+---
+
+## Presentation
 
 - Widgets contain presentation only.
 - Panels contain presentation only.
 - Presenters transform deterministic output only.
 - WorkspaceRenderer owns rendering only.
 - ChartCanvas owns painting only.
+- No business logic may exist inside Qt widgets.
 
-Artificial Intelligence
+---
 
-AI may:
+## Artificial Intelligence
+
+AI may
 
 - explain
 - summarize
 - compare
 - generate natural language
 
-AI may never:
+AI may never
 
 - generate BUY signals
 - generate SELL signals
 - calculate indicators
-- size positions
+- calculate confidence
+- calculate position size
 - override deterministic output
 
----
-
-# Current Development Focus
-
-Immediate priorities:
-
-1. Mission Control implementation.
-2. LiveScannerService scheduling.
-3. Trading Workspace deterministic reintegration.
-4. Position Monitor.
-5. Paper Trading foundation.
-
-Current long-term objective:
-
-Transform Orion into a professional deterministic trading workstation for short-term equity trading.
+Artificial Intelligence remains explainability only.
 
 ---
 
-# Validation
+# Current Architecture Direction
 
-After every complete file:
+Mission Control continues to evolve into the operational heart of Orion.
+
+Current architecture introduces a dedicated Opportunity model.
+
+Current deterministic flow
+
+Market Data
+
+↓
+
+LiveScannerService
+
+↓
+
+TradingPipeline
+
+↓
+
+OpportunityService
+
+↓
+
+MissionControlPresenter
+
+↓
+
+Mission Control
+
+Position sizing is prepared for integration through PositionSizingService.
+
+Mission Control itself performs no calculations.
+
+---
+
+# Development Workflow
+
+Every Orion sprint follows exactly the same workflow.
+
+## 1.
+
+Implement one complete feature.
+
+↓
+
+## 2.
+
+Run regression tests.
 
 ```powershell
 python run_tests.py
 ```
 
-Before every commit:
+Expected result
+
+✔ 6 passed
+
+↓
+
+## 3.
+
+Launch Orion.
 
 ```powershell
 python app.py
 ```
 
-Current validation:
+↓
 
-✔ 6 tests passed
+## 4.
+
+Perform manual GUI validation.
+
+Review
+
+- layout
+- usability
+- information hierarchy
+- visual quality
+
+↓
+
+## 5.
+
+Synchronize documentation.
+
+↓
+
+## 6.
+
+Commit changes.
+
+↓
+
+## 7.
+
+Push to GitHub.
+
+A sprint is only considered complete after the documentation has been synchronized and the repository has been updated.
+
+---
+
+# Current Development Focus
+
+Highest priorities
+
+1. Position sizing presentation
+2. Mission Control GUI improvements
+3. Opportunity presentation
+4. Market Health
+5. Trading Workspace improvements
+6. Position Monitor
+7. Paper Trading
+
+---
+
+# Upcoming Sprint
+
+## Sprint 5.2 — Position Sizing Presentation
+
+Objectives
+
+- Show recommended share quantity.
+- Show required investment.
+- Show remaining available capital.
+- Show insufficient budget warnings.
+- Keep TradingPipeline as the only decision engine.
+- Continue expanding Mission Control.
 
 ---
 
 # Documentation
 
-The official Orion documentation consists of:
+The official Orion documentation consists of
 
 - PROJECT_VISION.md
 - ORION_MASTER_ARCHITECTURE.md
@@ -194,39 +447,63 @@ The official Orion documentation consists of:
 - CHANGELOG.md
 - AI_CONTEXT.md
 
-Architectural information belongs only inside ORION_MASTER_ARCHITECTURE.md.
+Architectural information belongs exclusively inside ORION_MASTER_ARCHITECTURE.md.
 
 ---
 
 # New Chat Workflow
 
-Every new Orion development session must follow this workflow.
+Every Orion development session starts with the same process.
 
-1. Upload the complete Project Orion ZIP.
+1.
 
-2. Upload all synchronized documentation.
+Upload the complete Project Orion ZIP.
 
-3. Read every documentation file.
+2.
 
-4. Analyse the complete project source tree.
+Upload all synchronized documentation.
 
-5. Determine:
+3.
 
-- architecture version
-- current sprint
-- completed work
-- active work
-- next implementation step
+Read every documentation file completely.
 
-6. Only after the complete analysis may implementation begin.
+4.
 
-Rules:
+Analyse the complete source tree.
 
-- No assumptions.
-- No snippets.
-- Always provide complete files.
-- One file at a time.
-- Test after every file.
+5.
+
+Determine
+
+- Architecture Version
+- Documentation Version
+- Current Sprint
+- Completed work
+- Active work
+- Next logical implementation step
+
+6.
+
+Only after the complete analysis may implementation begin.
+
+No assumptions are allowed before analysis has been completed.
+
+---
+
+# Orion Development Philosophy
+
+Project Orion is developed according to one central principle:
+
+**Architecture before implementation.**
+
+Every new feature must:
+
+- extend the existing architecture;
+- preserve deterministic behaviour;
+- remain independently testable;
+- produce a visible improvement inside the desktop application.
+
+Mission Control continues to evolve into a professional trading workstation.
 
 ---
 

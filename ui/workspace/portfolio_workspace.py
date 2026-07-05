@@ -1,132 +1,284 @@
-from PySide6.QtWidgets import QHBoxLayout, QVBoxLayout, QWidget
+from __future__ import annotations
 
-from ui.foundation.models import GuiSection, GuiWorkspace
-from ui.widgets.chart_widget import ChartWidget
-from ui.widgets.metric_card import MetricCard
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtWidgets import (
+    QLabel,
+    QFrame,
+    QHBoxLayout,
+    QLineEdit,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
+)
+
 from ui.workspace.base_workspace import BaseWorkspace
-from ui.workspace.workspace_panel import WorkspacePanel
 
 
 class PortfolioWorkspace(BaseWorkspace):
     """
-    Professional Portfolio Dashboard Workspace.
+    Simplified Portfolio workspace.
 
-    UX goals:
-    - clear hierarchy (KPI → Charts → Sections)
-    - balanced chart layout
-    - readable spacing
-    - production-grade layout structure
+    One responsibility:
+    let the user define the available trading capital Orion may use
+    for position-sizing calculations.
+
+    Presentation only.
+    No persistence.
+    No trading decisions.
+    No BUY / HOLD / SELL logic.
     """
 
-    def __init__(self, theme):
+    capital_saved = Signal(float)
+
+    def __init__(
+        self,
+        theme,
+        initial_cash: float = 300.00,
+        currency: str = "EUR",
+    ):
         super().__init__(
             theme=theme,
             title="Portfolio",
-            intro="Bekijk de huidige portefeuille, allocatie en risico-overzicht.",
+            intro=(
+                "Stel hier het beschikbare handelskapitaal in dat Orion mag "
+                "gebruiken voor positieberekeningen."
+            ),
         )
 
-        self._cards: list[MetricCard] = []
-        self._charts: list[ChartWidget] = []
-        self._panels: list[WorkspacePanel] = []
+        self.currency = currency
 
-        self._card_row: QWidget | None = None
-        self._chart_row: QWidget | None = None
+        self.capital_input = QLineEdit()
+        self.capital_input.setText(f"{float(initial_cash):.2f}")
+        self.capital_input.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.capital_input.setPlaceholderText("Bijvoorbeeld: 300.00")
+        self.capital_input.setStyleSheet(self.input_style())
 
-    def set_workspace(self, workspace: GuiWorkspace):
-        self._clear_rendered_content()
+        self.currency_label = QLabel(self.currency)
+        self.currency_label.setStyleSheet(self.currency_style())
 
-        if workspace.cards:
-            self._card_row = self._create_card_row(workspace)
-            self.add_workspace_widget(self._card_row)
+        self.save_button = QPushButton("Opslaan")
+        self.save_button.setStyleSheet(self.primary_button_style())
+        self.save_button.clicked.connect(self._handle_save_clicked)
 
-        if workspace.charts:
-            self._chart_row = self._create_chart_row(workspace)
-            self.add_workspace_widget(self._chart_row)
+        self.status_label = QLabel("Trading capital klaar om gebruikt te worden.")
+        self.status_label.setWordWrap(True)
+        self.status_label.setStyleSheet(self.status_style("neutral"))
 
-        self.set_sections(workspace.sections)
+        self._build_layout()
 
-    def set_sections(self, sections: list[GuiSection]):
-        for panel in self._panels:
-            panel.setParent(None)
+    def set_workspace(self, workspace) -> None:
+        """
+        Backward-compatible adapter.
 
-        self._panels.clear()
+        MainWindow may still call set_workspace during startup.
+        The simplified Portfolio workspace no longer renders portfolio dashboards.
+        """
 
-        for section in sections:
-            panel = WorkspacePanel.from_section(
-                theme=self.theme,
-                section=section,
+        return None
+
+    def _build_layout(self) -> None:
+        card = QFrame()
+        card.setObjectName("TradingCapitalCard")
+        card.setStyleSheet(self.card_style())
+
+        card_layout = QVBoxLayout()
+        card_layout.setContentsMargins(28, 26, 28, 26)
+        card_layout.setSpacing(18)
+
+        title = QLabel("Trading Capital")
+        title.setStyleSheet(self.card_title_style())
+
+        subtitle = QLabel(
+            "Vul het bedrag in dat Orion mag gebruiken voor position sizing."
+        )
+        subtitle.setWordWrap(True)
+        subtitle.setStyleSheet(self.card_subtitle_style())
+
+        input_row = QWidget()
+        input_layout = QHBoxLayout()
+        input_layout.setContentsMargins(0, 0, 0, 0)
+        input_layout.setSpacing(12)
+
+        input_layout.addWidget(self.capital_input, stretch=1)
+        input_layout.addWidget(self.currency_label)
+
+        input_row.setLayout(input_layout)
+
+        explanation = QLabel(
+            "Orion gebruikt dit bedrag na een Scan Markt om per opportunity "
+            "te berekenen hoeveel aandelen binnen je beschikbare budget passen."
+        )
+        explanation.setWordWrap(True)
+        explanation.setStyleSheet(self.explanation_style())
+
+        bullets = QLabel(
+            "✓ aantal aandelen\n"
+            "✓ benodigde investering\n"
+            "✓ resterend budget\n"
+            "✓ budgetcontrole"
+        )
+        bullets.setStyleSheet(self.bullet_style())
+
+        card_layout.addWidget(title)
+        card_layout.addWidget(subtitle)
+        card_layout.addWidget(input_row)
+        card_layout.addWidget(self.save_button)
+        card_layout.addWidget(self.status_label)
+        card_layout.addSpacing(8)
+        card_layout.addWidget(explanation)
+        card_layout.addWidget(bullets)
+
+        card.setLayout(card_layout)
+
+        container = QWidget()
+        container_layout = QVBoxLayout()
+        container_layout.setContentsMargins(0, 0, 0, 0)
+        container_layout.setSpacing(0)
+        container_layout.addWidget(card)
+        container_layout.addStretch(1)
+        container.setLayout(container_layout)
+
+        self.add_workspace_widget(container)
+
+    def _handle_save_clicked(self) -> None:
+        value_text = self.capital_input.text().strip().replace(",", ".")
+
+        try:
+            amount = float(value_text)
+        except ValueError:
+            self._set_status(
+                "Vul een geldig bedrag in, bijvoorbeeld 300.00.",
+                "warning",
             )
+            return
 
-            self._panels.append(panel)
-            self.add_workspace_widget(panel)
-
-    def clear(self):
-        self._clear_rendered_content()
-
-    # -----------------------------
-    # KPI LAYER
-    # -----------------------------
-    def _create_card_row(self, workspace: GuiWorkspace) -> QWidget:
-        row = QWidget()
-
-        layout = QHBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 16)
-        layout.setSpacing(14)
-
-        for card in workspace.cards:
-            widget = MetricCard(
-                theme=self.theme,
-                card=card,
+        if amount <= 0:
+            self._set_status(
+                "Het beschikbare handelskapitaal moet groter zijn dan 0.",
+                "warning",
             )
-            self._cards.append(widget)
-            layout.addWidget(widget)
+            return
 
-        row.setLayout(layout)
-        return row
+        self.capital_input.setText(f"{amount:.2f}")
+        self.capital_saved.emit(amount)
 
-    # -----------------------------
-    # CHART LAYER (UX IMPROVED)
-    # -----------------------------
-    def _create_chart_row(self, workspace: GuiWorkspace) -> QWidget:
-        row = QWidget()
+        self._set_status(
+            f"Beschikbaar handelskapitaal opgeslagen: {self.currency} {amount:.2f}.",
+            "success",
+        )
 
-        layout = QHBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 18)
-        layout.setSpacing(16)
+    def set_capital(self, amount: float, currency: str | None = None) -> None:
+        self.capital_input.setText(f"{float(amount):.2f}")
 
-        # UX improvement: charts equal height & balanced width
-        for chart in workspace.charts:
-            widget = ChartWidget(
-                theme=self.theme,
-                chart=chart,
-            )
+        if currency:
+            self.currency = currency
+            self.currency_label.setText(currency)
 
-            widget.setMinimumHeight(340)
-            widget.setMaximumHeight(380)
+        self._set_status(
+            f"Huidig handelskapitaal: {self.currency} {float(amount):.2f}.",
+            "neutral",
+        )
 
-            self._charts.append(widget)
-            layout.addWidget(widget)
+    def _set_status(self, text: str, status: str) -> None:
+        self.status_label.setText(text)
+        self.status_label.setStyleSheet(self.status_style(status))
 
-        row.setLayout(layout)
-        return row
+    def card_style(self) -> str:
+        return """
+        QFrame#TradingCapitalCard {
+            background-color: #111827;
+            border: 1px solid #374151;
+            border-radius: 18px;
+        }
+        """
 
-    def _clear_rendered_content(self):
-        if self._card_row:
-            self._card_row.setParent(None)
-            self._card_row = None
+    def card_title_style(self) -> str:
+        return """
+        color: #f9fafb;
+        font-size: 22px;
+        font-weight: 800;
+        """
 
-        if self._chart_row:
-            self._chart_row.setParent(None)
-            self._chart_row = None
+    def card_subtitle_style(self) -> str:
+        return """
+        color: #9ca3af;
+        font-size: 14px;
+        font-weight: 500;
+        """
 
-        for card in self._cards:
-            card.setParent(None)
-        self._cards.clear()
+    def input_style(self) -> str:
+        return """
+        QLineEdit {
+            background-color: #020617;
+            color: #f9fafb;
+            border: 1px solid #374151;
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-size: 24px;
+            font-weight: 800;
+        }
 
-        for chart in self._charts:
-            chart.setParent(None)
-        self._charts.clear()
+        QLineEdit:focus {
+            border: 1px solid #2563eb;
+        }
+        """
 
-        for panel in self._panels:
-            panel.setParent(None)
-        self._panels.clear()
+    def currency_style(self) -> str:
+        return """
+        color: #60a5fa;
+        font-size: 20px;
+        font-weight: 800;
+        min-width: 54px;
+        """
+
+    def primary_button_style(self) -> str:
+        return """
+        QPushButton {
+            background-color: #2563eb;
+            color: white;
+            font-size: 15px;
+            font-weight: 800;
+            padding: 14px 20px;
+            border-radius: 12px;
+            border: 1px solid #3b82f6;
+        }
+
+        QPushButton:hover {
+            background-color: #1d4ed8;
+            border: 1px solid #60a5fa;
+        }
+
+        QPushButton:pressed {
+            background-color: #1e40af;
+        }
+        """
+
+    def status_style(self, status: str) -> str:
+        if status == "success":
+            color = "#22c55e"
+        elif status == "warning":
+            color = "#f59e0b"
+        else:
+            color = "#9ca3af"
+
+        return f"""
+        color: {color};
+        font-size: 13px;
+        font-weight: 600;
+        """
+
+    def explanation_style(self) -> str:
+        return """
+        color: #d1d5db;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 140%;
+        """
+
+    def bullet_style(self) -> str:
+        return """
+        color: #f9fafb;
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 150%;
+        """

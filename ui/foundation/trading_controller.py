@@ -6,12 +6,14 @@ from services.orchestration.trading_pipeline import TradingPipeline
 from ui.foundation.trading_workspace_presenter import TradingWorkspacePresenter
 
 
-class ApplicationController:
+class TradingController:
     """
-    Central application controller.
+    Controller for the Trading Workspace.
 
-    Current responsibilities:
-        - run deterministic TradingPipeline analysis for one symbol
+    Responsibilities:
+        - load historical market data
+        - build deterministic IndicatorPack
+        - execute TradingPipeline
         - transform pipeline output through TradingWorkspacePresenter
         - update TradingWorkspace
 
@@ -33,45 +35,15 @@ class ApplicationController:
         self.trading_workspace = trading_workspace
         self.portfolio_state = portfolio_state
 
-        self.market_provider = (
-            market_provider
-            if market_provider is not None
-            else YahooProvider()
-        )
-
-        self.indicator_builder = (
-            indicator_builder
-            if indicator_builder is not None
-            else IndicatorBuilder()
-        )
-
-        self.trading_pipeline = (
-            trading_pipeline
-            if trading_pipeline is not None
-            else TradingPipeline()
-        )
-
-        self.trading_presenter = (
-            trading_presenter
-            if trading_presenter is not None
-            else TradingWorkspacePresenter()
-        )
+        self.market_provider = market_provider or YahooProvider()
+        self.indicator_builder = indicator_builder or IndicatorBuilder()
+        self.trading_pipeline = trading_pipeline or TradingPipeline()
+        self.trading_presenter = trading_presenter or TradingWorkspacePresenter()
 
         self.analysis_period = "6mo"
         self.analysis_interval = "1d"
 
     def analyze_symbol(self, symbol: str) -> None:
-        """
-        Run the deterministic trading pipeline for one symbol.
-
-        Flow:
-            YahooProvider
-                -> IndicatorBuilder
-                -> TradingPipeline
-                -> TradingWorkspacePresenter
-                -> TradingWorkspace
-        """
-
         normalized_symbol = symbol.strip().upper()
 
         if not normalized_symbol:

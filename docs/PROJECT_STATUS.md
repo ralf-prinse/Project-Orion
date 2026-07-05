@@ -8,11 +8,11 @@
 
 Documentation Version
 
-v1.8
+v1.10
 
 Architecture Version
 
-v1.8
+v1.9
 
 Status
 
@@ -20,43 +20,42 @@ Status
 
 Current Sprint
 
-🚧 Sprint 4.8 — Mission Control Foundation
+🚧 Sprint 5.1 — Portfolio & Position Sizing Foundation
 
 Last Updated
 
-2026-07-04
+2026-07-05
 
 ---
 
 # Executive Summary
 
-Project Orion has transitioned from a chart-oriented desktop application into the foundation of a deterministic trading workstation.
+Project Orion has completed its deterministic architectural foundation.
 
-The deterministic backend remains the single source of truth for all trading decisions.
+The application has evolved into a Mission Control-driven desktop trading workstation.
 
-Current development is focused on transforming the desktop application into **Mission Control**: a workspace that continuously presents deterministic trading opportunities, monitors active positions and explains every signal.
+Mission Control is now the primary operational workspace.
 
-The architectural foundation is considered stable.
+The deterministic backend is considered stable.
 
-Future development extends the existing architecture rather than replacing it.
+Current development focuses on enriching the desktop experience without changing the underlying architecture.
 
-For architectural details, see:
-
-**ORION_MASTER_ARCHITECTURE.md**
+Every sprint must deliver a visible GUI improvement while preserving deterministic behaviour.
 
 ---
 
 # Current Development Focus
 
-Sprint 4.8 focuses on four major objectives.
+Sprint 5.1 focuses on connecting portfolio management with deterministic market opportunities.
 
-1. Introduce Mission Control as the primary workspace.
+Primary objectives
 
-2. Build the LiveScannerService orchestration layer.
-
-3. Reconnect the Trading Workspace to the deterministic TradingPipeline.
-
-4. Prepare deterministic Position Monitoring.
+1. Trading Capital configuration
+2. Persistent Portfolio storage
+3. Opportunity architecture
+4. Position sizing foundation
+5. Mission Control expansion
+6. Professional desktop UX
 
 ---
 
@@ -66,37 +65,108 @@ Sprint 4.8 focuses on four major objectives.
 
 🟢 Stable
 
-Completed:
+Completed
 
-- Deterministic TradingPipeline
+- TradingPipeline
 - TechnicalScanner
 - MarketScanner
 - AnalysisEngine
 - RiskEngine
 - PositionSizingEngine
-- Market Intelligence
+- LiveScannerService
+- IndicatorBuilder
+- YahooProvider
+- PortfolioStore
+- OpportunityService
+- PositionSizingService
 - AI Context Builder
 - AI Explanation Engine
 
-The backend architecture is considered stable.
+The backend remains fully deterministic.
+
+TradingPipeline remains the only source of BUY / HOLD / SELL decisions.
 
 ---
 
-## Desktop
+## Desktop Foundation
 
-🟢 Stable Foundation
+🟢 Stable
 
-Completed:
+Completed
 
 - Workspace architecture
 - Presenter architecture
 - WorkspaceRenderer
 - GuiWorkspace
-- ChartCanvas Framework
-- Dashboard integration
-- LiveScannerService foundation
+- GuiWorkspacePanel
+- DashboardGrid
+- MissionControlWorkspace
+- MissionControlController
+- TradingWorkspace
+- TradingController
+- PortfolioWorkspace
 
-Current work focuses on Mission Control panels and presentation.
+Mission Control remains the primary workspace.
+
+---
+
+## Portfolio Workspace
+
+🟢 Operational
+
+Completed
+
+- Portfolio redesigned
+- Trading Capital configuration
+- Persistent storage
+- PortfolioStore integration
+- Save workflow
+- Application restart persistence
+
+Current responsibility
+
+Portfolio configures the available trading capital Orion may use for deterministic position sizing.
+
+Portfolio no longer functions as an analytics dashboard.
+
+---
+
+## Mission Control
+
+🟢 Operational
+
+Completed
+
+- Scanner Status
+- Scan Duration
+- Market Data
+- Market Status
+- Universe Coverage
+- Top Opportunities
+- Opportunity Price
+- Scan Market
+- Automatic Refresh
+
+Mission Control now displays richer deterministic information and has been prepared for deterministic position sizing.
+
+---
+
+## Trading Workspace
+
+🟢 Operational
+
+Completed
+
+- TradingPipeline integration
+- TradingController
+- BUY / HOLD / SELL
+- Confidence
+- Pressure
+- Risk
+- Position Size
+- AI Explanation
+
+Remaining work is presentation focused.
 
 ---
 
@@ -104,324 +174,271 @@ Current work focuses on Mission Control panels and presentation.
 
 🟢 Stable
 
-Artificial Intelligence is explainability only.
+Artificial Intelligence remains explainability only.
 
-AI never:
+AI never
 
 - creates trading signals
-- performs calculations
+- calculates indicators
+- determines confidence
 - sizes positions
 - overrides deterministic output
-
-AI explains deterministic backend decisions only.
-
-# Current Workspaces
-
-## Mission Control
-
-🚧 Active Development
-
-Current objectives:
-
-- Live Scanner integration
-- Scanner panels
-- Market Status panel
-- Top Opportunities panel
-- Chart integration
-- Independent panel refresh
-
-Mission Control becomes the operational center of Orion.
-
----
-
-## Trading Workspace
-
-🟡 Integration Phase
-
-Current objectives:
-
-- reconnect deterministic TradingPipeline
-- remove remaining mock presentation model
-- integrate deterministic SignalOutput
-- add trading chart
-- display BUY / HOLD / SELL information
-- AI explanation synchronization
-
----
-
-## Scanner Workspace
-
-🟡 Planned
-
-Future responsibilities:
-
-- ranked opportunities
-- scanner statistics
-- confidence overview
-- filters
-- sector overview
-- market breadth
-
-Data source:
-
-LiveScannerService
-
----
-
-## Portfolio Workspace
-
-🟡 Planned
-
-Future responsibilities:
-
-- open positions
-- unrealized P/L
-- allocation
-- exposure
-- exit recommendations
-- portfolio timeline
-
-Data source:
-
-PositionMonitor
-
----
-
-## Performance Workspace
-
-📋 Planned
-
-Future responsibilities:
-
-- equity curve
-- drawdown
-- benchmark comparison
-- expectancy
-- historical statistics
-
----
-
-# Live Scanner Status
-
-Status
-
-🟡 Foundation Complete
-
-Completed:
-
-- LiveScannerService
-- Scanner Snapshot model
-- QuoteService integration
-- Watchlist integration
-- TechnicalScanner integration
-
-Planned:
-
-- scheduled scanning
-- snapshot publication
-- Mission Control integration
-- PositionMonitor integration
-
----
-
-# Mission Control Status
-
-Status
-
-🚧 In Progress
-
-Completed:
-
-- architecture defined
-- panel architecture defined
-- GuiWorkspace panel support introduced
-- ScannerPanel foundation
-
-Remaining work:
-
-- panel rendering
-- presenter integration
-- controller integration
-- live updates
-- Top Opportunities panel
-- Open Positions panel
-- Alerts panel
 
 ---
 
 # Current Validation
 
-Latest validation:
+Latest validation
 
 ✔ python run_tests.py
 
 Result
 
-6 passed
+✔ 6 passed
 
-Desktop status:
+Desktop validation
 
 ✔ Application starts
 
-✔ Dashboard loads
-
-✔ Trading loads
-
 ✔ Navigation works
 
-✔ Yahoo Finance integration operational
+✔ Mission Control loads
 
-✔ LiveScannerService integrated
+✔ Portfolio loads
 
-No known backend regressions.
+✔ Trading Workspace loads
+
+✔ Scan Market works
+
+✔ Auto Refresh works
+
+✔ Trading Capital persistence works
+
+✔ Manual GUI validation completed
+
+---
+
+# Current GUI Status
+
+Mission Control currently displays
+
+- Scanner Status
+- Scan Duration
+- Market Data
+- Universe Coverage
+- Market Status
+- Top Opportunities
+- Opportunity Price
+
+Portfolio currently displays
+
+- Trading Capital
+- Save action
+- Persistent storage
+
+Trading Workspace currently displays
+
+- Signal
+- Confidence
+- Pressure
+- Risk
+- Position Size
+- AI Explanation
+
+The GUI foundation is considered stable.
+
+Future work primarily enriches deterministic information.
 
 ---
 
 # Known Limitations
 
-Current limitations are implementation related.
+Current limitations are feature related rather than architectural.
 
-Remaining work:
+Remaining work
 
-- Mission Control rendering
-- TradingPipeline UI reintegration
+- Position sizing presentation
+- Shares to buy
+- Required investment
+- Remaining capital
+- Budget validation
+- Market Health expansion
 - Position Monitor
-- ExitSignalEngine
-- scheduled background scanner
-- streaming provider abstraction
-- paper trading
+- Paper Trading
 
-No architectural blockers are currently known.
+No known architectural blockers exist.
+
+---
 
 # Sprint Roadmap
 
-## Sprint 4.8 — Mission Control Foundation
-
-Current objectives
-
-- Mission Control becomes the primary workspace.
-- LiveScannerService becomes the central orchestration layer.
-- Trading Workspace reconnects to the deterministic TradingPipeline.
-- GuiWorkspace panels become the standard presentation model.
-- Scanner output is integrated into Mission Control.
+## Sprint 5.1 — Portfolio & Position Sizing Foundation
 
 Status
 
 🚧 Active
 
+Completed
+
+- Trading Capital
+- Portfolio persistence
+- OpportunityService
+- PositionSizingService
+- Opportunity pricing
+
+Remaining
+
+- Position sizing presentation
+
 ---
 
-## Sprint 4.9 — Position Monitoring
+## Sprint 5.2 — Position Sizing Presentation
+
+Objectives
+
+- Shares to buy
+- Required investment
+- Remaining capital
+- Budget warnings
+- Rich opportunity cards
+
+---
+
+## Sprint 5.3 — Market Health
 
 Planned
 
-- PositionMonitor
-- ExitSignalEngine
-- Open Position panels
-- Position timeline
-- Exit notifications
-- Position history
+- Scanner Health
+- Error Summary
+- Last Refresh
+- Market Breadth
+- Additional market metrics
 
 ---
 
-## Sprint 5.0 — Paper Trading
+## Sprint 5.4 — Trading Workspace 2.0
 
 Planned
 
-- Virtual broker
-- Simulated execution
+- Entry
+- Stop Loss
+- Take Profit
+- Risk / Reward
+- Trade Checklist
+- Improved AI Explanation
+
+---
+
+## Sprint 5.5 — Position Monitor
+
+Planned
+
+- Open Positions
+- Exit recommendations
+- Portfolio Health
+- Position Timeline
+- Alerts
+
+---
+
+## Sprint 6.0 — Paper Trading
+
+Planned
+
+- Virtual Broker
 - Order lifecycle
-- Trade journal
+- Portfolio model
+- Simulated execution
 - Performance tracking
-
----
-
-## Sprint 5.x
-
-Future development
-
-- Broker abstraction
-- Streaming market data
-- Performance analytics
-- Multi-monitor support
-- Replay Engine
-- Strategy comparison
-- Notifications
-- Portfolio Intelligence
 
 ---
 
 # Overall Project Progress
 
-## Epic 1 — Deterministic Backend
+Epic 1
 
-✅ Complete
+✅ Deterministic Backend
 
----
-
-## Epic 2 — Desktop Architecture
-
-✅ Complete
+Complete
 
 ---
 
-## Epic 3 — ChartCanvas Framework
+Epic 2
 
-✅ Complete
+✅ Desktop Architecture
 
----
-
-## Epic 4 — Mission Control
-
-🚧 In Progress
+Complete
 
 ---
 
-## Epic 5 — Position Monitoring
+Epic 3
 
-📋 Planned
+✅ Mission Control Foundation
 
----
-
-## Epic 6 — Paper Trading
-
-📋 Planned
+Complete
 
 ---
 
-## Epic 7 — Broker Integration
+Epic 4
 
-📋 Future
+🚧 Mission Control Expansion
+
+Active
+
+---
+
+Epic 5
+
+🚧 Portfolio & Position Sizing
+
+Active
+
+---
+
+Epic 6
+
+📋 Position Monitor
+
+Planned
+
+---
+
+Epic 7
+
+📋 Paper Trading
+
+Planned
 
 ---
 
 # Current Priorities
 
-Highest priority
-
-1. Mission Control integration
-2. LiveScannerService scheduling
-3. TradingPipeline UI integration
-4. Position Monitor
-5. Paper Trading foundation
+1. Position sizing presentation
+2. Mission Control
+3. Market Health
+4. Trading Workspace
+5. Position Monitor
+6. Paper Trading
 
 ---
 
 # Definition of Done
 
-A sprint is complete only when:
+A sprint is complete only when
 
 ✔ Feature implemented
 
-✔ Deterministic backend preserved
+✔ Architecture respected
+
+✔ TradingPipeline remains the only decision engine
 
 ✔ No business logic inside UI
 
 ✔ Tests pass
 
-✔ Desktop application starts
+✔ Desktop launches
 
-✔ Manual validation completed
+✔ Manual GUI validation completed
 
 ✔ Documentation synchronized
 
@@ -433,43 +450,15 @@ A sprint is complete only when:
 
 # Documentation Status
 
-The following documentation is considered authoritative:
+Documentation Version
 
-- PROJECT_VISION.md
-- ORION_MASTER_ARCHITECTURE.md
-- TRADING_STRATEGY.md
-- PROJECT_STATUS.md
-- TODO.md
-- CHANGELOG.md
-- AI_CONTEXT.md
+v1.10
 
-Architectural information must not be duplicated outside these documents.
+Architecture Version
 
----
+v1.9
 
-# New Chat Workflow
-
-Every Orion development session starts with the following workflow.
-
-1. Upload the complete Project Orion ZIP.
-
-2. Upload all synchronized documentation.
-
-3. Read every documentation file completely.
-
-4. Analyse the complete project.
-
-5. Determine:
-
-- architecture version
-- current sprint
-- completed work
-- active work
-- next logical implementation
-
-6. Only after the complete analysis may implementation begin.
-
-No assumptions may be made before the complete project analysis.
+Documentation is synchronized with the current implementation.
 
 ---
 

@@ -8,23 +8,23 @@
 
 Documentation Version
 
-v1.8
+v1.10
 
 Architecture Version
 
-v1.8
+v1.9
 
 Last Updated
 
-2026-07-04
+2026-07-05
 
 ---
 
-# Sprint 4.8 — Mission Control Foundation
+# Sprint 5.1 — Portfolio & Position Sizing Foundation
 
 Status
 
-🚧 Active Development
+✅ Completed
 
 ---
 
@@ -32,26 +32,25 @@ Status
 
 ### Added
 
-- Mission Control architecture
-- GuiWorkspace panel architecture
-- Generic GuiWorkspacePanel presentation model
-- LiveScannerService architecture
-- Scanner snapshot model
-- Unified documentation structure
+- Opportunity domain model introduced.
+- OpportunityService introduced.
+- PositionSizingService introduced.
+- PortfolioStore integrated into the desktop workflow.
+- Trading Capital configuration workflow.
 
 ### Changed
 
-- Dashboard architecture evolved into Mission Control architecture.
-- GuiWorkspace extended with reusable panels.
-- ORION_MASTER_ARCHITECTURE became the single architectural source of truth.
-- Presentation architecture standardized around reusable panels.
-- LiveScanner architecture integrated into the Master Architecture.
+- Mission Control prepared for deterministic position sizing.
+- Portfolio redesigned into a configuration workspace.
+- Opportunity presentation expanded with current market price.
+- Market Data panel now reports market data age.
+- Desktop architecture remains fully deterministic.
 
 ### Removed
 
-- Duplicate architecture definitions from separate documentation files.
-- Presentation architecture duplication.
-- Live Scanner architecture duplication.
+- Portfolio dashboard concept.
+- Portfolio analytics from Portfolio workspace.
+- Redundant portfolio presentation logic.
 
 ---
 
@@ -59,15 +58,18 @@ Status
 
 ### Added
 
-- LiveScannerService foundation
-- Scanner snapshot model
-- Live scanner orchestration layer
+- OpportunityService
+- PositionSizingService
+- PortfolioStore desktop integration
+- Trading Capital persistence
+- Opportunity aggregation layer
 
 ### Changed
 
-- Scanner orchestration centralized.
-- TradingPipeline confirmed as the only decision engine.
-- PositionMonitor introduced into the architectural roadmap.
+- MissionControlController now consumes OpportunityService.
+- Portfolio state is persisted between application launches.
+- Market data timestamps exposed to presentation layer.
+- Live scanner output prepared for deterministic position sizing.
 
 ---
 
@@ -75,97 +77,196 @@ Status
 
 ### Added
 
-- ScannerPanel foundation
-- Mission Control panel architecture
-- GuiWorkspacePanel support
+- Simplified Portfolio Workspace
+- Trading Capital input
+- Save workflow
+- Persistent Trading Capital
+- Opportunity market price presentation
+- Market data age presentation
 
 ### Changed
 
-- Dashboard transitions toward Mission Control.
-- Workspace architecture prepared for reusable presentation panels.
-
-# PROJECT ORION
-
-# CHANGELOG
+- Portfolio Workspace simplified to a single responsibility.
+- Mission Control opportunity cards enriched.
+- Scan Market workflow now prepares deterministic position sizing.
+- Desktop workflow aligned with Opportunity architecture.
 
 ---
 
-# Documentation Information
-
-Documentation Version
-
-v1.8
-
-Architecture Version
-
-v1.8
-
-Last Updated
-
-2026-07-04
-
----
-
-# Sprint 4.8 — Mission Control Foundation
-
-Status
-
-🚧 Active Development
-
----
-
-## Architecture
+## Presentation
 
 ### Added
 
-- Mission Control architecture
-- GuiWorkspace panel architecture
-- Generic GuiWorkspacePanel presentation model
-- LiveScannerService architecture
-- Scanner snapshot model
-- Unified documentation structure
+- Opportunity presentation model support.
+- Market price presentation.
+- Market data age presentation.
 
 ### Changed
 
-- Dashboard architecture evolved into Mission Control architecture.
-- GuiWorkspace extended with reusable panels.
-- ORION_MASTER_ARCHITECTURE became the single architectural source of truth.
-- Presentation architecture standardized around reusable panels.
-- LiveScanner architecture integrated into the Master Architecture.
-
-### Removed
-
-- Duplicate architecture definitions from separate documentation files.
-- Presentation architecture duplication.
-- Live Scanner architecture duplication.
+- MissionControlPresenter expanded.
+- Mission Control cards now display richer deterministic information.
+- Presentation prepared for Position Sizing integration.
 
 ---
 
-## Backend
+## Quality Assurance
 
-### Added
+Latest validation
 
-- LiveScannerService foundation
-- Scanner snapshot model
-- Live scanner orchestration layer
+✔ python run_tests.py
 
-### Changed
+Result
 
-- Scanner orchestration centralized.
-- TradingPipeline confirmed as the only decision engine.
-- PositionMonitor introduced into the architectural roadmap.
+✔ 6 passed
+
+Desktop validation
+
+✔ Application starts
+
+✔ Mission Control loads
+
+✔ Portfolio Workspace loads
+
+✔ Trading Workspace loads
+
+✔ Navigation works
+
+✔ Scan Market works
+
+✔ Auto Refresh works
+
+✔ Trading Capital persistence validated
+
+✔ Manual GUI validation completed
 
 ---
 
-## Desktop
+# Current Project State
 
-### Added
+Completed
 
-- ScannerPanel foundation
-- Mission Control panel architecture
-- GuiWorkspacePanel support
+✔ Opportunity architecture
 
-### Changed
+✔ Portfolio persistence
 
-- Dashboard transitions toward Mission Control.
-- Workspace architecture prepared for reusable presentation panels.
+✔ PositionSizingService
+
+✔ OpportunityService
+
+✔ Mission Control pricing
+
+✔ Market data freshness
+
+Current implementation status
+
+Mission Control currently displays
+
+- Signal
+- Technical score
+- Trend
+- Scanner reason
+- Current market price
+
+Portfolio currently manages
+
+- Available trading capital
+
+The backend is prepared for deterministic position sizing.
+
+GUI presentation of calculated position sizing begins in Sprint 5.2.
+
+---
+
+# Next Sprint
+
+## Sprint 5.2 — Position Sizing Presentation
+
+Objectives
+
+- Show recommended share quantity.
+- Show required investment.
+- Show remaining available capital.
+- Show insufficient budget warnings.
+- Prepare deterministic FX conversion.
+- Continue enriching Mission Control.
+
+---
+
+# Previous Milestones
+
+## Sprint 4.9.1 — Live Opportunities
+
+Completed
+
+- Mission Control introduced as primary workspace.
+- TradingController integrated.
+- LiveScannerService operational.
+- Scan Duration panel.
+- Scan Market workflow.
+- Rich Mission Control foundation.
+
+---
+
+## Sprint 4.8
+
+Completed
+
+- Workspace architecture
+- Presenter architecture
+- ChartCanvas framework
+
+---
+
+## Sprint 4.7 and earlier
+
+Completed
+
+- Deterministic backend foundation
+- TradingPipeline
+- TechnicalScanner
+- AnalysisEngine
+- MarketScanner
+- RiskEngine
+- AI Explanation Engine
+
+---
+
+# Development Workflow
+
+Every sprint follows the same lifecycle.
+
+Architecture
+
+↓
+
+Implementation
+
+↓
+
+Regression Tests
+
+↓
+
+Desktop Launch
+
+↓
+
+GUI Validation
+
+↓
+
+Documentation Synchronization
+
+↓
+
+Git Commit
+
+↓
+
+GitHub Push
+
+Every sprint must end with a visible desktop improvement while preserving deterministic architecture.
+
+---
+
+# End of CHANGELOG

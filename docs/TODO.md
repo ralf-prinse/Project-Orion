@@ -6,35 +6,40 @@
 
 Documentation Version
 
-v1.8
+v1.10
 
 Architecture Version
 
-v1.8
+v1.9
 
 Current Sprint
 
-🚧 Sprint 4.8 — Mission Control Foundation
+🚧 Sprint 5.1 — Portfolio & Position Sizing Foundation
 
 Last Updated
 
-2026-07-04
+2026-07-05
 
 ---
 
-# Completed Milestones
+# Completed Foundation
 
 ## Backend
 
-- [x] Deterministic TradingPipeline
+- [x] TradingPipeline
 - [x] TechnicalScanner
 - [x] MarketScanner
 - [x] AnalysisEngine
 - [x] RiskEngine
 - [x] PositionSizingEngine
+- [x] LiveScannerService
+- [x] IndicatorBuilder
+- [x] Yahoo Finance integration
+- [x] PortfolioStore
+- [x] OpportunityService
+- [x] PositionSizingService
 - [x] AI Context Builder
 - [x] AI Explanation Engine
-- [x] LiveScannerService foundation
 
 ---
 
@@ -45,9 +50,41 @@ Last Updated
 - [x] WorkspaceRenderer
 - [x] GuiWorkspace
 - [x] GuiWorkspacePanel
-- [x] Dashboard integration
-- [x] ChartCanvas Framework
-- [x] ScannerPanel foundation
+- [x] DashboardGrid
+- [x] MissionControlWorkspace
+- [x] MissionControlController
+- [x] TradingWorkspace
+- [x] TradingController
+- [x] PortfolioWorkspace
+- [x] ChartCanvas framework
+
+---
+
+## Mission Control
+
+Completed
+
+- [x] Scanner Status
+- [x] Scan Duration
+- [x] Market Data panel
+- [x] Market Status
+- [x] Universe Coverage
+- [x] Top Opportunities
+- [x] Opportunity Price
+- [x] Automatic Refresh
+- [x] Scan Market button
+
+---
+
+## Portfolio
+
+Completed
+
+- [x] Portfolio redesign
+- [x] Trading Capital configuration
+- [x] Save workflow
+- [x] Persistent PortfolioStore integration
+- [x] Trading capital survives restart
 
 ---
 
@@ -55,11 +92,13 @@ Last Updated
 
 - [x] Application starts
 - [x] Navigation works
-- [x] Dashboard renders
-- [x] Trading renders
-- [x] Yahoo Finance integration
-- [x] LiveScannerService foundation
-- [x] All regression tests pass
+- [x] Mission Control loads
+- [x] Portfolio loads
+- [x] Trading Workspace loads
+- [x] Scan Market works
+- [x] Auto Refresh works
+- [x] Trading Capital persistence works
+- [x] Manual GUI validation completed
 
 Latest validation
 
@@ -67,115 +106,86 @@ Latest validation
 
 ---
 
-# Sprint 4.8 — Mission Control Foundation
+# Sprint 5.1 — Portfolio & Position Sizing Foundation
 
-## LiveScannerService
+Completed
 
-- [ ] Add scheduled scan cycle
-- [ ] Configurable refresh interval
-- [ ] Publish scanner snapshots
-- [ ] Error recovery
-- [ ] Scanner status model
+- [x] PortfolioStore
+- [x] OpportunityService
+- [x] PositionSizingService
+- [x] Opportunity model
+- [x] Current market price in Mission Control
+- [x] Market data age
+- [x] Persistent Trading Capital
 
----
+Remaining
 
-## Mission Control
-
-- [ ] Replace Dashboard with Mission Control
-- [ ] Market Status panel
-- [ ] Live Scanner panel
-- [ ] Top Opportunities panel
-- [ ] Open Positions panel
-- [ ] Alerts panel
-- [ ] News & Macro panel
-- [ ] Mission Control layout
+- [ ] Position sizing presentation
 
 ---
 
-## Trading Workspace
+# Sprint 5.2 — Position Sizing Presentation
 
-- [ ] Remove mock presentation model
-- [ ] Reconnect deterministic TradingPipeline
-- [ ] Trading chart
-- [ ] Signal visualization
-- [ ] Position visualization
-- [ ] AI explanation synchronization
+Mission Control
 
----
+- [ ] Shares to buy
+- [ ] Required investment
+- [ ] Remaining capital
+- [ ] Budget exceeded warning
+- [ ] FX conversion support (EUR/USD)
+- [ ] Rich Opportunity cards
 
-# Sprint 4.9 — Position Monitoring
+Portfolio
 
-## Position Monitor
-
-- [ ] Implement PositionMonitor
-- [ ] Open position tracking
-- [ ] Position timeline
-- [ ] Unrealized P/L calculation
-- [ ] ExitSignalEngine integration
-- [ ] Position history
+- [ ] Maximum position size
+- [ ] Maximum portfolio exposure
+- [ ] Risk percentage per trade
 
 ---
 
-## Mission Control Panels
+# Sprint 5.3 — Market Health
 
-- [ ] Position panel
-- [ ] Portfolio overview panel
-- [ ] Exit recommendation panel
-- [ ] Position alerts
-- [ ] Position refresh cycle
+- [ ] Scanner Health
+- [ ] Error Summary
+- [ ] Last Refresh
+- [ ] Market Breadth
+- [ ] Sector Strength
+- [ ] Market Regime
 
 ---
 
-# Sprint 5.0 — Paper Trading
+# Sprint 5.4 — Trading Workspace 2.0
 
-## Virtual Broker
+- [ ] Entry Price
+- [ ] Stop Loss
+- [ ] Take Profit
+- [ ] Risk / Reward
+- [ ] Trade Checklist
+- [ ] Better AI explanation
+- [ ] Historical setup overview
 
-- [ ] Order model
+---
+
+# Sprint 5.5 — Position Monitor
+
+- [ ] Open Positions
+- [ ] Portfolio Health
+- [ ] Position Timeline
+- [ ] Exit recommendations
+- [ ] Alerts
+
+---
+
+# Sprint 6.0 — Paper Trading
+
+- [ ] Virtual broker
+- [ ] Order lifecycle
 - [ ] Portfolio model
 - [ ] Simulated execution
 - [ ] Commission model
 - [ ] Slippage model
-- [ ] Order lifecycle
-
----
-
-## Trade Journal
-
-- [ ] Trade history
-- [ ] Performance statistics
-- [ ] Win/Loss tracking
-- [ ] Strategy performance
-- [ ] Trade replay foundation
-
----
-
-# Sprint 5.1 — Broker Integration
-
-## Broker Abstraction
-
-- [ ] Broker interface
-- [ ] Account synchronization
-- [ ] Position synchronization
-- [ ] Order synchronization
-- [ ] Provider abstraction
-
-Supported brokers (planned)
-
-- [ ] DEGIRO
-- [ ] Interactive Brokers
-- [ ] Trading212 (evaluation)
-
----
-
-# Sprint 5.2 — Performance Analytics
-
-- [ ] Equity curve
-- [ ] Drawdown chart
-- [ ] Benchmark comparison
-- [ ] Expectancy
-- [ ] Win rate
-- [ ] Trade analytics
-- [ ] Monthly statistics
+- [ ] Trade Journal
+- [ ] Performance tracking
 
 ---
 
@@ -183,72 +193,76 @@ Supported brokers (planned)
 
 ## Mission Control
 
-- [ ] Notifications
-- [ ] Replay Engine
-- [ ] Multi-monitor support
-- [ ] Workspace layouts
-- [ ] Strategy comparison
-- [ ] Scanner filters
 - [ ] Heatmaps
+- [ ] Workspace layouts
+- [ ] Multi-monitor support
+- [ ] Watchlists
+- [ ] Notifications
+- [ ] Strategy comparison
 
 ---
 
 ## Market Intelligence
 
+- [ ] Earnings Calendar
+- [ ] FED Events
+- [ ] CPI Events
+- [ ] Macro Calendar
 - [ ] News integration
-- [ ] Earnings calendar
-- [ ] FED events
-- [ ] CPI events
-- [ ] Macro calendar
 
 ---
 
 ## Artificial Intelligence
 
-AI improvements may include:
+Explainability only
 
 - [ ] Better explanations
-- [ ] Trade summaries
-- [ ] Daily market briefing
-- [ ] Weekly performance review
+- [ ] Daily Market Briefing
+- [ ] Weekly Market Summary
+- [ ] Trade Summaries
 
-AI will remain explainability only.
+AI will never generate trading decisions.
 
 ---
 
-# Documentation Tasks
+# Documentation
 
+Before every release
+
+- [ ] Synchronize AI_CONTEXT.md
+- [ ] Synchronize PROJECT_STATUS.md
 - [ ] Synchronize CHANGELOG.md
-- [ ] Remove deprecated documentation
-- [ ] Verify documentation versions
+- [ ] Synchronize TODO.md
+- [ ] Synchronize PROJECT_VISION.md
+- [ ] Synchronize TRADING_STRATEGY.md
+- [ ] Synchronize ORION_MASTER_ARCHITECTURE.md
 - [ ] Create fresh Project Orion ZIP
 
 ---
 
 # Current Priority
 
-Highest priority implementation order
-
-1. Mission Control
-2. LiveScanner scheduling
-3. TradingPipeline UI integration
-4. Position Monitor
-5. Paper Trading
-6. Broker abstraction
+1. Position sizing presentation
+2. Mission Control
+3. Market Health
+4. Trading Workspace
+5. Position Monitor
+6. Paper Trading
 
 ---
 
 # Definition of Done
 
-A task is complete only when:
+A task is complete only when
 
 - [x] Feature implemented
 - [x] Architecture respected
-- [x] Deterministic backend preserved
+- [x] TradingPipeline remains the only decision engine
 - [x] No business logic inside UI
-- [x] Tests pass
-- [x] Desktop application starts
-- [x] Documentation updated
+- [x] Regression tests pass
+- [x] Desktop launches
+- [x] Manual GUI validation completed
+- [x] Documentation synchronized
 - [x] Git commit created
 - [x] GitHub push completed
 
