@@ -1,3 +1,4 @@
+from services.analysis.models import AnalysisResult
 from models.position_monitor import PositionMonitorResult
 from models.trade_lifecycle import Trade
 from services.exit_evaluation_service import ExitEvaluationService
@@ -24,7 +25,11 @@ class PositionMonitorService:
             exit_evaluation_service or ExitEvaluationService()
         )
 
-    def evaluate(self, trade: Trade) -> PositionMonitorResult:
+    def evaluate(
+        self,
+        trade: Trade,
+        analysis: AnalysisResult | None = None,
+    ) -> PositionMonitorResult:
         invested_amount = round(
             trade.quantity * trade.entry_price,
             2,
@@ -53,7 +58,13 @@ class PositionMonitorService:
             exit_score,
             summary,
             exit_reasons,
-        ) = self.exit_evaluation_service.evaluate(trade)
+            trend_status,
+            momentum_status,
+            risk_status,
+        ) = self.exit_evaluation_service.evaluate(
+            trade=trade,
+            analysis=analysis,
+        )
 
         stop_loss_distance = round(
             trade.current_price - trade.stop_loss,
@@ -71,9 +82,9 @@ class PositionMonitorService:
             exit_score=exit_score,
             reason=summary,
             exit_reasons=exit_reasons,
-            trend_status="Nog niet geanalyseerd",
-            momentum_status="Nog niet geanalyseerd",
-            risk_status="Prijsregels actief",
+            trend_status=trend_status,
+            momentum_status=momentum_status,
+            risk_status=risk_status,
             market_value=market_value,
             invested_amount=invested_amount,
             unrealized_profit_loss=unrealized_profit_loss,
