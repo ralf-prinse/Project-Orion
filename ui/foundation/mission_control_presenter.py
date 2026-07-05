@@ -507,26 +507,51 @@ class MissionControlPresenter:
 
         shares = int(getattr(sizing, "shares", 0))
         investment = getattr(sizing, "investment", 0.0)
+        investment_market = getattr(sizing, "investment_market", 0.0)
         remaining_cash = getattr(sizing, "remaining_cash", 0.0)
+        remaining_market_cash = getattr(sizing, "remaining_market_cash", 0.0)
         available_cash = getattr(sizing, "available_cash", 0.0)
+        available_market_cash = getattr(sizing, "available_market_cash", 0.0)
+        account_currency = getattr(sizing, "account_currency", "EUR")
+        market_currency = getattr(sizing, "market_currency", "USD")
+        fx_rate = getattr(sizing, "fx_rate", 1.0)
+        fx_source = getattr(sizing, "fx_source", "unknown")
         is_affordable = bool(getattr(sizing, "is_affordable", False))
 
         if not is_affordable:
             return [
                 "Aantal aandelen: 0",
-                f"Beschikbaar budget: {self._format_eur(available_cash)}",
+                f"Beschikbaar budget: {self._format_currency(available_cash, account_currency)}",
+                f"Koopkracht: {self._format_currency(available_market_cash, market_currency)}",
+                f"FX: 1 {account_currency} = {fx_rate:.4f} {market_currency}",
+                f"FX bron: {fx_source}",
                 "Budgetstatus: onvoldoende budget",
-                "FX: indicatief, geen EUR/USD-conversie",
             ]
 
         return [
             f"Aantal aandelen: {shares}",
-            f"Investering: {self._format_eur(investment)}",
-            f"Resterend budget: {self._format_eur(remaining_cash)}",
-            f"Beschikbaar budget: {self._format_eur(available_cash)}",
+            f"Investering: {self._format_currency(investment, account_currency)}",
+            f"Investering markt: {self._format_currency(investment_market, market_currency)}",
+            f"Resterend budget: {self._format_currency(remaining_cash, account_currency)}",
+            f"Resterende koopkracht: {self._format_currency(remaining_market_cash, market_currency)}",
+            f"Beschikbaar budget: {self._format_currency(available_cash, account_currency)}",
+            f"Koopkracht: {self._format_currency(available_market_cash, market_currency)}",
+            f"FX: 1 {account_currency} = {fx_rate:.4f} {market_currency}",
+            f"FX bron: {fx_source}",
             "Budgetstatus: binnen budget",
-            "FX: indicatief, geen EUR/USD-conversie",
         ]
+
+    def _format_currency(self, value, currency: str) -> str:
+        currency = str(currency).strip().upper()
+        amount = self._numeric(value)
+
+        if currency == "EUR":
+            return f"€{amount:,.2f}"
+
+        if currency == "USD":
+            return f"${amount:,.2f}"
+
+        return f"{amount:,.2f} {currency}"
 
     def _reason_summary(self, reason: str) -> str:
         clean_reason = str(reason or "").strip()

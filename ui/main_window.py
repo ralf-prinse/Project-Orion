@@ -223,7 +223,7 @@ class OrionWindow(QMainWindow):
             ("Mission Control", "mission_control"),
             ("Scanner", "scanner"),
             ("Trading", "trading"),
-            ("Position Monitor", "position_monitor"),
+            ("Trade Monitor", "position_monitor"),
             ("Portfolio", "portfolio"),
             ("Performance", "performance"),
             ("Historie", "history"),

@@ -30,10 +30,11 @@ class PositionMonitorWorkspace(BaseWorkspace):
     def __init__(self, theme, on_monitor_requested):
         super().__init__(
             theme=theme,
-            title="Position Monitor",
+            title="Trade Monitor",
             intro=(
-                "Controleer een open positie en bepaal deterministisch "
-                "of Orion vasthouden of verkopen adviseert."
+                "Volg de volledige levenscyclus van een open trade. "
+                "Orion beoordeelt deterministisch of een positie "
+                "vastgehouden of gesloten moet worden."
             ),
         )
 
@@ -46,7 +47,7 @@ class PositionMonitorWorkspace(BaseWorkspace):
         self.stop_loss_input = self._input("170.00")
         self.take_profit_input = self._input("200.00")
 
-        self.monitor_button = QPushButton("Controleer positie")
+        self.monitor_button = QPushButton("Controleer trade")
         self.monitor_button.setMinimumHeight(self.BUTTON_HEIGHT)
         self.monitor_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.monitor_button.setStyleSheet(self.primary_button_style())
