@@ -8,11 +8,14 @@ class PositionMonitorViewModel:
     title: str
     signal: str
     signal_explanation: str
+    exit_score: str
+    exit_score_explanation: str
     profit_loss: str
     profit_loss_explanation: str
     market_value: str
     risk_status: str
     target_status: str
+    intelligence_summary: str
     summary: str
     status: str
 
@@ -33,6 +36,8 @@ class PositionMonitorPresenter:
             title=f"{trade.symbol} Position Monitor",
             signal=self._signal_label(result.exit_signal),
             signal_explanation=result.reason,
+            exit_score=f"{result.exit_score}/100",
+            exit_score_explanation=self._exit_score_explanation(result.exit_score),
             profit_loss=self._format_profit_loss(
                 result.unrealized_profit_loss,
                 result.unrealized_profit_loss_percent,
@@ -43,6 +48,7 @@ class PositionMonitorPresenter:
             market_value=f"€{result.market_value:,.2f}",
             risk_status=self._risk_status(result),
             target_status=self._target_status(result),
+            intelligence_summary=self._intelligence_summary(result),
             summary=self._summary(result),
             status="Position monitor uitgevoerd.",
         )
@@ -64,6 +70,21 @@ class PositionMonitorPresenter:
             return "VERKOPEN — Tijdslimiet bereikt"
 
         return "VASTHOUDEN"
+
+    def _exit_score_explanation(self, score: int) -> str:
+        if score >= 90:
+            return "Zeer sterke exit-trigger. Orion adviseert direct actie."
+
+        if score >= 70:
+            return "Sterke exit-waarschuwing. De tradekwaliteit verslechtert."
+
+        if score >= 40:
+            return "Matige exit-waarschuwing. Blijf de positie actief volgen."
+
+        if score > 0:
+            return "Lage exit-druk. Er zijn aandachtspunten, maar geen directe exit."
+
+        return "Geen exit-druk. Stop-loss en winstdoel zijn niet geraakt."
 
     def _format_profit_loss(self, value: float, percent: float) -> str:
         sign = "+" if value >= 0 else ""
@@ -95,6 +116,26 @@ class PositionMonitorPresenter:
             f"Afstand tot winstdoel: €{result.take_profit_distance:,.2f} "
             "per aandeel."
         )
+
+    def _intelligence_summary(self, result) -> str:
+        lines = [
+            f"Trend: {result.trend_status}",
+            f"Momentum: {result.momentum_status}",
+            f"Risico: {result.risk_status}",
+        ]
+
+        if result.exit_reasons:
+            lines.append("")
+            lines.append("Exit-redenen:")
+
+            for reason in result.exit_reasons:
+                lines.append(f"• {reason}")
+        else:
+            lines.append("")
+            lines.append("Exit-redenen:")
+            lines.append("• Geen directe exit-trigger gevonden.")
+
+        return "\n".join(lines)
 
     def _summary(self, result) -> str:
         trade = result.trade

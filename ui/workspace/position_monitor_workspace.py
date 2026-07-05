@@ -58,6 +58,12 @@ class PositionMonitorWorkspace(BaseWorkspace):
             body="Nog geen positie gecontroleerd.",
         )
 
+        self.intelligence_panel = WorkspacePanel(
+            theme=self.theme,
+            title="Exit Intelligence",
+            body="Nog geen exit-intelligence beschikbaar.",
+        )
+
         self.pnl_panel = WorkspacePanel(
             theme=self.theme,
             title="Winst / Verlies",
@@ -97,7 +103,9 @@ class PositionMonitorWorkspace(BaseWorkspace):
         for row, (label_text, widget) in enumerate(fields):
             label = QLabel(label_text)
             label.setMinimumWidth(self.LABEL_WIDTH)
-            label.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
+            label.setAlignment(
+                Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft
+            )
             label.setStyleSheet(self.theme.muted_text_style())
 
             form_layout.addWidget(label, row, 0)
@@ -111,6 +119,7 @@ class PositionMonitorWorkspace(BaseWorkspace):
         self.add_workspace_widget(form)
         self.add_workspace_widget(self.monitor_button)
         self.add_workspace_widget(self.signal_panel)
+        self.add_workspace_widget(self.intelligence_panel)
         self.add_workspace_widget(self.pnl_panel)
         self.add_workspace_widget(self.risk_panel)
         self.add_workspace_widget(self.status_panel)
@@ -156,6 +165,12 @@ class PositionMonitorWorkspace(BaseWorkspace):
         self.signal_panel.set_title(view_model.signal)
         self.signal_panel.set_body(view_model.signal_explanation)
 
+        self.intelligence_panel.set_body(
+            f"Exit Score: {view_model.exit_score}\n\n"
+            f"{view_model.exit_score_explanation}\n\n"
+            f"{view_model.intelligence_summary}"
+        )
+
         self.pnl_panel.set_body(
             f"{view_model.profit_loss}\n\n"
             f"{view_model.profit_loss_explanation}\n\n"
@@ -177,7 +192,9 @@ class PositionMonitorWorkspace(BaseWorkspace):
         field = QLineEdit()
         field.setText(value)
         field.setMinimumHeight(self.INPUT_HEIGHT)
-        field.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
+        field.setAlignment(
+            Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft
+        )
         field.setStyleSheet(self.input_style())
         return field
 
