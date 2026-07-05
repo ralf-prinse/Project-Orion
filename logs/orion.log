@@ -4012,3 +4012,110 @@
 2026-07-05 18:06:11 | ERROR    | yfinance | 
 1 Failed download:
 2026-07-05 18:06:11 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:38:14 | ERROR    | yfinance | HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ASML-AS"}}}
+2026-07-05 18:38:14 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:38:14 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 18:38:14 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:38:29 | INFO     | YahooProvider | Downloading history for NOK (period=6mo interval=1d)
+2026-07-05 18:38:29 | INFO     | YahooProvider | 124 candles downloaded for NOK
+2026-07-05 18:38:29 | INFO     | IndicatorBuilder | Building indicators for NOK
+2026-07-05 18:38:29 | INFO     | IndicatorBuilder | Indicators ready for NOK | RSI=34.37 Trend=0.878 Momentum=22.62 Volatility=0.04838
+2026-07-05 18:38:29 | INFO     | TradingPipeline | Starting pipeline for NOK
+2026-07-05 18:38:29 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.626
+2026-07-05 18:38:29 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0009
+2026-07-05 18:38:29 | INFO     | TradingPipeline | Decision | BUY confidence=0.726
+2026-07-05 18:38:29 | INFO     | TradingPipeline | Pipeline completed for NOK | BUY | confidence=0.726 | position=31.31
+2026-07-05 18:39:12 | ERROR    | yfinance | HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ASML-AS"}}}
+2026-07-05 18:39:12 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:39:12 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 18:39:12 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:40:12 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:40:12 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 18:40:12 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:41:12 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:41:12 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 18:41:12 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:42:12 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:42:12 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 18:42:12 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:43:12 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:43:12 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 18:43:12 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:44:12 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:44:12 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 18:44:12 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:45:12 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:45:12 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 18:45:12 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:46:12 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:46:12 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 18:46:12 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:47:12 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:47:12 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 18:47:12 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:48:12 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:48:12 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 18:48:12 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:49:12 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:49:12 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 18:49:12 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:50:12 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:50:12 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 18:50:12 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:51:12 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:51:12 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 18:51:12 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:52:12 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:52:12 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 18:52:12 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:53:12 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:53:12 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 18:53:12 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:54:12 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:54:12 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 18:54:12 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:55:12 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:55:12 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 18:55:12 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:56:12 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:56:12 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 18:56:12 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:57:12 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:57:12 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 18:57:12 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:58:12 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:58:12 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 18:58:12 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:59:12 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 18:59:12 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 18:59:12 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 19:00:12 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 19:00:12 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 19:00:12 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 19:01:12 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 19:01:12 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 19:01:12 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")

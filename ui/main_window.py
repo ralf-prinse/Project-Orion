@@ -17,6 +17,7 @@ from ui.design import ORION_DARK_THEME
 
 from ui.foundation.history_presenter import HistoryPresenter
 from ui.foundation.mission_control_controller import MissionControlController
+from ui.foundation.position_monitor_controller import PositionMonitorController
 from ui.foundation.settings_presenter import SettingsPresenter
 from ui.foundation.trading_controller import TradingController
 from ui.foundation.workspace_coordinator import WorkspaceCoordinator
@@ -25,6 +26,7 @@ from ui.workspace.history_workspace import HistoryWorkspace
 from ui.workspace.mission_control_workspace import MissionControlWorkspace
 from ui.workspace.performance_workspace import PerformanceWorkspace
 from ui.workspace.portfolio_workspace import PortfolioWorkspace
+from ui.workspace.position_monitor_workspace import PositionMonitorWorkspace
 from ui.workspace.scanner_workspace import ScannerWorkspace
 from ui.workspace.settings_workspace import SettingsWorkspace
 from ui.workspace.trading_workspace import TradingWorkspace
@@ -63,10 +65,11 @@ class OrionWindow(QMainWindow):
             "mission_control": 0,
             "scanner": 1,
             "trading": 2,
-            "portfolio": 3,
-            "performance": 4,
-            "history": 5,
-            "settings": 6,
+            "position_monitor": 3,
+            "portfolio": 4,
+            "performance": 5,
+            "history": 6,
+            "settings": 7,
         }
 
         # ----------------------------
@@ -88,15 +91,20 @@ class OrionWindow(QMainWindow):
             on_analyze_requested=self.analyze_symbol,
         )
 
+        self.position_monitor_page = PositionMonitorWorkspace(
+            theme=self.theme,
+            on_monitor_requested=self.monitor_trade,
+        )
+
         self.portfolio_page = PortfolioWorkspace(
             theme=self.theme,
             initial_cash=self.portfolio.cash,
             currency=self.portfolio.currency,
-        
         )
         self.portfolio_page.capital_saved.connect(
             self._handle_capital_saved
         )
+
         self.performance_page = PerformanceWorkspace(theme=self.theme)
         self.history_page = HistoryWorkspace(theme=self.theme)
         self.settings_page = SettingsWorkspace(theme=self.theme)
@@ -119,6 +127,10 @@ class OrionWindow(QMainWindow):
         self.trading_controller = TradingController(
             trading_workspace=self.trading_page,
             portfolio_state=self.portfolio,
+        )
+
+        self.position_monitor_controller = PositionMonitorController(
+            workspace=self.position_monitor_page,
         )
 
         # ----------------------------
@@ -172,6 +184,7 @@ class OrionWindow(QMainWindow):
         self.pages.addWidget(self.mission_control_page)
         self.pages.addWidget(self.scanner_page)
         self.pages.addWidget(self.trading_page)
+        self.pages.addWidget(self.position_monitor_page)
         self.pages.addWidget(self.portfolio_page)
         self.pages.addWidget(self.performance_page)
         self.pages.addWidget(self.history_page)
@@ -210,6 +223,7 @@ class OrionWindow(QMainWindow):
             ("Mission Control", "mission_control"),
             ("Scanner", "scanner"),
             ("Trading", "trading"),
+            ("Position Monitor", "position_monitor"),
             ("Portfolio", "portfolio"),
             ("Performance", "performance"),
             ("Historie", "history"),
@@ -242,6 +256,10 @@ class OrionWindow(QMainWindow):
 
     def analyze_symbol(self, symbol: str):
         self.trading_controller.analyze_symbol(symbol)
+
+    def monitor_trade(self, trade):
+        self.position_monitor_controller.monitor_trade(trade)
+
     def _handle_capital_saved(self, amount: float):
         """
         Save the available trading capital.
@@ -252,6 +270,7 @@ class OrionWindow(QMainWindow):
 
         self.portfolio.cash = float(amount)
         self.portfolio_store.save(self.portfolio)
+
     def scan_market(self):
         self.mission_control_controller.refresh()
 
