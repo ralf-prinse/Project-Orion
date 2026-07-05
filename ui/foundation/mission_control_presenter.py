@@ -483,7 +483,7 @@ class MissionControlPresenter:
                 f"Advies: {signal_label} | Score: {technical_score} / 100 "
                 f"— {self._score_label(technical_score)}"
             ),
-            f"Prijs: ${self._format_money(price)}",
+            f"Koers: ${self._format_money(price)}",
             f"Trend: {trend_label}",
             f"Reden: {reason or 'Geen aanvullende scannerreden beschikbaar.'}",
         ]
@@ -496,27 +496,30 @@ class MissionControlPresenter:
         if sizing is None:
             return [
                 "Position sizing: niet beschikbaar",
+                "Budgetstatus: geen handelskapitaal beschikbaar",
             ]
 
-        if not getattr(sizing, "is_affordable", False):
-            return [
-                (
-                    "Budget sizing: onvoldoende budget "
-                    f"({self._format_eur(getattr(sizing, 'available_cash', 0.0))})"
-                ),
-                "Let op: indicatief, geen EUR/USD FX-conversie.",
-            ]
-
-        shares = getattr(sizing, "shares", 0)
+        shares = int(getattr(sizing, "shares", 0))
         investment = getattr(sizing, "investment", 0.0)
         remaining_cash = getattr(sizing, "remaining_cash", 0.0)
         available_cash = getattr(sizing, "available_cash", 0.0)
+        is_affordable = bool(getattr(sizing, "is_affordable", False))
+
+        if not is_affordable:
+            return [
+                "Aantal aandelen: 0",
+                f"Benodigde investering: {self._format_eur(0.0)}",
+                f"Beschikbaar budget: {self._format_eur(available_cash)}",
+                "Budgetstatus: onvoldoende budget",
+                "Let op: indicatief, geen EUR/USD FX-conversie.",
+            ]
 
         return [
-            f"Koopbaar: {shares} aandelen",
-            f"Investering: {self._format_eur(investment)}",
-            f"Budget over: {self._format_eur(remaining_cash)}",
-            f"Budget: {self._format_eur(available_cash)}",
+            f"Aantal aandelen: {shares}",
+            f"Benodigde investering: {self._format_eur(investment)}",
+            f"Resterend budget: {self._format_eur(remaining_cash)}",
+            f"Beschikbaar budget: {self._format_eur(available_cash)}",
+            "Budgetstatus: binnen budget",
             "Let op: indicatief, geen EUR/USD FX-conversie.",
         ]
 

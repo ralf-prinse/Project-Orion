@@ -3787,3 +3787,67 @@
 2026-07-05 11:21:22 | ERROR    | yfinance | 
 1 Failed download:
 2026-07-05 11:21:22 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 11:45:12 | ERROR    | yfinance | HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ASML-AS"}}}
+2026-07-05 11:45:13 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 11:45:13 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 11:45:13 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 11:45:19 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-05 11:45:19 | INFO     | YahooProvider | 124 candles downloaded for AAPL
+2026-07-05 11:45:19 | INFO     | IndicatorBuilder | Building indicators for AAPL
+2026-07-05 11:45:19 | INFO     | IndicatorBuilder | Indicators ready for AAPL | RSI=58.29 Trend=1.000 Momentum=49.16 Volatility=0.02422
+2026-07-05 11:45:19 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-05 11:45:19 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.789
+2026-07-05 11:45:19 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-05 11:45:19 | INFO     | TradingPipeline | Decision | BUY confidence=0.889
+2026-07-05 11:45:19 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.889 | position=3.95
+2026-07-05 11:45:23 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-05 11:45:23 | INFO     | YahooProvider | 124 candles downloaded for AAPL
+2026-07-05 11:45:23 | INFO     | IndicatorBuilder | Building indicators for AAPL
+2026-07-05 11:45:23 | INFO     | IndicatorBuilder | Indicators ready for AAPL | RSI=58.29 Trend=1.000 Momentum=49.16 Volatility=0.02422
+2026-07-05 11:45:23 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-05 11:45:23 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.789
+2026-07-05 11:45:23 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-05 11:45:23 | INFO     | TradingPipeline | Decision | BUY confidence=0.889
+2026-07-05 11:45:23 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.889 | position=3.95
+2026-07-05 11:45:25 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-05 11:45:25 | INFO     | YahooProvider | 124 candles downloaded for AAPL
+2026-07-05 11:45:25 | INFO     | IndicatorBuilder | Building indicators for AAPL
+2026-07-05 11:45:25 | INFO     | IndicatorBuilder | Indicators ready for AAPL | RSI=58.29 Trend=1.000 Momentum=49.16 Volatility=0.02422
+2026-07-05 11:45:25 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-05 11:45:25 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.789
+2026-07-05 11:45:25 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-05 11:45:25 | INFO     | TradingPipeline | Decision | BUY confidence=0.889
+2026-07-05 11:45:25 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.889 | position=3.95
+2026-07-05 11:45:25 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-05 11:45:25 | INFO     | YahooProvider | 124 candles downloaded for AAPL
+2026-07-05 11:45:25 | INFO     | IndicatorBuilder | Building indicators for AAPL
+2026-07-05 11:45:25 | INFO     | IndicatorBuilder | Indicators ready for AAPL | RSI=58.29 Trend=1.000 Momentum=49.16 Volatility=0.02422
+2026-07-05 11:45:25 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-05 11:45:25 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.789
+2026-07-05 11:45:25 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-05 11:45:25 | INFO     | TradingPipeline | Decision | BUY confidence=0.889
+2026-07-05 11:45:25 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.889 | position=3.95
+2026-07-05 12:24:33 | ERROR    | yfinance | HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ASML-AS"}}}
+2026-07-05 12:24:33 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 12:24:33 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 12:24:33 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 12:24:42 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-05 12:24:42 | INFO     | YahooProvider | 124 candles downloaded for AAPL
+2026-07-05 12:24:42 | INFO     | IndicatorBuilder | Building indicators for AAPL
+2026-07-05 12:24:42 | INFO     | IndicatorBuilder | Indicators ready for AAPL | RSI=58.29 Trend=1.000 Momentum=49.16 Volatility=0.02422
+2026-07-05 12:24:42 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-05 12:24:42 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.789
+2026-07-05 12:24:42 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-05 12:24:42 | INFO     | TradingPipeline | Decision | BUY confidence=0.889
+2026-07-05 12:24:42 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.889 | position=3.95
+2026-07-05 12:25:31 | ERROR    | yfinance | HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ASML-AS"}}}
+2026-07-05 12:25:31 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 12:25:31 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 12:25:31 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 12:26:31 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-05 12:26:31 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-05 12:26:31 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
