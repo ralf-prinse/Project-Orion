@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QGridLayout,
     QLabel,
@@ -22,6 +23,10 @@ class PositionMonitorWorkspace(BaseWorkspace):
     User input is forwarded to the controller.
     """
 
+    INPUT_HEIGHT = 44
+    BUTTON_HEIGHT = 48
+    LABEL_WIDTH = 120
+
     def __init__(self, theme, on_monitor_requested):
         super().__init__(
             theme=theme,
@@ -42,6 +47,8 @@ class PositionMonitorWorkspace(BaseWorkspace):
         self.take_profit_input = self._input("200.00")
 
         self.monitor_button = QPushButton("Controleer positie")
+        self.monitor_button.setMinimumHeight(self.BUTTON_HEIGHT)
+        self.monitor_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.monitor_button.setStyleSheet(self.primary_button_style())
         self.monitor_button.clicked.connect(self._handle_monitor_clicked)
 
@@ -75,7 +82,8 @@ class PositionMonitorWorkspace(BaseWorkspace):
         form = QWidget()
         form_layout = QGridLayout()
         form_layout.setContentsMargins(0, 0, 0, 0)
-        form_layout.setSpacing(12)
+        form_layout.setHorizontalSpacing(14)
+        form_layout.setVerticalSpacing(12)
 
         fields = [
             ("Symbool", self.symbol_input),
@@ -88,9 +96,15 @@ class PositionMonitorWorkspace(BaseWorkspace):
 
         for row, (label_text, widget) in enumerate(fields):
             label = QLabel(label_text)
+            label.setMinimumWidth(self.LABEL_WIDTH)
+            label.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
             label.setStyleSheet(self.theme.muted_text_style())
+
             form_layout.addWidget(label, row, 0)
             form_layout.addWidget(widget, row, 1)
+
+        form_layout.setColumnStretch(0, 0)
+        form_layout.setColumnStretch(1, 1)
 
         form.setLayout(form_layout)
 
@@ -103,18 +117,28 @@ class PositionMonitorWorkspace(BaseWorkspace):
 
     def _handle_monitor_clicked(self) -> None:
         try:
+            current_price = float(
+                self.current_price_input.text().strip().replace(",", ".")
+            )
+
             trade = Trade(
                 symbol=self.symbol_input.text().strip().upper(),
                 quantity=int(self.quantity_input.text().strip()),
-                entry_price=float(self.entry_price_input.text().strip().replace(",", ".")),
+                entry_price=float(
+                    self.entry_price_input.text().strip().replace(",", ".")
+                ),
                 entry_datetime=datetime.now(),
                 entry_reason="Handmatig ingevoerd in Position Monitor.",
                 confidence=0.0,
-                current_price=float(self.current_price_input.text().strip().replace(",", ".")),
-                highest_price=float(self.current_price_input.text().strip().replace(",", ".")),
-                lowest_price=float(self.current_price_input.text().strip().replace(",", ".")),
-                stop_loss=float(self.stop_loss_input.text().strip().replace(",", ".")),
-                take_profit=float(self.take_profit_input.text().strip().replace(",", ".")),
+                current_price=current_price,
+                highest_price=current_price,
+                lowest_price=current_price,
+                stop_loss=float(
+                    self.stop_loss_input.text().strip().replace(",", ".")
+                ),
+                take_profit=float(
+                    self.take_profit_input.text().strip().replace(",", ".")
+                ),
             )
         except ValueError:
             self.set_status_text(
@@ -152,6 +176,8 @@ class PositionMonitorWorkspace(BaseWorkspace):
     def _input(self, value: str) -> QLineEdit:
         field = QLineEdit()
         field.setText(value)
+        field.setMinimumHeight(self.INPUT_HEIGHT)
+        field.setAlignment(Qt.AlignmentFlag.AlignVCenter | Qt.AlignmentFlag.AlignLeft)
         field.setStyleSheet(self.input_style())
         return field
 
@@ -162,12 +188,20 @@ class PositionMonitorWorkspace(BaseWorkspace):
             color: #f9fafb;
             border: 1px solid #374151;
             border-radius: 10px;
-            padding: 12px;
+            padding: 10px 14px;
             font-size: 15px;
+            font-weight: 500;
+            selection-background-color: #2563eb;
+            selection-color: #ffffff;
+        }
+
+        QLineEdit:hover {
+            border: 1px solid #4b5563;
         }
 
         QLineEdit:focus {
             border: 1px solid #2563eb;
+            background-color: #111827;
         }
         """
 
@@ -175,14 +209,21 @@ class PositionMonitorWorkspace(BaseWorkspace):
         return """
         QPushButton {
             background-color: #2563eb;
-            color: white;
+            color: #ffffff;
             font-size: 15px;
-            font-weight: bold;
+            font-weight: 800;
             padding: 12px 22px;
             border-radius: 10px;
+            border: 1px solid #3b82f6;
+            text-align: center;
         }
 
         QPushButton:hover {
             background-color: #1d4ed8;
+            border: 1px solid #60a5fa;
+        }
+
+        QPushButton:pressed {
+            background-color: #1e40af;
         }
         """

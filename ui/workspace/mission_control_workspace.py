@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QPushButton
 
 from ui.foundation.workspace import GuiWorkspace
@@ -17,24 +17,11 @@ class MissionControlWorkspace(BaseWorkspace):
     Primary Mission Control workspace.
 
     Presentation only.
-
-    Mission Control renders GuiWorkspace models through the canonical
-    WorkspaceRenderer pipeline.
-
-    Responsibilities:
-        - own the Mission Control layout
-        - expose a scan trigger button
-        - mount dashboard and chart containers
-        - render prepared GuiWorkspace presentation models
-        - forward selected opportunity symbols to the application shell
-
-    No business logic.
-    No trading calculations.
-    No scanner orchestration.
-    No AI logic.
     """
 
     opportunity_selected = Signal(str)
+
+    SCAN_BUTTON_HEIGHT = 52
 
     def __init__(
         self,
@@ -53,6 +40,8 @@ class MissionControlWorkspace(BaseWorkspace):
         self._on_scan_requested = on_scan_requested
 
         self.scan_button = QPushButton("Scan markt")
+        self.scan_button.setMinimumHeight(self.SCAN_BUTTON_HEIGHT)
+        self.scan_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.scan_button.setStyleSheet(self.primary_button_style())
         self.scan_button.clicked.connect(self._handle_scan_requested)
 
@@ -77,22 +66,9 @@ class MissionControlWorkspace(BaseWorkspace):
         self.add_workspace_widget(self.chart_container)
 
     def set_workspace(self, workspace: GuiWorkspace) -> None:
-        """
-        Render a complete Mission Control workspace.
-
-        The workspace data must already be prepared by presenters or services.
-        """
-
         self.workspace_renderer.render(workspace)
 
     def set_status_text(self, text: str) -> None:
-        """
-        Backward-compatible status adapter.
-
-        Keeps Mission Control presentation-only while allowing callers to show
-        a simple status message before dedicated presenters are connected.
-        """
-
         self.set_workspace(
             GuiWorkspace(
                 title="Mission Control",
@@ -168,13 +144,13 @@ class MissionControlWorkspace(BaseWorkspace):
         return """
         QPushButton {
             background-color: #2563eb;
-            color: white;
+            color: #ffffff;
             font-size: 15px;
-            font-weight: bold;
-            padding: 15px 18px;
+            font-weight: 800;
             border-radius: 14px;
-            margin-bottom: 22px;
             border: 1px solid #3b82f6;
+            padding: 0px 18px;
+            text-align: center;
         }
 
         QPushButton:hover {

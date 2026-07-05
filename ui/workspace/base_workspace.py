@@ -1,14 +1,14 @@
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QLabel, QScrollArea, QVBoxLayout, QWidget
 
 
-class BaseWorkspace(QWidget):
+class BaseWorkspace(QScrollArea):
     """
     Reusable base class for presentation-only Orion workspaces.
 
-    BaseWorkspace owns shared workspace layout concerns such as title,
-    introduction text and vertical panel placement. It does not call services,
-    execute scans, calculate trading logic or access deterministic engines.
+    Provides a stable scrollable content area so workspace content never
+    falls outside the visible desktop window after resize, maximize or
+    dynamic content updates.
     """
 
     def __init__(
@@ -21,16 +21,27 @@ class BaseWorkspace(QWidget):
 
         self.theme = theme
 
+        self.setWidgetResizable(True)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self.setFrameShape(QScrollArea.Shape.NoFrame)
+
+        self.content = QWidget()
         self.layout = QVBoxLayout()
-        self.layout.setAlignment(Qt.AlignTop)
+        self.layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.layout.setContentsMargins(28, 24, 28, 28)
+        self.layout.setSpacing(16)
 
         self.title_label = QLabel(title)
-        self.title_label.setStyleSheet(self.theme.title_style() + "; margin-top: 25px;")
+        self.title_label.setWordWrap(True)
+        self.title_label.setStyleSheet(
+            self.theme.title_style() + "; margin-top: 0px;"
+        )
 
         self.intro_label = QLabel(intro)
         self.intro_label.setWordWrap(True)
         self.intro_label.setStyleSheet(
-            self.theme.muted_text_style() + "; margin-bottom: 20px;"
+            self.theme.muted_text_style() + "; margin-bottom: 10px;"
         )
 
         self.layout.addWidget(self.title_label)
@@ -38,7 +49,8 @@ class BaseWorkspace(QWidget):
         if intro:
             self.layout.addWidget(self.intro_label)
 
-        self.setLayout(self.layout)
+        self.content.setLayout(self.layout)
+        self.setWidget(self.content)
 
     def add_workspace_widget(self, widget: QWidget):
         self.layout.addWidget(widget)

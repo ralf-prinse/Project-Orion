@@ -3,23 +3,65 @@ from __future__ import annotations
 from typing import Any
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtWidgets import QFrame, QLabel, QPushButton, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QFrame, QLabel, QVBoxLayout, QWidget
 
 from ui.foundation.workspace import GuiWorkspacePanel
 
 
+class OpportunityCard(QFrame):
+    clicked = Signal(str)
+
+    def __init__(self, theme, symbol: str, text: str, highlight: bool = False):
+        super().__init__()
+
+        self.symbol = symbol
+        self.setObjectName("OpportunityCard")
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+
+        self.label = QLabel(text)
+        self.label.setWordWrap(True)
+        self.label.setAlignment(Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        self.label.setStyleSheet("""
+        QLabel {
+            color: #f9fafb;
+            font-size: 13px;
+            font-weight: 750;
+            line-height: 145%;
+        }
+        """)
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(14, 12, 14, 12)
+        layout.addWidget(self.label)
+
+        self.setLayout(layout)
+        self.setMinimumHeight(190)
+        self.setStyleSheet(self._style(highlight))
+
+    def mousePressEvent(self, event):
+        if self.symbol:
+            self.clicked.emit(self.symbol)
+        super().mousePressEvent(event)
+
+    def _style(self, highlight: bool) -> str:
+        border = "#3b82f6" if highlight else "#374151"
+        background = "#111f1a" if highlight else "#0f172a"
+
+        return f"""
+        QFrame#OpportunityCard {{
+            background-color: {background};
+            border: 1px solid {border};
+            border-radius: 12px;
+        }}
+
+        QFrame#OpportunityCard:hover {{
+            background-color: #111827;
+            border: 1px solid #60a5fa;
+        }}
+        """
+
+
 class WorkspacePanel(QFrame):
-    """
-    Generic presentation-only workspace panel.
-
-    Renders GuiWorkspacePanel models produced by presenters.
-
-    No business logic.
-    No trading calculations.
-    No scanner orchestration.
-    No AI logic.
-    """
-
     opportunity_selected = Signal(str)
 
     def __init__(
@@ -83,6 +125,7 @@ class WorkspacePanel(QFrame):
     def _render_items(self, items: list[Any]) -> None:
         if not items:
             empty_label = QLabel("Geen gegevens beschikbaar")
+            empty_label.setWordWrap(True)
             empty_label.setStyleSheet(self._empty_style())
             self.items_layout.addWidget(empty_label)
             return
@@ -92,39 +135,31 @@ class WorkspacePanel(QFrame):
 
     def _build_item_widget(self, item: Any, index: int) -> QWidget:
         if self._is_opportunity_item(item):
-            return self._build_opportunity_button(item, index)
+            return self._build_opportunity_card(item, index)
 
         label = QLabel(str(item))
         label.setWordWrap(True)
         label.setStyleSheet(self._item_style())
         return label
 
-    def _build_opportunity_button(
+    def _build_opportunity_card(
         self,
         item: dict[str, Any],
         index: int,
-    ) -> QPushButton:
+    ) -> OpportunityCard:
         symbol = str(item.get("symbol", "")).strip()
         display_text = str(item.get("display_text", symbol or item))
 
-        button = QPushButton(display_text)
-        button.setObjectName("OpportunityButton")
-        button.setCursor(Qt.CursorShape.PointingHandCursor)
-        button.setFlat(True)
-        button.setCheckable(False)
-        button.setAutoDefault(False)
-        button.setDefault(False)
-        button.setMinimumHeight(96)
-        button.setStyleSheet(self._opportunity_button_style(index))
+        card = OpportunityCard(
+            theme=self.theme,
+            symbol=symbol,
+            text=display_text,
+            highlight=index == 1,
+        )
 
-        if symbol:
-            button.clicked.connect(
-                lambda checked=False, selected_symbol=symbol: self.opportunity_selected.emit(
-                    selected_symbol
-                )
-            )
+        card.clicked.connect(self.opportunity_selected.emit)
 
-        return button
+        return card
 
     def _clear_items(self) -> None:
         while self.items_layout.count():
@@ -182,40 +217,6 @@ class WorkspacePanel(QFrame):
         font-size: 13px;
         font-weight: 500;
         font-style: italic;
-        """
-
-    def _opportunity_button_style(self, index: int) -> str:
-        if index == 1:
-            border_color = self._accent_color(self.panel)
-            background_color = "#111f1a"
-            font_weight = 800
-        else:
-            border_color = "#374151"
-            background_color = "#0f172a"
-            font_weight = 650
-
-        return f"""
-        QPushButton#OpportunityButton {{
-            background-color: {background_color};
-            border: 1px solid {border_color};
-            border-radius: 12px;
-            color: #f9fafb;
-            font-size: 13px;
-            font-weight: {font_weight};
-            padding: 12px 14px;
-            text-align: left;
-            line-height: 145%;
-        }}
-
-        QPushButton#OpportunityButton:hover {{
-            background-color: #111827;
-            border: 1px solid {self._accent_color(self.panel)};
-        }}
-
-        QPushButton#OpportunityButton:pressed {{
-            background-color: #020617;
-            border: 1px solid #60a5fa;
-        }}
         """
 
     def _item_spacing(self, panel: GuiWorkspacePanel) -> int:
