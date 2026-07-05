@@ -1,68 +1,61 @@
-from dataclasses import dataclass, field
+from __future__ import annotations
+
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
 class IndicatorConfig:
-    """
-    Configuration for deterministic indicator calculations.
-    """
-
     rsi_period: int = 14
-    momentum_period: int = 20
-    trend_period: int = 50
-    volatility_period: int = 20
+    trend_short_window: int = 20
+    trend_long_window: int = 50
+    momentum_window: int = 10
+    volatility_window: int = 20
 
 
 @dataclass(frozen=True)
-class MarketDataConfig:
-    """
-    Configuration for market data retrieval.
-    """
-
-    history_period: str = "6mo"
-    history_interval: str = "1d"
-
-
-@dataclass(frozen=True)
-class ScannerConfig:
-    """
-    Configuration for the default AI market scanner universe.
-    """
-
-    default_symbols: list[str] = field(
-        default_factory=lambda: [
-            "MSFT",
-            "NVDA",
-            "AAPL",
-            "TSLA",
-            "AMZN",
-        ]
-    )
-
-    max_results: int = 10
-    minimum_confidence: float = 0.60
-
-
-@dataclass(frozen=True)
-class BacktestConfig:
-    """
-    Configuration for deterministic backtest simulation.
-    """
-
-    fee_rate: float = 0.001
-    slippage_rate: float = 0.0005
+class SupportedMarket:
+    name: str
+    country: str
+    currency: str
+    exchanges: tuple[str, ...]
 
 
 @dataclass(frozen=True)
 class TradingConfig:
-    """
-    Root configuration object for the Orion AI trading engine.
-    """
-
-    indicators: IndicatorConfig = field(default_factory=IndicatorConfig)
-    market_data: MarketDataConfig = field(default_factory=MarketDataConfig)
-    scanner: ScannerConfig = field(default_factory=ScannerConfig)
-    backtest: BacktestConfig = field(default_factory=BacktestConfig)
+    broker_name: str
+    account_currency: str
+    default_market_currency: str
+    default_universe: str
+    supported_markets: tuple[SupportedMarket, ...]
+    indicators: IndicatorConfig
 
 
-DEFAULT_TRADING_CONFIG = TradingConfig()
+TRADING_CONFIG = TradingConfig(
+    broker_name="DEGIRO",
+    account_currency="EUR",
+    default_market_currency="USD",
+    default_universe="degiro_us_stocks",
+    supported_markets=(
+        SupportedMarket(
+            name="United States",
+            country="US",
+            currency="USD",
+            exchanges=("NASDAQ", "NYSE"),
+        ),
+        SupportedMarket(
+            name="Euronext Amsterdam",
+            country="NL",
+            currency="EUR",
+            exchanges=("Euronext Amsterdam",),
+        ),
+        SupportedMarket(
+            name="Xetra",
+            country="DE",
+            currency="EUR",
+            exchanges=("Xetra",),
+        ),
+    ),
+    indicators=IndicatorConfig(),
+)
+
+DEFAULT_TRADING_CONFIG = TRADING_CONFIG

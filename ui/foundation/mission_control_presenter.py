@@ -409,7 +409,7 @@ class MissionControlPresenter:
             subtitle=(
                 f"Top {len(visible_opportunities)} live kansen • "
                 f"{actionable_count} actionable • "
-                "position sizing is indicatief zonder FX-conversie."
+                "live position sizing actief."
             ),
             items=[
                 self._opportunity_item(index, opportunity)
@@ -484,7 +484,7 @@ class MissionControlPresenter:
                 f"{signal_label} • Score {technical_score} / 100 "
                 f"• {self._score_label(technical_score)}"
             ),
-            f"Koers: ${self._format_money(price)}",
+            f"Aandeelprijs: ${self._format_money(price)} USD",
         ]
 
         lines.extend(self._position_sizing_lines(sizing))
@@ -507,37 +507,30 @@ class MissionControlPresenter:
 
         shares = int(getattr(sizing, "shares", 0))
         investment = getattr(sizing, "investment", 0.0)
-        investment_market = getattr(sizing, "investment_market", 0.0)
         remaining_cash = getattr(sizing, "remaining_cash", 0.0)
-        remaining_market_cash = getattr(sizing, "remaining_market_cash", 0.0)
         available_cash = getattr(sizing, "available_cash", 0.0)
         available_market_cash = getattr(sizing, "available_market_cash", 0.0)
         account_currency = getattr(sizing, "account_currency", "EUR")
         market_currency = getattr(sizing, "market_currency", "USD")
         fx_rate = getattr(sizing, "fx_rate", 1.0)
-        fx_source = getattr(sizing, "fx_source", "unknown")
         is_affordable = bool(getattr(sizing, "is_affordable", False))
 
         if not is_affordable:
             return [
                 "Aantal aandelen: 0",
-                f"Beschikbaar budget: {self._format_currency(available_cash, account_currency)}",
-                f"Koopkracht: {self._format_currency(available_market_cash, market_currency)}",
-                f"FX: 1 {account_currency} = {fx_rate:.4f} {market_currency}",
-                f"FX bron: {fx_source}",
+                f"Budget: {self._format_currency(available_cash, account_currency)}",
+                f"Beschikbaar op beurs: {self._format_currency(available_market_cash, market_currency)}",
+                f"Wisselkoers: 1 {account_currency} = {fx_rate:.4f} {market_currency}",
                 "Budgetstatus: onvoldoende budget",
             ]
 
         return [
             f"Aantal aandelen: {shares}",
             f"Investering: {self._format_currency(investment, account_currency)}",
-            f"Investering markt: {self._format_currency(investment_market, market_currency)}",
             f"Resterend budget: {self._format_currency(remaining_cash, account_currency)}",
-            f"Resterende koopkracht: {self._format_currency(remaining_market_cash, market_currency)}",
-            f"Beschikbaar budget: {self._format_currency(available_cash, account_currency)}",
-            f"Koopkracht: {self._format_currency(available_market_cash, market_currency)}",
-            f"FX: 1 {account_currency} = {fx_rate:.4f} {market_currency}",
-            f"FX bron: {fx_source}",
+            f"Budget: {self._format_currency(available_cash, account_currency)}",
+            f"Beschikbaar op beurs: {self._format_currency(available_market_cash, market_currency)}",
+            f"Wisselkoers: 1 {account_currency} = {fx_rate:.4f} {market_currency}",
             "Budgetstatus: binnen budget",
         ]
 
