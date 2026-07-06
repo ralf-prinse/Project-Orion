@@ -32,7 +32,6 @@ from ui.workspace.mission_control_workspace import MissionControlWorkspace
 from ui.workspace.performance_workspace import PerformanceWorkspace
 from ui.workspace.portfolio_workspace import PortfolioWorkspace
 from ui.workspace.position_monitor_workspace import PositionMonitorWorkspace
-from ui.workspace.scanner_workspace import ScannerWorkspace
 from ui.workspace.settings_workspace import SettingsWorkspace
 from ui.workspace.trading_workspace import TradingWorkspace
 from ui.workspace.workspace_controller import WorkspaceController
@@ -73,13 +72,12 @@ class OrionWindow(QMainWindow):
 
         self.workspace_page_indexes = {
             "mission_control": 0,
-            "scanner": 1,
-            "trading": 2,
-            "position_monitor": 3,
-            "portfolio": 4,
-            "performance": 5,
-            "history": 6,
-            "settings": 7,
+            "trading": 1,
+            "position_monitor": 2,
+            "portfolio": 3,
+            "performance": 4,
+            "history": 5,
+            "settings": 6,
         }
 
         # ----------------------------
@@ -94,7 +92,6 @@ class OrionWindow(QMainWindow):
             self._handle_mission_control_opportunity_selected
         )
 
-        self.scanner_page = ScannerWorkspace(theme=self.theme)
 
         self.trading_page = TradingWorkspace(
             theme=self.theme,
@@ -204,7 +201,6 @@ class OrionWindow(QMainWindow):
 
     def _initialize_pages(self):
         self.pages.addWidget(self.mission_control_page)
-        self.pages.addWidget(self.scanner_page)
         self.pages.addWidget(self.trading_page)
         self.pages.addWidget(self.position_monitor_page)
         self.pages.addWidget(self.portfolio_page)
@@ -243,7 +239,6 @@ class OrionWindow(QMainWindow):
 
         buttons = [
             ("Mission Control", "mission_control"),
-            ("Scanner", "scanner"),
             ("Trading", "trading"),
             ("Trade Monitor", "position_monitor"),
             ("Portfolio", "portfolio"),

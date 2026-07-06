@@ -21,5 +21,28 @@
         "unrealized_profit_loss": 0.0,
         "unrealized_profit_loss_percent": 0.0,
         "notes": "Geopend vanuit Trading Workspace."
+    },
+    {
+        "symbol": "PANW",
+        "quantity": 2,
+        "entry_price": 348.05999755859375,
+        "entry_datetime": "2026-07-06T13:31:18",
+        "entry_reason": "Adaptive decision | score=0.896 | buy_t=0.55 | sell_t=0.50",
+        "confidence": 0.9959542309870982,
+        "current_price": 348.05999755859375,
+        "highest_price": 348.05999755859375,
+        "lowest_price": 348.05999755859375,
+        "stop_loss": 330.66,
+        "take_profit": 382.87,
+        "trailing_stop": null,
+        "status": "OPEN",
+        "exit_signal": "HOLD_POSITION",
+        "exit_reason": "",
+        "exit_price": null,
+        "exit_datetime": null,
+        "realized_profit_loss": 0.0,
+        "unrealized_profit_loss": 0.0,
+        "unrealized_profit_loss_percent": 0.0,
+        "notes": "Geopend vanuit Trading Workspace."
     }
 ]

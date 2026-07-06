@@ -409,7 +409,7 @@ class MissionControlPresenter:
             subtitle=(
                 f"Top {len(visible_opportunities)} live kansen • "
                 f"{actionable_count} actionable • "
-                "live position sizing actief."
+                "TradingPipeline actief."
             ),
             items=[
                 self._opportunity_item(index, opportunity)
@@ -475,26 +475,23 @@ class MissionControlPresenter:
         price,
         sizing,
     ) -> str:
+        market_currency = getattr(sizing, "market_currency", "USD")
+
         lines = [
-            (
-                f"{self._rank_medal(index)} {symbol} • "
-                f"{self._priority_label(technical_score, signal_label)}"
-            ),
-            (
-                f"{signal_label} • Score {technical_score} / 100 "
-                f"• {self._score_label(technical_score)}"
-            ),
-            f"Aandeelprijs: ${self._format_money(price)} USD",
-        ]
+        (
+            f"{self._rank_medal(index)} {symbol} • "
+            f"{self._priority_label(technical_score, signal_label)}"
+        ),
+        (
+            f"Beslissing: {signal_label} • "
+            f"Confidence: {self._numeric(technical_score):.1f}%"
+        ),
+        f"Huidige prijs: {self._format_currency(price, market_currency)}",
+    ]
 
         lines.extend(self._position_sizing_lines(sizing))
 
-        lines.extend(
-            [
-                f"Trend: {trend_label}",
-                self._reason_summary(reason),
-            ]
-        )
+        lines.append(self._reason_summary(reason))
 
         return "\n".join(lines)
 
@@ -550,26 +547,9 @@ class MissionControlPresenter:
         clean_reason = str(reason or "").strip()
 
         if not clean_reason:
-            return "Setup: geen aanvullende scannerreden beschikbaar."
+            return "Pipeline reden: geen aanvullende uitleg beschikbaar."
 
-        parts = [
-            part.strip()
-            for part in clean_reason.split(".")
-            if part.strip()
-        ]
-
-        if not parts:
-            return f"Setup: {clean_reason}"
-
-        visible = parts[: self.REASON_PREVIEW_LIMIT]
-        remaining = max(0, len(parts) - len(visible))
-
-        summary = " | ".join(visible)
-
-        if remaining:
-            summary = f"{summary} | +{remaining} meer"
-
-        return f"Setup: {summary}"
+        return f"Pipeline reden: {clean_reason}"
 
     def _rank_medal(self, index: int) -> str:
         if index == 1:
