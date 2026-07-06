@@ -6,30 +6,39 @@
 
 Documentation Version
 
-v1.12
+v1.13
 
 Architecture Version
 
-v2.1
+v2.2
+
+Status
+
+🟢 Active Development
 
 Last Updated
 
-2026-07-05
+2026-07-06
 
 ---
 
 # Vision
 
-The long-term vision of Orion is to become a complete professional desktop trading workstation centered around Mission Control.
+Project Orion aims to become a professional deterministic desktop trading workstation for swing traders.
 
-Mission Control should allow a trader to understand the current market within seconds after launching the application.
+The platform is designed to support the complete trading lifecycle rather than simply identify trading opportunities.
 
-Instead of manually analysing hundreds of symbols, Orion continuously performs deterministic analysis and highlights only the opportunities that deserve attention.
+Orion continuously scans predefined markets, evaluates deterministic opportunities, calculates adaptive risk, monitors open positions and assists the trader throughout the entire investment process.
 
-Orion no longer focuses solely on finding trading opportunities.
+Artificial Intelligence exists exclusively as an explainability layer.
 
-The platform now supports the complete deterministic trading workflow:
+---
 
+# Long-Term Mission
+
+The long-term objective is to provide one integrated workspace covering every stage of deterministic trading.
+
+```text
 Market Awareness
 
 ↓
@@ -42,7 +51,7 @@ Trading Decision
 
 ↓
 
-Position Sizing
+Adaptive Risk Planning
 
 ↓
 
@@ -58,10 +67,6 @@ Trade Monitor
 
 ↓
 
-Exit Intelligence
-
-↓
-
 Trade History
 
 ↓
@@ -74,68 +79,158 @@ Paper Trading
 
 ↓
 
-Optional Broker Integration
+Optional Broker Compatibility
+```
 
-Every stage of this workflow must remain deterministic, explainable and independently testable.
-
----
-
-# Current Direction
-
-Trade Lifecycle is now the primary development focus.
-
-Mission Control remains the operational center of Orion.
-
-Trading Workspace remains the deterministic entry point for individual BUY / HOLD / SELL analysis.
-
-Trade Monitor is evolving into the central workspace for active open trades.
-
-Portfolio remains responsible for trading capital configuration.
-
-Broker connectivity remains optional.
-
-Orion does not execute real broker orders.
-
-Orion is a deterministic decision-support platform, not an automated trading bot.
+Every stage must remain deterministic, reproducible and independently testable.
 
 ---
 
-# Broker Context
+# Strategic Direction
 
-Current broker context:
+Project Orion is evolving in three major phases.
+
+## Phase 1
+
+Deterministic Trading Platform
+
+Completed
+
+✔ Market Scanner
+
+✔ TradingPipeline
+
+✔ Mission Control
+
+✔ Trading Workspace
+
+✔ Portfolio
+
+✔ Trade Monitor
+
+✔ Trade History
+
+✔ Trade Lifecycle
+
+---
+
+## Phase 2
+
+Intelligent Risk Management
+
+Current phase
+
+Objectives
+
+- Adaptive Risk Engine
+- Dynamic Risk Plans
+- ATR-aware stop-loss
+- Dynamic targets
+- Trailing stop
+- Break-even
+- Partial profit taking
+- Portfolio-aware risk management
+
+---
+
+## Phase 3
+
+Professional Trading Workstation
+
+Future
+
+Objectives
+
+- Paper Trading
+- Portfolio Intelligence
+- Performance Analytics
+- Trade Journal
+- Broker Compatibility
+- Portfolio Synchronization
+
+---
+
+# Architectural Principles
+
+Every future feature must strengthen the deterministic backend.
+
+Business logic always belongs inside backend services.
+
+Artificial Intelligence never replaces deterministic decision making.
+
+The desktop remains a presentation layer.
+
+GitHub remains the single source of truth.
+
+---
+
+# Current Broker Context
+
+Broker
 
 DEGIRO
 
-Current account currency:
-
-EUR
-
-Default market currency:
-
-USD
-
-Current supported market direction:
+Supported Markets
 
 - NASDAQ
 - NYSE
 - Euronext Amsterdam
 - Xetra
 
-Live FX conversion supports EUR/USD-aware position sizing.
+Supported Currencies
+
+- EUR
+- USD
+
+Live FX conversion is fully supported.
 
 Broker execution remains outside Orion.
 
-Future broker integration may support import, export or assisted workflows, but must never replace deterministic decision making.
-
 ---
 
-# Core Principle
+# Core Principles
 
-Every new feature must strengthen the deterministic architecture before expanding automation.
+Project Orion will always remain
+
+✔ Deterministic
+
+✔ Explainable
+
+✔ Transparent
+
+✔ Testable
+
+✔ Modular
+
+✔ Scalable
 
 Artificial Intelligence may explain deterministic output.
 
-Artificial Intelligence may never create BUY, SELL or EXIT decisions.
+Artificial Intelligence may never generate BUY, SELL or EXIT decisions.
+
+---
+
+# Current Project Status
+
+Architecture
+
+🟢 Stable
+
+Desktop
+
+🟢 Stable
+
+Trade Lifecycle
+
+🟢 Operational
+
+Adaptive Risk Engine
+
+🟢 Operational
+
+Current focus
+
+Sprint 5.9 — Intelligent Risk Management
 
 ---
 

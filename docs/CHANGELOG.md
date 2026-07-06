@@ -2,94 +2,147 @@
 
 ---
 
-# Sprint 5.5 — Trade Lifecycle Foundation
+# Documentation Information
+
+Documentation Version
+
+v1.13
+
+Architecture Version
+
+v2.2
+
+Last Updated
+
+2026-07-06
+
+---
+
+# Sprint 5.8 — Adaptive Risk Engine
 
 Status
 
-✅ In Progress
+✅ Completed
 
 ---
 
-## Architecture
+# Summary
 
-### Added
+Sprint 5.8 marks an important milestone in the evolution of Project Orion.
 
-- FxRateService
-- TradingConfig
-- IndicatorConfig
-- OpenTradeStore
-- TradeLifecycleService
-- TradeMonitorService
-- TradeMonitorPresenter
-- Open Trade GUI workflow foundation
+The platform has transitioned from fixed risk management toward deterministic adaptive risk management.
 
-### Changed
+Static stop-loss and take-profit percentages have been replaced by dynamically generated Risk Plans.
 
-- PositionSizingService now supports live FX conversion.
-- Trading configuration centralized.
-- Broker context centralized.
-- Trade lifecycle architecture expanded.
-- Open trade persistence introduced.
-- Trade Monitor architecture prepared for lifecycle management.
+Trade lifecycle management is now fully operational.
+
+Mission Control continues to function as the operational center for opportunity discovery.
+
+Trade Monitor now serves as the operational workspace for active positions.
 
 ---
 
-## Backend
+# Architecture
 
-### Added
+## Added
 
-- Live EUR/USD exchange-rate retrieval using frankfurter.app.
-- Central TradingConfig.
-- Broker configuration.
-- Supported market configuration.
-- OpenTradeStore persistence.
-- TradeLifecycleService.
-- TradeMonitorService.
-- TradeMonitorPresenter.
-
-### Changed
-
-- PositionSizingService now performs FX-aware calculations.
-- TradingController stores the latest deterministic pipeline result.
-- Deterministic architecture preserved.
-- No duplicate business logic introduced.
+- AdaptiveRiskEngine
+- RiskPlan domain model
+- Dynamic RiskPlan generation
+- IndicatorPack price support
+- Adaptive stop-loss calculation
+- Adaptive profit target calculation
+- Risk / Reward calculation
+- Adaptive risk notes
 
 ---
 
-## Desktop
+## Changed
 
-### Added
-
-- Open Trade button in Trading Workspace.
-- Open Trades panel inside Trade Monitor.
-- Trade Monitor presenter integration.
-
-### Changed
-
-- Position Monitor continues evolving into Trade Monitor.
-- Trading Workspace prepared for lifecycle workflow.
-- Mission Control now displays FX-aware position sizing.
-- GUI remains fully scrollable and responsive.
+- TradingPipeline now generates deterministic RiskPlans.
+- IndicatorBuilder now supplies the latest market price.
+- IndicatorPack now contains live price information.
+- Open Trade workflow now consumes RiskPlans instead of fixed percentages.
+- Risk management architecture is fully separated from BUY/HOLD/SELL decision logic.
 
 ---
 
-## Validation
+## Preserved
 
-Latest validation
+The following architectural rules remain unchanged
+
+- TradingPipeline remains the only deterministic BUY / HOLD / SELL engine.
+- AdaptiveDecisionEngine remains responsible for deterministic trading decisions.
+- AdaptiveRiskEngine remains responsible only for deterministic risk planning.
+- ExitEvaluationService remains the only deterministic EXIT engine.
+- Artificial Intelligence remains explainability only.
+
+---
+
+# Backend
+
+## Added
+
+- AdaptiveRiskEngine
+- RiskPlan
+- Adaptive risk calculation
+- Dynamic stop-loss generation
+- Dynamic target generation
+- Risk / Reward calculation
+
+---
+
+## Improved
+
+- TradingPipeline integration
+- IndicatorBuilder
+- IndicatorPack
+- Trade creation workflow
+- Risk calculation architecture
+
+---
+
+# Desktop
+
+## Improved
+
+Mission Control
+
+- Improved opportunity ranking
+- Top 10 opportunities
+- Expanded watchlist support
+
+Trading Workspace
+
+- Adaptive RiskPlan integration
+- Improved Open Trade workflow
+
+Trade Monitor
+
+- Live monitoring improvements
+- Dynamic trade refresh
+- Close Trade workflow
+- Trade lifecycle synchronization
+
+Portfolio
+
+- Stable capital persistence
+- FX-aware buying power
+
+---
+
+# Validation
+
+Regression
 
 ```powershell
 python run_tests.py
 ```
 
-Additional tests
+Additional validation
 
 ```powershell
-python test_fx_rate_service.py
-python test_trading_config.py
-python test_open_trade_store.py
-python test_trade_lifecycle_service.py
-python test_trade_monitor_service.py
-python test_trade_monitor_presenter.py
+python test_adaptive_risk_engine.py
 ```
 
 Desktop validation
@@ -100,27 +153,31 @@ python app.py
 
 Validated
 
-✔ Application starts
+✔ Regression tests pass
 
-✔ Navigation works
+✔ AdaptiveRiskEngine tests pass
+
+✔ Desktop launches
 
 ✔ Mission Control operational
 
 ✔ Trading Workspace operational
 
-✔ Portfolio operational
-
 ✔ Trade Monitor operational
 
-✔ Scan Market operational
+✔ Portfolio operational
 
-✔ Live FX conversion operational
+✔ History operational
 
-✔ Open Trade button operational
+✔ Settings operational
 
-✔ Open Trades panel operational
+✔ Open Trade validated
 
-✔ Exit Intelligence operational
+✔ Close Trade validated
+
+✔ Live P/L validated
+
+✔ Adaptive RiskPlan validated
 
 ✔ Manual GUI validation completed
 
@@ -130,46 +187,47 @@ Validated
 
 Completed
 
-✔ Deterministic BUY pipeline
+✔ Deterministic TradingPipeline
 
-✔ Deterministic Position Sizing
+✔ Mission Control
 
-✔ Live FX conversion
+✔ Trading Workspace
 
-✔ TradingConfig
+✔ Trade Monitor
 
-✔ Trade domain model
+✔ Portfolio
 
-✔ OpenTradeStore
+✔ Trade History
 
-✔ TradeLifecycleService
+✔ Trade Lifecycle
 
-✔ TradeMonitorService
+✔ Adaptive Risk Engine
 
-✔ Exit Intelligence
+✔ Live Position Monitoring
 
-✔ Shared AnalysisEngine
+✔ Dynamic Risk Planning
 
 ✔ Stable desktop architecture
 
-The project is now implementing the visible Trade Lifecycle.
+Project Orion now provides a complete deterministic workflow from market scanning through trade lifecycle management.
 
 ---
 
-# Next Sprint Objectives
+# Next Sprint
 
-Continue Sprint 5.5
+Sprint 5.9 — Intelligent Risk Management
 
 Objectives
 
-- Complete BUY → Open Trade workflow.
-- Persist trades automatically.
-- Refresh Trade Monitor after trade creation.
-- Improve Open Trades presentation.
-- Add Trade Detail panel.
-- Add Close Trade workflow.
-- Connect Trade History.
-- Prepare Paper Trading foundation.
+- Display complete RiskPlan
+- Display Target 1
+- Display Target 2
+- Display Target 3
+- Display Risk / Reward ratio
+- ATR-aware stop-loss
+- Dynamic trailing stop
+- Break-even support
+- Partial profit taking
 
 ---
 

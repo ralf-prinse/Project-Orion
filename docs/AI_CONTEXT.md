@@ -1,4 +1,4 @@
-# ORION AI CONTEXT
+# AI_CONTEXT
 
 ---
 
@@ -6,67 +6,229 @@
 
 Documentation Version
 
-v1.12
+v1.13
 
 Architecture Version
 
-v2.1
+v2.2
+
+Status
+
+🟢 Active Development
 
 Current Sprint
 
-🚧 Sprint 5.5 — Trade Lifecycle / Trade Monitor
+🚧 Sprint 5.8 — Adaptive Risk Engine
 
 Last Updated
 
-2026-07-05
+2026-07-06
 
 ---
 
-# Purpose
+# Project Summary
 
-This document provides the minimum context required for every new Orion development session.
+Project Orion is a deterministic AI-assisted desktop swing trading platform.
 
-It complements:
+Its objective is to scan a predefined investment universe, identify high-quality trading opportunities, calculate position sizing and risk, and guide the complete trade lifecycle from opportunity discovery through trade closure.
 
-- ORION_MASTER_ARCHITECTURE.md
-- PROJECT_STATUS.md
-- TRADING_STRATEGY.md
+Artificial Intelligence is used exclusively as an explainability layer.
 
-Architectural specifications intentionally exist primarily inside ORION_MASTER_ARCHITECTURE.md.
-
-This document contains only project state, development workflow and current implementation context.
+All BUY, HOLD, SELL and EXIT decisions remain fully deterministic.
 
 ---
 
-# Current Project State
+# Current Development State
 
-Project Orion has completed its deterministic trading foundation and has entered the Trade Lifecycle phase.
+Current project maturity
 
-The deterministic backend is stable.
+🟢 Stable desktop application
 
-Mission Control is the operational center of Orion.
+Completed major milestones
 
-Trading Workspace provides deterministic BUY / HOLD / SELL analysis with explainability.
+✔ Mission Control
 
-Trade Monitor is evolving from the former Position Monitor into the visible Trade Lifecycle area.
+✔ Trading Workspace
 
-The project has moved beyond only finding opportunities.
+✔ Portfolio Workspace
 
-Orion now supports the first working foundation of the full trade lifecycle:
+✔ Trade Monitor
 
-Market Scan
+✔ Trade History
+
+✔ Position Sizing
+
+✔ Live FX Conversion
+
+✔ Trading Configuration
+
+✔ Market Scanner
+
+✔ Opportunity Ranking
+
+✔ Open Trade Workflow
+
+✔ Close Trade Workflow
+
+✔ Live Trade Monitoring
+
+✔ Dynamic Position Refresh
+
+✔ Personal Universe V1
+
+✔ Adaptive Risk Engine
+
+Current application launches successfully.
+
+Regression tests pass.
+
+Architecture remains clean.
+
+Business logic remains outside the UI.
+
+---
+
+# Current Workspace Architecture
+
+Mission Control
+
+Purpose
+
+Daily operational dashboard.
+
+Responsibilities
+
+- Scan complete market universe
+- Present market information
+- Present top opportunities
+- Display buying power
+- Display investment size
+- Display confidence
+- Display deterministic explanations
+
+Mission Control never performs analysis.
+
+Mission Control only presents TradingPipeline output.
+
+---
+
+Trading Workspace
+
+Purpose
+
+Single-symbol deterministic analysis.
+
+Responsibilities
+
+- Analyze one symbol
+- Display BUY / HOLD / SELL
+- Display confidence
+- Display pressure score
+- Display AI explanation
+- Allow opening a trade
+
+Trading Workspace never calculates indicators.
+
+TradingPipeline remains the single deterministic decision engine.
+
+---
+
+Trade Monitor
+
+Purpose
+
+Monitor active positions.
+
+Responsibilities
+
+- Live current price
+- Live unrealized P/L
+- Dynamic exit evaluation
+- Stop-loss
+- Take-profit
+- Close Trade workflow
+- Trade lifecycle management
+
+Trade Monitor never creates BUY decisions.
+
+Trade Monitor only evaluates existing positions.
+
+---
+
+Portfolio Workspace
+
+Responsibilities
+
+- Trading capital
+- Currency
+- Position sizing context
+- Buying power
+
+Portfolio is the single source of truth for available trading capital.
+
+---
+
+History Workspace
+
+Responsibilities
+
+- Closed trades
+- Historical performance
+- Trade archive
+
+---
+
+Settings Workspace
+
+Responsibilities
+
+- Universe selection
+- Trading configuration
+- Platform settings
+
+---
+
+# Current Backend Architecture
+
+Current deterministic flow
+
+Universe
 
 ↓
 
-Opportunity
+YahooProvider
 
 ↓
 
-Trading Decision
+TechnicalScanner
 
 ↓
 
-Position Sizing
+AnalysisEngine
+
+↓
+
+TradingPipeline
+
+↓
+
+AdaptiveDecisionEngine
+
+↓
+
+AdaptiveRiskEngine
+
+↓
+
+RiskPlan
+
+↓
+
+Mission Control
+
+↓
+
+Trading Workspace
 
 ↓
 
@@ -74,7 +236,7 @@ Open Trade
 
 ↓
 
-OpenTradeStore
+TradeLifecycleService
 
 ↓
 
@@ -82,301 +244,112 @@ Trade Monitor
 
 ↓
 
-Exit Intelligence
+TradeHistoryStore
 
-↓
+The architecture follows strict separation of responsibilities.
 
-Future Trade History
+Every layer owns exactly one responsibility.
 
-Current development focuses on making this lifecycle visible, persistent and usable inside the desktop application.
-
-Every completed sprint must result in a visible improvement inside the desktop application.
+Duplicate business logic is forbidden.
 
 ---
 
-# Current Sprint Status
+# Adaptive Risk Engine (Sprint 5.8)
 
-## ✅ Sprint 5.1 — Portfolio & Position Sizing Foundation
+Sprint 5.8 introduced the first adaptive risk management layer.
 
-Completed
+Previous implementation
 
-✔ Portfolio Workspace redesigned
+Entry
 
-✔ Portfolio reduced to Trading Capital configuration
+↓
 
-✔ PortfolioStore persistence connected
+Fixed Stop Loss (-5%)
 
-✔ Trading capital survives application restart
+↓
 
-✔ Market Data panel displays market data age
+Fixed Take Profit (+10%)
 
-✔ Opportunity cards display current market price
+Current implementation
 
-✔ OpportunityService introduced
+Entry
 
-✔ PositionSizingService introduced
+↓
 
-✔ Mission Control prepared for position sizing
+AdaptiveRiskEngine
+
+↓
+
+RiskPlan
+
+↓
+
+Dynamic Stop Loss
+
+↓
+
+Dynamic Target 1
+
+↓
+
+Dynamic Target 2
+
+↓
+
+Dynamic Target 3
+
+Risk calculations now depend on
+
+- Confidence
+- Risk Score
+- Volatility
+- Market Regime
+- Entry Price
+
+The architecture supports future expansion toward
+
+- ATR-based stop-loss
+- Trailing stop
+- Break-even stop
+- Partial profit taking
+- Dynamic target updates
+- Portfolio risk balancing
+
+The AdaptiveRiskEngine never generates BUY or SELL decisions.
+
+Its responsibility begins only after a BUY decision has already been produced.
 
 ---
 
-## ✅ Sprint 5.2 — Position Sizing Presentation
+# Current Backend State
 
-Completed
+The backend is considered stable.
 
-✔ Mission Control displays recommended share quantity
+Completed deterministic services
 
-✔ Mission Control displays required investment
+✔ YahooProvider
 
-✔ Mission Control displays remaining available capital
+✔ IndicatorBuilder
 
-✔ Mission Control displays available trading capital
-
-✔ Mission Control displays budget status
-
-✔ Trading Workspace explainability improved
-
-✔ Risk, pressure score, confidence and position size now have human-readable explanations
-
-✔ No TradingPipeline logic was changed
-
-✔ AI remained explainability-only
-
----
-
-## ✅ Sprint 5.3 — Position Monitor Foundation
-
-Completed
-
-✔ Trade lifecycle domain model introduced
-
-✔ Trade model added as central domain object
-
-✔ PositionMonitorResult introduced
-
-✔ PositionMonitorService added
-
-✔ PositionMonitorPresenter added
-
-✔ PositionMonitorController added
-
-✔ PositionMonitorWorkspace added
-
-✔ Position Monitor integrated into main desktop navigation
-
-✔ Manual position input available
-
-✔ Position Monitor evaluates:
-
-- symbol
-- quantity
-- entry price
-- current price
-- stop-loss
-- take-profit
-
-✔ Position Monitor displays:
-
-- HOLD / SELL advice
-- unrealized profit/loss
-- market value
-- distance to stop-loss
-- distance to take-profit
-- deterministic reason
-
-✔ GUI layout stabilized with scrollable workspaces
-
-✔ Mission Control opportunity cards fixed with wrapping card renderer
-
----
-
-## ✅ Sprint 5.4 — Exit Intelligence Foundation
-
-Completed
-
-✔ ExitEvaluationService introduced
-
-✔ PositionMonitorService now delegates exit decisions to ExitEvaluationService
-
-✔ PositionMonitorResult expanded with:
-
-- exit_score
-- exit_reasons
-- trend_status
-- momentum_status
-- risk_status
-
-✔ PositionAnalysisService introduced
-
-✔ Position Monitor now uses the existing AnalysisEngine
-
-✔ Exit Intelligence now uses the same technical analysis infrastructure as the buying side
-
-✔ ExitEvaluationService supports:
-
-- stop-loss exit
-- take-profit exit
-- profit protection signal
-- loss warning
-- weak trend warning
-- weak momentum warning
-- weak structure warning
-- volatility / structure risk warning
-
-✔ Position Monitor GUI now displays:
-
-- Exit Score
-- Exit Score explanation
-- Trend status
-- Momentum status
-- Risk status
-- Exit reasons
-
-✔ First version of deterministic exit intelligence is working in the GUI
-
-✔ No AI decision logic added
-
-✔ No duplicate indicator logic added
-
----
-
-# Current Sprint
-
-## 🚧 Sprint 5.5 — Trade Lifecycle / Trade Monitor
-
-Primary goal
-
-Transform Orion from an analysis workstation into a trade lifecycle workstation.
-
-Implemented during Sprint 5.5 so far:
-
-✔ Position Monitor conceptually renamed toward Trade Monitor in the desktop navigation
-
-✔ Trade Monitor workspace title and copy updated
-
-✔ FxRateService introduced
-
-✔ Live EUR/USD conversion added through frankfurter.app
-
-✔ PositionSizingService made FX-aware
-
-✔ Mission Control now displays EUR account capital and USD market buying power
-
-✔ TradingConfig introduced
-
-✔ DEGIRO configured as the current broker context
-
-✔ Account currency centralized as EUR
-
-✔ Default market currency centralized as USD
-
-✔ Supported markets configured:
-
-- United States / NASDAQ / NYSE / USD
-- Euronext Amsterdam / EUR
-- Xetra / EUR
-
-✔ IndicatorConfig preserved inside TradingConfig
-
-✔ OpenTradeStore introduced
-
-✔ Open trades persisted in data/open_trades.json
-
-✔ TradeLifecycleService introduced
-
-✔ TradeMonitorService introduced
-
-✔ TradeMonitorService connected to ExitEvaluationService
-
-✔ TradeMonitorPresenter introduced
-
-✔ Trade Monitor GUI now displays an Open Trades panel
-
-✔ Trading Workspace now contains an Open Trade button
-
-✔ TradingController remembers the latest deterministic pipeline result
-
-✔ Open Trade workflow is being connected from Trading Workspace toward OpenTradeStore
-
-Current active objective
-
-Complete the end-to-end visible lifecycle:
-
-Trading Decision
-
-↓
-
-BUY
-
-↓
-
-Open Trade
-
-↓
-
-OpenTradeStore
-
-↓
-
-Trade Monitor
-
-↓
-
-ExitEvaluationService
-
-↓
-
-Trade History
-
-No broker order execution exists.
-
-No automatic real trading exists.
-
-No DEGIRO API integration exists.
-
-Orion is a deterministic trading assistant, not an execution bot.
-
----
-
-# Current Working Components
-
-## Backend
-
-✔ TradingPipeline
+✔ AnalysisEngine
 
 ✔ TechnicalScanner
 
 ✔ MarketScanner
 
-✔ AnalysisEngine
+✔ TradingPipeline
 
-✔ RiskEngine
+✔ SignalFusionEngine
 
-✔ PositionSizingEngine
+✔ MarketIntelligenceEngine
 
-✔ IndicatorBuilder
+✔ AdaptiveDecisionEngine
 
-✔ YahooProvider
+✔ PositionSizer
 
-✔ LiveScannerService
+✔ AdaptiveRiskEngine
 
 ✔ OpportunityService
-
-✔ PositionSizingService
-
-✔ FxRateService
-
-✔ TradingConfig
-
-✔ IndicatorConfig
-
-✔ PortfolioStore
-
-✔ Trade model
-
-✔ OpenTradeStore
-
-✔ TradeHistoryStore
 
 ✔ TradeLifecycleService
 
@@ -384,175 +357,103 @@ Orion is a deterministic trading assistant, not an execution bot.
 
 ✔ PositionMonitorService
 
-✔ ExitEvaluationService
-
 ✔ PositionAnalysisService
 
-✔ AI Context Builder
+✔ ExitEvaluationService
 
-✔ AI Explanation Engine
+✔ PortfolioStore
 
-The deterministic backend remains the single source of truth.
+✔ OpenTradeStore
 
-TradingPipeline remains the only source of BUY / HOLD / SELL trading decisions.
+✔ TradeHistoryStore
 
-ExitEvaluationService remains the deterministic source for open-trade exit advice.
+✔ AIContextBuilder
 
-TradeLifecycleService manages trade lifecycle state.
+✔ AIExplainer
 
-OpenTradeStore owns open-trade persistence.
+The backend remains the single source of truth.
 
-TradeMonitorService coordinates open-trade monitoring.
-
-AI remains explainability-only.
+No business logic exists inside Qt widgets.
 
 ---
 
-## Desktop
+# Current Desktop State
 
-✔ Workspace architecture
+The desktop application is fully operational.
 
-✔ Presenter architecture
+Current workspaces
 
-✔ WorkspaceRenderer
+✔ Mission Control
 
-✔ GuiWorkspace
+✔ Trading Workspace
 
-✔ GuiWorkspacePanel
+✔ Trade Monitor
 
-✔ BaseWorkspace with scrollable layout
+✔ Portfolio
 
-✔ MissionControlWorkspace
+✔ Performance
 
-✔ MissionControlController
+✔ History
 
-✔ TradingWorkspace
+✔ Settings
 
-✔ TradingController
+Navigation is stable.
 
-✔ PortfolioWorkspace
+Workspace rendering is stable.
 
-✔ PositionMonitorWorkspace / Trade Monitor
+Application startup is stable.
 
-✔ PositionMonitorController
-
-✔ TradeMonitorPresenter
-
-✔ ChartCanvas Framework
-
-✔ Auto Refresh
-
-Mission Control remains the primary workspace.
-
-Trade Monitor is now the first visible implementation of the Trade Lifecycle area.
+No architectural blockers currently exist.
 
 ---
 
-# Current Validation
+# Mission Control
 
-Latest validation
-
-```powershell
-python run_tests.py
-
-Expected result
-
-✔ Regression tests pass
-
-Additional targeted tests added during Sprint 5.5 include:
-
-python test_fx_rate_service.py
-python test_trading_config.py
-python test_open_trade_store.py
-python test_trade_lifecycle_service.py
-python test_trade_monitor_service.py
-python test_trade_monitor_presenter.py
-
-Desktop validation
-
-python app.py
-
-Validated
-
-✔ Application starts
-
-✔ Navigation works
-
-✔ Mission Control loads
-
-✔ Trading Workspace loads
-
-✔ Portfolio Workspace loads
-
-✔ Trade Monitor loads
-
-✔ Scan Market works
-
-✔ Opportunity cards render correctly
-
-✔ Workspaces support scrolling
-
-✔ Trading Capital persistence works
-
-✔ Mission Control displays live FX-aware position sizing
-
-✔ Trading Workspace displays Open Trade button
-
-✔ Open Trade button is disabled before a BUY analysis
-
-✔ Trade Monitor displays Open Trades panel
-
-✔ Manual trade monitoring still works
-
-✔ Exit Intelligence displays analysis-based status
-
-✔ Manual GUI validation completed
-
-Current GUI State
-
-Mission Control currently contains
+Mission Control currently displays
 
 ✔ Scanner Status
 
 ✔ Scan Duration
 
-✔ Market Data
+✔ Market Status
 
 ✔ Universe Coverage
 
-✔ Market Status
+✔ Top 10 Opportunities
 
-✔ Top Opportunities
+✔ Current Price
 
-✔ Opportunity Price
+✔ BUY / HOLD / SELL
 
-✔ FX-aware position sizing information
+✔ Confidence
 
-✔ Share quantity
+✔ Position Size
 
-✔ Required EUR investment
+✔ Required Investment
 
-✔ USD market buying power
+✔ Remaining Capital
 
-✔ Remaining capital
+✔ Buying Power
 
-✔ Budget status
+✔ Market Refresh
 
 ✔ Scan Market button
 
-✔ Scroll-stable opportunity cards
+Mission Control now acts as the operational heart of Orion.
 
-Portfolio currently contains
+Scanner results are fully deterministic.
 
-✔ Trading Capital configuration
+Opportunity ranking is deterministic.
 
-✔ Persistent capital storage
+---
 
-✔ Save button
+# Trading Workspace
 
-Trading currently contains
+Trading Workspace currently supports
 
-✔ TradingPipeline analysis
+✔ Symbol analysis
+
+✔ TradingPipeline execution
 
 ✔ BUY / HOLD / SELL
 
@@ -564,160 +465,89 @@ Trading currently contains
 
 ✔ Position Size
 
-✔ Human-readable metric explanations
-
 ✔ AI Explanation
 
-✔ Open Trade button
+✔ Open Trade
 
-Trade Monitor currently contains
+✔ Pipeline result caching
 
-✔ Manual trade input
+TradingController stores the latest deterministic pipeline result.
 
-✔ Open Trades panel
+Open Trade uses the latest deterministic analysis.
 
-✔ Exit Advies
+---
 
-✔ Exit Intelligence
+# Trade Monitor
+
+Trade Monitor currently supports
+
+✔ Open Trades
+
+✔ Live Current Price
+
+✔ Live Unrealized Profit/Loss
+
+✔ Live Position Value
+
+✔ Entry Price
+
+✔ Stop Loss
+
+✔ Take Profit
+
+✔ Exit Advice
 
 ✔ Exit Score
 
-✔ Trend status
+✔ Trend Status
 
-✔ Momentum status
+✔ Momentum Status
 
-✔ Risk status
+✔ Risk Status
 
-✔ Exit reasons
+✔ Exit Reasons
 
-✔ Winst / Verlies
+✔ Close Trade
 
-✔ Risico & Winstdoel
+✔ Automatic refresh
 
-✔ Status panel
+✔ Trade lifecycle synchronization
 
-The desktop now resembles a professional trading workstation rather than a simple dashboard.
+Trade Monitor now represents the operational center of the trade lifecycle.
 
-Development Rules
+---
 
-Every Orion implementation must follow these rules.
+# Portfolio
 
-Backend
-Trading logic exists only inside backend services.
-TradingPipeline remains the only source of BUY / HOLD / SELL decisions.
-ExitEvaluationService remains the deterministic source of open-trade exit advice.
-TradeLifecycleService owns trade lifecycle state transitions.
-OpenTradeStore owns open-trade persistence.
-TradeMonitorService coordinates open-trade monitoring.
-LiveScannerService performs orchestration only.
-OpportunityService builds presentation-ready opportunities.
-PositionSizingService calculates deterministic position sizing only.
-FxRateService owns live FX rate retrieval.
-PositionMonitorService calculates manual trade monitoring result data and delegates exit advice.
-PositionAnalysisService retrieves technical analysis for existing trades.
-PortfolioStore owns persistence of trading capital.
-Controllers coordinate services but never perform calculations.
-Presentation
-Widgets contain presentation only.
-Panels contain presentation only.
-Workspaces render and forward user actions only.
-Presenters transform deterministic output into readable UI text only.
-WorkspaceRenderer owns Mission Control rendering only.
-ChartCanvas owns painting only.
-No business logic may exist inside Qt widgets.
-No technical analysis may be calculated inside the UI.
-No exit decision may be calculated inside the UI.
-No trade lifecycle state may be mutated inside UI widgets.
-Artificial Intelligence
+Portfolio currently supports
 
-AI may
+✔ Trading Capital
 
-explain
-summarize
-compare
-generate natural language
+✔ Persistent storage
 
-AI may never
+✔ Position sizing context
 
-generate BUY signals
-generate SELL signals
-generate EXIT signals
-calculate indicators
-calculate confidence
-calculate position size
-override deterministic output
-override TradingPipeline
-override ExitEvaluationService
-open trades
-close trades
+✔ Save workflow
 
-Artificial Intelligence remains explainability only.
+✔ Restart persistence
 
-Current Architecture Direction
+PortfolioStore remains the single persistence owner.
 
-Mission Control continues to evolve into the operational heart of Orion.
+---
 
-The application is now moving from opportunity detection toward full trade lifecycle support.
+# Trade Lifecycle
 
-Current deterministic opportunity flow
-
-Market Data
-
-↓
-
-LiveScannerService
-
-↓
-
-TechnicalScanner / TradingPipeline
-
-↓
-
-OpportunityService
-
-↓
-
-MissionControlPresenter
-
-↓
-
-Mission Control
-
-Current deterministic trading analysis flow
-
-Symbol
-
-↓
-
-YahooProvider
-
-↓
-
-IndicatorBuilder
-
-↓
-
-TradingPipeline
-
-↓
-
-TradingWorkspacePresenter
-
-↓
-
-Trading Workspace
-
-Current open trade lifecycle flow
+Current lifecycle
 
 Trading Workspace
 
 ↓
 
-Open Trade action
+BUY
 
 ↓
 
-TradingController latest pipeline result
+Open Trade
 
 ↓
 
@@ -731,78 +561,418 @@ OpenTradeStore
 
 Trade Monitor
 
-Current deterministic position / exit flow
+↓
 
-Trade
+Close Trade
 
 ↓
 
-PositionAnalysisService
+TradeHistoryStore
+
+Trade lifecycle state is owned exclusively by backend services.
+
+---
+
+# Adaptive Risk Engine
+
+Current implementation
+
+IndicatorBuilder
 
 ↓
 
-YahooProvider
+IndicatorPack
 
 ↓
 
-AnalysisEngine
+TradingPipeline
 
 ↓
 
-AnalysisResult
+AdaptiveRiskEngine
 
 ↓
 
-PositionMonitorService / TradeMonitorService
+RiskPlan
 
 ↓
 
-ExitEvaluationService
+Open Trade
+
+RiskPlan currently contains
+
+✔ Entry Price
+
+✔ Stop Loss
+
+✔ Target 1
+
+✔ Target 2
+
+✔ Target 3
+
+✔ Risk %
+
+✔ Reward %
+
+✔ Risk / Reward
+
+✔ Confidence
+
+✔ Notes
+
+Current adaptive inputs
+
+✔ Confidence
+
+✔ Risk Score
+
+✔ Volatility
+
+✔ Market Regime
+
+✔ Current Price
+
+Fixed stop-loss percentages have been replaced by adaptive calculations.
+
+Fixed take-profit percentages have been replaced by adaptive calculations.
+
+The architecture now supports future intelligent risk management without modifying the TradingPipeline.
+
+---
+
+# Validation Status
+
+Latest validation
+
+✔ python run_tests.py
+
+✔ Regression tests passed
+
+✔ AdaptiveRiskEngine tests passed
+
+✔ Desktop launches successfully
+
+✔ Mission Control operational
+
+✔ Trading Workspace operational
+
+✔ Trade Monitor operational
+
+✔ Portfolio operational
+
+✔ History operational
+
+✔ Settings operational
+
+✔ Open Trade validated
+
+✔ Close Trade validated
+
+✔ Live P/L validated
+
+✔ Adaptive Risk Plan validated
+
+✔ Manual GUI validation completed
+
+---
+
+# Current GUI State
+
+Mission Control
+
+✔ Operational
+
+Trading Workspace
+
+✔ Operational
+
+Trade Monitor
+
+✔ Operational
+
+Portfolio
+
+✔ Operational
+
+History
+
+✔ Operational
+
+Settings
+
+✔ Operational
+
+The desktop now resembles a professional trading workstation with deterministic trade lifecycle support.
+
+---
+
+# Development Rules
+
+Every Orion implementation must follow these rules.
+
+## Backend
+
+TradingPipeline remains the only deterministic BUY / HOLD / SELL decision engine.
+
+AdaptiveDecisionEngine determines deterministic trade decisions.
+
+AdaptiveRiskEngine determines deterministic trade risk plans.
+
+ExitEvaluationService remains the only deterministic EXIT decision engine.
+
+TradeLifecycleService owns lifecycle transitions.
+
+TradeMonitorService coordinates open-trade monitoring.
+
+PositionAnalysisService retrieves technical analysis.
+
+PortfolioStore owns portfolio persistence.
+
+OpenTradeStore owns active trade persistence.
+
+TradeHistoryStore owns closed-trade persistence.
+
+Controllers orchestrate workflows only.
+
+No deterministic calculations may exist inside controllers.
+
+---
+
+## Presentation
+
+Widgets render only.
+
+Workspaces render only.
+
+Presenters transform deterministic output into readable UI.
+
+Qt widgets never calculate indicators.
+
+Qt widgets never calculate BUY, SELL or EXIT decisions.
+
+Qt widgets never mutate lifecycle state.
+
+Business logic belongs exclusively in backend services.
+
+---
+
+## Artificial Intelligence
+
+Artificial Intelligence may
+
+- Explain
+- Summarize
+- Compare
+- Generate natural language
+
+Artificial Intelligence may never
+
+- Generate BUY decisions
+- Generate SELL decisions
+- Generate EXIT decisions
+- Calculate indicators
+- Calculate confidence
+- Calculate position sizing
+- Calculate stop-loss
+- Calculate take-profit
+- Override deterministic output
+- Override TradingPipeline
+- Override AdaptiveRiskEngine
+- Open trades
+- Close trades
+
+Artificial Intelligence remains an explainability layer only.
+
+---
+
+# Current Architecture Direction
+
+Mission Control remains the operational center of Orion.
+
+Trade Monitor remains the operational center of the Trade Lifecycle.
+
+The next architectural evolution is Intelligent Risk Management.
+
+Current deterministic workflow
+
+Market Data
 
 ↓
 
-PositionMonitorPresenter / TradeMonitorPresenter
+Technical Analysis
 
 ↓
 
-Trade Monitor Workspace
+TradingPipeline
 
-The same AnalysisEngine supports both opportunity evaluation and exit intelligence.
+↓
 
-Current Known Limitations
-Open Trade workflow is still being completed.
-Open Trade currently uses early defaults for quantity, stop-loss and take-profit.
-Trade Monitor still contains legacy manual input.
-Open Trades list is basic text presentation.
-No selectable trade detail view yet.
-No Close Trade GUI action yet.
-No automatic Trade History transfer from GUI yet.
-No broker execution.
-No DEGIRO API integration.
-No automated trading.
-No paper broker yet.
-No commission/slippage model yet.
+AdaptiveDecisionEngine
 
-These are expected Sprint 5.5 / Sprint 6 limitations, not architectural blockers.
+↓
 
-Immediate Next Steps
-Finish Open Trade workflow from Trading Workspace.
-Ensure a BUY analysis can create a persisted open trade.
-Refresh Trade Monitor immediately after trade creation.
-Improve Open Trades presentation.
-Add trade selection / detail view.
-Add Close Trade workflow.
-Move closed trades to TradeHistoryStore.
-Update docs after every visible milestone.
-Git / Workflow Rules
-GitHub is the primary source of truth.
-After every stable milestone:
-run tests
-launch desktop
-manually validate GUI
-commit
-push
-update documentation
-Do not continue large implementation work when docs are outdated after a completed sprint milestone.
-Prefer small, safe commits.
-End of AI_CONTEXT
+AdaptiveRiskEngine
+
+↓
+
+RiskPlan
+
+↓
+
+Open Trade
+
+↓
+
+TradeLifecycleService
+
+↓
+
+Trade Monitor
+
+↓
+
+TradeHistoryStore
+
+The deterministic backend remains the single source of truth.
+
+---
+
+# Current Known Limitations
+
+The current implementation is stable.
+
+Remaining limitations are functional rather than architectural.
+
+Current limitations
+
+- RiskPlan is not yet fully visualized inside Trade Monitor.
+- Target 2 and Target 3 are calculated but not yet displayed.
+- Risk/Reward ratio is not yet displayed.
+- Trailing Stop is not implemented.
+- Break-even logic is not implemented.
+- Partial profit taking is not implemented.
+- ATR-based stop-loss is not implemented.
+- Portfolio-wide risk management is not implemented.
+- Paper Trading is not implemented.
+- Broker connectivity is not implemented.
+
+No known architectural blockers exist.
+
+---
+
+# Immediate Next Sprint
+
+Sprint 5.9 — Intelligent Risk Management
+
+Objectives
+
+- Display complete RiskPlan inside Trade Monitor.
+- Display Target 1 / 2 / 3.
+- Display Risk/Reward ratio.
+- Improve Trade card presentation.
+- Introduce ATR-aware stop-loss calculations.
+- Introduce dynamic trailing stop foundation.
+- Prepare partial profit-taking architecture.
+
+---
+
+# Sprint 6 Roadmap
+
+Planned evolution
+
+Sprint 6.0
+
+- Intelligent Risk Manager V2
+- ATR-based stop-loss
+- Dynamic trailing stop
+- Break-even stop
+- Partial exits
+- Portfolio risk allocation
+- Dynamic exposure management
+
+Sprint 6.1
+
+- Paper Trading
+- Portfolio performance
+- Daily statistics
+- Trade journal
+- Equity curve
+
+Sprint 6.2
+
+- Broker compatibility layer
+- Portfolio synchronization
+- Order preparation
+- Optional broker integration
+
+---
+
+# Git Workflow
+
+GitHub remains the primary source of truth.
+
+Every completed milestone must end with
+
+- Regression tests
+- Desktop validation
+- Manual GUI validation
+- Documentation synchronization
+- Git commit
+- Git push
+
+Documentation must never lag behind implementation.
+
+---
+
+# Current Project Status
+
+Current architecture
+
+🟢 Stable
+
+Backend
+
+🟢 Stable
+
+Desktop
+
+🟢 Stable
+
+Trade Lifecycle
+
+🟢 Operational
+
+Mission Control
+
+🟢 Operational
+
+Trading Workspace
+
+🟢 Operational
+
+Trade Monitor
+
+🟢 Operational
+
+Adaptive Risk Engine
+
+🟢 Operational
+
+Portfolio
+
+🟢 Operational
+
+History
+
+🟢 Operational
+
+Overall project maturity
+
+The deterministic architecture is now considered mature.
+
+Current development is focused on expanding intelligent risk management and preparing Orion for a complete paper-trading environment.
+
+---
+
+# End of AI_CONTEXT
