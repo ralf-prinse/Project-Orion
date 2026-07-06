@@ -1,19 +1,26 @@
 from models.trade_lifecycle import Trade
+from services.open_trade_store import OpenTradeStore
 from services.position_analysis_service import PositionAnalysisService
 from services.position_monitor_service import PositionMonitorService
+from services.trade_history_store import TradeHistoryStore
+from services.trade_lifecycle_service import TradeLifecycleService
+from services.trade_monitor_service import TradeMonitorService
 from ui.foundation.position_monitor_presenter import PositionMonitorPresenter
+from ui.foundation.trade_monitor_presenter import TradeMonitorPresenter
 
 
 class PositionMonitorController:
     """
-    Controller for the Position Monitor workspace.
+    Controller for the Trade Monitor workspace.
 
     Responsibilities
     ----------------
-    - receive a Trade from the workspace
+    - receive manual Trade input from the workspace
     - retrieve latest technical analysis
     - invoke PositionMonitorService
     - invoke PositionMonitorPresenter
+    - load persisted open trades
+    - invoke TradeMonitorPresenter
     - update the workspace
 
     No business logic.
@@ -27,6 +34,8 @@ class PositionMonitorController:
         analysis_service: PositionAnalysisService | None = None,
         monitor_service: PositionMonitorService | None = None,
         presenter: PositionMonitorPresenter | None = None,
+        trade_monitor_service: TradeMonitorService | None = None,
+        trade_monitor_presenter: TradeMonitorPresenter | None = None,
     ):
         self.workspace = workspace
 
@@ -41,6 +50,36 @@ class PositionMonitorController:
         self.presenter = (
             presenter or PositionMonitorPresenter()
         )
+
+        if trade_monitor_service is None:
+            lifecycle_service = TradeLifecycleService(
+                open_trade_store=OpenTradeStore(),
+                trade_history_store=TradeHistoryStore(),
+            )
+
+            trade_monitor_service = TradeMonitorService(
+                trade_lifecycle_service=lifecycle_service,
+            )
+
+        self.trade_monitor_service = trade_monitor_service
+
+        self.trade_monitor_presenter = (
+            trade_monitor_presenter or TradeMonitorPresenter()
+        )
+
+    def load_open_trades(self) -> None:
+        try:
+            trades = self.trade_monitor_service.get_open_trades()
+            view_model = self.trade_monitor_presenter.present_open_trades(
+                trades
+            )
+
+            self.workspace.set_open_trades_view_model(view_model)
+
+        except Exception as error:
+            self.workspace.set_status_text(
+                f"Open trades laden mislukt: {error}"
+            )
 
     def monitor_trade(
         self,
@@ -66,5 +105,5 @@ class PositionMonitorController:
 
         except Exception as error:
             self.workspace.set_status_text(
-                f"Position Monitor mislukt: {error}"
+                f"Trade Monitor mislukt: {error}"
             )

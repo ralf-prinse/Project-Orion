@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
 
 from models.trade_lifecycle import Trade
 from ui.foundation.position_monitor_presenter import PositionMonitorViewModel
+from ui.foundation.trade_monitor_presenter import TradeMonitorListViewModel
 from ui.workspace.base_workspace import BaseWorkspace
 from ui.workspace.workspace_panel import WorkspacePanel
 
@@ -52,6 +53,12 @@ class PositionMonitorWorkspace(BaseWorkspace):
         self.monitor_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.monitor_button.setStyleSheet(self.primary_button_style())
         self.monitor_button.clicked.connect(self._handle_monitor_clicked)
+
+        self.open_trades_panel = WorkspacePanel(
+            theme=self.theme,
+            title="Open Trades",
+            body="Open trades worden geladen...",
+        )
 
         self.signal_panel = WorkspacePanel(
             theme=self.theme,
@@ -119,6 +126,7 @@ class PositionMonitorWorkspace(BaseWorkspace):
 
         self.add_workspace_widget(form)
         self.add_workspace_widget(self.monitor_button)
+        self.add_workspace_widget(self.open_trades_panel)
         self.add_workspace_widget(self.signal_panel)
         self.add_workspace_widget(self.intelligence_panel)
         self.add_workspace_widget(self.pnl_panel)
@@ -161,6 +169,16 @@ class PositionMonitorWorkspace(BaseWorkspace):
             return
 
         self.on_monitor_requested(trade)
+
+    def set_open_trades_view_model(
+        self,
+        view_model: TradeMonitorListViewModel,
+    ) -> None:
+        self.open_trades_panel.set_title(view_model.title)
+        self.open_trades_panel.set_body(
+            f"{view_model.summary}\n\n{view_model.trades_text}"
+        )
+        self.set_status_text(view_model.status)
 
     def set_view_model(self, view_model: PositionMonitorViewModel) -> None:
         self.signal_panel.set_title(view_model.signal)

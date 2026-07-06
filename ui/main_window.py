@@ -94,6 +94,7 @@ class OrionWindow(QMainWindow):
         self.position_monitor_page = PositionMonitorWorkspace(
             theme=self.theme,
             on_monitor_requested=self.monitor_trade,
+            
         )
 
         self.portfolio_page = PortfolioWorkspace(
@@ -132,6 +133,8 @@ class OrionWindow(QMainWindow):
         self.position_monitor_controller = PositionMonitorController(
             workspace=self.position_monitor_page,
         )
+
+        self.position_monitor_controller.load_open_trades()
 
         # ----------------------------
         # INIT WORKSPACES
