@@ -16,6 +16,7 @@ class TradingController:
         - execute TradingPipeline
         - transform pipeline output through TradingWorkspacePresenter
         - update TradingWorkspace
+        - remember the latest deterministic pipeline result
 
     No trading decisions are made here.
     No indicator calculations are implemented here.
@@ -42,6 +43,9 @@ class TradingController:
 
         self.analysis_period = "6mo"
         self.analysis_interval = "1d"
+
+        self.last_symbol: str = ""
+        self.last_pipeline_result: dict | None = None
 
     def analyze_symbol(self, symbol: str) -> None:
         normalized_symbol = symbol.strip().upper()
@@ -71,6 +75,9 @@ class TradingController:
                 portfolio_state=self.portfolio_state,
             )
 
+            self.last_symbol = normalized_symbol
+            self.last_pipeline_result = pipeline_result
+
             view_model = self.trading_presenter.create_view_model(
                 pipeline_result
             )
@@ -81,3 +88,9 @@ class TradingController:
             self.trading_workspace.set_status_text(
                 f"Analyse mislukt voor {normalized_symbol}: {error}"
             )
+
+    def get_last_pipeline_result(self) -> dict | None:
+        return self.last_pipeline_result
+
+    def get_last_symbol(self) -> str:
+        return self.last_symbol
