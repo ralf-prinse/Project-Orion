@@ -6,11 +6,11 @@
 
 Documentation Version
 
-v1.11
+v1.12
 
 Architecture Version
 
-v2.0
+v2.1
 
 Current Sprint
 
@@ -35,10 +35,17 @@ Last Updated
 - [x] LiveScannerService
 - [x] IndicatorBuilder
 - [x] Yahoo Finance integration
+- [x] FxRateService
+- [x] TradingConfig
+- [x] IndicatorConfig
 - [x] PortfolioStore
 - [x] OpportunityService
 - [x] PositionSizingService
 - [x] Trade domain model
+- [x] OpenTradeStore
+- [x] TradeHistoryStore
+- [x] TradeLifecycleService
+- [x] TradeMonitorService
 - [x] PositionAnalysisService
 - [x] PositionMonitorService
 - [x] ExitEvaluationService
@@ -63,6 +70,7 @@ Last Updated
 - [x] PositionMonitorWorkspace
 - [x] PositionMonitorController
 - [x] PositionMonitorPresenter
+- [x] TradeMonitorPresenter
 - [x] ChartCanvas framework
 
 ---
@@ -78,9 +86,11 @@ Completed
 - [x] Universe Coverage
 - [x] Top Opportunities
 - [x] Opportunity Price
+- [x] Live FX conversion
 - [x] Position sizing presentation
 - [x] Share quantity
-- [x] Required investment
+- [x] Required EUR investment
+- [x] USD buying power
 - [x] Remaining capital
 - [x] Budget validation
 - [x] Automatic Refresh
@@ -113,15 +123,21 @@ Completed
 - [x] Position Size
 - [x] Human-readable explanations
 - [x] AI Explanation
+- [x] Open Trade button
+- [x] Latest pipeline result caching
 
 ---
 
-## Position Monitor
+## Trade Monitor
 
 Completed
 
 - [x] Trade model
 - [x] Manual trade input
+- [x] Open Trades panel
+- [x] OpenTradeStore
+- [x] TradeLifecycleService
+- [x] TradeMonitorService
 - [x] PositionAnalysisService
 - [x] PositionMonitorService
 - [x] ExitEvaluationService
@@ -144,72 +160,93 @@ Completed
 - [x] Mission Control loads
 - [x] Portfolio loads
 - [x] Trading Workspace loads
-- [x] Position Monitor loads
+- [x] Trade Monitor loads
 - [x] Scan Market works
+- [x] FX conversion works
+- [x] TradingConfig works
+- [x] OpenTradeStore works
+- [x] TradeLifecycleService works
+- [x] TradeMonitorService works
 - [x] Exit Intelligence works
 - [x] Opportunity cards validated
 - [x] Manual GUI validation completed
 
 Latest validation
 
-✔ 6 passed
+✔ Regression tests pass
 
 ---
 
 # Sprint 5.5 — Trade Lifecycle
 
-Current Sprint
+## Highest Priority
 
-## Trade Monitor
+### Open Trade Workflow
 
-- [ ] Rename Position Monitor conceptually to Trade Monitor
-- [ ] Improve information hierarchy
-- [ ] Improve trade summary presentation
-- [ ] Improve Exit Intelligence presentation
-- [ ] Show trade health more visually
-- [ ] Improve professional desktop UX
-
----
-
-## Trade Lifecycle
-
-- [ ] Introduce Open Trade workflow
-- [ ] Create trade directly from Trading Workspace
-- [ ] Create trade directly from Mission Control
-- [ ] Connect Position Monitor to persisted trades
-- [ ] Show current open trades
-- [ ] Prepare Trade History architecture
+- [ ] Complete BUY → Open Trade workflow
+- [ ] Save trade through TradeLifecycleService
+- [ ] Persist trade in OpenTradeStore
+- [ ] Auto refresh Trade Monitor
+- [ ] Show newly created trade immediately
 
 ---
 
-## Exit Intelligence
+### Trade Monitor UX
 
-- [ ] Add Trailing Stop evaluation
-- [ ] Add Time-based Exit evaluation
-- [ ] Improve Exit Score weighting
-- [ ] Improve Exit explanations
-- [ ] Add technical indicator explanations
-- [ ] Add market regime influence
-- [ ] Add volatility interpretation
-
----
-
-## Mission Control
-
-- [ ] Show open positions
-- [ ] Show portfolio exposure
-- [ ] Show available buying power
-- [ ] Show active trades
-- [ ] Show watchlist integration
+- [ ] Replace legacy manual workflow
+- [ ] Clickable Open Trades list
+- [ ] Trade detail panel
+- [ ] Live P/L display
+- [ ] Days in trade
+- [ ] Highest price
+- [ ] Lowest price
+- [ ] Current stop-loss
+- [ ] Current take-profit
+- [ ] Exit score visualization
 
 ---
 
-## Trading Workspace
+### Trade Lifecycle
 
-- [ ] One-click trade creation
-- [ ] Display expected lifecycle
-- [ ] Improve trade checklist
-- [ ] Improve AI explanation readability
+- [ ] Close Trade workflow
+- [ ] Move closed trades into TradeHistoryStore
+- [ ] Holding duration
+- [ ] Trade state transitions
+- [ ] Lifecycle timestamps
+
+---
+
+### Exit Intelligence
+
+- [ ] Trailing Stop evaluation
+- [ ] Time-based Exit evaluation
+- [ ] Better Exit Score weighting
+- [ ] Better Exit explanations
+- [ ] Technical indicator explanations
+- [ ] Market regime interpretation
+- [ ] Volatility interpretation
+
+---
+
+### Mission Control
+
+- [ ] Show active open trades
+- [ ] Portfolio exposure
+- [ ] Buying power
+- [ ] Open risk
+- [ ] Current portfolio P/L
+- [ ] Watchlist integration
+
+---
+
+### Trading Workspace
+
+- [ ] Finish Open Trade workflow
+- [ ] Editable quantity dialog
+- [ ] Editable entry price
+- [ ] Editable stop-loss
+- [ ] Editable take-profit
+- [ ] Trade confirmation dialog
 
 ---
 
@@ -268,13 +305,14 @@ AI will never generate deterministic trading decisions.
 
 Current technical debt
 
-- [ ] Rename Position Monitor to Trade Monitor throughout the application.
-- [ ] Introduce persistent TradeStore.
-- [ ] Connect Trade creation to Trading Workspace.
-- [ ] Connect Trade creation to Mission Control.
-- [ ] Remove remaining placeholder texts in Exit Intelligence.
-- [ ] Improve professional terminology throughout the desktop.
-- [ ] Extend automated regression tests for Trade Lifecycle.
+- [ ] Finish Open Trade workflow
+- [ ] Remove remaining legacy Position Monitor naming
+- [ ] Replace manual Trade Monitor workflow
+- [ ] Improve Open Trades presentation
+- [ ] Trade detail screen
+- [ ] Close Trade action
+- [ ] Improve terminology
+- [ ] Extend regression tests for lifecycle
 
 Current architecture is otherwise considered clean.
 
@@ -298,12 +336,13 @@ GitHub is the primary source of truth.
 
 # Current Priority
 
-1. Trade Lifecycle
-2. Trade Monitor
-3. Open Trade persistence
+1. Complete Open Trade workflow
+2. Trade Monitor UX
+3. Close Trade workflow
 4. Trade History
 5. Exit Intelligence improvements
 6. Paper Trading
+7. Broker compatibility layer
 
 ---
 

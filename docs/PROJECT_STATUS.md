@@ -8,11 +8,11 @@
 
 Documentation Version
 
-v1.11
+v1.12
 
 Architecture Version
 
-v2.0
+v2.1
 
 Status
 
@@ -30,19 +30,17 @@ Last Updated
 
 # Executive Summary
 
-Project Orion has successfully completed its deterministic trading foundation.
+Project Orion has successfully completed its deterministic trading foundation and is now actively implementing the Trade Lifecycle.
 
-The application has evolved from a market scanner into a professional desktop trading workstation that now supports the first stages of the complete trade lifecycle.
+The application has evolved from a market scanner into a professional desktop trading workstation.
 
 Mission Control remains the operational center of Orion.
 
 Trading Workspace performs deterministic BUY / HOLD / SELL analysis.
 
-Position Monitor introduces deterministic Exit Intelligence using the same technical analysis engine as the buying side.
+Trade Monitor is evolving from the former Position Monitor into the visible area for open trades, lifecycle monitoring and exit intelligence.
 
 The deterministic backend remains stable.
-
-Current development no longer focuses on architectural foundations.
 
 Current development focuses on completing the Trade Lifecycle while preserving deterministic behaviour.
 
@@ -56,12 +54,14 @@ Sprint 5.5 focuses on completing the Trade Lifecycle.
 
 Primary objectives
 
-1. Trade Lifecycle
-2. Trade Monitor
-3. Open Trade persistence
-4. Trade History preparation
-5. Exit Intelligence improvements
-6. Mission Control evolution
+1. Open Trade workflow
+2. OpenTradeStore persistence
+3. TradeLifecycleService
+4. TradeMonitorService
+5. Trade Monitor GUI integration
+6. Exit Intelligence integration
+7. Trade History preparation
+8. Mission Control evolution
 
 ---
 
@@ -85,7 +85,14 @@ Completed
 - PortfolioStore
 - OpportunityService
 - PositionSizingService
+- FxRateService
+- TradingConfig
+- IndicatorConfig
 - Trade domain model
+- OpenTradeStore
+- TradeHistoryStore
+- TradeLifecycleService
+- TradeMonitorService
 - PositionAnalysisService
 - PositionMonitorService
 - ExitEvaluationService
@@ -96,11 +103,48 @@ The backend remains fully deterministic.
 
 TradingPipeline remains the only source of BUY / HOLD / SELL decisions.
 
-ExitEvaluationService is now the deterministic source of HOLD / SELL exit advice.
+ExitEvaluationService remains the only deterministic source of open-trade HOLD / EXIT advice.
+
+TradeLifecycleService manages trade lifecycle state.
+
+OpenTradeStore owns open-trade persistence.
+
+TradeMonitorService coordinates open-trade monitoring.
 
 No duplicated indicator calculations exist.
 
-AnalysisEngine is now shared by both Trading Workspace and Position Monitor.
+AnalysisEngine is shared by both entry-side analysis and exit-side monitoring.
+
+---
+
+## Market / Broker Configuration
+
+🟢 Operational
+
+Completed
+
+- TradingConfig introduced
+- Broker context set to DEGIRO
+- Account currency centralized as EUR
+- Default market currency centralized as USD
+- Supported markets configured:
+  - United States / NASDAQ / NYSE / USD
+  - Euronext Amsterdam / EUR
+  - Xetra / EUR
+- IndicatorConfig preserved for deterministic indicator periods
+- FxRateService introduced
+- Live EUR/USD conversion added
+- PositionSizingService made FX-aware
+
+Current responsibility
+
+TradingConfig defines broker, account currency, default market currency, supported markets and indicator settings.
+
+FxRateService retrieves live FX rates.
+
+No broker execution exists.
+
+No DEGIRO API integration exists.
 
 ---
 
@@ -121,12 +165,15 @@ Completed
 - TradingWorkspace
 - TradingController
 - PortfolioWorkspace
-- PositionMonitorWorkspace
+- PositionMonitorWorkspace / Trade Monitor
 - PositionMonitorController
+- TradeMonitorPresenter
 
 Mission Control remains the primary workspace.
 
 The desktop architecture is considered stable and extensible.
+
+---
 
 ## Portfolio Workspace
 
@@ -147,7 +194,7 @@ Portfolio configures the deterministic trading capital available to Orion.
 
 The workspace no longer performs analytical tasks.
 
-Portfolio is now exclusively responsible for capital configuration.
+Portfolio is exclusively responsible for capital configuration.
 
 ---
 
@@ -165,9 +212,10 @@ Completed
 - Top Opportunities
 - Opportunity cards
 - Current market price
-- Position sizing presentation
+- FX-aware position sizing presentation
 - Share quantity
-- Required investment
+- Required EUR investment
+- USD market buying power
 - Remaining available capital
 - Budget validation
 - Automatic Refresh
@@ -175,7 +223,7 @@ Completed
 - Stable scrollable layouts
 - Responsive opportunity cards
 
-Mission Control is now the operational hub of Orion.
+Mission Control is the operational hub of Orion.
 
 Its responsibility is to surface the highest-quality deterministic opportunities together with capital allocation information.
 
@@ -198,7 +246,8 @@ Completed
 - Position Size
 - Human-readable explanations
 - AI Explanation
-- Professional information hierarchy
+- Open Trade button
+- Latest deterministic pipeline result stored by TradingController
 
 Trading Workspace remains the deterministic entry point for evaluating individual stocks.
 
@@ -206,20 +255,29 @@ TradingPipeline remains the only decision engine.
 
 Artificial Intelligence only explains deterministic output.
 
+Current limitation
+
+Open Trade workflow is in progress.
+
 ---
 
-## Position Monitor
+## Trade Monitor
 
-🟢 Operational
+🚧 Active
 
 Completed
 
+- Former Position Monitor workspace conceptually evolved toward Trade Monitor
+- Manual trade input retained
 - Trade model integration
-- Manual trade input
-- PositionMonitorService
+- Open Trades panel added
+- TradeMonitorPresenter introduced
+- TradeMonitorService introduced
+- TradeLifecycleService introduced
+- OpenTradeStore introduced
+- PositionMonitorService retained for manual trade evaluation
 - PositionAnalysisService
 - ExitEvaluationService
-- PositionMonitorPresenter
 - Exit Intelligence
 - Exit Score
 - Trend Status
@@ -233,24 +291,29 @@ Completed
 
 Current responsibility
 
-Position Monitor evaluates an existing trade.
+Trade Monitor displays persisted open trades and evaluates trade health.
 
 It combines
 
 - current trade information
+- open trade persistence
 - technical analysis
 - deterministic exit rules
 
-into a single deterministic exit recommendation.
+into a deterministic lifecycle monitoring experience.
 
 Current limitations
 
-- Trades are entered manually.
-- Open trades are not yet persisted.
+- Manual trade input still exists.
+- Open Trades list is currently basic text presentation.
+- Open Trade workflow is still being completed.
+- Trade selection/detail view is not yet implemented.
+- Close Trade workflow is not yet implemented.
+- Closed trades are not yet automatically moved from GUI workflow into history.
 - No broker integration.
-- No automatic trade creation from Trading Workspace.
+- No automatic order execution.
 
-Position Monitor is the first implementation of Orion's Trade Lifecycle.
+Trade Monitor is the first implementation of Orion's Trade Lifecycle.
 
 ---
 
@@ -260,17 +323,23 @@ Latest validation
 
 ```powershell
 python run_tests.py
-```
 
 Result
 
-✔ 6 passed
+✔ Regression tests pass
+
+Additional targeted tests
+
+python test_fx_rate_service.py
+python test_trading_config.py
+python test_open_trade_store.py
+python test_trade_lifecycle_service.py
+python test_trade_monitor_service.py
+python test_trade_monitor_presenter.py
 
 Desktop validation
 
-```powershell
 python app.py
-```
 
 Validated
 
@@ -284,7 +353,7 @@ Validated
 
 ✔ Portfolio Workspace loads
 
-✔ Position Monitor loads
+✔ Trade Monitor loads
 
 ✔ Scan Market works
 
@@ -294,171 +363,169 @@ Validated
 
 ✔ Trading Capital persistence works
 
+✔ Mission Control displays FX-aware position sizing
+
+✔ Trading Workspace shows Open Trade button
+
+✔ Open Trade button is disabled before BUY analysis
+
+✔ Trade Monitor displays Open Trades panel
+
+✔ Manual trade evaluation still works
+
 ✔ Exit Intelligence displays correctly
 
 ✔ AnalysisEngine integration validated
 
 ✔ Manual GUI validation completed
 
----
-
-# Current GUI Status
+Current GUI Status
 
 Mission Control currently displays
 
-- Scanner Status
-- Scan Duration
-- Market Data
-- Universe Coverage
-- Market Status
-- Top Opportunities
-- Current Market Price
-- Position Size
-- Required Investment
-- Remaining Capital
-- Budget Status
+Scanner Status
+Scan Duration
+Market Data
+Universe Coverage
+Market Status
+Top Opportunities
+Current Market Price
+FX-aware Position Size
+Required EUR Investment
+USD Market Buying Power
+Remaining Capital
+Budget Status
 
 Portfolio currently displays
 
-- Trading Capital
-- Persistent storage
-- Save action
+Trading Capital
+Persistent storage
+Save action
 
 Trading Workspace currently displays
 
-- BUY / HOLD / SELL
-- Confidence
-- Pressure
-- Risk
-- Position Size
-- Human-readable explanations
-- AI Explanation
+BUY / HOLD / SELL
+Confidence
+Pressure
+Risk
+Position Size
+Human-readable explanations
+AI Explanation
+Open Trade action
 
-Position Monitor currently displays
+Trade Monitor currently displays
 
-- Manual Trade Entry
-- Exit Advice
-- Exit Intelligence
-- Exit Score
-- Trend Status
-- Momentum Status
-- Risk Status
-- Exit Reasons
-- Profit / Loss
-- Market Value
-- Risk & Target
-- Status
+Manual Trade Entry
+Open Trades panel
+Exit Advice
+Exit Intelligence
+Exit Score
+Trend Status
+Momentum Status
+Risk Status
+Exit Reasons
+Profit / Loss
+Market Value
+Risk & Target
+Status
 
 The desktop foundation is considered stable.
 
-Current work is focused on expanding the Trade Lifecycle.
+Current work is focused on completing the Trade Lifecycle.
 
----
-
-# Known Limitations
+Known Limitations
 
 Current limitations are functional rather than architectural.
 
 Remaining work
 
-- Trade Lifecycle improvements
-- Trade Monitor UX
-- Open Trade persistence
-- Trade History
-- Trailing Stop logic
-- Time-based exit logic
-- Paper Trading
-- Broker integration
+Complete Open Trade workflow
+Improve Trade Monitor UX
+Improve Open Trades list presentation
+Add trade selection/detail view
+Add Close Trade workflow
+Move closed trades into TradeHistoryStore
+Improve Trade History
+Add Trailing Stop logic
+Add Time-based Exit logic
+Add Paper Trading
+Add broker compatibility layer
+Add optional future DEGIRO import/export support
 
 No known architectural blockers exist.
 
----
-
-# Sprint Roadmap
-
-## ✅ Sprint 5.1 — Portfolio & Position Sizing Foundation
+Sprint Roadmap
+✅ Sprint 5.1 — Portfolio & Position Sizing Foundation
 
 Completed
 
-- Trading Capital
-- Portfolio persistence
-- OpportunityService
-- PositionSizingService
-- Opportunity pricing
-
----
-
-## ✅ Sprint 5.2 — Position Sizing Presentation
+Trading Capital
+Portfolio persistence
+OpportunityService
+PositionSizingService
+Opportunity pricing
+✅ Sprint 5.2 — Position Sizing Presentation
 
 Completed
 
-- Recommended share quantity
-- Required investment
-- Remaining capital
-- Budget validation
-- Improved opportunity presentation
-- Human-readable trading explanations
-
----
-
-## ✅ Sprint 5.3 — Position Monitor Foundation
+Recommended share quantity
+Required investment
+Remaining capital
+Budget validation
+Improved opportunity presentation
+Human-readable trading explanations
+✅ Sprint 5.3 — Position Monitor Foundation
 
 Completed
 
-- Trade domain model
-- PositionMonitorService
-- PositionMonitorController
-- PositionMonitorPresenter
-- PositionMonitorWorkspace
-- Manual trade monitoring
-- Profit/Loss monitoring
-- Initial exit advice
-
----
-
-## ✅ Sprint 5.4 — Exit Intelligence Foundation
+Trade domain model
+PositionMonitorService
+PositionMonitorController
+PositionMonitorPresenter
+PositionMonitorWorkspace
+Manual trade monitoring
+Profit/Loss monitoring
+Initial exit advice
+✅ Sprint 5.4 — Exit Intelligence Foundation
 
 Completed
 
-- ExitEvaluationService
-- PositionAnalysisService
-- Shared AnalysisEngine
-- Exit Score
-- Trend Status
-- Momentum Status
-- Risk Status
-- Exit Reasons
-- Exit Intelligence panel
-- Shared technical analysis for BUY and SELL
-
----
-
-## 🚧 Sprint 5.5 — Trade Lifecycle
+ExitEvaluationService
+PositionAnalysisService
+Shared AnalysisEngine
+Exit Score
+Trend Status
+Momentum Status
+Risk Status
+Exit Reasons
+Exit Intelligence panel
+Shared technical analysis for BUY and SELL
+🚧 Sprint 5.5 — Trade Lifecycle
 
 Current objectives
 
-- Evolve Position Monitor into Trade Monitor
-- Improve Trade Lifecycle presentation
-- Prepare Open Trade persistence
-- Prepare Trade History
-- Improve Exit Intelligence explanations
-- Prepare automatic trade creation
-
----
-
-## Sprint 6.0 — Paper Trading
+Evolve Position Monitor into Trade Monitor
+Implement OpenTradeStore
+Implement TradeLifecycleService
+Implement TradeMonitorService
+Show current open trades
+Complete Open Trade workflow from Trading Workspace
+Prepare Trade History
+Improve Exit Intelligence explanations
+Prepare future paper trading
+Sprint 6.0 — Paper Trading
 
 Planned
 
-- Virtual Broker
-- Order lifecycle
-- Simulated execution
-- Portfolio tracking
-- Performance statistics
-
----
-
-# Overall Project Progress
+Virtual Broker
+Order lifecycle
+Simulated execution
+Portfolio tracking
+Commission model
+Slippage model
+Performance statistics
+Trade journal
+Overall Project Progress
 
 Epic 1
 
@@ -466,15 +533,11 @@ Epic 1
 
 Complete
 
----
-
 Epic 2
 
 ✅ Desktop Architecture
 
 Complete
-
----
 
 Epic 3
 
@@ -482,15 +545,11 @@ Epic 3
 
 Operational
 
----
-
 Epic 4
 
 ✅ Portfolio & Position Sizing
 
 Complete
-
----
 
 Epic 5
 
@@ -498,15 +557,11 @@ Epic 5
 
 Operational
 
----
-
 Epic 6
 
 ✅ Position Monitor & Exit Intelligence
 
 Operational
-
----
 
 Epic 7
 
@@ -514,28 +569,21 @@ Epic 7
 
 Active
 
----
-
 Epic 8
 
 📋 Paper Trading
 
 Planned
 
----
-
-# Current Priorities
-
-1. Trade Lifecycle
-2. Trade Monitor
-3. Open Trade persistence
-4. Trade History
-5. Exit Intelligence improvements
-6. Paper Trading
-
----
-
-# Definition of Done
+Current Priorities
+Complete Open Trade workflow
+Trade Monitor open trade UX
+Trade selection/detail view
+Close Trade workflow
+Trade History
+Exit Intelligence improvements
+Paper Trading
+Definition of Done
 
 A sprint is complete only when
 
@@ -561,20 +609,16 @@ A sprint is complete only when
 
 ✔ GitHub push completed
 
----
-
-# Documentation Status
+Documentation Status
 
 Documentation Version
 
-v1.11
+v1.12
 
 Architecture Version
 
-v2.0
+v2.1
 
 Documentation is synchronized with the current implementation.
 
----
-
-# End of PROJECT_STATUS
+End of PROJECT_STATUS

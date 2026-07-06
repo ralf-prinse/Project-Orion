@@ -1,73 +1,36 @@
----
-
-# Sprint 5.2 — Position Sizing Presentation
-
-Status
-
-✅ Completed
-
-## Added
-
-- Recommended share quantity presentation.
-- Required investment presentation.
-- Remaining available capital.
-- Budget validation.
-- Human-readable trading explanations.
-- Improved opportunity presentation.
-
-## Changed
-
-- Mission Control now presents deterministic position sizing.
-- Trading Workspace explanations became easier to understand.
-- TradingPipeline remained unchanged.
+# CHANGELOG
 
 ---
 
-# Sprint 5.3 — Position Monitor Foundation
+# Sprint 5.5 — Trade Lifecycle Foundation
 
 Status
 
-✅ Completed
-
-## Added
-
-- Trade domain model.
-- PositionMonitorWorkspace.
-- PositionMonitorController.
-- PositionMonitorPresenter.
-- PositionMonitorService.
-- Manual trade monitoring workflow.
-- Profit/Loss overview.
-- Market Value overview.
-- Initial deterministic exit advice.
-
-## Changed
-
-- Desktop expanded with the first Trade Lifecycle workspace.
-- Workspace architecture extended without changing existing deterministic logic.
+✅ In Progress
 
 ---
-
-# Sprint 5.4 — Exit Intelligence Foundation
-
-Status
-
-✅ Completed
 
 ## Architecture
 
 ### Added
 
-- ExitEvaluationService.
-- PositionAnalysisService.
-- Shared AnalysisEngine integration.
-- Deterministic Exit Intelligence layer.
+- FxRateService
+- TradingConfig
+- IndicatorConfig
+- OpenTradeStore
+- TradeLifecycleService
+- TradeMonitorService
+- TradeMonitorPresenter
+- Open Trade GUI workflow foundation
 
 ### Changed
 
-- PositionMonitorService now delegates exit decisions to ExitEvaluationService.
-- Position Monitor now reuses the same AnalysisEngine as Trading Workspace.
-- No duplicate indicator calculations remain.
+- PositionSizingService now supports live FX conversion.
+- Trading configuration centralized.
+- Broker context centralized.
+- Trade lifecycle architecture expanded.
+- Open trade persistence introduced.
+- Trade Monitor architecture prepared for lifecycle management.
 
 ---
 
@@ -75,18 +38,21 @@ Status
 
 ### Added
 
-- ExitEvaluationService
-- PositionAnalysisService
-- Exit Score
-- Trend Status
-- Momentum Status
-- Risk Status
-- Exit Reasons
+- Live EUR/USD exchange-rate retrieval using frankfurter.app.
+- Central TradingConfig.
+- Broker configuration.
+- Supported market configuration.
+- OpenTradeStore persistence.
+- TradeLifecycleService.
+- TradeMonitorService.
+- TradeMonitorPresenter.
 
 ### Changed
 
-- Shared deterministic technical analysis between BUY and SELL workflows.
-- Exit decisions remain fully deterministic.
+- PositionSizingService now performs FX-aware calculations.
+- TradingController stores the latest deterministic pipeline result.
+- Deterministic architecture preserved.
+- No duplicate business logic introduced.
 
 ---
 
@@ -94,42 +60,65 @@ Status
 
 ### Added
 
-- Exit Intelligence panel.
-- Exit Score presentation.
-- Trend presentation.
-- Momentum presentation.
-- Risk presentation.
-- Exit Reasons presentation.
+- Open Trade button in Trading Workspace.
+- Open Trades panel inside Trade Monitor.
+- Trade Monitor presenter integration.
 
 ### Changed
 
-- Position Monitor evolved into the first implementation of Orion's Trade Lifecycle.
-- Workspace scrolling improved.
-- Opportunity card layout stabilised.
+- Position Monitor continues evolving into Trade Monitor.
+- Trading Workspace prepared for lifecycle workflow.
+- Mission Control now displays FX-aware position sizing.
+- GUI remains fully scrollable and responsive.
 
 ---
 
-## Quality Assurance
+## Validation
 
 Latest validation
 
-✔ python run_tests.py
+```powershell
+python run_tests.py
+```
 
-Result
+Additional tests
 
-✔ 6 passed
+```powershell
+python test_fx_rate_service.py
+python test_trading_config.py
+python test_open_trade_store.py
+python test_trade_lifecycle_service.py
+python test_trade_monitor_service.py
+python test_trade_monitor_presenter.py
+```
 
 Desktop validation
 
+```powershell
+python app.py
+```
+
+Validated
+
 ✔ Application starts
 
-✔ Mission Control loads
+✔ Navigation works
 
-✔ Trading Workspace loads
+✔ Mission Control operational
 
-✔ Portfolio Workspace loads
+✔ Trading Workspace operational
 
-✔ Position Monitor loads
+✔ Portfolio operational
+
+✔ Trade Monitor operational
+
+✔ Scan Market operational
+
+✔ Live FX conversion operational
+
+✔ Open Trade button operational
+
+✔ Open Trades panel operational
 
 ✔ Exit Intelligence operational
 
@@ -145,9 +134,17 @@ Completed
 
 ✔ Deterministic Position Sizing
 
+✔ Live FX conversion
+
+✔ TradingConfig
+
 ✔ Trade domain model
 
-✔ Position Monitor
+✔ OpenTradeStore
+
+✔ TradeLifecycleService
+
+✔ TradeMonitorService
 
 ✔ Exit Intelligence
 
@@ -155,19 +152,25 @@ Completed
 
 ✔ Stable desktop architecture
 
-The project has entered the Trade Lifecycle phase.
+The project is now implementing the visible Trade Lifecycle.
 
 ---
 
-# Next Sprint
+# Next Sprint Objectives
 
-## Sprint 5.5 — Trade Lifecycle
+Continue Sprint 5.5
 
 Objectives
 
-- Improve Trade Monitor presentation.
-- Prepare Open Trade persistence.
-- Prepare Trade History.
-- Improve Exit Intelligence readability.
-- Connect future trade creation workflow.
-- Continue evolving Orion into a complete trading workstation.
+- Complete BUY → Open Trade workflow.
+- Persist trades automatically.
+- Refresh Trade Monitor after trade creation.
+- Improve Open Trades presentation.
+- Add Trade Detail panel.
+- Add Close Trade workflow.
+- Connect Trade History.
+- Prepare Paper Trading foundation.
+
+---
+
+# End of CHANGELOG
