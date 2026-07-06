@@ -6,10 +6,9 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class IndicatorConfig:
     rsi_period: int = 14
-    trend_short_window: int = 20
-    trend_long_window: int = 50
-    momentum_window: int = 10
-    volatility_window: int = 20
+    trend_period: int = 20
+    momentum_period: int = 10
+    volatility_period: int = 20
 
 
 @dataclass(frozen=True)
