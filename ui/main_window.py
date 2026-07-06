@@ -14,7 +14,11 @@ from services.trade_history_store import TradeHistoryStore
 from services.universe_manager import UniverseManager
 
 from ui.design import ORION_DARK_THEME
+from datetime import datetime
 
+from models.trade_lifecycle import ExitSignal, Trade, TradeStatus
+from services.open_trade_store import OpenTradeStore
+from services.trade_lifecycle_service import TradeLifecycleService
 from ui.foundation.history_presenter import HistoryPresenter
 from ui.foundation.mission_control_controller import MissionControlController
 from ui.foundation.position_monitor_controller import PositionMonitorController
@@ -49,7 +53,11 @@ class OrionWindow(QMainWindow):
 
         self.portfolio_store = PortfolioStore()
         self.trade_history_store = TradeHistoryStore()
-
+        self.open_trade_store = OpenTradeStore()
+        self.trade_lifecycle_service = TradeLifecycleService(
+    open_trade_store=self.open_trade_store,
+    trade_history_store=self.trade_history_store,
+)
         self.portfolio = self.portfolio_store.load()
         self.active_universe = "swing"
 

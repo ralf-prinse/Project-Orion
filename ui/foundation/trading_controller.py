@@ -9,19 +9,6 @@ from ui.foundation.trading_workspace_presenter import TradingWorkspacePresenter
 class TradingController:
     """
     Controller for the Trading Workspace.
-
-    Responsibilities:
-        - load historical market data
-        - build deterministic IndicatorPack
-        - execute TradingPipeline
-        - transform pipeline output through TradingWorkspacePresenter
-        - update TradingWorkspace
-        - remember the latest deterministic pipeline result
-
-    No trading decisions are made here.
-    No indicator calculations are implemented here.
-    No AI logic is implemented here.
-    No rendering ownership.
     """
 
     def __init__(
@@ -45,7 +32,7 @@ class TradingController:
         self.analysis_interval = "1d"
 
         self.last_symbol: str = ""
-        self.last_pipeline_result: dict | None = None
+        self.last_pipeline_result = None
 
     def analyze_symbol(self, symbol: str) -> None:
         normalized_symbol = symbol.strip().upper()
@@ -89,7 +76,7 @@ class TradingController:
                 f"Analyse mislukt voor {normalized_symbol}: {error}"
             )
 
-    def get_last_pipeline_result(self) -> dict | None:
+    def get_last_pipeline_result(self):
         return self.last_pipeline_result
 
     def get_last_symbol(self) -> str:

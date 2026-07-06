@@ -5597,3 +5597,89 @@ AttributeError: 'IndicatorConfig' object has no attribute 'trend_period'. Did yo
 2026-07-06 09:26:29 | ERROR    | yfinance | 
 1 Failed download:
 2026-07-06 09:26:29 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-06 09:33:38 | ERROR    | yfinance | HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ASML-AS"}}}
+2026-07-06 09:33:39 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-06 09:33:39 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-06 09:33:39 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-06 09:33:42 | INFO     | YahooProvider | Downloading history for TSLA (period=6mo interval=1d)
+2026-07-06 09:33:42 | INFO     | YahooProvider | 124 candles downloaded for TSLA
+2026-07-06 09:33:42 | INFO     | IndicatorBuilder | Building indicators for TSLA
+2026-07-06 09:33:42 | INFO     | IndicatorBuilder | Indicators ready for TSLA | RSI=48.07 Trend=0.986 Momentum=48.24 Volatility=0.03929
+2026-07-06 09:33:42 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-06 09:33:42 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.761
+2026-07-06 09:33:42 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0008
+2026-07-06 09:33:42 | INFO     | TradingPipeline | Decision | BUY confidence=0.861
+2026-07-06 09:33:42 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.861 | position=38.03
+2026-07-06 09:34:26 | ERROR    | yfinance | HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ASML-AS"}}}
+2026-07-06 09:34:26 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-06 09:34:26 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-06 09:34:26 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-06 09:35:25 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-06 09:35:25 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-06 09:35:25 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-06 09:36:25 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-06 09:36:25 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-06 09:36:25 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-06 09:37:25 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-06 09:37:25 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-06 09:37:25 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-06 09:38:25 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-06 09:38:25 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-06 09:38:25 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-06 09:38:57 | INFO     | YahooProvider | Downloading history for TSLA (period=6mo interval=1d)
+2026-07-06 09:38:58 | INFO     | YahooProvider | 124 candles downloaded for TSLA
+2026-07-06 09:38:58 | INFO     | IndicatorBuilder | Building indicators for TSLA
+2026-07-06 09:38:58 | INFO     | IndicatorBuilder | Indicators ready for TSLA | RSI=48.07 Trend=0.986 Momentum=48.24 Volatility=0.03929
+2026-07-06 09:38:58 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-06 09:38:58 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.761
+2026-07-06 09:38:58 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0008
+2026-07-06 09:38:58 | INFO     | TradingPipeline | Decision | BUY confidence=0.861
+2026-07-06 09:38:58 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.861 | position=38.03
+2026-07-06 09:39:18 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-06 09:39:18 | INFO     | YahooProvider | 124 candles downloaded for AAPL
+2026-07-06 09:39:31 | INFO     | YahooProvider | Downloading history for TSLA (period=6mo interval=1d)
+2026-07-06 09:39:31 | INFO     | YahooProvider | 124 candles downloaded for TSLA
+2026-07-06 09:39:31 | INFO     | IndicatorBuilder | Building indicators for TSLA
+2026-07-06 09:39:31 | INFO     | IndicatorBuilder | Indicators ready for TSLA | RSI=48.07 Trend=0.986 Momentum=48.24 Volatility=0.03929
+2026-07-06 09:39:31 | INFO     | TradingPipeline | Starting pipeline for TSLA
+2026-07-06 09:39:31 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.761
+2026-07-06 09:39:31 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0008
+2026-07-06 09:39:31 | INFO     | TradingPipeline | Decision | BUY confidence=0.861
+2026-07-06 09:39:31 | INFO     | TradingPipeline | Pipeline completed for TSLA | BUY | confidence=0.861 | position=38.03
+2026-07-06 09:39:46 | ERROR    | yfinance | HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ASML-AS"}}}
+2026-07-06 09:39:46 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-06 09:39:46 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-06 09:39:46 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-06 09:39:50 | ERROR    | yfinance | HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: ASML-AS"}}}
+2026-07-06 09:39:51 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-06 09:39:51 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-06 09:39:51 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-06 09:39:51 | INFO     | YahooProvider | Downloading history for AAPL (period=6mo interval=1d)
+2026-07-06 09:39:52 | INFO     | YahooProvider | 124 candles downloaded for AAPL
+2026-07-06 09:39:52 | INFO     | IndicatorBuilder | Building indicators for AAPL
+2026-07-06 09:39:52 | INFO     | IndicatorBuilder | Indicators ready for AAPL | RSI=58.29 Trend=1.000 Momentum=53.56 Volatility=0.02422
+2026-07-06 09:39:52 | INFO     | TradingPipeline | Starting pipeline for AAPL
+2026-07-06 09:39:52 | INFO     | TradingPipeline | Signal Fusion completed | pressure=0.800
+2026-07-06 09:39:52 | INFO     | TradingPipeline | Market Intelligence | regime=BULL volatility=LOW risk=0.0005
+2026-07-06 09:39:52 | INFO     | TradingPipeline | Decision | BUY confidence=0.900
+2026-07-06 09:39:52 | INFO     | TradingPipeline | Pipeline completed for AAPL | BUY | confidence=0.900 | position=40.01
+2026-07-06 09:40:45 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-06 09:40:45 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-06 09:40:45 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-06 09:41:46 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-06 09:41:46 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-06 09:41:46 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-06 09:42:45 | ERROR    | yfinance | $ASML-AS: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-07-06 09:42:45 | ERROR    | yfinance | 
+1 Failed download:
+2026-07-06 09:42:45 | ERROR    | yfinance | ['ASML-AS']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
