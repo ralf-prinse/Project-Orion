@@ -38,6 +38,7 @@ class TradeCard(QFrame):
         layout.addWidget(self._header())
         layout.addWidget(self._price_section())
         layout.addWidget(self._risk_plan_section())
+        layout.addWidget(self._target_status_section())
         layout.addWidget(self._progress_section())
         layout.addWidget(self._context_section())
         layout.addWidget(self._exit_section())
@@ -97,27 +98,38 @@ class TradeCard(QFrame):
         )
 
     def _risk_plan_section(self) -> QWidget:
-        target_1 = self.trade.target_1 or self.trade.take_profit
-
         return self._grid_section(
             title="RiskPlan",
             rows=[
                 ("Stop-loss", self._money(self.trade.stop_loss)),
-                ("Target 1", self._money(target_1)),
+                ("Target 1", self._money(self._target_1())),
                 ("Target 2", self._money(self.trade.target_2)),
                 ("Target 3", self._money(self.trade.target_3)),
                 ("Risk", f"{self.trade.risk_percent:.2f}%"),
                 ("Reward", f"{self.trade.reward_percent:.2f}%"),
-                ("R/R", f"{self.trade.risk_reward_ratio:.2f}"),
+                ("R/R", self._risk_reward_label()),
                 ("Confidence", f"{self.trade.risk_plan_confidence * 100:.0f}%"),
             ],
         )
 
+    def _target_status_section(self) -> QWidget:
+        return self._grid_section(
+            title="Target status",
+            rows=[
+                ("Target 1", self._target_label(self._target_1())),
+                ("Target 2", self._target_label(self.trade.target_2)),
+                ("Target 3", self._target_label(self.trade.target_3)),
+                ("Stop-loss", self._stop_loss_label()),
+            ],
+        )
+
     def _progress_section(self) -> QWidget:
-        target_1 = self.trade.target_1 or self.trade.take_profit
+        target_1 = self._target_1()
         progress = self._progress_to_target(target_1)
 
         widget = QWidget()
+        widget.setMaximumWidth(520)
+
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(6)
@@ -132,24 +144,7 @@ class TradeCard(QFrame):
         progress_bar.setFormat(f"{progress:.0f}%")
         progress_bar.setMinimumHeight(18)
         progress_bar.setMaximumWidth(520)
-        progress_bar.setStyleSheet(
-            """
-            QProgressBar {
-                background-color: #111827;
-                border: 1px solid #374151;
-                border-radius: 8px;
-                color: #f9fafb;
-                text-align: center;
-                font-size: 12px;
-                font-weight: bold;
-            }
-
-            QProgressBar::chunk {
-                background-color: #22c55e;
-                border-radius: 8px;
-            }
-            """
-        )
+        progress_bar.setStyleSheet(self._progress_bar_style(progress))
 
         layout.addWidget(title)
         layout.addWidget(progress_bar)
@@ -201,7 +196,7 @@ class TradeCard(QFrame):
             label_widget.setStyleSheet(self._label_style())
 
             value_widget = QLabel(value)
-            value_widget.setMinimumWidth(140)
+            value_widget.setMinimumWidth(180)
             value_widget.setAlignment(Qt.AlignmentFlag.AlignLeft)
             value_widget.setStyleSheet(self._value_style(value))
 
@@ -217,8 +212,13 @@ class TradeCard(QFrame):
     def _adaptive_context_rows(self) -> list[tuple[str, str]]:
         notes = self.trade.risk_plan_notes
 
+        rows: list[tuple[str, str]] = [
+            ("Confidence", f"{self.trade.risk_plan_confidence * 100:.0f}%"),
+        ]
+
         if not notes:
-            return [("Context", "Niet beschikbaar")]
+            rows.append(("Context", "Niet beschikbaar"))
+            return rows
 
         parts: dict[str, str] = {}
 
@@ -229,8 +229,6 @@ class TradeCard(QFrame):
             key, value = item.split("=", 1)
             parts[key.strip().lower()] = value.strip().upper()
 
-        rows: list[tuple[str, str]] = []
-
         if "regime" in parts:
             rows.append(("Regime", self._regime_label(parts["regime"])))
 
@@ -240,7 +238,52 @@ class TradeCard(QFrame):
         if "risk" in parts:
             rows.append(("Risk score", parts["risk"]))
 
-        return rows or [("Context", notes)]
+        return rows
+
+    def _target_1(self) -> float:
+        return self.trade.target_1 or self.trade.take_profit
+
+    def _target_label(self, target: float) -> str:
+        if target <= 0:
+            return "Niet beschikbaar"
+
+        if self.trade.current_price >= target:
+            return f"🟢 Bereikt ({self._money(target)})"
+
+        progress = self._progress_to_target(target)
+
+        if progress >= 90:
+            return f"🟡 Bijna bereikt ({progress:.0f}%)"
+
+        return f"⚪ {progress:.0f}% ({self._money(target)})"
+
+    def _stop_loss_label(self) -> str:
+        if self.trade.stop_loss <= 0:
+            return "Niet beschikbaar"
+
+        if self.trade.current_price <= self.trade.stop_loss:
+            return f"🔴 Stop geraakt ({self._money(self.trade.stop_loss)})"
+
+        distance = (
+            (self.trade.current_price - self.trade.stop_loss)
+            / self.trade.current_price
+        ) * 100
+
+        return f"🟢 Veilig marge {distance:.2f}%"
+
+    def _risk_reward_label(self) -> str:
+        ratio = self.trade.risk_reward_ratio
+
+        if ratio >= 3:
+            return f"🟢 Excellent ({ratio:.2f})"
+
+        if ratio >= 2:
+            return f"🟡 Goed ({ratio:.2f})"
+
+        if ratio > 0:
+            return f"🔴 Zwak ({ratio:.2f})"
+
+        return "Niet beschikbaar"
 
     def _progress_to_target(self, target: float) -> float:
         if self.trade.entry_price <= 0:
@@ -338,6 +381,31 @@ class TradeCard(QFrame):
             color: {color};
             font-size: 13px;
             font-weight: bold;
+        }}
+        """
+
+    def _progress_bar_style(self, progress: float) -> str:
+        chunk_color = "#ef4444"
+
+        if progress >= 75:
+            chunk_color = "#22c55e"
+        elif progress >= 35:
+            chunk_color = "#f59e0b"
+
+        return f"""
+        QProgressBar {{
+            background-color: #111827;
+            border: 1px solid #374151;
+            border-radius: 8px;
+            color: #f9fafb;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+        }}
+
+        QProgressBar::chunk {{
+            background-color: {chunk_color};
+            border-radius: 8px;
         }}
         """
 
