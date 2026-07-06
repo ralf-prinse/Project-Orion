@@ -4,14 +4,17 @@ from pathlib import Path
 class WatchlistService:
     """
     Laadt de aandelen die Orion automatisch moet scannen.
+
+    Source of truth:
+    data/universes/swing.csv
     """
 
-    def __init__(self, watchlist_path: str = "config/watchlist.txt"):
+    def __init__(self, watchlist_path: str = "data/universes/swing.csv"):
         self.watchlist_path = Path(watchlist_path)
 
     def load_symbols(self) -> list[str]:
         if not self.watchlist_path.exists():
-            raise FileNotFoundError(f"Watchlist niet gevonden: {self.watchlist_path}")
+            raise FileNotFoundError(f"Universe niet gevonden: {self.watchlist_path}")
 
         symbols = []
 
@@ -21,4 +24,4 @@ class WatchlistService:
             if symbol and not symbol.startswith("#"):
                 symbols.append(symbol)
 
-        return symbols
+        return sorted(list(set(symbols)))
