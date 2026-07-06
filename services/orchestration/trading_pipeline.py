@@ -16,28 +16,12 @@ from services.decision.decision_models import (
     DecisionInput,
 )
 
+from services.risk.adaptive_risk_engine import AdaptiveRiskEngine
+
 
 class TradingPipeline:
     """
     ORION FULL AI TRADING PIPELINE
-
-    Flow
-
-    IndicatorPack
-            ↓
-    Signal Fusion
-            ↓
-    Market Intelligence
-            ↓
-    Adaptive Decision
-            ↓
-    Position Sizing
-            ↓
-    AI Context
-            ↓
-    AI Explanation
-            ↓
-    Pipeline Result
     """
 
     def __init__(self):
@@ -47,6 +31,7 @@ class TradingPipeline:
         self.intelligence = MarketIntelligenceEngine()
         self.decision_engine = AdaptiveDecisionEngine()
         self.sizer = PositionSizer()
+        self.risk_engine = AdaptiveRiskEngine()
         self.ai_builder = AIContextBuilder()
         self.explainer = AIExplainer()
 
@@ -127,6 +112,15 @@ class TradingPipeline:
             6,
         )
 
+        risk_plan = self.risk_engine.build(
+            symbol=indicator_data.symbol,
+            entry_price=getattr(indicator_data, "price", 0.0),
+            confidence=decision.confidence,
+            risk_score=intelligence.risk_score,
+            volatility=intelligence.volatility_state,
+            regime=intelligence.regime,
+        )
+
         output = {
             "symbol": indicator_data.symbol,
             "pressure_score": fused.pressure_score,
@@ -141,6 +135,19 @@ class TradingPipeline:
             "reason": decision.reason,
             "position_size": position_size,
             "expected_risk": expected_risk,
+            "risk_plan": {
+                "symbol": risk_plan.symbol,
+                "entry_price": risk_plan.entry_price,
+                "stop_loss": risk_plan.stop_loss,
+                "target_1": risk_plan.target_1,
+                "target_2": risk_plan.target_2,
+                "target_3": risk_plan.target_3,
+                "risk_percent": risk_plan.risk_percent,
+                "reward_percent": risk_plan.reward_percent,
+                "risk_reward_ratio": risk_plan.risk_reward_ratio,
+                "confidence": risk_plan.confidence,
+                "notes": risk_plan.notes,
+            },
             "features": {
                 "pressure_score": fused.pressure_score,
                 "buy_pressure": fused.buy_pressure,

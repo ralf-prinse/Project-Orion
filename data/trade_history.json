@@ -22,5 +22,21 @@
         "quantity": 1,
         "price": 119.45999908447266,
         "reason": "Handmatig gesloten via Trade Monitor."
+    },
+    {
+        "timestamp": "2026-07-06T16:06:04",
+        "action": "SELL",
+        "symbol": "INGA.AS",
+        "quantity": 5,
+        "price": 28.5049991607666,
+        "reason": "Handmatig gesloten via Trade Monitor."
+    },
+    {
+        "timestamp": "2026-07-06T16:12:53",
+        "action": "SELL",
+        "symbol": "SHOP",
+        "quantity": 1,
+        "price": 115.87000274658203,
+        "reason": "Handmatig gesloten via Trade Monitor."
     }
 ]

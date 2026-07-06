@@ -40,6 +40,8 @@ class IndicatorBuilder:
 
         close = history["Close"]
 
+        latest_price = float(close.iloc[-1])
+
         rsi = self._calculate_rsi(close)
         trend = self._calculate_trend(close)
         momentum = self._calculate_momentum(close)
@@ -54,6 +56,7 @@ class IndicatorBuilder:
             volatility=volatility,
             momentum=momentum,
             volume=latest_volume,
+            price=latest_price,
         )
 
         self.logger.info(

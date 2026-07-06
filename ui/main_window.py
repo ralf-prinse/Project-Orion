@@ -276,6 +276,16 @@ class OrionWindow(QMainWindow):
             position_budget = float(pipeline_data.get("position_size", 0.0))
             quantity = int(position_budget // current_price)
 
+            risk_plan = pipeline_data.get("risk_plan", {})
+
+            stop_loss = float(
+                risk_plan.get("stop_loss") or round(current_price * 0.95, 2)
+            )
+
+            take_profit = float(
+                risk_plan.get("target_1") or round(current_price * 1.10, 2)
+            )
+
             if quantity <= 0:
                 self.trading_page.set_status_text(
                     "Open Trade mislukt: positieomvang is te klein voor minimaal 1 aandeel."
@@ -297,8 +307,8 @@ class OrionWindow(QMainWindow):
                 current_price=current_price,
                 highest_price=current_price,
                 lowest_price=current_price,
-                stop_loss=round(current_price * 0.95, 2),
-                take_profit=round(current_price * 1.10, 2),
+                stop_loss=stop_loss,
+                take_profit=take_profit,
                 trailing_stop=None,
                 status=TradeStatus.OPEN,
                 notes="Geopend vanuit Trading Workspace.",

@@ -17,6 +17,7 @@ class IndicatorPack:
     volatility: float
     momentum: float
     volume: float = 0.0
+    price: float = 0.0
 
 
 @dataclass(frozen=True)
