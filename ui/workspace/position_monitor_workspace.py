@@ -28,7 +28,12 @@ class PositionMonitorWorkspace(BaseWorkspace):
     BUTTON_HEIGHT = 48
     LABEL_WIDTH = 120
 
-    def __init__(self, theme, on_monitor_requested):
+    def __init__(
+        self,
+        theme,
+        on_monitor_requested,
+        on_close_trade_requested=None,
+    ):
         super().__init__(
             theme=theme,
             title="Trade Monitor",
@@ -40,6 +45,7 @@ class PositionMonitorWorkspace(BaseWorkspace):
         )
 
         self.on_monitor_requested = on_monitor_requested
+        self.on_close_trade_requested = on_close_trade_requested
 
         self.symbol_input = self._input("AAPL")
         self.quantity_input = self._input("1")
@@ -53,6 +59,14 @@ class PositionMonitorWorkspace(BaseWorkspace):
         self.monitor_button.setCursor(Qt.CursorShape.PointingHandCursor)
         self.monitor_button.setStyleSheet(self.primary_button_style())
         self.monitor_button.clicked.connect(self._handle_monitor_clicked)
+
+        self.close_trade_button = QPushButton("Close Trade")
+        self.close_trade_button.setMinimumHeight(self.BUTTON_HEIGHT)
+        self.close_trade_button.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.close_trade_button.setStyleSheet(self.danger_button_style())
+        self.close_trade_button.clicked.connect(
+            self._handle_close_trade_clicked
+        )
 
         self.open_trades_panel = WorkspacePanel(
             theme=self.theme,
@@ -126,6 +140,7 @@ class PositionMonitorWorkspace(BaseWorkspace):
 
         self.add_workspace_widget(form)
         self.add_workspace_widget(self.monitor_button)
+        self.add_workspace_widget(self.close_trade_button)
         self.add_workspace_widget(self.open_trades_panel)
         self.add_workspace_widget(self.signal_panel)
         self.add_workspace_widget(self.intelligence_panel)
@@ -169,6 +184,21 @@ class PositionMonitorWorkspace(BaseWorkspace):
             return
 
         self.on_monitor_requested(trade)
+
+    def _handle_close_trade_clicked(self) -> None:
+        symbol = self.symbol_input.text().strip().upper()
+
+        if not symbol:
+            self.set_status_text("Vul eerst een geldig symbool in.")
+            return
+
+        if self.on_close_trade_requested is None:
+            self.set_status_text(
+                "Close Trade is nog niet gekoppeld aan de controller."
+            )
+            return
+
+        self.on_close_trade_requested(symbol)
 
     def set_open_trades_view_model(
         self,
@@ -261,5 +291,28 @@ class PositionMonitorWorkspace(BaseWorkspace):
 
         QPushButton:pressed {
             background-color: #1e40af;
+        }
+        """
+
+    def danger_button_style(self) -> str:
+        return """
+        QPushButton {
+            background-color: #991b1b;
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 800;
+            padding: 12px 22px;
+            border-radius: 10px;
+            border: 1px solid #dc2626;
+            text-align: center;
+        }
+
+        QPushButton:hover {
+            background-color: #7f1d1d;
+            border: 1px solid #ef4444;
+        }
+
+        QPushButton:pressed {
+            background-color: #450a0a;
         }
         """

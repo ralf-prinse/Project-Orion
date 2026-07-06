@@ -80,10 +80,6 @@ class OrionWindow(QMainWindow):
             "settings": 6,
         }
 
-        # ----------------------------
-        # WORKSPACES
-        # ----------------------------
-
         self.mission_control_page = MissionControlWorkspace(
             theme=self.theme,
             on_scan_requested=self.scan_market,
@@ -91,7 +87,6 @@ class OrionWindow(QMainWindow):
         self.mission_control_page.opportunity_selected.connect(
             self._handle_mission_control_opportunity_selected
         )
-
 
         self.trading_page = TradingWorkspace(
             theme=self.theme,
@@ -102,6 +97,7 @@ class OrionWindow(QMainWindow):
         self.position_monitor_page = PositionMonitorWorkspace(
             theme=self.theme,
             on_monitor_requested=self.monitor_trade,
+            on_close_trade_requested=self.close_trade,
         )
 
         self.portfolio_page = PortfolioWorkspace(
@@ -117,22 +113,10 @@ class OrionWindow(QMainWindow):
         self.history_page = HistoryWorkspace(theme=self.theme)
         self.settings_page = SettingsWorkspace(theme=self.theme)
 
-        # ----------------------------
-        # CONTROLLERS
-        # ----------------------------
-
         self.mission_control_controller = MissionControlController(
             workspace=self.mission_control_page,
             available_cash_provider=lambda: self.portfolio.cash,
         )
-
-        self.mission_refresh_timer = QTimer(self)
-        self.mission_refresh_timer.setInterval(60_000)
-        self.mission_refresh_timer.timeout.connect(
-            self.mission_control_controller.refresh
-        )
-
-
 
         self.trading_controller = TradingController(
             trading_workspace=self.trading_page,
@@ -141,19 +125,22 @@ class OrionWindow(QMainWindow):
 
         self.position_monitor_controller = PositionMonitorController(
             workspace=self.position_monitor_page,
+            trade_lifecycle_service=self.trade_lifecycle_service,
+        )
+
+        self.mission_refresh_timer = QTimer(self)
+        self.mission_refresh_timer.setInterval(60_000)
+        self.mission_refresh_timer.timeout.connect(
+            self.mission_control_controller.refresh
         )
 
         self.trade_monitor_refresh_timer = QTimer(self)
         self.trade_monitor_refresh_timer.setInterval(60_000)
         self.trade_monitor_refresh_timer.timeout.connect(
-        self.position_monitor_controller.refresh_open_trades
+            self.position_monitor_controller.refresh_open_trades
         )
 
         self.position_monitor_controller.load_open_trades()
-
-        # ----------------------------
-        # INIT WORKSPACES
-        # ----------------------------
 
         self._initialize_settings_workspace()
         self._initialize_portfolio_workspace()
@@ -163,10 +150,6 @@ class OrionWindow(QMainWindow):
         self.mission_control_controller.initialize()
         self.mission_refresh_timer.start()
         self.trade_monitor_refresh_timer.start()
-
-    # ----------------------------
-    # INIT METHODS
-    # ----------------------------
 
     def _initialize_settings_workspace(self):
         universe = self.universe_manager.get_universe(self.active_universe)
@@ -185,19 +168,13 @@ class OrionWindow(QMainWindow):
         portfolio_workspace = self.workspace_coordinator.create_portfolio_workspace(
             self.portfolio
         )
-
         self.portfolio_page.set_workspace(portfolio_workspace)
 
     def _initialize_history_workspace(self):
         trades = self.trade_history_store.load()
-
         self.history_page.set_sections(
             self.history_presenter.create_sections(trades)
         )
-
-    # ----------------------------
-    # UI SETUP
-    # ----------------------------
 
     def _initialize_pages(self):
         self.pages.addWidget(self.mission_control_page)
@@ -259,17 +236,9 @@ class OrionWindow(QMainWindow):
         sidebar.setLayout(layout)
         return sidebar
 
-    # ----------------------------
-    # NAVIGATION
-    # ----------------------------
-
     def navigate_to_workspace(self, page: str):
         index = self.workspace_page_indexes[page]
         self.pages.setCurrentIndex(index)
-
-    # ----------------------------
-    # ACTIONS
-    # ----------------------------
 
     def analyze_symbol(self, symbol: str):
         self.trading_controller.analyze_symbol(symbol)
@@ -305,12 +274,6 @@ class OrionWindow(QMainWindow):
             )
 
             position_budget = float(pipeline_data.get("position_size", 0.0))
-            print("\n===== OPEN TRADE DEBUG =====")
-            print(f"Pipeline result: {pipeline_result}")
-            print(f"Pipeline data: {pipeline_data}")
-            print(f"Position budget: {position_budget}")
-            print(f"Current price: {current_price}")
-            print("============================\n")
             quantity = int(position_budget // current_price)
 
             if quantity <= 0:
@@ -324,7 +287,12 @@ class OrionWindow(QMainWindow):
                 quantity=quantity,
                 entry_price=current_price,
                 entry_datetime=datetime.now(),
-                entry_reason=str(pipeline_data.get("reason", "BUY-signaal uit TradingPipeline.")),
+                entry_reason=str(
+                    pipeline_data.get(
+                        "reason",
+                        "BUY-signaal uit TradingPipeline.",
+                    )
+                ),
                 confidence=float(pipeline_data.get("confidence", 0.0)),
                 current_price=current_price,
                 highest_price=current_price,
@@ -356,14 +324,11 @@ class OrionWindow(QMainWindow):
     def monitor_trade(self, trade):
         self.position_monitor_controller.monitor_trade(trade)
 
+    def close_trade(self, symbol: str):
+        self.position_monitor_controller.close_trade(symbol)
+        self._initialize_history_workspace()
+
     def _handle_capital_saved(self, amount: float):
-        """
-        Save the available trading capital.
-
-        MainWindow owns the PortfolioStore and is therefore responsible
-        for persistence.
-        """
-
         self.portfolio.cash = float(amount)
         self.portfolio_store.save(self.portfolio)
 
@@ -387,10 +352,6 @@ class OrionWindow(QMainWindow):
             trade.symbol.upper() == normalized_symbol
             for trade in self.trade_lifecycle_service.get_open_trades()
         )
-
-    # ----------------------------
-    # STYLES
-    # ----------------------------
 
     def stylesheet(self):
         return """

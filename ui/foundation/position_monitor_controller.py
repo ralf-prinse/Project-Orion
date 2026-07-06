@@ -21,6 +21,7 @@ class PositionMonitorController:
     - invoke PositionMonitorPresenter
     - load persisted open trades
     - refresh open trades
+    - close open trades
     - invoke TradeMonitorPresenter
     - update the workspace
 
@@ -37,6 +38,7 @@ class PositionMonitorController:
         presenter: PositionMonitorPresenter | None = None,
         trade_monitor_service: TradeMonitorService | None = None,
         trade_monitor_presenter: TradeMonitorPresenter | None = None,
+        trade_lifecycle_service: TradeLifecycleService | None = None,
     ):
         self.workspace = workspace
 
@@ -52,17 +54,20 @@ class PositionMonitorController:
             presenter or PositionMonitorPresenter()
         )
 
-        if trade_monitor_service is None:
-            lifecycle_service = TradeLifecycleService(
+        self.trade_lifecycle_service = (
+            trade_lifecycle_service
+            or TradeLifecycleService(
                 open_trade_store=OpenTradeStore(),
                 trade_history_store=TradeHistoryStore(),
             )
+        )
 
-            trade_monitor_service = TradeMonitorService(
-                trade_lifecycle_service=lifecycle_service,
+        self.trade_monitor_service = (
+            trade_monitor_service
+            or TradeMonitorService(
+                trade_lifecycle_service=self.trade_lifecycle_service,
             )
-
-        self.trade_monitor_service = trade_monitor_service
+        )
 
         self.trade_monitor_presenter = (
             trade_monitor_presenter or TradeMonitorPresenter()
@@ -104,6 +109,49 @@ class PositionMonitorController:
         except Exception as error:
             self.workspace.set_status_text(
                 f"Open trades verversen mislukt: {error}"
+            )
+
+    def close_trade(
+        self,
+        symbol: str,
+        reason: str = "Handmatig gesloten via Trade Monitor.",
+    ) -> None:
+        normalized_symbol = str(symbol).strip().upper()
+
+        if not normalized_symbol:
+            self.workspace.set_status_text(
+                "Close Trade mislukt: geen geldig symbool."
+            )
+            return
+
+        try:
+            open_trades = self.trade_lifecycle_service.get_open_trades()
+
+            has_trade = any(
+                trade.symbol.upper() == normalized_symbol
+                for trade in open_trades
+            )
+
+            if not has_trade:
+                self.workspace.set_status_text(
+                    f"Geen open trade gevonden voor {normalized_symbol}."
+                )
+                return
+
+            self.trade_lifecycle_service.close_trade(
+                symbol=normalized_symbol,
+                reason=reason,
+            )
+
+            self.load_open_trades()
+
+            self.workspace.set_status_text(
+                f"Trade gesloten voor {normalized_symbol}."
+            )
+
+        except Exception as error:
+            self.workspace.set_status_text(
+                f"Close Trade mislukt voor {normalized_symbol}: {error}"
             )
 
     def monitor_trade(
