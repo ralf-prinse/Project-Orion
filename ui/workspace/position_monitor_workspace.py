@@ -6,9 +6,10 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
+    QVBoxLayout,
     QWidget,
 )
-
+from ui.components.trade_card import TradeCard
 from models.trade_lifecycle import Trade
 from ui.foundation.position_monitor_presenter import PositionMonitorViewModel
 from ui.foundation.trade_monitor_presenter import TradeMonitorListViewModel
@@ -73,7 +74,11 @@ class PositionMonitorWorkspace(BaseWorkspace):
             title="Open Trades",
             body="Open trades worden geladen...",
         )
-
+        self.open_trade_cards_container = QWidget()
+        self.open_trade_cards_layout = QVBoxLayout()
+        self.open_trade_cards_layout.setContentsMargins(0, 0, 0, 0)
+        self.open_trade_cards_layout.setSpacing(12)
+        self.open_trade_cards_container.setLayout(self.open_trade_cards_layout)
         self.signal_panel = WorkspacePanel(
             theme=self.theme,
             title="Exit Advies",
@@ -142,6 +147,7 @@ class PositionMonitorWorkspace(BaseWorkspace):
         self.add_workspace_widget(self.monitor_button)
         self.add_workspace_widget(self.close_trade_button)
         self.add_workspace_widget(self.open_trades_panel)
+        self.add_workspace_widget(self.open_trade_cards_container)
         self.add_workspace_widget(self.signal_panel)
         self.add_workspace_widget(self.intelligence_panel)
         self.add_workspace_widget(self.pnl_panel)
@@ -201,13 +207,11 @@ class PositionMonitorWorkspace(BaseWorkspace):
         self.on_close_trade_requested(symbol)
 
     def set_open_trades_view_model(
-        self,
-        view_model: TradeMonitorListViewModel,
-    ) -> None:
+    self,
+    view_model: TradeMonitorListViewModel,
+) -> None:
         self.open_trades_panel.set_title(view_model.title)
-        self.open_trades_panel.set_body(
-            f"{view_model.summary}\n\n{view_model.trades_text}"
-        )
+        self.open_trades_panel.set_body(view_model.summary)
         self.set_status_text(view_model.status)
 
     def set_view_model(self, view_model: PositionMonitorViewModel) -> None:

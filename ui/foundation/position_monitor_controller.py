@@ -81,6 +81,7 @@ class PositionMonitorController:
             )
 
             self.workspace.set_open_trades_view_model(view_model)
+            self.workspace.set_open_trade_cards(trades)
 
         except Exception as error:
             self.workspace.set_status_text(
