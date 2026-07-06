@@ -131,6 +131,7 @@ class TradeCard(QFrame):
         progress_bar.setTextVisible(True)
         progress_bar.setFormat(f"{progress:.0f}%")
         progress_bar.setMinimumHeight(18)
+        progress_bar.setMaximumWidth(520)
         progress_bar.setStyleSheet(
             """
             QProgressBar {
@@ -182,6 +183,8 @@ class TradeCard(QFrame):
         rows: list[tuple[str, str]],
     ) -> QWidget:
         widget = QWidget()
+        widget.setMaximumWidth(520)
+
         layout = QGridLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setHorizontalSpacing(18)
@@ -194,14 +197,19 @@ class TradeCard(QFrame):
 
         for index, (label, value) in enumerate(rows, start=1):
             label_widget = QLabel(label)
+            label_widget.setMinimumWidth(160)
             label_widget.setStyleSheet(self._label_style())
 
             value_widget = QLabel(value)
-            value_widget.setAlignment(Qt.AlignmentFlag.AlignRight)
+            value_widget.setMinimumWidth(140)
+            value_widget.setAlignment(Qt.AlignmentFlag.AlignLeft)
             value_widget.setStyleSheet(self._value_style(value))
 
             layout.addWidget(label_widget, index, 0)
             layout.addWidget(value_widget, index, 1)
+
+        layout.setColumnStretch(0, 0)
+        layout.setColumnStretch(1, 0)
 
         widget.setLayout(layout)
         return widget
