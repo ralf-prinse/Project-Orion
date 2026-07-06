@@ -20,7 +20,12 @@ class TradingWorkspace(BaseWorkspace):
     No pipeline parsing.
     """
 
-    def __init__(self, theme, on_analyze_requested):
+    def __init__(
+        self,
+        theme,
+        on_analyze_requested,
+        on_open_trade_requested=None,
+    ):
         super().__init__(
             theme=theme,
             title="Trading Decision",
@@ -28,6 +33,7 @@ class TradingWorkspace(BaseWorkspace):
         )
 
         self.on_analyze_requested = on_analyze_requested
+        self.on_open_trade_requested = on_open_trade_requested
 
         self.symbol_input = QLineEdit()
         self.symbol_input.setPlaceholderText("Bijvoorbeeld: TSLA")
@@ -37,6 +43,11 @@ class TradingWorkspace(BaseWorkspace):
         self.analyze_button = QPushButton("Analyze")
         self.analyze_button.setStyleSheet(self.primary_button_style())
         self.analyze_button.clicked.connect(self._handle_analyze_clicked)
+
+        self.open_trade_button = QPushButton("Open Trade")
+        self.open_trade_button.setStyleSheet(self.secondary_button_style())
+        self.open_trade_button.setEnabled(False)
+        self.open_trade_button.clicked.connect(self._handle_open_trade_clicked)
 
         self.decision_card = MetricCard(
             theme=self.theme,
@@ -95,6 +106,7 @@ class TradingWorkspace(BaseWorkspace):
 
         input_layout.addWidget(self.symbol_input, stretch=1)
         input_layout.addWidget(self.analyze_button)
+        input_layout.addWidget(self.open_trade_button)
 
         input_row.setLayout(input_layout)
 
@@ -132,7 +144,15 @@ class TradingWorkspace(BaseWorkspace):
             self.set_status_text("Vul eerst een symbool in.")
             return
 
+        self.open_trade_button.setEnabled(False)
         self.on_analyze_requested(symbol)
+
+    def _handle_open_trade_clicked(self):
+        if self.on_open_trade_requested is None:
+            self.set_status_text("Open Trade actie is nog niet gekoppeld.")
+            return
+
+        self.on_open_trade_requested()
 
     def set_symbol(self, symbol: str) -> None:
         """
@@ -149,6 +169,7 @@ class TradingWorkspace(BaseWorkspace):
             return
 
         self.symbol_input.setText(normalized_symbol)
+        self.open_trade_button.setEnabled(False)
         self.set_status_text(
             f"Symbool {normalized_symbol} geladen vanuit Mission Control."
         )
@@ -177,6 +198,11 @@ class TradingWorkspace(BaseWorkspace):
         self.risk_card.set_subtitle(view_model.risk_subtitle)
 
         self.explanation_panel.set_body(view_model.explanation)
+
+        self.open_trade_button.setEnabled(
+            str(view_model.decision).strip().upper() == "BUY"
+        )
+
         self.set_status_text(view_model.status)
 
     def set_status_text(self, text: str):
@@ -211,5 +237,28 @@ class TradingWorkspace(BaseWorkspace):
 
         QPushButton:hover {
             background-color: #1d4ed8;
+        }
+        """
+
+    def secondary_button_style(self):
+        return """
+        QPushButton {
+            background-color: #374151;
+            color: #f9fafb;
+            font-size: 15px;
+            font-weight: bold;
+            padding: 12px 22px;
+            border-radius: 10px;
+            border: 1px solid #4b5563;
+        }
+
+        QPushButton:hover {
+            background-color: #4b5563;
+        }
+
+        QPushButton:disabled {
+            background-color: #1f2937;
+            color: #6b7280;
+            border: 1px solid #374151;
         }
         """

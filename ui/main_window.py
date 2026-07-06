@@ -89,12 +89,12 @@ class OrionWindow(QMainWindow):
         self.trading_page = TradingWorkspace(
             theme=self.theme,
             on_analyze_requested=self.analyze_symbol,
+            on_open_trade_requested=self.open_trade_from_last_analysis,
         )
 
         self.position_monitor_page = PositionMonitorWorkspace(
             theme=self.theme,
             on_monitor_requested=self.monitor_trade,
-            
         )
 
         self.portfolio_page = PortfolioWorkspace(
@@ -259,6 +259,11 @@ class OrionWindow(QMainWindow):
 
     def analyze_symbol(self, symbol: str):
         self.trading_controller.analyze_symbol(symbol)
+
+    def open_trade_from_last_analysis(self):
+        self.trading_page.set_status_text(
+        "Open Trade workflow wordt gekoppeld..."
+    )
 
     def monitor_trade(self, trade):
         self.position_monitor_controller.monitor_trade(trade)
