@@ -14,7 +14,7 @@ class MissionControlPresenter:
     Builds GuiWorkspace models for the primary Mission Control workspace.
     """
 
-    TOP_OPPORTUNITY_LIMIT = 5
+    TOP_OPPORTUNITY_LIMIT = 10
     REASON_PREVIEW_LIMIT = 4
 
     def present(
@@ -26,16 +26,12 @@ class MissionControlPresenter:
             title="Mission Control",
             subtitle=self._subtitle(scanner_snapshot),
             panels=[
-                self._scanner_status_panel(scanner_snapshot),
-                self._scan_duration_panel(scanner_snapshot),
-                self._market_data_panel(scanner_snapshot),
-                self._universe_coverage_panel(scanner_snapshot),
-                self._market_status_panel(scanner_snapshot),
-                self._top_opportunities_panel(
-                    scanner_snapshot,
-                    opportunities,
-                ),
-            ],
+    self._market_data_panel(scanner_snapshot),
+    self._top_opportunities_panel(
+        scanner_snapshot,
+        opportunities,
+    ),
+],
             charts=[],
             metadata={
                 "source": "mission_control_presenter",
@@ -359,72 +355,53 @@ class MissionControlPresenter:
     ) -> GuiWorkspacePanel:
         if snapshot is None:
             return GuiWorkspacePanel(
-                panel_type="top_opportunities",
-                title="Top Opportunities",
-                subtitle="Nog geen opportunities beschikbaar.",
-                items=[],
-                status="neutral",
-                metadata={},
-            )
+            panel_type="top_opportunities",
+            title="Top BUY Opportunities",
+            subtitle="Nog geen scan uitgevoerd.",
+            items=[],
+            status="neutral",
+            metadata={},
+        )
 
         visible_opportunities = tuple(opportunities[: self.TOP_OPPORTUNITY_LIMIT])
 
         if not visible_opportunities:
             return GuiWorkspacePanel(
-                panel_type="top_opportunities",
-                title="Top Opportunities",
-                subtitle="Geen opportunities gevonden.",
-                items=[],
-                status="neutral",
-                metadata={
-                    "count": 0,
-                },
-            )
+            panel_type="top_opportunities",
+            title="Top BUY Opportunities",
+            subtitle="Geen BUY-kansen gevonden.",
+            items=[],
+            status="neutral",
+            metadata={
+                "count": 0,
+            },
+        )
 
         best_score = max(
             self._numeric(getattr(opportunity, "technical_score", 0.0))
             for opportunity in visible_opportunities
-        )
-
-        actionable_count = len(
-            [
-                opportunity
-                for opportunity in visible_opportunities
-                if self._is_actionable_signal(
-                    getattr(opportunity, "signal", "")
-                )
-            ]
-        )
-
-        if best_score >= 80:
-            status = "success"
-        elif best_score >= 60:
-            status = "info"
-        else:
-            status = "warning"
+    )
 
         return GuiWorkspacePanel(
-            panel_type="top_opportunities",
-            title="Top Opportunities",
-            subtitle=(
-                f"Top {len(visible_opportunities)} live kansen • "
-                f"{actionable_count} actionable • "
-                "TradingPipeline actief."
-            ),
-            items=[
-                self._opportunity_item(index, opportunity)
-                for index, opportunity in enumerate(
-                    visible_opportunities,
-                    start=1,
-                )
-            ],
-            status=status,
-            metadata={
-                "count": len(visible_opportunities),
-                "best_score": best_score,
-                "actionable_count": actionable_count,
-            },
-        )
+        panel_type="top_opportunities",
+        title="Top BUY Opportunities",
+        subtitle=(
+            f"Top {len(visible_opportunities)} pipeline-kansen "
+            f"gesorteerd op confidence."
+        ),
+        items=[
+            self._opportunity_item(index, opportunity)
+            for index, opportunity in enumerate(
+                visible_opportunities,
+                start=1,
+            )
+        ],
+        status="success" if best_score >= 80 else "info",
+        metadata={
+            "count": len(visible_opportunities),
+            "best_score": best_score,
+        },
+    )
 
     def _opportunity_item(self, index: int, opportunity) -> dict[str, Any]:
         symbol = getattr(opportunity, "symbol", "Onbekend")
@@ -478,19 +455,15 @@ class MissionControlPresenter:
         market_currency = getattr(sizing, "market_currency", "USD")
 
         lines = [
-        (
-            f"{self._rank_medal(index)} {symbol} • "
-            f"{self._priority_label(technical_score, signal_label)}"
-        ),
-        (
-            f"Beslissing: {signal_label} • "
-            f"Confidence: {self._numeric(technical_score):.1f}%"
-        ),
-        f"Huidige prijs: {self._format_currency(price, market_currency)}",
-    ]
+            (
+                f"{self._rank_medal(index)} {symbol}  |  "
+                f"{signal_label}  |  "
+                f"Confidence {self._numeric(technical_score):.1f}%"
+            ),
+            f"Prijs: {self._format_currency(price, market_currency)}",
+        ]
 
-        lines.extend(self._position_sizing_lines(sizing))
-
+        lines.extend(self._compact_position_sizing_lines(sizing))
         lines.append(self._reason_summary(reason))
 
         return "\n".join(lines)
@@ -530,6 +503,33 @@ class MissionControlPresenter:
             f"Wisselkoers: 1 {account_currency} = {fx_rate:.4f} {market_currency}",
             "Budgetstatus: binnen budget",
         ]
+
+    def _compact_position_sizing_lines(self, sizing) -> list[str]:
+        if sizing is None:
+            return [
+                "Aantal: niet beschikbaar",
+                "Investering: niet beschikbaar",
+            ]
+
+        shares = int(getattr(sizing, "shares", 0))
+        investment = getattr(sizing, "investment", 0.0)
+        account_currency = getattr(sizing, "account_currency", "EUR")
+        is_affordable = bool(getattr(sizing, "is_affordable", False))
+
+        if not is_affordable:
+            available_cash = getattr(sizing, "available_cash", 0.0)
+            return [
+                "Aantal: 0",
+                f"Budget: {self._format_currency(available_cash, account_currency)}",
+                "Status: onvoldoende budget",
+            ]
+
+        return [
+            f"Aantal: {shares}",
+            f"Investering: {self._format_currency(investment, account_currency)}",
+            "Status: koopbaar",
+        ]
+
 
     def _format_currency(self, value, currency: str) -> str:
         currency = str(currency).strip().upper()

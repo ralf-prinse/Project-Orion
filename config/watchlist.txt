@@ -1,37 +1,155 @@
 # ==========================
-# ORION PERSONAL WATCHLIST
+# ORION PERSONAL UNIVERSE V1
 # ==========================
-# United States
 
+# ===========
+# MEGA CAPS
+# ===========
 AAPL
 MSFT
 NVDA
-TSLA
-AMD
-META
 AMZN
 GOOGL
-NFLX
-PLTR
-CRWD
-SHOP
+META
+TSLA
 AVGO
-MU
-SNOW
-ARM
-UBER
-PANW
-INTU
-CRM
-ADBE
-QCOM
-LIN
 ORCL
 IBM
+CRM
+ADBE
+NFLX
+COST
+WMT
+PG
+KO
+PEP
+MCD
+DIS
 
-# ==========================
-# Netherlands (Euronext)
+# ======================
+# AI / SEMICONDUCTORS
+# ======================
+AMD
+ARM
+MU
+QCOM
+TXN
+INTC
+AMAT
+LRCX
+KLAC
+MRVL
+ON
+NXPI
+MPWR
+MCHP
+TER
+ENTG
+ASML
+ASMI.AS
+BESI.AS
+TSM
 
+# ======================
+# CYBER SECURITY
+# ======================
+PANW
+CRWD
+FTNT
+ZS
+OKTA
+NET
+DDOG
+CYBR
+S
+RBRK
+
+# ======================
+# CLOUD / SOFTWARE
+# ======================
+SNOW
+SHOP
+TEAM
+INTU
+NOW
+MDB
+HUBS
+DOCN
+APP
+DUOL
+PLTR
+PATH
+
+# ======================
+# FINANCIALS
+# ======================
+JPM
+GS
+MS
+BAC
+C
+AXP
+BLK
+SCHW
+SPGI
+V
+MA
+PYPL
+
+# ======================
+# HEALTHCARE
+# ======================
+LLY
+NVO
+JNJ
+ABBV
+MRK
+ISRG
+ABT
+TMO
+DHR
+VRTX
+
+# ======================
+# INDUSTRIALS
+# ======================
+GE
+CAT
+DE
+RTX
+LMT
+HON
+ETN
+PH
+TT
+
+# ======================
+# ENERGY
+# ======================
+XOM
+CVX
+COP
+SLB
+HAL
+SHEL.AS
+BP
+
+# ======================
+# CONSUMER / RETAIL
+# ======================
+HD
+LOW
+TJX
+NKE
+SBUX
+CMG
+BKNG
+UBER
+ABNB
+
+# ======================
+# NETHERLANDS
+# ======================
 ASML.AS
 ASMI.AS
 BESI.AS
@@ -40,19 +158,12 @@ INGA.AS
 ABN.AS
 NN.AS
 AGN.AS
-SHEL.AS
-UNA.AS
 HEIA.AS
 PHIA.AS
-AKZA.AS
-RAND.AS
-AALB.AS
 IMCD.AS
 WKL.AS
 KPN.AS
-TKWY.AS
-
-# ==========================
-# Taiwan
-
-TSM
+AKZA.AS
+AALB.AS
+RAND.AS
+UNA.AS

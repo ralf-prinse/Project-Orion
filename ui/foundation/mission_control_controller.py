@@ -131,7 +131,7 @@ class MissionControlController:
     def _build_opportunities(
         self,
         snapshot: MarketPipelineScannerSnapshot,
-        limit: int = 5,
+        limit: int = 10,
     ) -> tuple[Opportunity, ...]:
         opportunities: list[Opportunity] = []
         available_cash = self._available_cash()
