@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import (
     QLabel,
@@ -9,16 +11,15 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from models.trade_lifecycle import Trade, TradeStatus
+from services.open_trade_store import OpenTradeStore
 from services.portfolio_store import PortfolioStore
 from services.trade_history_store import TradeHistoryStore
+from services.trade_lifecycle_service import TradeLifecycleService
 from services.universe_manager import UniverseManager
 
 from ui.design import ORION_DARK_THEME
-from datetime import datetime
 
-from models.trade_lifecycle import ExitSignal, Trade, TradeStatus
-from services.open_trade_store import OpenTradeStore
-from services.trade_lifecycle_service import TradeLifecycleService
 from ui.foundation.history_presenter import HistoryPresenter
 from ui.foundation.mission_control_controller import MissionControlController
 from ui.foundation.position_monitor_controller import PositionMonitorController
@@ -55,9 +56,10 @@ class OrionWindow(QMainWindow):
         self.trade_history_store = TradeHistoryStore()
         self.open_trade_store = OpenTradeStore()
         self.trade_lifecycle_service = TradeLifecycleService(
-    open_trade_store=self.open_trade_store,
-    trade_history_store=self.trade_history_store,
-)
+            open_trade_store=self.open_trade_store,
+            trade_history_store=self.trade_history_store,
+        )
+
         self.portfolio = self.portfolio_store.load()
         self.active_universe = "swing"
 
@@ -133,6 +135,8 @@ class OrionWindow(QMainWindow):
             self.mission_control_controller.refresh
         )
 
+
+
         self.trading_controller = TradingController(
             trading_workspace=self.trading_page,
             portfolio_state=self.portfolio,
@@ -140,6 +144,12 @@ class OrionWindow(QMainWindow):
 
         self.position_monitor_controller = PositionMonitorController(
             workspace=self.position_monitor_page,
+        )
+
+        self.trade_monitor_refresh_timer = QTimer(self)
+        self.trade_monitor_refresh_timer.setInterval(60_000)
+        self.trade_monitor_refresh_timer.timeout.connect(
+        self.position_monitor_controller.refresh_open_trades
         )
 
         self.position_monitor_controller.load_open_trades()
@@ -155,6 +165,7 @@ class OrionWindow(QMainWindow):
 
         self.mission_control_controller.initialize()
         self.mission_refresh_timer.start()
+        self.trade_monitor_refresh_timer.start()
 
     # ----------------------------
     # INIT METHODS
@@ -269,9 +280,83 @@ class OrionWindow(QMainWindow):
         self.trading_controller.analyze_symbol(symbol)
 
     def open_trade_from_last_analysis(self):
-        self.trading_page.set_status_text(
-        "Open Trade workflow wordt gekoppeld..."
-    )
+        pipeline_result = self.trading_controller.get_last_pipeline_result()
+        symbol = self.trading_controller.get_last_symbol()
+
+        if not pipeline_result or not symbol:
+            self.trading_page.set_status_text(
+                "Voer eerst een geldige BUY-analyse uit."
+            )
+            return
+
+        pipeline_data = pipeline_result.get("pipeline", {})
+        decision = str(pipeline_data.get("decision", "")).strip().upper()
+
+        if decision != "BUY":
+            self.trading_page.set_status_text(
+                "Alleen een BUY-signaal kan als open trade worden opgeslagen."
+            )
+            return
+
+        if self._has_open_trade(symbol):
+            self.trading_page.set_status_text(
+                f"Er bestaat al een open trade voor {symbol}."
+            )
+            return
+
+        try:
+            current_price = float(
+                self.trading_controller.market_provider.get_current_price(symbol)
+            )
+
+            position_budget = float(pipeline_data.get("position_size", 0.0))
+            print("\n===== OPEN TRADE DEBUG =====")
+            print(f"Pipeline result: {pipeline_result}")
+            print(f"Pipeline data: {pipeline_data}")
+            print(f"Position budget: {position_budget}")
+            print(f"Current price: {current_price}")
+            print("============================\n")
+            quantity = int(position_budget // current_price)
+
+            if quantity <= 0:
+                self.trading_page.set_status_text(
+                    "Open Trade mislukt: positieomvang is te klein voor minimaal 1 aandeel."
+                )
+                return
+
+            trade = Trade(
+                symbol=symbol,
+                quantity=quantity,
+                entry_price=current_price,
+                entry_datetime=datetime.now(),
+                entry_reason=str(pipeline_data.get("reason", "BUY-signaal uit TradingPipeline.")),
+                confidence=float(pipeline_data.get("confidence", 0.0)),
+                current_price=current_price,
+                highest_price=current_price,
+                lowest_price=current_price,
+                stop_loss=round(current_price * 0.95, 2),
+                take_profit=round(current_price * 1.10, 2),
+                trailing_stop=None,
+                status=TradeStatus.OPEN,
+                notes="Geopend vanuit Trading Workspace.",
+            )
+
+            self.trade_lifecycle_service.open_trade(trade)
+            self.position_monitor_controller.load_open_trades()
+
+            self.trading_page.set_status_text(
+                f"Open trade opgeslagen voor {symbol}."
+            )
+
+            self.navigate_to_workspace("position_monitor")
+            self.position_monitor_page.set_status_text(
+                f"Open trade voor {symbol} geladen in Trade Monitor."
+            )
+
+        except Exception as error:
+            self.trading_page.set_status_text(
+                f"Open Trade mislukt voor {symbol}: {error}"
+            )
 
     def monitor_trade(self, trade):
         self.position_monitor_controller.monitor_trade(trade)
@@ -299,6 +384,14 @@ class OrionWindow(QMainWindow):
         self.navigate_to_workspace("trading")
         self.trading_page.set_symbol(normalized_symbol)
         self.trading_page.analyze_current_symbol()
+
+    def _has_open_trade(self, symbol: str) -> bool:
+        normalized_symbol = str(symbol).strip().upper()
+
+        return any(
+            trade.symbol.upper() == normalized_symbol
+            for trade in self.trade_lifecycle_service.get_open_trades()
+        )
 
     # ----------------------------
     # STYLES

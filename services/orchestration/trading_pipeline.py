@@ -41,19 +41,13 @@ class TradingPipeline:
     """
 
     def __init__(self):
-
         self.logger = LoggingService.get_logger("TradingPipeline")
 
         self.fusion = SignalFusionEngine()
-
         self.intelligence = MarketIntelligenceEngine()
-
         self.decision_engine = AdaptiveDecisionEngine()
-
         self.sizer = PositionSizer()
-
         self.ai_builder = AIContextBuilder()
-
         self.explainer = AIExplainer()
 
     def run(
@@ -61,7 +55,6 @@ class TradingPipeline:
         indicator_data: IndicatorPack,
         portfolio_state,
     ):
-
         self.logger.info(
             "Starting pipeline for %s",
             indicator_data.symbol,
@@ -112,6 +105,11 @@ class TradingPipeline:
                 portfolio_state,
                 "exposure",
                 0.0,
+            ),
+            max_position_percentage=getattr(
+                portfolio_state,
+                "max_position_percentage",
+                1.0,
             ),
         )
 

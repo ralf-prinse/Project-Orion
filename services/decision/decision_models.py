@@ -32,6 +32,7 @@ class PositionContext:
     cash: float
     position_size: float = 0.0
     exposure: float = 0.0
+    max_position_percentage: float = 1.0
 
 
 @dataclass(frozen=True)

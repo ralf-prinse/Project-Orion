@@ -20,6 +20,7 @@ class PositionMonitorController:
     - invoke PositionMonitorService
     - invoke PositionMonitorPresenter
     - load persisted open trades
+    - refresh open trades
     - invoke TradeMonitorPresenter
     - update the workspace
 
@@ -79,6 +80,30 @@ class PositionMonitorController:
         except Exception as error:
             self.workspace.set_status_text(
                 f"Open trades laden mislukt: {error}"
+            )
+
+    def refresh_open_trades(self) -> None:
+        """
+        Refresh open trades and update the Open Trades panel.
+
+        The controller only orchestrates:
+        - service refreshes prices and P/L
+        - service evaluates exit status
+        - presenter formats the result
+        - workspace renders the view model
+        """
+
+        try:
+            trades = self.trade_monitor_service.refresh_and_evaluate_all()
+            view_model = self.trade_monitor_presenter.present_open_trades(
+                trades
+            )
+
+            self.workspace.set_open_trades_view_model(view_model)
+
+        except Exception as error:
+            self.workspace.set_status_text(
+                f"Open trades verversen mislukt: {error}"
             )
 
     def monitor_trade(

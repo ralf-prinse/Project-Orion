@@ -3,8 +3,7 @@ from services.decision.decision_models import DecisionInput
 
 class PositionSizer:
     """
-    Calculates position size based on normalized signal strength,
-    available cash and volatility.
+    Calculates deterministic position size from portfolio context and signal strength.
 
     This service performs sizing only.
     It does not make BUY / SELL / HOLD decisions.
@@ -14,17 +13,34 @@ class PositionSizer:
         signal = data.signal
         context = data.context
 
-        if context.cash <= 0:
+        cash = max(0.0, float(context.cash))
+
+        if cash <= 0:
             return 0.0
 
-        base_position = context.cash * 0.10
+        max_position_percentage = max(
+            0.0,
+            min(float(context.max_position_percentage), 1.0),
+        )
 
-        confidence_factor = max(0.10, min(signal.score, 1.0))
+        max_position_value = cash * max_position_percentage
 
-        volatility_factor = 1.0 - max(0.0, min(signal.volatility, 0.80))
+        confidence_factor = max(
+            0.10,
+            min(float(signal.score), 1.0),
+        )
 
-        position_size = base_position * confidence_factor * volatility_factor
+        volatility_factor = 1.0 - max(
+            0.0,
+            min(float(signal.volatility), 0.80),
+        )
 
-        max_position = context.cash * 0.25
+        position_size = max_position_value * confidence_factor * volatility_factor
 
-        return round(max(0.0, min(position_size, max_position)), 2)
+        return round(
+            max(
+                0.0,
+                min(position_size, max_position_value),
+            ),
+            2,
+        )

@@ -16,7 +16,7 @@ class Position:
 class Portfolio:
     cash: float
     currency: str = "EUR"
-    max_position_percentage: float = 0.35
+    max_position_percentage: float = 1.0
     positions: dict[str, Position] = field(default_factory=dict)
 
     def max_position_value(self) -> float:
@@ -62,7 +62,9 @@ class Portfolio:
         else:
             if isinstance(existing_position, dict):
                 old_quantity = int(existing_position.get("quantity", 0))
-                old_average_price = float(existing_position.get("average_price", price))
+                old_average_price = float(
+                    existing_position.get("average_price", price)
+                )
             else:
                 old_quantity = existing_position.quantity
                 old_average_price = existing_position.average_price

@@ -197,7 +197,7 @@ class YahooMarketDataProvider(MarketDataProvider):
             yield items[index:index + size]
 
     def _to_yfinance_symbol(self, symbol: str) -> str:
-        return symbol.replace(".", "-")
+        return symbol.replace
 
     @contextlib.contextmanager
     def _suppress_output(self):

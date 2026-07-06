@@ -1,6 +1,6 @@
 {
-    "cash": 500.0,
+    "cash": 800.0,
     "currency": "EUR",
-    "max_position_percentage": 0.35,
+    "max_position_percentage": 1.0,
     "positions": {}
 }

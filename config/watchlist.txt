@@ -1,6 +1,58 @@
+# ==========================
+# ORION PERSONAL WATCHLIST
+# ==========================
+# United States
+
 AAPL
-AMD
-NOK
 MSFT
 NVDA
+TSLA
+AMD
+META
+AMZN
+GOOGL
+NFLX
+PLTR
+CRWD
+SHOP
+AVGO
+MU
+SNOW
+ARM
+UBER
+PANW
+INTU
+CRM
+ADBE
+QCOM
+LIN
+ORCL
+IBM
+
+# ==========================
+# Netherlands (Euronext)
+
 ASML.AS
+ASMI.AS
+BESI.AS
+ADYEN.AS
+INGA.AS
+ABN.AS
+NN.AS
+AGN.AS
+SHEL.AS
+UNA.AS
+HEIA.AS
+PHIA.AS
+AKZA.AS
+RAND.AS
+AALB.AS
+IMCD.AS
+WKL.AS
+KPN.AS
+TKWY.AS
+
+# ==========================
+# Taiwan
+
+TSM

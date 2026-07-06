@@ -1,1 +1,25 @@
-[]
+[
+    {
+        "symbol": "TSLA",
+        "quantity": 1,
+        "entry_price": 393.45001220703125,
+        "entry_datetime": "2026-07-06T12:19:30",
+        "entry_reason": "Adaptive decision | score=0.761 | buy_t=0.60 | sell_t=0.50",
+        "confidence": 0.8609604105434262,
+        "current_price": 393.45001220703125,
+        "highest_price": 393.45001220703125,
+        "lowest_price": 393.45001220703125,
+        "stop_loss": 373.78,
+        "take_profit": 432.8,
+        "trailing_stop": null,
+        "status": "OPEN",
+        "exit_signal": "HOLD_POSITION",
+        "exit_reason": "",
+        "exit_price": null,
+        "exit_datetime": null,
+        "realized_profit_loss": 0.0,
+        "unrealized_profit_loss": 0.0,
+        "unrealized_profit_loss_percent": 0.0,
+        "notes": "Geopend vanuit Trading Workspace."
+    }
+]
