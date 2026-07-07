@@ -65,7 +65,7 @@ class OrionTestRunner:
             TestCommand("Trading Cycle", [sys.executable, "test_trading_cycle.py"]),
             TestCommand("Paper Trading Runner", [sys.executable, "test_paper_trading_runner.py"]),
             TestCommand("Typed Paper Trading Flow", [sys.executable, "test_typed_paper_trading_flow.py"]),
-
+            TestCommand("Paper Trading Demo", [sys.executable, "test_paper_trading_demo_runner.py"]),
             TestCommand("Open Trade Store", [sys.executable, "test_open_trade_store.py"]),
             TestCommand("Trade Lifecycle Service", [sys.executable, "test_trade_lifecycle_service.py"]),
             TestCommand("Trade Monitor Service", [sys.executable, "test_trade_monitor_service.py"]),
