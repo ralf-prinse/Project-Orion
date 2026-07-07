@@ -27,6 +27,7 @@ class OrionTestRunner:
     def __init__(self):
         self.commands = [
             TestCommand("Trading Pipeline", [sys.executable, "test_trading_pipeline.py"]),
+            TestCommand("Trading Pipeline Result", [sys.executable, "test_trading_pipeline_result.py"]),
             TestCommand("Decision Smoke", [sys.executable, "test_decision_smoke.py"]),
             TestCommand("Intelligence Layer", [sys.executable, "test_intelligence_layer.py"]),
             TestCommand("AI Market Scanner", [sys.executable, "test_ai_market_scanner.py"]),
@@ -57,11 +58,13 @@ class OrionTestRunner:
             TestCommand("Position Management Summary", [sys.executable, "test_position_management_summary.py"]),
             TestCommand("Position Management Summary Builder", [sys.executable, "test_position_management_summary_builder.py"]),
 
+            TestCommand("Paper Trading Pipeline Adapter", [sys.executable, "test_paper_trading_pipeline_adapter.py"]),
             TestCommand("Paper Trading Service", [sys.executable, "test_paper_trading_service.py"]),
             TestCommand("Paper Position Update Service", [sys.executable, "test_paper_position_update_service.py"]),
             TestCommand("Paper Position Close Service", [sys.executable, "test_paper_position_close_service.py"]),
             TestCommand("Trading Cycle", [sys.executable, "test_trading_cycle.py"]),
             TestCommand("Paper Trading Runner", [sys.executable, "test_paper_trading_runner.py"]),
+            TestCommand("Typed Paper Trading Flow", [sys.executable, "test_typed_paper_trading_flow.py"]),
 
             TestCommand("Open Trade Store", [sys.executable, "test_open_trade_store.py"]),
             TestCommand("Trade Lifecycle Service", [sys.executable, "test_trade_lifecycle_service.py"]),

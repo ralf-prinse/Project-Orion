@@ -44,18 +44,19 @@ def main():
     assert result.position_size == 100
     assert result.expected_risk == 250.0
     assert result.risk_plan is risk_plan
-    assert result.ai_context == "Bullish context"
-    assert result.explanation == "Trend and momentum aligned."
 
     assert result.legacy_output is pipeline_output
     assert result.legacy_output["decision"] == "BUY"
 
     exported = result.to_dict()
 
-    assert exported["symbol"] == "INGA.AS"
-    assert exported["decision"] == "BUY"
-    assert exported["risk_plan"] is risk_plan
-    assert exported["pipeline_output"] is pipeline_output
+    assert exported["pipeline"] is pipeline_output
+    assert exported["ai_context"] == "Bullish context"
+    assert exported["explanation"] == "Trend and momentum aligned."
+
+    assert result["pipeline"] is pipeline_output
+    assert "pipeline" in result
+    assert list(result.keys()) == ["pipeline", "ai_context", "explanation"]
 
     print("TRADING PIPELINE RESULT: PASS ✅")
 
