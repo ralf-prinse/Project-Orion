@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import List, Literal
 
+from models.market_structure import MarketStructure
+
 
 MarketRegime = Literal["BULL", "BEAR", "SIDEWAYS"]
 VolatilityState = Literal["LOW", "MEDIUM", "HIGH"]
@@ -9,8 +11,9 @@ VolatilityState = Literal["LOW", "MEDIUM", "HIGH"]
 @dataclass(frozen=True)
 class IndicatorPack:
     """
-    Raw output from analysis layer.
+    Raw deterministic output from analysis layer.
     """
+
     symbol: str
     rsi: float
     trend: float
@@ -18,6 +21,7 @@ class IndicatorPack:
     momentum: float
     volume: float = 0.0
     price: float = 0.0
+    market_structure: MarketStructure = MarketStructure()
 
 
 @dataclass(frozen=True)
