@@ -34,7 +34,7 @@ class OrionTestRunner:
             TestCommand("AI Scanner Presenter", [sys.executable, "test_ai_scanner_presenter.py"]),
             TestCommand("Backtest Visualizer", [sys.executable, "test_backtest_visualizer.py"]),
             TestCommand("Trading Config", [sys.executable, "test_trading_config.py"]),
-
+            TestCommand("Live Paper Market Scanner", [sys.executable, "test_live_paper_market_scanner.py"]),
             TestCommand("Adaptive Risk Engine", [sys.executable, "test_adaptive_risk_engine.py"]),
             TestCommand("Break Even Service", [sys.executable, "test_break_even_service.py"]),
             TestCommand("Trailing Stop Service", [sys.executable, "test_trailing_stop_service.py"]),
