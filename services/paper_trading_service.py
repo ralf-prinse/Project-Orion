@@ -3,7 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from models.execution_context import ExecutionContext
-from models.paper_portfolio import PaperPortfolio
 from models.position_state import PositionState
 from models.trading_session import TradingSession
 from services.execution_engine import (
@@ -16,14 +15,6 @@ from services.position_state_store import PositionStateStore
 
 @dataclass(frozen=True)
 class PaperTradeResult:
-    """
-    Result of one end-to-end paper trade.
-
-    No live broker.
-    No real money.
-    No AI.
-    """
-
     executed: bool
     symbol: str
     session: TradingSession
@@ -33,26 +24,6 @@ class PaperTradeResult:
 
 
 class PaperTradingService:
-    """
-    Executes one deterministic paper trade from pipeline output.
-
-    Responsibilities
-    ----------------
-    - Build ExecutionRequest
-    - Build ExecutionContext
-    - Run ExecutionEngine
-    - Update TradingSession portfolio
-    - Create PositionState for filled paper positions
-    - Save PositionState in PositionStateStore
-
-    Does NOT
-    --------
-    - Scan markets
-    - Generate BUY/HOLD/SELL
-    - Generate RiskPlan
-    - Execute real broker orders
-    """
-
     def __init__(
         self,
         execution_engine: ExecutionEngine | None = None,
@@ -61,10 +32,7 @@ class PaperTradingService:
     ):
         self.execution_engine = execution_engine or ExecutionEngine()
         self.request_builder = request_builder or ExecutionRequestBuilder()
-        self.position_state_store = (
-            position_state_store
-            or PositionStateStore()
-        )
+        self.position_state_store = position_state_store or PositionStateStore()
 
     def open_position(
         self,
@@ -92,14 +60,17 @@ class PaperTradingService:
             name=session.name,
             portfolio=execution.portfolio,
             position_states=dict(session.position_states),
+            risk_plans=dict(session.risk_plans),
             status=session.status,
         )
 
         position_state: PositionState | None = None
 
         if execution.execution.accepted:
+            symbol = request.symbol.upper()
+
             position_state = PositionState(
-                symbol=request.symbol,
+                symbol=symbol,
                 entry_price=request.risk_plan.entry_price,
                 current_stop_loss=request.risk_plan.stop_loss,
                 highest_price=request.risk_plan.entry_price,
@@ -111,15 +82,14 @@ class PaperTradingService:
                 target_3_hit=False,
             )
 
-            updated_session.position_states[
-                request.symbol
-            ] = position_state
+            updated_session.position_states[symbol] = position_state
+            updated_session.risk_plans[symbol] = request.risk_plan
 
             self.position_state_store.save(position_state)
 
         return PaperTradeResult(
             executed=execution.execution.accepted,
-            symbol=request.symbol,
+            symbol=request.symbol.upper(),
             session=updated_session,
             execution=execution,
             position_state=position_state,

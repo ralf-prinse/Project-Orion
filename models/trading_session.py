@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 
 from models.paper_portfolio import PaperPortfolio
 from models.position_state import PositionState
+from models.risk_plan import RiskPlan
 
 
 @dataclass
@@ -19,6 +20,7 @@ class TradingSession:
     name: str
     portfolio: PaperPortfolio
     position_states: dict[str, PositionState] = field(default_factory=dict)
+    risk_plans: dict[str, RiskPlan] = field(default_factory=dict)
     status: str = "ACTIVE"
 
     @property
