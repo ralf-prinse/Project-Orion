@@ -48,7 +48,6 @@ def main():
     assert result.position_size >= 0
     assert result.risk_plan.symbol == "INGA.AS"
     assert result.risk_plan.entry_price > 0
-    assert result.legacy_output["symbol"] == "INGA.AS"
 
     print("PAPER TRADING PIPELINE ADAPTER: PASS ✅")
 

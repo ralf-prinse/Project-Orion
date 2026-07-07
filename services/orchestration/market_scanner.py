@@ -1,7 +1,8 @@
-from typing import List, Dict, Any
+from typing import Any
 
-from services.orchestration.trading_pipeline import TradingPipeline
+from models.trading_pipeline_result import TradingPipelineResult
 from services.intelligence.intelligence_models import IndicatorPack
+from services.orchestration.trading_pipeline import TradingPipeline
 
 
 class MarketScanner:
@@ -18,26 +19,24 @@ class MarketScanner:
 
     def scan(
         self,
-        assets: List[IndicatorPack],
+        assets: list[IndicatorPack],
         portfolio_state,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
 
-        pipeline_results = []
+        pipeline_results: list[dict[str, Any]] = []
 
         for asset in assets:
-
-            result = self.pipeline.run(asset, portfolio_state)
-
-            pipeline = result["pipeline"]
-            ai_context = result["ai_context"]
-            explanation = result["explanation"]
+            result = self.pipeline.run(
+                asset,
+                portfolio_state,
+            )
 
             pipeline_results.append(
                 {
-                    "symbol": pipeline["symbol"],
-                    "pipeline": pipeline,
-                    "ai_context": ai_context,
-                    "explanation": explanation,
+                    "symbol": result.symbol,
+                    "pipeline": result,
+                    "ai_context": result.ai_context,
+                    "explanation": result.explanation,
                 }
             )
 
@@ -50,8 +49,8 @@ class MarketScanner:
         actionable = [
             item
             for item in ranked
-            if item["pipeline"]["decision"] in ("BUY", "SELL")
-            and item["pipeline"]["confidence"] >= 0.60
+            if item["pipeline"].decision in ("BUY", "SELL")
+            and item["pipeline"].confidence >= 0.60
         ]
 
         return {
@@ -62,12 +61,11 @@ class MarketScanner:
         }
 
     @staticmethod
-    def _ranking_score(item: Dict[str, Any]) -> float:
-        pipeline = item["pipeline"]
+    def _ranking_score(item: dict[str, Any]) -> float:
+        pipeline: TradingPipelineResult = item["pipeline"]
 
         return (
-            pipeline["pressure_score"]
-            * pipeline["confidence"]
-            * pipeline["strength"]
-            - pipeline["risk_score"]
+            pipeline.confidence
+            * pipeline.position_size
+            - pipeline.expected_risk
         )

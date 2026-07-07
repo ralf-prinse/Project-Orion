@@ -1,5 +1,6 @@
-from typing import Any, Dict, List
+from typing import Any
 
+from models.trading_pipeline_result import TradingPipelineResult
 from services.intelligence.intelligence_models import IndicatorPack
 from services.logging_service import LoggingService
 from services.orchestration.backtest_simulator import BacktestSimulator
@@ -37,9 +38,9 @@ class BacktestEngine:
 
     def run(
         self,
-        dataset: List[List[IndicatorPack]],
+        dataset: list[list[IndicatorPack]],
         portfolio_state,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
 
         self.logger.info(
             "Starting backtest (%d timesteps)",
@@ -80,20 +81,28 @@ class BacktestEngine:
 
                 continue
 
-            pipeline = best_trade["pipeline"]
+            pipeline: TradingPipelineResult = best_trade["pipeline"]
 
             self.logger.info(
                 (
                     "Selected %s | %s | "
                     "confidence=%.3f"
                 ),
-                pipeline["symbol"],
-                pipeline["decision"],
-                pipeline["confidence"],
+                pipeline.symbol,
+                pipeline.decision,
+                pipeline.confidence,
             )
 
             simulation = self.simulator.simulate_trade(
-                pipeline
+                {
+                    "symbol": pipeline.symbol,
+                    "decision": pipeline.decision,
+                    "pressure_score": pipeline.confidence,
+                    "confidence": pipeline.confidence,
+                    "strength": pipeline.position_size,
+                    "position_size": pipeline.position_size,
+                    "expected_risk": pipeline.expected_risk,
+                }
             )
 
             equity += simulation["net_pnl"]
@@ -101,13 +110,13 @@ class BacktestEngine:
             trade_log.append(
                 {
                     "timestep": timestep,
-                    "symbol": pipeline["symbol"],
-                    "decision": pipeline["decision"],
-                    "score": pipeline["pressure_score"],
-                    "confidence": pipeline["confidence"],
-                    "strength": pipeline["strength"],
-                    "position_size": pipeline["position_size"],
-                    "expected_risk": pipeline["expected_risk"],
+                    "symbol": pipeline.symbol,
+                    "decision": pipeline.decision,
+                    "score": pipeline.confidence,
+                    "confidence": pipeline.confidence,
+                    "strength": pipeline.position_size,
+                    "position_size": pipeline.position_size,
+                    "expected_risk": pipeline.expected_risk,
                     "gross_pnl": simulation["gross_pnl"],
                     "fees": simulation["fees"],
                     "slippage": simulation["slippage"],

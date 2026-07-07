@@ -19,12 +19,6 @@ def main():
         notes="Adaptive risk plan",
     )
 
-    pipeline_output = {
-        "symbol": "INGA.AS",
-        "decision": "BUY",
-        "confidence": 0.82,
-    }
-
     result = TradingPipelineResult(
         symbol="INGA.AS",
         decision="BUY",
@@ -35,7 +29,6 @@ def main():
         market_intelligence=None,
         ai_context="Bullish context",
         explanation="Trend and momentum aligned.",
-        pipeline_output=pipeline_output,
     )
 
     assert result.symbol == "INGA.AS"
@@ -44,19 +37,8 @@ def main():
     assert result.position_size == 100
     assert result.expected_risk == 250.0
     assert result.risk_plan is risk_plan
-
-    assert result.legacy_output is pipeline_output
-    assert result.legacy_output["decision"] == "BUY"
-
-    exported = result.to_dict()
-
-    assert exported["pipeline"] is pipeline_output
-    assert exported["ai_context"] == "Bullish context"
-    assert exported["explanation"] == "Trend and momentum aligned."
-
-    assert result["pipeline"] is pipeline_output
-    assert "pipeline" in result
-    assert list(result.keys()) == ["pipeline", "ai_context", "explanation"]
+    assert result.ai_context == "Bullish context"
+    assert result.explanation == "Trend and momentum aligned."
 
     print("TRADING PIPELINE RESULT: PASS ✅")
 

@@ -1,5 +1,5 @@
-from services.orchestration.trading_pipeline import TradingPipeline
 from services.intelligence.intelligence_models import IndicatorPack
+from services.orchestration.trading_pipeline import TradingPipeline
 
 
 class FakePortfolio:
@@ -11,7 +11,6 @@ class FakePortfolio:
 def run():
     pipeline = TradingPipeline()
 
-    # test input (realistic market data)
     indicators = IndicatorPack(
         symbol="TSLA",
         rsi=72,
@@ -23,11 +22,17 @@ def run():
 
     result = pipeline.run(indicators, FakePortfolio())
 
-    print("\n🚀 FULL PIPELINE RESULT")
+    assert result.symbol == "TSLA"
+    assert result.decision in {"BUY", "HOLD", "SELL"}
+    assert result.confidence >= 0
+    assert result.position_size >= 0
+    assert result.expected_risk >= 0
+    assert result.risk_plan.symbol == "TSLA"
+    assert result.risk_plan.entry_price > 0
+    assert result.ai_context is not None
+    assert result.explanation is not None
 
-    # clean output printing
-    for k, v in result.items():
-        print(f"{k}: {v}")
+    print("TRADING PIPELINE: PASS ✅")
 
 
 if __name__ == "__main__":

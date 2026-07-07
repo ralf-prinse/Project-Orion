@@ -144,46 +144,46 @@ class TradingPipeline:
                 + "\n".join(validation.errors)
             )
 
-        output = {
-            "symbol": indicator_data.symbol,
-            "pressure_score": fused.pressure_score,
-            "buy_pressure": fused.buy_pressure,
-            "sell_pressure": fused.sell_pressure,
-            "strength": fused.strength,
-            "regime": intelligence.regime,
-            "volatility": intelligence.volatility_state,
-            "risk_score": intelligence.risk_score,
-            "decision": decision.decision,
-            "confidence": decision.confidence,
-            "reason": decision.reason,
-            "position_size": position_size,
-            "expected_risk": expected_risk,
-            "risk_plan": {
-                "symbol": risk_plan.symbol,
-                "entry_price": risk_plan.entry_price,
-                "stop_loss": risk_plan.stop_loss,
-                "target_1": risk_plan.target_1,
-                "target_2": risk_plan.target_2,
-                "target_3": risk_plan.target_3,
-                "risk_percent": risk_plan.risk_percent,
-                "reward_percent": risk_plan.reward_percent,
-                "risk_reward_ratio": risk_plan.risk_reward_ratio,
-                "confidence": risk_plan.confidence,
-                "notes": risk_plan.notes,
-            },
-            "features": {
+        ai_context = self.ai_builder.build(
+            {
+                "symbol": indicator_data.symbol,
                 "pressure_score": fused.pressure_score,
                 "buy_pressure": fused.buy_pressure,
                 "sell_pressure": fused.sell_pressure,
                 "strength": fused.strength,
-                "trend": fused.trend,
-                "momentum": fused.momentum,
-                "rsi": fused.rsi,
-                "volatility": fused.volatility,
-            },
-        }
-
-        ai_context = self.ai_builder.build(output)
+                "regime": intelligence.regime,
+                "volatility": intelligence.volatility_state,
+                "risk_score": intelligence.risk_score,
+                "decision": decision.decision,
+                "confidence": decision.confidence,
+                "reason": decision.reason,
+                "position_size": position_size,
+                "expected_risk": expected_risk,
+                "risk_plan": {
+                    "symbol": risk_plan.symbol,
+                    "entry_price": risk_plan.entry_price,
+                    "stop_loss": risk_plan.stop_loss,
+                    "target_1": risk_plan.target_1,
+                    "target_2": risk_plan.target_2,
+                    "target_3": risk_plan.target_3,
+                    "risk_percent": risk_plan.risk_percent,
+                    "reward_percent": risk_plan.reward_percent,
+                    "risk_reward_ratio": risk_plan.risk_reward_ratio,
+                    "confidence": risk_plan.confidence,
+                    "notes": risk_plan.notes,
+                },
+                "features": {
+                    "pressure_score": fused.pressure_score,
+                    "buy_pressure": fused.buy_pressure,
+                    "sell_pressure": fused.sell_pressure,
+                    "strength": fused.strength,
+                    "trend": fused.trend,
+                    "momentum": fused.momentum,
+                    "rsi": fused.rsi,
+                    "volatility": fused.volatility,
+                },
+            }
+        )
 
         explanation = self.explainer.explain(
             ai_context
@@ -207,5 +207,4 @@ class TradingPipeline:
             market_intelligence=intelligence,
             ai_context=ai_context,
             explanation=explanation,
-            pipeline_output=output,
         )
