@@ -1,96 +1,56 @@
 # PROJECT_STATUS.md
 
-> Documentation Version: v1.14
+> Documentation Version: v1.15
+> Architecture Version: v2.4
 > Last Updated: 2026-07-07
 
 ---
 
 # PROJECT STATUS
 
-## Project
-
-Project Orion
-
-Deterministic AI-Assisted Swing Trading Platform
+Project Orion is now a deterministic AI-assisted swing trading platform with a working paper trading foundation.
 
 ---
 
-# OVERALL STATUS
+# CURRENT PHASE
 
-Current Phase
+Sprint 6 — Paper Trading Engine
 
-Sprint 5.9 — Advanced Position Management
+Status:
 
-Overall Progress
+IN PROGRESS
 
-████████████████████░ 90%
+Project Health:
 
-Project Health
+EXCELLENT
 
-🟢 EXCELLENT
+Regression Tests:
 
-Regression Tests
-
-✅ ALL PASSING
-
-Architecture
-
-Stable
+ALL PASSING
 
 ---
 
-# COMPLETED MODULES
+# COMPLETED MAJOR SYSTEMS
 
-## Core Platform
+## Trading Core
 
-- Mission Control
-- Trading Workspace
-- Trade Monitor
-- Portfolio
-- History
-- Settings
-
----
-
-## Market Analysis
-
+- TradingPipeline
+- AdaptiveDecisionEngine
 - Market Scanner
 - AI Market Scanner
-- IndicatorBuilder
-- IndicatorPack
-- MarketStructure
 - Signal Fusion
 - Market Intelligence
 
----
+## Risk Engine
 
-## Trading Decision
-
-- AdaptiveDecisionEngine
-- TradingPipeline
-
-BUY / HOLD / SELL decisions are fully deterministic.
-
----
-
-## Risk Planning
-
-Completed
-
+- MarketStructure
 - RiskContext
-- RiskContextBuilder
 - AdaptiveRiskEngine V2
-- ATR Stop-Loss
+- ATR Stop Loss
 - Risk Distance Targets
 - RiskPlanValidator
 
-RiskPlans are validated before entering the trading workflow.
-
----
-
 ## Position Management
-
-Completed
 
 - PositionState
 - PositionStateFactory
@@ -98,240 +58,95 @@ Completed
 - PositionManager
 - BreakEvenService
 - TrailingStopService
+- TimeStopService
+- PositionHealthService
+- PositionStateStore
+- PositionManagementSummary
+- PositionManagementSummaryBuilder
 
-Open positions now have deterministic runtime state.
+## Execution Layer
+
+- ExecutionRequest
+- ExecutionContext
+- Order
+- ExecutionResult
+- ExecutionValidator
+- OrderFactory
+- ExecutionEngine
+- PaperBroker
+- ExecutionReportBuilder
+
+## Paper Trading Foundation
+
+- PaperPortfolio
+- PaperPosition
+- TradingSession
+- PaperTradingService
+- PaperPositionUpdateService
+- PaperPositionCloseService
+- TradingCycle
+- PaperTradingRunner
 
 ---
 
-## Trade Management
+# CURRENT CAPABILITY
 
-Completed
+Orion can now:
 
-- TradeLifecycleService
-- ExitEvaluationService
-- PositionAnalysisService
-
----
-
-## Persistence
-
-Completed
-
-- PortfolioStore
-- OpenTradeStore
-- TradeHistoryStore
+- open a paper position
+- update a paper position
+- apply break-even logic
+- apply trailing stop logic
+- close a paper position
+- update portfolio cash
+- update portfolio equity
+- run multiple paper trading cycles
 
 ---
 
-# CURRENT ARCHITECTURE
+# CURRENT LIMITATION
+
+TradingPipeline is not yet automatically connected to PaperTradingRunner.
+
+MarketSnapshots currently require prepared pipeline output.
+
+Next goal:
+
+Connect TradingPipeline to TradingCycle / PaperTradingRunner.
+
+---
+
+# NEXT STEP
+
+Sprint 6E — TradingPipeline Paper Integration
+
+Goal:
+
+MarketSnapshot
+
+↓
 
 TradingPipeline
 
 ↓
 
-AdaptiveDecisionEngine
+ExecutionRequest
 
 ↓
 
-RiskContext
+ExecutionEngine
 
 ↓
 
-AdaptiveRiskEngine
+PaperBroker
 
 ↓
 
-RiskPlan
+TradingSession
 
 ↓
-
-RiskPlanValidator
-
-↓
-
-PositionState
-
-↓
-
-PositionUpdateEngine
-
-↓
-
-PositionManager
-
-↓
-
-BreakEvenService
-
-↓
-
-TrailingStopService
-
-↓
-
-TradeLifecycleService
-
----
-
-# CURRENT SPRINT
-
-Sprint 5.9
-
-Status
-
-Approximately 90% Complete
-
-Completed
-
-✅ RiskContext
-
-✅ MarketStructure
-
-✅ ATR Stop Loss
-
-✅ Risk Distance Targets
-
-✅ RiskPlan Validation
-
-✅ PositionState
-
-✅ PositionUpdateEngine
-
-✅ PositionManager
-
-✅ Break-even Management
-
-✅ Trailing Stop Management
-
-Remaining
-
-- TimeStopService
-
-- PositionHealthService
-
-- PositionStateStore
-
-- Integration into TradeLifecycleService
-
----
-
-# NEXT SPRINT
-
-Sprint 6
-
-Paper Trading
-
-Planned Components
-
-- Simulated Order Execution
-
-- Paper Portfolio
-
-- Daily Portfolio Updates
-
-- PositionManager Integration
-
-- Portfolio Performance Tracking
-
-Broker integration will only start after Paper Trading has been fully validated.
-
----
-
-# LONG TERM ROADMAP
-
-Phase 1
-
-Deterministic Trading Engine
-
-Status
-
-Completed
-
----
-
-Phase 2
-
-Advanced Position Management
-
-Status
-
-In Progress
-
----
-
-Phase 3
-
-Paper Trading
-
-Status
-
-Planned
-
----
-
-Phase 4
-
-Portfolio Intelligence
-
-Status
-
-Planned
-
----
-
-Phase 5
-
-Broker Compatibility Layer
-
-Status
-
-Planned
-
----
-
-Phase 6
-
-Autonomous Capital Management
-
-Status
-
-Long-Term Vision
-
----
-
-# CURRENT QUALITY
-
-Architecture
-
-⭐⭐⭐⭐⭐
-
-Trading Engine
-
-⭐⭐⭐⭐⭐
-
-Risk Engine
-
-⭐⭐⭐⭐⭐
 
 Position Management
-
-⭐⭐⭐⭐☆
-
-Testing
-
-⭐⭐⭐⭐⭐
-
-GUI
-
-⭐⭐⭐☆☆
-
-Paper Trading
-
-☆☆☆☆☆
-
-Broker Integration
-
-☆☆☆☆☆
 
 ---
 

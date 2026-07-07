@@ -1,237 +1,213 @@
 # TODO.md
 
-> Documentation Version: v1.14
+> Documentation Version: v1.15
+> Architecture Version: v2.4
 > Last Updated: 2026-07-07
 
 ---
 
-# PROJECT ORION
+# PROJECT ORION TODO
 
-Current Sprint
+Current Sprint:
 
-Sprint 5.9 — Advanced Position Management
+Sprint 6 — Paper Trading Engine
 
-Overall Progress
+Status:
 
-████████████████████░ 90%
+IN PROGRESS
 
-Regression Status
+Regression Status:
 
-✅ ALL TESTS PASS
+ALL TESTS PASSING
 
 ---
 
-# SPRINT 5.9
+# COMPLETED
 
-## Completed
+## Sprint 5.9 — Advanced Position Management
 
-### Risk Engine
-
+- [x] MarketStructure
 - [x] RiskContext
-- [x] RiskContextBuilder
 - [x] AdaptiveRiskEngine V2
-- [x] ATR Stop-Loss
+- [x] ATR Stop Loss
 - [x] Risk Distance Targets
 - [x] RiskPlanValidator
-
----
-
-### Position Management
-
 - [x] PositionState
 - [x] PositionStateFactory
 - [x] PositionUpdateEngine
 - [x] PositionManager
 - [x] BreakEvenService
 - [x] TrailingStopService
+- [x] TimeStopService
+- [x] PositionHealthService
+- [x] PositionStateStore
+- [x] PositionManagementSummary
+- [x] PositionManagementSummaryBuilder
 
 ---
 
-### Architecture
+## Sprint 6 — Paper Trading Foundation
 
-- [x] MarketStructure introduced
-- [x] RiskContext architecture
-- [x] Position Management architecture
-- [x] Runtime PositionState
-- [x] Deterministic validation pipeline
-
----
-
-# Remaining Sprint 5.9
-
-## Position Management
-
-### TimeStopService
-
-Priority
-
-HIGH
-
-Purpose
-
-Close trades that remain inactive for too long.
-
-Planned Features
-
-- Maximum holding period
-- Adaptive holding period
-- Trade Horizon support
+- [x] ExecutionRequest
+- [x] ExecutionContext
+- [x] Order
+- [x] ExecutionResult
+- [x] ExecutionValidator
+- [x] OrderFactory
+- [x] ExecutionEngine
+- [x] PaperBroker
+- [x] PaperPortfolio
+- [x] PaperPosition
+- [x] PortfolioManager
+- [x] ExecutionReportBuilder
+- [x] TradingSession
+- [x] PaperTradingService
+- [x] PaperPositionUpdateService
+- [x] PaperPositionCloseService
+- [x] TradingCycle
+- [x] PaperTradingRunner
 
 ---
 
-### PositionHealthService
+# CURRENT WORK
 
-Priority
+## Sprint 6E — TradingPipeline Paper Integration
 
-HIGH
-
-Purpose
-
-Determine the health of an open position.
-
-Metrics
-
-- Trend
-- Momentum
-- ATR
-- Distance to Stop
-- Distance to Target
-- Confidence
-
-Output
-
-- Healthy
-- Neutral
-- Weak
-- Critical
-
----
-
-### PositionStateStore
-
-Priority
-
-MEDIUM
-
-Purpose
-
-Central runtime storage of PositionState objects.
-
-Future Responsibilities
-
-- Live monitoring
-- Paper Trading
-- Broker synchronization
-
----
-
-### TradeLifecycle Integration
-
-Priority
-
-HIGH
-
-Integrate
-
-- PositionManager
-
-Into
-
-- TradeLifecycleService
-
----
-
-# Sprint 6
-
-Paper Trading
-
-Priority
+Priority:
 
 VERY HIGH
 
-Modules
+Goal:
 
-- Paper Portfolio
-- Paper Orders
-- Simulated Broker
-- Daily Portfolio Updates
-- Portfolio Statistics
-- PositionManager Integration
+Automatically connect TradingPipeline output to the paper trading cycle.
+
+Current flow:
+
+MarketSnapshot
+
+↓
+
+Prepared pipeline_output
+
+↓
+
+TradingCycle
+
+↓
+
+PaperTradingRunner
+
+Target flow:
+
+MarketSnapshot
+
+↓
+
+IndicatorBuilder / IndicatorPack
+
+↓
+
+TradingPipeline
+
+↓
+
+ExecutionRequestBuilder
+
+↓
+
+ExecutionEngine
+
+↓
+
+PaperBroker
+
+↓
+
+TradingSession
 
 ---
 
-# Sprint 6.1
+# Sprint 6E Tasks
 
-Portfolio Intelligence
-
-Planned
-
-- Portfolio Heat
-- Exposure
-- Sector Allocation
-- Risk Allocation
-- Drawdown Analysis
+- [ ] Define PaperTradingPipelineAdapter
+- [ ] Convert market data into IndicatorPack
+- [ ] Run TradingPipeline automatically
+- [ ] Pass pipeline output into TradingCycle
+- [ ] Prevent duplicate open positions
+- [ ] Add integration test for one symbol
+- [ ] Add multi-symbol replay test
+- [ ] Validate portfolio cash/equity after replay
 
 ---
 
-# Sprint 6.2
+# NEXT
 
-Broker Compatibility
+## Sprint 6F — Close Logic Integration
 
-Planned
+Goal:
 
-- Broker Adapter
-- Order Translation
-- Position Synchronization
-- Account Synchronization
+Close paper positions automatically based on deterministic rules.
 
-Supported Brokers
+Triggers:
+
+- Stop-loss hit
+- Target reached
+- Time stop
+- Manual close
+
+---
+
+## Sprint 6G — Paper Trading Loop
+
+Goal:
+
+Run autonomous paper trading over historical data.
+
+Includes:
+
+- multiple candles
+- multiple symbols
+- repeated scans
+- portfolio updates
+- position updates
+- close events
+
+---
+
+## Sprint 6H — Portfolio Intelligence
+
+Goal:
+
+Add portfolio-level intelligence.
+
+Planned:
+
+- exposure
+- allocation
+- risk per position
+- total portfolio risk
+- cash utilization
+- drawdown
+- performance metrics
+
+---
+
+# FUTURE
+
+## Broker Compatibility
+
+Planned after Paper Trading is stable.
+
+Possible broker targets:
 
 - Interactive Brokers
 - Alpaca
-- Trading212 (research)
-- Others (future)
+- Saxo
+- Trading212 research
 
----
+Broker adapters may only execute deterministic orders.
 
-# Sprint 7
-
-Autonomous Trading
-
-Long-Term Goal
-
-The user defines
-
-- Initial capital
-- Maximum risk
-- Markets
-- Trading universe
-
-Orion autonomously
-
-- scans markets
-- opens trades
-- manages positions
-- protects capital
-- compounds returns
-
-using deterministic trading rules.
-
----
-
-# Documentation
-
-Before every new sprint
-
-Required
-
-- [ ] AI_CONTEXT.md
-- [ ] PROJECT_STATUS.md
-- [ ] TODO.md
-- [ ] CHANGELOG.md
-- [ ] ORION_MASTER_ARCHITECTURE.md
-
-must always be synchronized with the GitHub repository.
+They may never calculate BUY, SELL, Stop Loss, Targets or Position Size.
 
 ---
 

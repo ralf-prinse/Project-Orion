@@ -1,6 +1,7 @@
 # CHANGELOG.md
 
-> Documentation Version: v1.14
+> Documentation Version: v1.15
+> Architecture Version: v2.4
 > Last Updated: 2026-07-07
 
 ---
@@ -9,282 +10,153 @@
 
 ---
 
-## Sprint 5.9
+# v1.15 — Paper Trading Engine Foundation
 
-Status
+Status:
 
-In Progress
+Completed
 
----
+Regression:
 
-### Added
-
-#### MarketStructure
-
-Introduced a dedicated deterministic MarketStructure model.
-
-New deterministic market information:
-
-- ATR
-- Average Daily Range
-- Swing High
-- Swing Low
-- Support
-- Resistance
-
-MarketStructure became the single owner of market context.
+ALL TESTS PASSING
 
 ---
 
-#### RiskContext
+## Added
 
-Introduced RiskContext.
+### Execution Layer
 
-AdaptiveRiskEngine now accepts a single deterministic context object.
-
-RiskContext currently contains:
-
-- Symbol
-- Entry Price
-- Confidence
-- Risk Score
-- Market Regime
-- Volatility State
-- MarketStructure
-
-This significantly reduced coupling between TradingPipeline and AdaptiveRiskEngine.
+- ExecutionRequest
+- ExecutionContext
+- ExecutionResult
+- Order
+- ExecutionValidator
+- OrderFactory
+- ExecutionEngine
+- PaperBroker
+- ExecutionReportBuilder
 
 ---
 
-#### AdaptiveRiskEngine V2
+### Paper Trading
 
-AdaptiveRiskEngine now supports:
+Added deterministic paper trading support.
 
-- ATR based Stop Loss
-- Risk Distance calculations
-- Dynamic Risk %
-- Dynamic Reward %
-- Risk / Reward Ratio
+New components:
 
-The engine now adapts risk according to market volatility.
+- PaperPortfolio
+- PaperPosition
+- TradingSession
+- PaperTradingService
 
----
+Capabilities:
 
-#### RiskPlanValidator
-
-Added deterministic validation layer.
-
-Every RiskPlan is validated before continuing through the pipeline.
-
-Validation includes:
-
-- Entry validation
-- Stop Loss validation
-- Target validation
-- Risk %
-- Reward %
-- Risk / Reward Ratio
-- Metadata validation
-
-Invalid RiskPlans immediately stop execution.
+- Open paper positions
+- Execute deterministic orders
+- Maintain portfolio cash
+- Maintain portfolio equity
 
 ---
 
-#### PositionState
+### Position Lifecycle
 
-Introduced runtime PositionState model.
+Added complete deterministic position lifecycle.
 
-RiskPlan remains immutable.
+New services:
 
-PositionState stores runtime information including:
+- PaperPositionUpdateService
+- PaperPositionCloseService
 
-- Highest Price
-- Current Price
-- Current Stop Loss
-- Break-even state
-- Trailing Stop state
-- Target progression
+Supported lifecycle:
 
-This establishes the foundation for advanced position management.
-
----
-
-#### PositionStateFactory
-
-Added PositionStateFactory.
-
-Responsible for creating the initial runtime PositionState from a RiskPlan.
-
-Factory follows deterministic architecture principles.
-
----
-
-#### PositionUpdateEngine
-
-Introduced deterministic PositionUpdateEngine.
-
-Responsibilities:
-
-- coordinate PositionManager
-- update PositionState
-- process live price updates
-
-PositionUpdateEngine performs no trading decisions.
-
----
-
-#### PositionManager
-
-Added PositionManager.
-
-Current responsibilities:
-
-- coordinate BreakEvenService
-- coordinate TrailingStopService
-
-Designed for future extension.
-
----
-
-#### BreakEvenService
-
-Implemented deterministic break-even management.
-
-Current behaviour:
-
-- activates after Target 1
-- never lowers Stop Loss
-- protects capital
-
----
-
-#### TrailingStopService
-
-Implemented deterministic trailing stop.
-
-Current behaviour:
-
-- tracks Highest Price
-- only raises Stop Loss
-- never reduces protection
-
-Trailing stop currently uses a fixed percentage.
-
-Future versions will become ATR based.
-
----
-
-#### Position Management Framework
-
-Sprint 5.9 introduced the first complete deterministic
-Position Management Framework.
-
-Current flow:
-
-RiskPlan
+OPEN
 
 ↓
 
-PositionStateFactory
+UPDATE
 
 ↓
 
-PositionState
+BREAK EVEN
 
 ↓
 
-PositionUpdateEngine
+TRAILING STOP
 
 ↓
 
-PositionManager
+TIME STOP
 
 ↓
 
-BreakEvenService
+HEALTH CHECK
 
 ↓
 
-TrailingStopService
-
-This architecture separates immutable trade planning
-from mutable runtime position management.
+CLOSE
 
 ---
 
-### Improved
+### Trading Cycle
 
-#### TradingPipeline
+Added first orchestration layer.
 
-TradingPipeline now:
+New components:
 
-- builds RiskContext
-- generates RiskPlan
-- validates every RiskPlan
-- forwards only valid plans
+- MarketSnapshot
+- TradingCycle
+- TradingCycleResult
 
-The pipeline has become cleaner through stronger
-separation of responsibilities.
+TradingCycle responsibilities:
 
----
-
-#### Risk Planning
-
-RiskPlans are now generated using:
-
-- MarketStructure
-- ATR
-- Risk Distance
-
-instead of fixed percentage calculations whenever
-market information is available.
+- open positions
+- update positions
+- close positions
+- return updated TradingSession
 
 ---
 
-#### Runtime Position Management
+### Multi-Cycle Runner
 
-Open positions are no longer treated as static objects.
+Added:
 
-Runtime state now evolves through PositionState
-and PositionUpdateEngine.
+PaperTradingRunner
 
-This architecture prepares Orion for:
+Capabilities:
 
-- Paper Trading
-- Live Monitoring
-- Broker Integration
+- execute multiple TradingCycles
+- preserve TradingSession
+- replay deterministic market history
 
 ---
 
-### Architecture
+## Architecture Improvements
 
-Architecture Version
+Introduced deterministic execution architecture.
 
-v2.3
+Execution flow:
 
-Major architectural additions
-
-- MarketStructure
-- RiskContext
-- RiskPlanValidator
-- PositionState
-- PositionStateFactory
-- PositionUpdateEngine
-- PositionManager
-- BreakEvenService
-- TrailingStopService
-
-The architecture now clearly separates:
-
-Market Analysis
+TradingPipeline
 
 ↓
 
-Decision Making
+ExecutionRequest
 
 ↓
 
-Risk Planning
+ExecutionContext
+
+↓
+
+ExecutionEngine
+
+↓
+
+PaperBroker
+
+↓
+
+TradingSession
 
 ↓
 
@@ -292,83 +164,68 @@ Position Management
 
 ↓
 
-Execution (future)
+TradingCycle
+
+↓
+
+PaperTradingRunner
 
 ---
 
-### Testing
+## Testing
 
-Regression Suite
+Added regression tests for:
 
-Status
+- Execution Models
+- Execution Context
+- Execution Validator
+- Order Factory
+- Paper Broker
+- Portfolio Manager
+- Execution Report Builder
+- Execution Engine
+- Execution Request Builder
+- Paper Trading Service
+- Paper Position Update Service
+- Paper Position Close Service
+- Trading Cycle
+- Paper Trading Runner
 
-PASS
-
-Current regression coverage includes:
-
-- Trading Pipeline
-- Decision Engine
-- Market Intelligence
-- AI Scanner
-- AI Scanner Presenter
-- Backtest Visualizer
-
-Additional deterministic unit tests added:
-
-- BreakEvenService
-- TrailingStopService
-- PositionManager
-- PositionStateFactory
-- PositionUpdateEngine
-
-All tests currently pass.
+All tests passing.
 
 ---
 
-### Project Health
+# Current Status
 
-Overall Status
+Project Health:
 
-🟢 EXCELLENT
+EXCELLENT
 
-Architecture Stability
+Architecture:
 
-HIGH
+Stable
 
-Regression Stability
+Paper Trading:
 
-HIGH
+Operational
 
-Code Quality
+Next milestone:
 
-HIGH
-
-Deterministic Compliance
-
-FULL
+TradingPipeline Integration
 
 ---
 
-## Next Milestone
+# Upcoming Version
 
-Sprint 6
+v1.16
 
-Paper Trading
+Planned:
 
-Preparation work completed during Sprint 5.9:
-
-✓ Deterministic Risk Engine
-
-✓ Runtime Position State
-
-✓ Position Update Engine
-
-✓ Position Management Framework
-
-✓ Adaptive Stop Management
-
-Sprint 6 will build on this foundation without requiring
-major architectural refactoring.
+- TradingPipeline automatic integration
+- Indicator conversion
+- Automatic pipeline execution
+- Multi-symbol replay
+- Automatic paper trading decisions
 
 ---
 

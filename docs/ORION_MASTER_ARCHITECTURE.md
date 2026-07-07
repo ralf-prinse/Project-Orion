@@ -1,7 +1,7 @@
 # ORION_MASTER_ARCHITECTURE.md
 
-> Architecture Version: v2.3
-> Documentation Version: v1.14
+> Documentation Version: v1.15
+> Architecture Version: v2.4
 > Last Updated: 2026-07-07
 
 ---
@@ -10,1068 +10,817 @@
 
 ## Master Architecture
 
-Deterministic AI-Assisted Swing Trading Platform
+This document defines the complete high-level architecture of Orion.
+
+It serves as the single source of truth for all architectural decisions.
+
+Every subsystem must comply with this document.
 
 ---
 
-# ARCHITECTURAL PHILOSOPHY
+# DESIGN PHILOSOPHY
 
-Orion is built around one fundamental principle:
+Orion is designed as a deterministic autonomous swing trading platform.
 
-**Every trading decision must be deterministic.**
+Primary goals:
 
-Artificial Intelligence exists solely to explain deterministic output.
+- deterministic
+- modular
+- explainable
+- regression-testable
+- broker independent
+- AI assisted
+- production ready
 
-AI is never allowed to influence the outcome of:
+AI may assist with:
+
+- interpretation
+- summarization
+- market commentary
+
+AI may never directly generate:
 
 - BUY decisions
-- HOLD decisions
 - SELL decisions
-- EXIT decisions
-- Stop Loss calculations
-- Take Profit calculations
-- Position sizing
-- Risk calculations
+- stop-loss values
+- targets
+- risk sizing
+- broker execution
 
-Deterministic engines always own business logic.
-
-AI owns explanation only.
+All trading decisions must remain deterministic.
 
 ---
 
-# SYSTEM LAYERS
+# CORE ARCHITECTURE
 
-Orion is divided into five architectural layers.
+Orion is divided into independent subsystems.
+
+Each subsystem has:
+
+- Models
+- Services
+- Tests
+
+Each orchestration layer:
+
+- accepts exactly one Context or State object
+- returns exactly one immutable Result object
+
+Pattern:
+
+Subsystem
+
+↓
+
+Context / State
+
+↓
+
+Engine
+
+↓
+
+Result
+
+This pattern is mandatory throughout the project.
+
+---
+
+# SYSTEM OVERVIEW
+
+```text
+                    Market Data
+                         │
+                         ▼
+                Market Intelligence
+                         │
+                         ▼
+                 Trading Pipeline
+                         │
+                         ▼
+                  Risk Engine
+                         │
+                         ▼
+               Execution Engine
+                         │
+                         ▼
+                 Paper Broker
+                         │
+                         ▼
+                Trading Session
+                         │
+                         ▼
+              Position Management
+                         │
+                         ▼
+                 Trading Cycle
+                         │
+                         ▼
+             Paper Trading Runner
+```
+
+---
+
+# CURRENT IMPLEMENTED SUBSYSTEMS
 
 ```
 Market Analysis
 
+Risk Engine
+
+Execution Layer
+
+Paper Trading
+
+Position Management
+
+Trading Cycle
+
+Paper Trading Runner
+```
+
+All systems above are operational and covered by regression tests.
+
+---
+
+# SUBSYSTEMS
+
+---
+
+# 1. MARKET ANALYSIS
+
+Purpose
+
+Analyze raw market data and produce deterministic trading decisions.
+
+Responsibilities
+
+- collect indicator values
+- analyze trend
+- analyze volatility
+- detect market structure
+- detect momentum
+- combine signals
+
+Output
+
+TradingDecision
+
+Main Components
+
+- MarketScanner
+- AIMarketScanner
+- SignalFusionEngine
+- MarketIntelligenceEngine
+- TradingPipeline
+
+The Market Analysis subsystem never performs:
+
+- risk calculations
+- execution
+- portfolio management
+- broker communication
+
+---
+
+# 2. RISK ENGINE
+
+Purpose
+
+Convert a trading decision into a deterministic RiskPlan.
+
+Responsibilities
+
+- ATR stop-loss
+- volatility adjustments
+- market regime adjustments
+- reward targets
+- risk validation
+
+Input
+
+RiskContext
+
+Output
+
+RiskPlan
+
+Main Components
+
+- RiskContext
+- AdaptiveRiskEngine
+- RiskPlanValidator
+
+The Risk subsystem never performs:
+
+- market scanning
+- order execution
+- portfolio management
+
+---
+
+# 3. EXECUTION LAYER
+
+Purpose
+
+Convert deterministic trading decisions into broker-neutral orders.
+
+Responsibilities
+
+- validate execution
+- build orders
+- execute through broker abstraction
+- produce execution reports
+
+Input
+
+ExecutionContext
+
+Output
+
+ExecutionEngineResult
+
+Main Components
+
+- ExecutionRequest
+- ExecutionContext
+- ExecutionValidator
+- OrderFactory
+- ExecutionEngine
+- ExecutionReportBuilder
+
+Broker Implementation
+
+PaperBroker
+
+Future
+
+BrokerAdapter
+
+The Execution subsystem never generates BUY or SELL decisions.
+
+---
+
+# 4. PAPER TRADING
+
+Purpose
+
+Execute trades in a deterministic simulated environment.
+
+Responsibilities
+
+- maintain paper portfolio
+- maintain cash
+- maintain equity
+- simulate fills
+
+Main Components
+
+- PaperPortfolio
+- PaperPosition
+- TradingSession
+- PaperTradingService
+- PaperPositionUpdateService
+- PaperPositionCloseService
+
+The Paper Trading subsystem never:
+
+- scans markets
+- calculates indicators
+- generates trading decisions
+
+---
+
+# 5. POSITION MANAGEMENT
+
+Purpose
+
+Manage already opened positions.
+
+Responsibilities
+
+- break-even
+- trailing stop
+- time stop
+- health monitoring
+- position updates
+
+Input
+
+PositionState
+
+Output
+
+PositionUpdateResult
+
+Main Components
+
+- PositionManager
+- PositionUpdateEngine
+- BreakEvenService
+- TrailingStopService
+- TimeStopService
+- PositionHealthService
+- PositionStateStore
+- PositionManagementSummaryBuilder
+
+Position Management never:
+
+- opens trades
+- closes trades directly
+- generates BUY or SELL signals
+
+---
+
+# 6. TRADING CYCLE
+
+Purpose
+
+Execute one complete deterministic trading tick.
+
+Responsibilities
+
+- open positions
+- update positions
+- close positions
+- return updated TradingSession
+
+Input
+
+MarketSnapshot
+
+Output
+
+TradingCycleResult
+
+Main Components
+
+- MarketSnapshot
+- TradingCycle
+- TradingCycleResult
+
+TradingCycle is the orchestration layer connecting:
+
+TradingPipeline
+
 ↓
 
-Trading Decision
+Execution
 
 ↓
 
-Risk Planning
+Paper Trading
 
 ↓
 
 Position Management
 
-↓
-
-Execution (Future)
-```
-
-Every layer owns exactly one responsibility.
-
-Dependencies always flow downward.
-
-Higher layers may orchestrate lower layers.
-
-Lower layers never know about higher layers.
+TradingCycle does not calculate indicators itself.
 
 ---
 
-# CORE DESIGN PRINCIPLES
+# 7. PAPER TRADING RUNNER
 
-## Single Responsibility
+Purpose
 
-Every service owns one responsibility.
+Replay deterministic trading cycles.
 
-Examples
+Responsibilities
 
-TradingPipeline
+- execute multiple TradingCycles
+- preserve TradingSession
+- collect history
 
-→ Trading orchestration
+Input
 
-AdaptiveDecisionEngine
+TradingSession
 
-→ BUY / HOLD / SELL
++
 
-AdaptiveRiskEngine
+MarketSnapshots
 
-→ RiskPlan generation
+Output
 
-RiskPlanValidator
+PaperTradingRunResult
 
-→ Risk validation
+Main Components
 
-PositionUpdateEngine
+- PaperTradingRunner
+- PaperTradingRunResult
 
-→ Position update orchestration
+Future responsibilities
 
-PositionManager
-
-→ Position management orchestration
-
-BreakEvenService
-
-→ Break-even calculations
-
-TrailingStopService
-
-→ Trailing stop calculations
+- historical replay
+- multi-symbol replay
+- live replay
 
 ---
 
-## Deterministic First
+# ARCHITECTURAL RULES
 
-All deterministic calculations must produce identical output for identical market input.
+Every subsystem must satisfy the following rules.
 
-No randomness.
+Rule 1
 
-No hidden state.
+One orchestration layer.
 
-No AI influence.
+Rule 2
 
----
+One Context or State object as input.
 
-## Immutable Planning
+Rule 3
 
-Planning objects never change.
+One immutable Result object as output.
 
-Examples
+Rule 4
 
-- IndicatorPack
-- MarketStructure
-- RiskContext
-- RiskPlan
+No circular dependencies.
 
-These objects describe how Orion intends to trade.
+Rule 5
 
----
+No duplicated business logic.
 
-## Mutable Runtime State
+Rule 6
 
-Runtime state changes continuously.
+Business logic belongs inside services.
 
-Examples
+Rule 7
 
-- PositionState
+Models remain lightweight and deterministic.
 
-PositionState describes how Orion manages an already opened trade.
+Rule 8
 
-This separation between planning and runtime state is considered permanent architecture.
+Regression tests are mandatory.
 
 ---
 
-# ARCHITECTURE OVERVIEW
+# FUTURE ARCHITECTURE
 
-The complete deterministic pipeline now consists of:
+The current implementation represents the foundation of Orion.
+
+The remaining development focuses on expanding capabilities without changing the architectural principles defined in this document.
+
+Every future subsystem must integrate into the existing deterministic pipeline.
+
+---
+
+# TARGET AUTONOMOUS FLOW
+
+The final Orion architecture is designed as a continuous deterministic trading engine.
 
 ```
+                Market Data
+                     │
+                     ▼
+             Indicator Builder
+                     │
+                     ▼
+              Trading Pipeline
+                     │
+                     ▼
+                Risk Engine
+                     │
+                     ▼
+             Execution Engine
+                     │
+                     ▼
+               Broker Adapter
+                     │
+                     ▼
+             Trading Session
+                     │
+                     ▼
+          Position Management
+                     │
+                     ▼
+             Portfolio Engine
+                     │
+                     ▼
+             Trading Cycle
+                     │
+                     ▼
+          Continuous Runner
+                     │
+                     └───────────────┐
+                                     │
+                                     ▼
+                             Next Market Tick
+```
+
+---
+
+# DEVELOPMENT PHASES
+
+Development is divided into capability levels.
+
+The objective is to complete one fully operational capability before introducing the next.
+
+---
+
+# LEVEL 1
+
+Deterministic Paper Trading
+
+Status
+
+Completed (Foundation)
+
+Capabilities
+
+- TradingPipeline
+- Risk Engine
+- Execution Engine
+- Paper Broker
+- Paper Portfolio
+- Position Management
+- Trading Cycle
+- Paper Trading Runner
+
+Current limitation
+
+TradingPipeline is not yet automatically connected to TradingCycle.
+
+---
+
+# LEVEL 2
+
+Automatic TradingPipeline Integration
+
+Objective
+
+Remove manually prepared pipeline output.
+
+Future flow
+
 Market Data
 
 ↓
 
-IndicatorBuilder
+Indicator Builder
 
 ↓
 
-IndicatorPack
-
-↓
-
-MarketStructure
-
-↓
-
-Signal Fusion
-
-↓
-
-Market Intelligence
-
-↓
-
-AdaptiveDecisionEngine
-
-↓
-
-Trading Decision
-
-↓
-
-RiskContextBuilder
-
-↓
-
-RiskContext
-
-↓
-
-AdaptiveRiskEngine
-
-↓
-
-RiskPlan
-
-↓
-
-RiskPlanValidator
-
-↓
-
-PositionStateFactory
-
-↓
-
-PositionState
-
-↓
-
-PositionUpdateEngine
-
-↓
-
-PositionManager
-
-↓
-
-BreakEvenService
-
-↓
-
-TrailingStopService
-
-↓
-
-TradeLifecycleService
-
-↓
-
-Execution Layer (Future)
-```
-
----
-
-# LAYER 1 — MARKET ANALYSIS
-
-## Purpose
-
-Transform raw market data into deterministic market intelligence.
-
-This layer never produces trading decisions.
-
-It only prepares deterministic information.
-
-### Components
-
-Market Scanner
-
-IndicatorBuilder
-
-IndicatorPack
-
-MarketStructure
-
-Signal Fusion
-
-Market Intelligence
-
-### Responsibilities
-
-- Download market data
-- Calculate indicators
-- Build deterministic MarketStructure
-- Measure volatility
-- Detect support
-- Detect resistance
-- Calculate ATR
-- Detect swing highs
-- Detect swing lows
-- Calculate signal pressure
-
-### Output
-
-IndicatorPack
-
-↓
-
-MarketStructure
-
-↓
-
-Market Intelligence
-
----
-
-# LAYER 2 — TRADING DECISION
-
-## Purpose
-
-Produce deterministic BUY / HOLD / SELL decisions.
-
-### Components
-
-AdaptiveDecisionEngine
-
-TradingPipeline
-
-### Responsibilities
-
-- Evaluate market intelligence
-- Generate BUY
-- Generate HOLD
-- Generate SELL
-
-### Permanent Rule
-
-BUY / HOLD / SELL may ONLY be produced by:
-
-AdaptiveDecisionEngine
-
-No exceptions.
-
-TradingPipeline orchestrates the process but never owns trading logic.
-
----
-
-# LAYER 3 — RISK PLANNING
-
-## Purpose
-
-Transform a deterministic trading decision into a deterministic RiskPlan.
-
-### Components
-
-RiskContextBuilder
-
-RiskContext
-
-AdaptiveRiskEngine
-
-RiskPlan
-
-RiskPlanValidator
-
-### Responsibilities
-
-Build RiskContext
-
-↓
-
-Generate RiskPlan
-
-↓
-
-Validate RiskPlan
-
-### RiskContext
-
-RiskContext contains every deterministic input required by the
-AdaptiveRiskEngine.
-
-Current fields
-
-- Symbol
-- Entry Price
-- Confidence
-- Risk Score
-- Market Regime
-- Volatility State
-- MarketStructure
-
-### MarketStructure
-
-MarketStructure currently contains
-
-- ATR
-- Average Daily Range
-- Swing High
-- Swing Low
-- Support
-- Resistance
-
-### AdaptiveRiskEngine
-
-AdaptiveRiskEngine is solely responsible for:
-
-- Stop Loss
-- Target 1
-- Target 2
-- Target 3
-- Risk %
-- Reward %
-- Risk / Reward Ratio
-
-Current implementation
-
-- ATR based Stop Loss
-- Risk Distance based Targets
-
-Future versions
-
-- ATR based Trailing Stop
-- Time Horizon
-- Support / Resistance constrained targets
-- Dynamic volatility scaling
-
-### RiskPlanValidator
-
-Every RiskPlan is validated before leaving the Risk Planning Layer.
-
-Validation includes
-
-- Entry validation
-- Stop validation
-- Target ordering
-- Risk %
-- Reward %
-- Risk / Reward Ratio
-- Metadata validation
-
-Invalid RiskPlans terminate pipeline execution immediately.
-
----
-
-# LAYER 4 — POSITION MANAGEMENT
-
-## Purpose
-
-Manage already opened positions.
-
-No BUY decisions.
-
-No SELL decisions.
-
-Only runtime management.
-
-### Components
-
-PositionStateFactory
-
-PositionState
-
-PositionUpdateEngine
-
-PositionManager
-
-BreakEvenService
-
-TrailingStopService
-
-### PositionState
-
-PositionState represents mutable runtime information.
-
-Current runtime fields
-
-- Symbol
-- Entry Price
-- Current Price
-- Highest Price
-- Current Stop Loss
-- Break-even Active
-- Trailing Stop Active
-- Target 1 Hit
-- Target 2 Hit
-- Target 3 Hit
-
-Unlike RiskPlan,
-
-PositionState changes continuously while a trade remains open.
-
-### PositionUpdateEngine
-
-Coordinates runtime updates.
-
-Responsibilities
-
-- receive market updates
-- coordinate PositionManager
-- update PositionState
-
-No business logic beyond orchestration.
-
-### PositionManager
-
-Coordinates deterministic management services.
-
-Current managed services
-
-- BreakEvenService
-- TrailingStopService
-
-Future managed services
-
-- TimeStopService
-- PositionHealthService
-- ExitEvaluationService
-
-### BreakEvenService
-
-Responsibilities
-
-- activate break-even
-- never lower Stop Loss
-- preserve capital
-
-### TrailingStopService
-
-Responsibilities
-
-- monitor Highest Price
-- raise Stop Loss
-- never reduce protection
-
-Current implementation
-
-Fixed percentage trailing.
-
-Future implementation
-
-ATR based trailing.
-
----
-
-# LAYER 5 — EXECUTION
-
-Status
-
-Future
-
-Responsibilities
-
-- Paper Trading
-- Simulated Orders
-- Broker Adapter
-- Portfolio Synchronization
-- Order Execution
-
-No implementation exists yet.
-
-The architecture has already been prepared for this layer.
-
-
----
-
-# ARCHITECTURAL OWNERSHIP
-
-Every major responsibility inside Orion has exactly one owner.
-
-This rule may never be violated.
-
----
-
-## Trading Decisions
-
-Owner
-
-AdaptiveDecisionEngine
-
-Responsible for
-
-- BUY
-- HOLD
-- SELL
-
-No other component may generate trading decisions.
-
----
-
-## Risk Planning
-
-Owner
-
-AdaptiveRiskEngine
-
-Responsible for
-
-- Stop Loss
-- Target 1
-- Target 2
-- Target 3
-- Risk %
-- Reward %
-- Risk / Reward Ratio
-
-No other component may generate RiskPlans.
-
----
-
-## Risk Validation
-
-Owner
-
-RiskPlanValidator
-
-Responsible for
-
-- RiskPlan consistency
-- RiskPlan validation
-- Pipeline safety
-
-Invalid RiskPlans terminate execution.
-
----
-
-## Position Updates
-
-Owner
-
-PositionUpdateEngine
-
-Responsible for
-
-- Runtime position updates
-- Updating PositionState
-- Coordinating PositionManager
-
-PositionUpdateEngine never contains business logic.
-
----
-
-## Position Management
-
-Owner
-
-PositionManager
-
-Responsible for coordinating deterministic position-management services.
-
-Current services
-
-- BreakEvenService
-- TrailingStopService
-
-Future services
-
-- TimeStopService
-- PositionHealthService
-- ExitEvaluationService
-
-PositionManager itself contains orchestration only.
-
----
-
-## Break-even
-
-Owner
-
-BreakEvenService
-
-Responsibilities
-
-- Activate break-even
-- Protect capital
-- Never lower Stop Loss
-
----
-
-## Trailing Stop
-
-Owner
-
-TrailingStopService
-
-Responsibilities
-
-- Track Highest Price
-- Raise Stop Loss
-- Never decrease Stop Loss
-
----
-
-## Trade Lifecycle
-
-Owner
-
-TradeLifecycleService
-
-Responsible for
-
-- Trade state transitions
-- Open
-- Active
-- Closed
-
-TradeLifecycleService never calculates trading decisions.
-
----
-
-## Persistence
-
-Portfolio
-
-PortfolioStore
-
-Open Positions
-
-OpenTradeStore
-
-Closed Positions
-
-TradeHistoryStore
-
-Each persistence service owns exactly one storage domain.
-
----
-
-# DEPENDENCY RULES
-
-Dependencies always flow downward.
-
-```
 TradingPipeline
 
 ↓
 
-AdaptiveDecisionEngine
+ExecutionRequest
 
 ↓
 
-AdaptiveRiskEngine
+ExecutionEngine
 
 ↓
 
-RiskPlanValidator
+TradingCycle
 
 ↓
 
-PositionUpdateEngine
+PaperTradingRunner
 
-↓
+New planned components
 
-PositionManager
-
-↓
-
-BreakEvenService
-
-↓
-
-TrailingStopService
-```
-
-Reverse dependencies are forbidden.
-
-Services may never depend on Qt Widgets.
-
-Qt Widgets may depend on Presenters.
-
-Presenters may depend on Models.
-
-Controllers orchestrate workflows only.
+- IndicatorBuilder
+- PipelineAdapter
+- TradingPipelineRunner
 
 ---
 
-# IMMUTABILITY RULES
+# LEVEL 3
 
-Immutable models
+Historical Replay Engine
 
-- IndicatorPack
-- MarketStructure
-- RiskContext
-- RiskPlan
+Objective
 
-Mutable runtime models
+Replay historical market data through the complete trading engine.
 
-- PositionState
+Capabilities
 
-RiskPlan is never modified after creation.
+- multiple candles
+- multiple symbols
+- deterministic replay
+- portfolio evolution
+- trade history
 
-PositionState is continuously updated while a position remains open.
+Planned components
 
----
-
-# EXTENSION STRATEGY
-
-Future functionality must extend the architecture without modifying existing ownership.
-
-Examples
-
-TimeStopService
-
-↓
-
-PositionManager
-
-↓
-
-PositionUpdateEngine
-
-PositionHealthService
-
-↓
-
-PositionManager
-
-↓
-
-PositionUpdateEngine
-
-Broker Adapter
-
-↓
-
-Execution Layer
-
-↓
-
-TradeLifecycleService
-
-No new functionality may bypass the established ownership rules.
+- ReplayEngine
+- CandleFeed
+- HistoricalSession
 
 ---
 
-# ARCHITECTURAL GOALS
+# LEVEL 4
 
-The architecture has been designed to support:
+Portfolio Intelligence
 
-✓ deterministic trading
+Objective
 
-✓ deterministic risk management
+Evaluate the portfolio as a whole instead of evaluating only individual trades.
 
-✓ deterministic position management
+Planned capabilities
 
-✓ paper trading
+- total exposure
+- sector exposure
+- position sizing
+- capital allocation
+- portfolio heat
+- portfolio drawdown
+- portfolio risk
+- portfolio performance
 
-✓ broker compatibility
+Possible components
 
-✓ autonomous portfolio management
-
-without requiring structural redesign.
-
-
----
-
-# CURRENT MATURITY
-
-The Orion architecture has evolved from a market analysis application
-into a deterministic trading engine.
-
-Current maturity by subsystem
-
-Market Analysis
-
-████████████████████ 100%
-
-Trading Decision
-
-████████████████████ 100%
-
-Risk Planning
-
-███████████████████░ 95%
-
-Position Management
-
-██████████████████░░ 90%
-
-Execution Layer
-
-░░░░░░░░░░░░░░░░░░░░ 0%
-
-Broker Integration
-
-░░░░░░░░░░░░░░░░░░░░ 0%
+- PortfolioAnalytics
+- PortfolioAllocator
+- PortfolioRiskEngine
+- PortfolioPerformanceEngine
+- PortfolioReportBuilder
 
 ---
 
-# CURRENT PRIORITIES
+# LEVEL 5
 
-The architecture is now considered stable.
+Multi-Asset Trading
 
-No further architectural restructuring is planned before
-Sprint 6.
+Objective
 
-Development effort should now focus on extending the existing
-architecture instead of redesigning it.
+Trade multiple symbols simultaneously.
 
-Remaining Position Management work
+Capabilities
 
-• TimeStopService
+- concurrent open positions
+- portfolio-wide exposure control
+- ranking competing opportunities
+- capital allocation across symbols
 
-• PositionHealthService
+Possible components
 
-• PositionStateStore
-
-• TradeLifecycle integration
-
-After these components are complete,
-the Position Management Layer is considered feature complete.
+- OpportunityRanker
+- PortfolioAllocator
+- PositionSelector
 
 ---
 
-# SPRINT 6
+# LEVEL 6
 
-Primary Objective
+Broker Abstraction
 
-Paper Trading
+Objective
 
-Planned architecture
+Replace PaperBroker without changing business logic.
 
-```
-TradingPipeline
+Architecture
 
-↓
-
-AdaptiveRiskEngine
+ExecutionEngine
 
 ↓
 
-RiskPlan
-
-↓
-
-PositionState
-
-↓
-
-PositionUpdateEngine
+Broker Interface
 
 ↓
 
 Paper Broker
 
-↓
+Interactive Brokers
 
-Paper Portfolio
+Alpaca
 
-↓
+Trading212
 
-Performance Analytics
-```
+Future brokers
 
-Paper Trading must reuse the deterministic engine.
-
-No duplicate business logic is allowed.
+ExecutionEngine must never contain broker-specific code.
 
 ---
 
-# BROKER COMPATIBILITY
+# LEVEL 7
 
-Broker support will only be implemented after
-Paper Trading has been fully validated.
+Live Trading
 
-The future Broker Layer will only translate deterministic
-orders into broker-specific API calls.
+Objective
 
-Broker adapters will never calculate:
+Execute deterministic live trades through supported broker adapters.
 
-- BUY
-- SELL
-- Stop Loss
-- Targets
-- Position Size
+Requirements
 
-Those values remain exclusively owned by the deterministic engine.
+- deterministic execution
+- broker confirmation
+- retry handling
+- logging
+- audit trail
+- rollback protection
 
----
-
-# AUTONOMOUS CAPITAL MANAGEMENT
-
-Ultimate project vision
-
-The user specifies:
-
-• Initial Capital
-
-• Maximum Risk
-
-• Trading Universe
-
-• Broker
-
-• Trading Rules
-
-Orion autonomously performs:
-
-• Market Scanning
-
-• Trade Selection
-
-• Risk Planning
-
-• Position Management
-
-• Portfolio Monitoring
-
-• Capital Protection
-
-• Performance Tracking
-
-while remaining completely deterministic.
-
-Artificial Intelligence continues to function solely
-as an explainability layer.
+No trading logic may exist inside broker adapters.
 
 ---
 
-# VERSION HISTORY
+# LEVEL 8
 
-Architecture v2.0
+Autonomous Capital Management
 
-Introduced deterministic trading architecture.
+Objective
 
-Architecture v2.1
+Operate a complete investment account without manual intervention.
 
-Introduced AdaptiveDecisionEngine.
+Capabilities
 
-Architecture v2.2
+- portfolio optimization
+- cash management
+- exposure balancing
+- daily limits
+- weekly limits
+- risk budgeting
 
-Introduced AdaptiveRiskEngine.
+Long-term objective
 
-Architecture v2.3
+User configures:
 
-Introduced the complete Position Management Layer.
+- starting capital
+- allowed markets
+- maximum risk
+- trading schedule
 
-Major additions
-
-✓ MarketStructure
-
-✓ RiskContext
-
-✓ RiskPlanValidator
-
-✓ PositionState
-
-✓ PositionStateFactory
-
-✓ PositionUpdateEngine
-
-✓ PositionManager
-
-✓ BreakEvenService
-
-✓ TrailingStopService
-
-This architecture establishes the foundation required for:
-
-- Advanced Position Management
-- Paper Trading
-- Portfolio Intelligence
-- Broker Compatibility
-- Autonomous Capital Management
-
-without requiring fundamental architectural redesign.
+Orion manages the portfolio autonomously.
 
 ---
 
-# ARCHITECTURE STATUS
+# NON-NEGOTIABLE ARCHITECTURAL PRINCIPLES
+
+The following rules apply to every future subsystem.
+
+1.
+
+Every orchestration layer accepts exactly one Context or State object.
+
+2.
+
+Every orchestration layer returns exactly one immutable Result object.
+
+3.
+
+Business logic exists only inside services.
+
+4.
+
+Models remain lightweight.
+
+5.
+
+No duplicated business logic.
+
+6.
+
+No circular dependencies.
+
+7.
+
+No subsystem may bypass another subsystem.
+
+8.
+
+Regression tests are mandatory before every commit.
+
+9.
+
+Architecture changes must be reflected in this document before implementation.
+
+10.
+
+The TradingPipeline remains the single source of truth for trading decisions.
+
+---
+
+# CURRENT PROJECT STATUS
 
 Architecture Version
 
-v2.3
+v2.4
 
-Status
+Documentation Version
 
-STABLE
-
-Regression Status
-
-ALL TESTS PASS
+v1.15
 
 Project Health
 
-🟢 EXCELLENT
+EXCELLENT
 
-Next Target
+Regression Status
 
-Sprint 6 — Paper Trading
+ALL TESTS PASSING
+
+Current Capability
+
+Deterministic autonomous paper trading foundation
+
+Next Milestone
+
+Automatic TradingPipeline Integration
+
+Long-Term Vision
+
+A deterministic, explainable, fully autonomous swing trading platform capable of managing real capital through broker-independent execution.
 
 ---
 
-END OF FILE
+END OF DOCUMENT
