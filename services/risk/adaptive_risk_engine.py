@@ -20,39 +20,50 @@ class AdaptiveRiskEngine:
     - Render UI
     """
 
-        symbol = context.symbol
-        entry_price = context.entry_price
-        confidence = context.confidence
-        risk_score = context.risk_score
-        volatility = context.volatility
-        regime = context.regime
-        market = context.market_structure
-
 
     def build(
-        self,
-        context: RiskContext,
-    ):
+    self,
+    context: RiskContext,
+):
+    symbol = context.symbol
+    entry_price = context.entry_price
+    confidence = context.confidence
+    risk_score = context.risk_score
+    volatility = context.volatility
+    regime = context.regime
+    market = context.market_structure
 
-        entry = max(0.0, float(entry_price))
-        confidence_value = max(0.0, min(1.0, float(confidence)))
-        risk_value = max(0.0, float(risk_score))
+    entry = max(0.0, float(entry_price))
+    confidence_value = max(0.0, min(1.0, float(confidence)))
+    risk_value = max(0.0, float(risk_score))
 
-        if entry <= 0:
-            return RiskPlan(
-                symbol=str(symbol).strip().upper(),
-                entry_price=0.0,
-                stop_loss=0.0,
-                target_1=0.0,
-                target_2=0.0,
-                target_3=0.0,
-                risk_percent=0.0,
-                reward_percent=0.0,
-                risk_reward_ratio=0.0,
-                confidence=confidence_value,
-                notes="Invalid entry price.",
-            )
+    if entry <= 0:
+        return RiskPlan(
+            symbol=str(symbol).strip().upper(),
+            entry_price=0.0,
+            stop_loss=0.0,
+            target_1=0.0,
+            target_2=0.0,
+            target_3=0.0,
+            risk_percent=0.0,
+            reward_percent=0.0,
+            risk_reward_ratio=0.0,
+            confidence=confidence_value,
+            notes="Invalid entry price.",
+        )
 
+    atr = market.atr
+
+    if atr > 0:
+        stop_loss = self._atr_stop_loss(
+            entry_price=entry,
+            atr=atr,
+            volatility=volatility,
+        )
+
+        stop_percent = (entry - stop_loss) / entry
+
+    else:
         stop_percent = self._stop_percent(
             confidence=confidence_value,
             risk_score=risk_value,
@@ -60,31 +71,54 @@ class AdaptiveRiskEngine:
             regime=regime,
         )
 
-        reward_multiplier = self._reward_multiplier(
+        stop_loss = round(
+            entry * (1 - stop_percent),
+            2,
+        )
+
+    reward_multiplier = self._reward_multiplier(
+        confidence=confidence_value,
+        volatility=volatility,
+        regime=regime,
+    )
+
+    target_1_percent = stop_percent * reward_multiplier
+    target_2_percent = target_1_percent * 1.6
+    target_3_percent = target_1_percent * 2.3
+
+    target_1 = round(entry * (1 + target_1_percent), 2)
+    target_2 = round(entry * (1 + target_2_percent), 2)
+    target_3 = round(entry * (1 + target_3_percent), 2)
+
+    risk_percent = round(stop_percent * 100, 2)
+    reward_percent = round(target_1_percent * 100, 2)
+
+    risk_reward_ratio = (
+        round(target_1_percent / stop_percent, 2)
+        if stop_percent > 0
+        else 0.0
+    )
+
+    return RiskPlan(
+        symbol=str(symbol).strip().upper(),
+        entry_price=round(entry, 2),
+        stop_loss=stop_loss,
+        target_1=target_1,
+        target_2=target_2,
+        target_3=target_3,
+        risk_percent=risk_percent,
+        reward_percent=reward_percent,
+        risk_reward_ratio=risk_reward_ratio,
+        confidence=confidence_value,
+        notes=self._notes(
             confidence=confidence_value,
+            risk_score=risk_value,
             volatility=volatility,
             regime=regime,
-        )
+        ),
+    )
 
-        target_1_percent = stop_percent * reward_multiplier
-        target_2_percent = target_1_percent * 1.6
-        target_3_percent = target_1_percent * 2.3
-
-        stop_loss = round(entry * (1 - stop_percent), 2)
-        target_1 = round(entry * (1 + target_1_percent), 2)
-        target_2 = round(entry * (1 + target_2_percent), 2)
-        target_3 = round(entry * (1 + target_3_percent), 2)
-
-        risk_percent = round(stop_percent * 100, 2)
-        reward_percent = round(target_1_percent * 100, 2)
-
-        risk_reward_ratio = (
-            round(target_1_percent / stop_percent, 2)
-            if stop_percent > 0
-            else 0.0
-        )
-
-        return RiskPlan(
+    return RiskPlan(
             symbol=str(symbol).strip().upper(),
             entry_price=round(entry, 2),
             stop_loss=stop_loss,
