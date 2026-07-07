@@ -58,9 +58,6 @@ class AdaptiveRiskEngine:
                 atr=atr,
                 volatility=volatility,
             )
-
-            stop_percent = (entry - stop_loss) / entry
-
         else:
             stop_percent = self._stop_percent(
                 confidence=confidence,
@@ -68,10 +65,23 @@ class AdaptiveRiskEngine:
                 volatility=volatility,
                 regime=regime,
             )
+            stop_loss = round(entry * (1 - stop_percent), 2)
 
-            stop_loss = round(
-                entry * (1 - stop_percent),
-                2,
+        risk_distance = max(0.0, entry - stop_loss)
+
+        if risk_distance <= 0:
+            return RiskPlan(
+                symbol=str(symbol).strip().upper(),
+                entry_price=round(entry, 2),
+                stop_loss=round(stop_loss, 2),
+                target_1=round(entry, 2),
+                target_2=round(entry, 2),
+                target_3=round(entry, 2),
+                risk_percent=0.0,
+                reward_percent=0.0,
+                risk_reward_ratio=0.0,
+                confidence=confidence,
+                notes="Invalid risk distance.",
             )
 
         reward_multiplier = self._reward_multiplier(
@@ -80,27 +90,23 @@ class AdaptiveRiskEngine:
             regime=regime,
         )
 
-        target_1_percent = stop_percent * reward_multiplier
-        target_2_percent = target_1_percent * 1.6
-        target_3_percent = target_1_percent * 2.3
+        target_1 = round(entry + (risk_distance * reward_multiplier), 2)
+        target_2 = round(entry + (risk_distance * reward_multiplier * 1.6), 2)
+        target_3 = round(entry + (risk_distance * reward_multiplier * 2.3), 2)
 
-        target_1 = round(entry * (1 + target_1_percent), 2)
-        target_2 = round(entry * (1 + target_2_percent), 2)
-        target_3 = round(entry * (1 + target_3_percent), 2)
-
-        risk_percent = round(stop_percent * 100, 2)
-        reward_percent = round(target_1_percent * 100, 2)
+        risk_percent = round((risk_distance / entry) * 100, 2)
+        reward_percent = round(((target_1 - entry) / entry) * 100, 2)
 
         risk_reward_ratio = (
-            round(target_1_percent / stop_percent, 2)
-            if stop_percent > 0
+            round((target_1 - entry) / risk_distance, 2)
+            if risk_distance > 0
             else 0.0
         )
 
         return RiskPlan(
             symbol=str(symbol).strip().upper(),
             entry_price=round(entry, 2),
-            stop_loss=stop_loss,
+            stop_loss=round(stop_loss, 2),
             target_1=target_1,
             target_2=target_2,
             target_3=target_3,
@@ -113,6 +119,8 @@ class AdaptiveRiskEngine:
                 risk_score=risk_score,
                 volatility=volatility,
                 regime=regime,
+                atr=atr,
+                stop_model="ATR" if atr > 0 else "PERCENTAGE",
             ),
         )
 
@@ -201,7 +209,6 @@ class AdaptiveRiskEngine:
     ) -> float:
 
         base = 2.0
-
         confidence_bonus = confidence * 0.8
 
         volatility_adjustment = {
@@ -238,6 +245,8 @@ class AdaptiveRiskEngine:
         risk_score: float,
         volatility: str,
         regime: str,
+        atr: float,
+        stop_model: str,
     ) -> str:
 
         return (
@@ -245,5 +254,7 @@ class AdaptiveRiskEngine:
             f"confidence={confidence:.2f} | "
             f"risk={risk_score:.4f} | "
             f"volatility={str(volatility).strip().upper()} | "
-            f"regime={str(regime).strip().upper()}"
+            f"regime={str(regime).strip().upper()} | "
+            f"atr={atr:.4f} | "
+            f"stop_model={stop_model}"
         )
