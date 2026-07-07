@@ -1,5 +1,5 @@
 from services.logging_service import LoggingService
-
+from services.risk.risk_context_builder import RiskContextBuilder
 from services.intelligence.signal_fusion_engine import SignalFusionEngine
 from services.intelligence.intelligence_models import IndicatorPack
 from services.intelligence.market_intelligence_engine import (
@@ -32,6 +32,7 @@ class TradingPipeline:
         self.decision_engine = AdaptiveDecisionEngine()
         self.sizer = PositionSizer()
         self.risk_engine = AdaptiveRiskEngine()
+        self.risk_context_builder = RiskContextBuilder()
         self.ai_builder = AIContextBuilder()
         self.explainer = AIExplainer()
 
@@ -112,13 +113,14 @@ class TradingPipeline:
             6,
         )
 
-        risk_plan = self.risk_engine.build(
-            symbol=indicator_data.symbol,
-            entry_price=getattr(indicator_data, "price", 0.0),
+        risk_context = self.risk_context_builder.build(
+            indicator_pack=indicator_data,
+            intelligence=intelligence,
             confidence=decision.confidence,
-            risk_score=intelligence.risk_score,
-            volatility=intelligence.volatility_state,
-            regime=intelligence.regime,
+        )
+
+        risk_plan = self.risk_engine.build(
+            risk_context
         )
 
         output = {

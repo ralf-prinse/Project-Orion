@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from models.risk_plan import RiskPlan
-
+from models.risk_context import RiskContext
 
 class AdaptiveRiskEngine:
     """
@@ -20,15 +20,20 @@ class AdaptiveRiskEngine:
     - Render UI
     """
 
+        symbol = context.symbol
+        entry_price = context.entry_price
+        confidence = context.confidence
+        risk_score = context.risk_score
+        volatility = context.volatility
+        regime = context.regime
+        market = context.market_structure
+
+
     def build(
         self,
-        symbol: str,
-        entry_price: float,
-        confidence: float,
-        risk_score: float,
-        volatility: str,
-        regime: str,
-    ) -> RiskPlan:
+        context: RiskContext,
+    ):
+
         entry = max(0.0, float(entry_price))
         confidence_value = max(0.0, min(1.0, float(confidence)))
         risk_value = max(0.0, float(risk_score))
