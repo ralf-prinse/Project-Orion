@@ -1,234 +1,375 @@
+# CHANGELOG.md
+
+> Documentation Version: v1.14
+> Last Updated: 2026-07-07
+
+---
+
 # CHANGELOG
 
 ---
 
-# Documentation Information
-
-Documentation Version
-
-v1.13
-
-Architecture Version
-
-v2.2
-
-Last Updated
-
-2026-07-06
-
----
-
-# Sprint 5.8 — Adaptive Risk Engine
+## Sprint 5.9
 
 Status
 
-✅ Completed
+In Progress
 
 ---
 
-# Summary
+### Added
 
-Sprint 5.8 marks an important milestone in the evolution of Project Orion.
+#### MarketStructure
 
-The platform has transitioned from fixed risk management toward deterministic adaptive risk management.
+Introduced a dedicated deterministic MarketStructure model.
 
-Static stop-loss and take-profit percentages have been replaced by dynamically generated Risk Plans.
+New deterministic market information:
 
-Trade lifecycle management is now fully operational.
+- ATR
+- Average Daily Range
+- Swing High
+- Swing Low
+- Support
+- Resistance
 
-Mission Control continues to function as the operational center for opportunity discovery.
-
-Trade Monitor now serves as the operational workspace for active positions.
-
----
-
-# Architecture
-
-## Added
-
-- AdaptiveRiskEngine
-- RiskPlan domain model
-- Dynamic RiskPlan generation
-- IndicatorPack price support
-- Adaptive stop-loss calculation
-- Adaptive profit target calculation
-- Risk / Reward calculation
-- Adaptive risk notes
+MarketStructure became the single owner of market context.
 
 ---
 
-## Changed
+#### RiskContext
 
-- TradingPipeline now generates deterministic RiskPlans.
-- IndicatorBuilder now supplies the latest market price.
-- IndicatorPack now contains live price information.
-- Open Trade workflow now consumes RiskPlans instead of fixed percentages.
-- Risk management architecture is fully separated from BUY/HOLD/SELL decision logic.
+Introduced RiskContext.
 
----
+AdaptiveRiskEngine now accepts a single deterministic context object.
 
-## Preserved
+RiskContext currently contains:
 
-The following architectural rules remain unchanged
+- Symbol
+- Entry Price
+- Confidence
+- Risk Score
+- Market Regime
+- Volatility State
+- MarketStructure
 
-- TradingPipeline remains the only deterministic BUY / HOLD / SELL engine.
-- AdaptiveDecisionEngine remains responsible for deterministic trading decisions.
-- AdaptiveRiskEngine remains responsible only for deterministic risk planning.
-- ExitEvaluationService remains the only deterministic EXIT engine.
-- Artificial Intelligence remains explainability only.
+This significantly reduced coupling between TradingPipeline and AdaptiveRiskEngine.
 
 ---
 
-# Backend
+#### AdaptiveRiskEngine V2
 
-## Added
+AdaptiveRiskEngine now supports:
 
-- AdaptiveRiskEngine
-- RiskPlan
-- Adaptive risk calculation
-- Dynamic stop-loss generation
-- Dynamic target generation
-- Risk / Reward calculation
+- ATR based Stop Loss
+- Risk Distance calculations
+- Dynamic Risk %
+- Dynamic Reward %
+- Risk / Reward Ratio
 
----
-
-## Improved
-
-- TradingPipeline integration
-- IndicatorBuilder
-- IndicatorPack
-- Trade creation workflow
-- Risk calculation architecture
+The engine now adapts risk according to market volatility.
 
 ---
 
-# Desktop
+#### RiskPlanValidator
 
-## Improved
+Added deterministic validation layer.
 
-Mission Control
+Every RiskPlan is validated before continuing through the pipeline.
 
-- Improved opportunity ranking
-- Top 10 opportunities
-- Expanded watchlist support
+Validation includes:
 
-Trading Workspace
+- Entry validation
+- Stop Loss validation
+- Target validation
+- Risk %
+- Reward %
+- Risk / Reward Ratio
+- Metadata validation
 
-- Adaptive RiskPlan integration
-- Improved Open Trade workflow
-
-Trade Monitor
-
-- Live monitoring improvements
-- Dynamic trade refresh
-- Close Trade workflow
-- Trade lifecycle synchronization
-
-Portfolio
-
-- Stable capital persistence
-- FX-aware buying power
+Invalid RiskPlans immediately stop execution.
 
 ---
 
-# Validation
+#### PositionState
 
-Regression
+Introduced runtime PositionState model.
 
-```powershell
-python run_tests.py
-```
+RiskPlan remains immutable.
 
-Additional validation
+PositionState stores runtime information including:
 
-```powershell
-python test_adaptive_risk_engine.py
-```
+- Highest Price
+- Current Price
+- Current Stop Loss
+- Break-even state
+- Trailing Stop state
+- Target progression
 
-Desktop validation
-
-```powershell
-python app.py
-```
-
-Validated
-
-✔ Regression tests pass
-
-✔ AdaptiveRiskEngine tests pass
-
-✔ Desktop launches
-
-✔ Mission Control operational
-
-✔ Trading Workspace operational
-
-✔ Trade Monitor operational
-
-✔ Portfolio operational
-
-✔ History operational
-
-✔ Settings operational
-
-✔ Open Trade validated
-
-✔ Close Trade validated
-
-✔ Live P/L validated
-
-✔ Adaptive RiskPlan validated
-
-✔ Manual GUI validation completed
+This establishes the foundation for advanced position management.
 
 ---
 
-# Current Project State
+#### PositionStateFactory
 
-Completed
+Added PositionStateFactory.
 
-✔ Deterministic TradingPipeline
+Responsible for creating the initial runtime PositionState from a RiskPlan.
 
-✔ Mission Control
-
-✔ Trading Workspace
-
-✔ Trade Monitor
-
-✔ Portfolio
-
-✔ Trade History
-
-✔ Trade Lifecycle
-
-✔ Adaptive Risk Engine
-
-✔ Live Position Monitoring
-
-✔ Dynamic Risk Planning
-
-✔ Stable desktop architecture
-
-Project Orion now provides a complete deterministic workflow from market scanning through trade lifecycle management.
+Factory follows deterministic architecture principles.
 
 ---
 
-# Next Sprint
+#### PositionUpdateEngine
 
-Sprint 5.9 — Intelligent Risk Management
+Introduced deterministic PositionUpdateEngine.
 
-Objectives
+Responsibilities:
 
-- Display complete RiskPlan
-- Display Target 1
-- Display Target 2
-- Display Target 3
-- Display Risk / Reward ratio
-- ATR-aware stop-loss
-- Dynamic trailing stop
-- Break-even support
-- Partial profit taking
+- coordinate PositionManager
+- update PositionState
+- process live price updates
+
+PositionUpdateEngine performs no trading decisions.
 
 ---
 
-# End of CHANGELOG
+#### PositionManager
+
+Added PositionManager.
+
+Current responsibilities:
+
+- coordinate BreakEvenService
+- coordinate TrailingStopService
+
+Designed for future extension.
+
+---
+
+#### BreakEvenService
+
+Implemented deterministic break-even management.
+
+Current behaviour:
+
+- activates after Target 1
+- never lowers Stop Loss
+- protects capital
+
+---
+
+#### TrailingStopService
+
+Implemented deterministic trailing stop.
+
+Current behaviour:
+
+- tracks Highest Price
+- only raises Stop Loss
+- never reduces protection
+
+Trailing stop currently uses a fixed percentage.
+
+Future versions will become ATR based.
+
+---
+
+#### Position Management Framework
+
+Sprint 5.9 introduced the first complete deterministic
+Position Management Framework.
+
+Current flow:
+
+RiskPlan
+
+↓
+
+PositionStateFactory
+
+↓
+
+PositionState
+
+↓
+
+PositionUpdateEngine
+
+↓
+
+PositionManager
+
+↓
+
+BreakEvenService
+
+↓
+
+TrailingStopService
+
+This architecture separates immutable trade planning
+from mutable runtime position management.
+
+---
+
+### Improved
+
+#### TradingPipeline
+
+TradingPipeline now:
+
+- builds RiskContext
+- generates RiskPlan
+- validates every RiskPlan
+- forwards only valid plans
+
+The pipeline has become cleaner through stronger
+separation of responsibilities.
+
+---
+
+#### Risk Planning
+
+RiskPlans are now generated using:
+
+- MarketStructure
+- ATR
+- Risk Distance
+
+instead of fixed percentage calculations whenever
+market information is available.
+
+---
+
+#### Runtime Position Management
+
+Open positions are no longer treated as static objects.
+
+Runtime state now evolves through PositionState
+and PositionUpdateEngine.
+
+This architecture prepares Orion for:
+
+- Paper Trading
+- Live Monitoring
+- Broker Integration
+
+---
+
+### Architecture
+
+Architecture Version
+
+v2.3
+
+Major architectural additions
+
+- MarketStructure
+- RiskContext
+- RiskPlanValidator
+- PositionState
+- PositionStateFactory
+- PositionUpdateEngine
+- PositionManager
+- BreakEvenService
+- TrailingStopService
+
+The architecture now clearly separates:
+
+Market Analysis
+
+↓
+
+Decision Making
+
+↓
+
+Risk Planning
+
+↓
+
+Position Management
+
+↓
+
+Execution (future)
+
+---
+
+### Testing
+
+Regression Suite
+
+Status
+
+PASS
+
+Current regression coverage includes:
+
+- Trading Pipeline
+- Decision Engine
+- Market Intelligence
+- AI Scanner
+- AI Scanner Presenter
+- Backtest Visualizer
+
+Additional deterministic unit tests added:
+
+- BreakEvenService
+- TrailingStopService
+- PositionManager
+- PositionStateFactory
+- PositionUpdateEngine
+
+All tests currently pass.
+
+---
+
+### Project Health
+
+Overall Status
+
+🟢 EXCELLENT
+
+Architecture Stability
+
+HIGH
+
+Regression Stability
+
+HIGH
+
+Code Quality
+
+HIGH
+
+Deterministic Compliance
+
+FULL
+
+---
+
+## Next Milestone
+
+Sprint 6
+
+Paper Trading
+
+Preparation work completed during Sprint 5.9:
+
+✓ Deterministic Risk Engine
+
+✓ Runtime Position State
+
+✓ Position Update Engine
+
+✓ Position Management Framework
+
+✓ Adaptive Stop Management
+
+Sprint 6 will build on this foundation without requiring
+major architectural refactoring.
+
+---
+
+END OF FILE

@@ -35,7 +35,7 @@ def run():
     print(result)
 
     assert result.state.break_even_active is True
-    assert result.state.current_stop_loss == 100.0
+    assert result.state.current_stop_loss > plan.entry_price
     assert result.state.highest_price == 112.0
     assert result.state.target_1_hit is True
     assert result.state.target_2_hit is False

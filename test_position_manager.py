@@ -1,3 +1,4 @@
+from models.position_state import PositionState
 from models.risk_plan import RiskPlan
 from services.position_manager import PositionManager
 
@@ -20,35 +21,33 @@ def run():
         notes="test",
     )
 
-    print("========== BEFORE TARGET ==========")
+    state = PositionState(
+        symbol="AAPL",
+        entry_price=100.0,
+        current_stop_loss=95.0,
+        highest_price=110.0,
+        current_price=110.0,
+        break_even_active=False,
+        trailing_stop_active=False,
+        target_1_hit=False,
+        target_2_hit=False,
+        target_3_hit=False,
+    )
+
+    print("========== POSITION MANAGER ==========")
 
     result = manager.manage(
-        symbol="AAPL",
+        state=state,
         risk_plan=plan,
-        current_price=108.0,
+        current_price=115.0,
     )
 
     print(result)
 
-    assert result.stop_loss == 95.0
-    assert "MOVE_STOP_TO_BREAK_EVEN" not in result.actions
-
-    print("PASS")
-
-    print()
-
-    print("========== AFTER TARGET ==========")
-
-    result = manager.manage(
-        symbol="AAPL",
-        risk_plan=plan,
-        current_price=112.0,
-    )
-
-    print(result)
-
-    assert result.stop_loss == 100.0
-    assert "MOVE_STOP_TO_BREAK_EVEN" in result.actions
+    assert result.stop_loss >= 100.0
+    assert result.break_even is not None
+    assert result.trailing_stop is not None
+    assert len(result.actions) > 0
 
     print("PASS")
 

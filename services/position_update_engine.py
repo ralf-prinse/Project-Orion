@@ -14,13 +14,9 @@ from services.position_manager import (
 class PositionUpdateResult:
     """
     Result of updating an open position.
-
-    This object is deterministic and contains the updated
-    runtime state after processing one market update.
     """
 
     state: PositionState
-
     management: PositionManagementResult
 
 
@@ -30,9 +26,9 @@ class PositionUpdateEngine:
 
     Responsibilities
     ----------------
-    - Update runtime position state
     - Coordinate PositionManager
-    - Produce updated PositionState
+    - Update PositionState
+    - Produce updated runtime state
 
     Does NOT
     --------
@@ -58,7 +54,7 @@ class PositionUpdateEngine:
     ) -> PositionUpdateResult:
 
         management = self.position_manager.manage(
-            symbol=state.symbol,
+            state=state,
             risk_plan=risk_plan,
             current_price=current_price,
         )
@@ -72,15 +68,26 @@ class PositionUpdateEngine:
                 current_price,
             ),
             current_price=current_price,
-            break_even_active=management.break_even.activated
-            or state.break_even_active,
-            trailing_stop_active=state.trailing_stop_active,
-            target_1_hit=state.target_1_hit
-            or current_price >= risk_plan.target_1,
-            target_2_hit=state.target_2_hit
-            or current_price >= risk_plan.target_2,
-            target_3_hit=state.target_3_hit
-            or current_price >= risk_plan.target_3,
+            break_even_active=(
+                state.break_even_active
+                or management.break_even.activated
+            ),
+            trailing_stop_active=(
+                state.trailing_stop_active
+                or management.trailing_stop.activated
+            ),
+            target_1_hit=(
+                state.target_1_hit
+                or current_price >= risk_plan.target_1
+            ),
+            target_2_hit=(
+                state.target_2_hit
+                or current_price >= risk_plan.target_2
+            ),
+            target_3_hit=(
+                state.target_3_hit
+                or current_price >= risk_plan.target_3
+            ),
         )
 
         return PositionUpdateResult(
