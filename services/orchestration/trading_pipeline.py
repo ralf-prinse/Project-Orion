@@ -7,7 +7,7 @@ from services.intelligence.market_intelligence_engine import (
 )
 from services.intelligence.ai_context_builder import AIContextBuilder
 from services.intelligence.ai_explainer import AIExplainer
-
+from services.risk.risk_plan_validator import RiskPlanValidator
 from services.decision.adaptive_decision_engine import AdaptiveDecisionEngine
 from services.decision.position_sizing import PositionSizer
 from services.decision.decision_models import (
@@ -32,6 +32,7 @@ class TradingPipeline:
         self.decision_engine = AdaptiveDecisionEngine()
         self.sizer = PositionSizer()
         self.risk_engine = AdaptiveRiskEngine()
+        self.risk_validator = RiskPlanValidator()
         self.risk_context_builder = RiskContextBuilder()
         self.ai_builder = AIContextBuilder()
         self.explainer = AIExplainer()
@@ -122,6 +123,16 @@ class TradingPipeline:
         risk_plan = self.risk_engine.build(
             risk_context
         )
+
+        validation = self.risk_validator.validate(
+            risk_plan
+        )
+        
+        if not validation.is_valid:
+            raise ValueError(
+                "AdaptiveRiskEngine produced an invalid RiskPlan:\n"
+            + "\n".join(validation.errors)
+            )
 
         output = {
             "symbol": indicator_data.symbol,
