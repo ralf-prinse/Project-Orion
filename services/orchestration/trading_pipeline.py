@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from models.trading_pipeline_result import TradingPipelineResult
 from services.logging_service import LoggingService
 from services.risk.risk_context_builder import RiskContextBuilder
 from services.intelligence.signal_fusion_engine import SignalFusionEngine
@@ -15,13 +18,20 @@ from services.decision.decision_models import (
     PositionContext,
     DecisionInput,
 )
-
 from services.risk.adaptive_risk_engine import AdaptiveRiskEngine
 
 
 class TradingPipeline:
     """
     ORION FULL AI TRADING PIPELINE
+
+    Input
+    -----
+    IndicatorPack + portfolio_state
+
+    Output
+    ------
+    TradingPipelineResult
     """
 
     def __init__(self):
@@ -41,7 +51,7 @@ class TradingPipeline:
         self,
         indicator_data: IndicatorPack,
         portfolio_state,
-    ):
+    ) -> TradingPipelineResult:
         self.logger.info(
             "Starting pipeline for %s",
             indicator_data.symbol,
@@ -127,11 +137,11 @@ class TradingPipeline:
         validation = self.risk_validator.validate(
             risk_plan
         )
-        
+
         if not validation.is_valid:
             raise ValueError(
                 "AdaptiveRiskEngine produced an invalid RiskPlan:\n"
-            + "\n".join(validation.errors)
+                + "\n".join(validation.errors)
             )
 
         output = {
@@ -187,8 +197,15 @@ class TradingPipeline:
             position_size,
         )
 
-        return {
-            "pipeline": output,
-            "ai_context": ai_context,
-            "explanation": explanation,
-        }
+        return TradingPipelineResult(
+            symbol=indicator_data.symbol,
+            decision=decision.decision,
+            confidence=decision.confidence,
+            position_size=position_size,
+            expected_risk=expected_risk,
+            risk_plan=risk_plan,
+            market_intelligence=intelligence,
+            ai_context=ai_context,
+            explanation=explanation,
+            pipeline_output=output,
+        )

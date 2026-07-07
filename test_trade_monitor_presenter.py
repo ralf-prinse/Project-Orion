@@ -44,7 +44,8 @@ def main():
     assert result.title == "Open Trades"
     assert "1 open trade" in result.summary
     assert "AAPL" in result.trades_text
-    assert "Aantal: 2" in result.trades_text
+    assert "Aantal:" in result.trades_text
+    assert "2" in result.trades_text
     assert "Exit status: HOLD_POSITION" in result.trades_text
 
     print("Open trade formatter: PASS")

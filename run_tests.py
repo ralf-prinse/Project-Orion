@@ -21,40 +21,59 @@ class OrionTestRunner:
     """
     Central regression test runner for Project Orion.
 
-    Runs smoke tests and integration tests in a predictable order.
+    Runs all deterministic regression tests in a predictable order.
     """
 
     def __init__(self):
         self.commands = [
-            TestCommand(
-                name="Trading Pipeline",
-                command=[sys.executable, "test_trading_pipeline.py"],
-            ),
-            TestCommand(
-                name="Decision Smoke",
-                command=[sys.executable, "test_decision_smoke.py"],
-            ),
-            TestCommand(
-                name="Intelligence Layer",
-                command=[sys.executable, "test_intelligence_layer.py"],
-            ),
-            TestCommand(
-                name="AI Market Scanner",
-                command=[sys.executable, "test_ai_market_scanner.py"],
-            ),
-            TestCommand(
-                name="AI Scanner Presenter",
-                command=[sys.executable, "test_ai_scanner_presenter.py"],
-            ),
-            TestCommand(
-                name="Backtest Visualizer",
-                command=[sys.executable, "test_backtest_visualizer.py"],
-            ),
+            TestCommand("Trading Pipeline", [sys.executable, "test_trading_pipeline.py"]),
+            TestCommand("Decision Smoke", [sys.executable, "test_decision_smoke.py"]),
+            TestCommand("Intelligence Layer", [sys.executable, "test_intelligence_layer.py"]),
+            TestCommand("AI Market Scanner", [sys.executable, "test_ai_market_scanner.py"]),
+            TestCommand("AI Scanner Presenter", [sys.executable, "test_ai_scanner_presenter.py"]),
+            TestCommand("Backtest Visualizer", [sys.executable, "test_backtest_visualizer.py"]),
+            TestCommand("Trading Config", [sys.executable, "test_trading_config.py"]),
+
+            TestCommand("Adaptive Risk Engine", [sys.executable, "test_adaptive_risk_engine.py"]),
+            TestCommand("Break Even Service", [sys.executable, "test_break_even_service.py"]),
+            TestCommand("Trailing Stop Service", [sys.executable, "test_trailing_stop_service.py"]),
+            TestCommand("Time Stop Service", [sys.executable, "test_time_stop_service.py"]),
+
+            TestCommand("Execution Context", [sys.executable, "test_execution_context.py"]),
+            TestCommand("Execution Models", [sys.executable, "test_execution_models.py"]),
+            TestCommand("Execution Validator", [sys.executable, "test_execution_validator.py"]),
+            TestCommand("Execution Request Builder", [sys.executable, "test_execution_request_builder.py"]),
+            TestCommand("Execution Report Builder", [sys.executable, "test_execution_report_builder.py"]),
+            TestCommand("Execution Engine", [sys.executable, "test_execution_engine.py"]),
+            TestCommand("Order Factory", [sys.executable, "test_order_factory.py"]),
+            TestCommand("Paper Broker", [sys.executable, "test_paper_broker.py"]),
+
+            TestCommand("Portfolio Manager", [sys.executable, "test_portfolio_manager.py"]),
+
+            TestCommand("Position State Factory", [sys.executable, "test_position_state_factory.py"]),
+            TestCommand("Position State Store", [sys.executable, "test_position_state_store.py"]),
+            TestCommand("Position Update Engine", [sys.executable, "test_position_update_engine.py"]),
+            TestCommand("Position Manager", [sys.executable, "test_position_manager.py"]),
+            TestCommand("Position Management Summary", [sys.executable, "test_position_management_summary.py"]),
+            TestCommand("Position Management Summary Builder", [sys.executable, "test_position_management_summary_builder.py"]),
+
+            TestCommand("Paper Trading Service", [sys.executable, "test_paper_trading_service.py"]),
+            TestCommand("Paper Position Update Service", [sys.executable, "test_paper_position_update_service.py"]),
+            TestCommand("Paper Position Close Service", [sys.executable, "test_paper_position_close_service.py"]),
+            TestCommand("Trading Cycle", [sys.executable, "test_trading_cycle.py"]),
+            TestCommand("Paper Trading Runner", [sys.executable, "test_paper_trading_runner.py"]),
+
+            TestCommand("Open Trade Store", [sys.executable, "test_open_trade_store.py"]),
+            TestCommand("Trade Lifecycle Service", [sys.executable, "test_trade_lifecycle_service.py"]),
+            TestCommand("Trade Monitor Service", [sys.executable, "test_trade_monitor_service.py"]),
+            TestCommand("Trade Monitor Presenter", [sys.executable, "test_trade_monitor_presenter.py"]),
+
+            TestCommand("Market Pipeline Scanner Service", [sys.executable, "test_market_pipeline_scanner_service.py"]),
         ]
 
     def run(self):
         print("\n=========================================")
-        print("ORION REGRESSION TESTS")
+        print("ORION FULL REGRESSION TESTS")
         print("=========================================\n")
 
         results: list[TestResult] = []
@@ -95,7 +114,7 @@ class OrionTestRunner:
 
     def _print_result(self, result: TestResult):
         status = "PASS" if result.passed else "FAIL"
-        print(f"{result.name:<25} {status}")
+        print(f"{result.name:<40} {status}")
 
         if not result.passed:
             print("\n--- OUTPUT ---")
