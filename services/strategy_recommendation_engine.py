@@ -11,7 +11,8 @@ class StrategyRecommendationEngine:
     """
     Deterministic recommendation engine.
 
-    Converts performance analysis into self-improvement suggestions.
+    Converts performance analysis and optional hypothesis evaluation
+    results into self-improvement suggestions.
 
     Recommendations are informational only.
     They do not modify configuration automatically.
@@ -20,8 +21,49 @@ class StrategyRecommendationEngine:
     def build(
         self,
         analysis: PerformanceAnalysisResult,
+        hypothesis_report=None,
     ) -> StrategyRecommendationResult:
         recommendations: list[StrategyRecommendation] = []
+
+        if hypothesis_report is not None:
+            if hypothesis_report.insufficient_data > 0:
+                recommendations.append(
+                    StrategyRecommendation(
+                        title="Collect more hypothesis data",
+                        description=(
+                            "One or more strategy hypotheses do not yet have "
+                            "enough samples for reliable evaluation."
+                        ),
+                        priority=1,
+                        confidence=0.90,
+                        expected_impact=0.50,
+                        category="HYPOTHESIS_DATA",
+                        rationale=(
+                            f"{hypothesis_report.insufficient_data} "
+                            "hypothesis evaluations have insufficient data."
+                        ),
+                    )
+                )
+
+            if hypothesis_report.rejected > 0:
+                recommendations.append(
+                    StrategyRecommendation(
+                        title="Review rejected hypotheses",
+                        description=(
+                            "One or more strategy hypotheses were rejected by "
+                            "the current performance data. Review them before "
+                            "changing strategy parameters."
+                        ),
+                        priority=2,
+                        confidence=0.80,
+                        expected_impact=0.60,
+                        category="HYPOTHESIS_REVIEW",
+                        rationale=(
+                            f"{hypothesis_report.rejected} hypothesis "
+                            "evaluations were rejected."
+                        ),
+                    )
+                )
 
         if analysis.total_trades == 0:
             recommendations.append(

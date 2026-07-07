@@ -47,6 +47,14 @@ TestCommand(
     "Hypothesis Evaluation Service",
     [sys.executable, "test_hypothesis_evaluation_service.py"],
 ),
+TestCommand(
+    "Hypothesis Report Builder",
+    [sys.executable, "test_hypothesis_report_builder.py"],
+),
+TestCommand(
+    "Strategy Recommendation With Hypotheses",
+    [sys.executable, "test_strategy_recommendation_with_hypotheses.py"],
+),
             TestCommand("Time Stop Service", [sys.executable, "test_time_stop_service.py"]),
             TestCommand("Trade Journal Builder", [sys.executable, "test_trade_journal_builder.py"]),
             TestCommand("Performance Analyzer", [sys.executable, "test_performance_analyzer.py"]),
