@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 from models.execution_context import ExecutionContext
 from models.position_state import PositionState
+from models.trading_pipeline_result import TradingPipelineResult
 from models.trading_session import TradingSession
 from services.execution_engine import (
     ExecutionEngine,
@@ -37,7 +39,7 @@ class PaperTradingService:
     def open_position(
         self,
         session: TradingSession,
-        pipeline_output: dict,
+        pipeline_output: TradingPipelineResult | dict[str, Any],
         quantity: int,
     ) -> PaperTradeResult:
 

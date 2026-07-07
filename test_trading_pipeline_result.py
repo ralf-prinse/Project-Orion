@@ -47,7 +47,6 @@ def main():
     assert result.ai_context == "Bullish context"
     assert result.explanation == "Trend and momentum aligned."
 
-    # Backwards-compatible interface
     assert result.legacy_output is pipeline_output
     assert result.legacy_output["decision"] == "BUY"
 

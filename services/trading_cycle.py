@@ -108,17 +108,19 @@ class TradingCycle:
                 updated=update_result,
             )
 
-        if snapshot.pipeline_output is None:
+        pipeline_input = snapshot.resolved_pipeline_output
+
+        if pipeline_input is None:
             return TradingCycleResult(
                 symbol=symbol,
                 session=session,
                 action="NO_ACTION",
-                message="No open position and no pipeline output.",
+                message="No open position and no pipeline result.",
             )
 
         open_result = self.paper_trading_service.open_position(
             session=session,
-            pipeline_output=snapshot.pipeline_output,
+            pipeline_output=pipeline_input,
             quantity=quantity,
         )
 
