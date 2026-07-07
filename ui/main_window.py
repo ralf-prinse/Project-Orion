@@ -282,8 +282,39 @@ class OrionWindow(QMainWindow):
                 risk_plan.get("stop_loss") or round(current_price * 0.95, 2)
             )
 
-            take_profit = float(
+            target_1 = float(
                 risk_plan.get("target_1") or round(current_price * 1.10, 2)
+            )
+
+            target_2 = float(
+                risk_plan.get("target_2") or 0.0
+            )
+
+            target_3 = float(
+                risk_plan.get("target_3") or 0.0
+            )
+
+            risk_percent = float(
+                risk_plan.get("risk_percent") or 0.0
+            )
+
+            reward_percent = float(
+                risk_plan.get("reward_percent") or 0.0
+            )
+
+            risk_reward_ratio = float(
+                risk_plan.get("risk_reward_ratio") or 0.0
+            )
+
+            risk_plan_confidence = float(
+                risk_plan.get(
+                    "confidence",
+                    pipeline_data.get("confidence", 0.0),
+                )
+            )
+
+            risk_plan_notes = str(
+                risk_plan.get("notes") or ""
             )
 
             if quantity <= 0:
@@ -308,7 +339,15 @@ class OrionWindow(QMainWindow):
                 highest_price=current_price,
                 lowest_price=current_price,
                 stop_loss=stop_loss,
-                take_profit=take_profit,
+                take_profit=target_1,
+                target_1=target_1,
+                target_2=target_2,
+                target_3=target_3,
+                risk_percent=risk_percent,
+                reward_percent=reward_percent,
+                risk_reward_ratio=risk_reward_ratio,
+                risk_plan_confidence=risk_plan_confidence,
+                risk_plan_notes=risk_plan_notes,
                 trailing_stop=None,
                 status=TradeStatus.OPEN,
                 notes="Geopend vanuit Trading Workspace.",

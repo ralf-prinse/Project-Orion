@@ -1,6 +1,7 @@
 import pandas as pd
 
 from config.trading_config import DEFAULT_TRADING_CONFIG, TradingConfig
+from models.market_structure import MarketStructure
 from services.intelligence.intelligence_models import IndicatorPack
 from services.logging_service import LoggingService
 
@@ -12,8 +13,8 @@ class IndicatorBuilder:
     Responsibilities
     ----------------
     - Calculate deterministic indicators
+    - Build deterministic MarketStructure
     - Convert OHLCV history into IndicatorPack
-    - Log calculation lifecycle
     """
 
     def __init__(self, config: TradingConfig | None = None):
@@ -32,49 +33,110 @@ class IndicatorBuilder:
         )
 
         if history.empty:
-            self.logger.error(
-                "No historical data available for %s",
-                symbol,
-            )
             raise ValueError("History may not be empty.")
 
         close = history["Close"]
+        high = history["High"]
+        low = history["Low"]
 
         latest_price = float(close.iloc[-1])
-
-        rsi = self._calculate_rsi(close)
-        trend = self._calculate_trend(close)
-        momentum = self._calculate_momentum(close)
-        volatility = self._calculate_volatility(close)
-
         latest_volume = float(history["Volume"].iloc[-1])
 
         indicator_pack = IndicatorPack(
             symbol=symbol,
-            rsi=rsi,
-            trend=trend,
-            volatility=volatility,
-            momentum=momentum,
+            rsi=self._calculate_rsi(close),
+            trend=self._calculate_trend(close),
+            volatility=self._calculate_volatility(close),
+            momentum=self._calculate_momentum(close),
             volume=latest_volume,
             price=latest_price,
+            market_structure=self._build_market_structure(
+                history
+            ),
         )
 
         self.logger.info(
             (
-                "Indicators ready for %s | "
-                "RSI=%.2f Trend=%.3f "
-                "Momentum=%.2f Volatility=%.5f"
+                "Indicators ready | "
+                "ATR=%.2f "
+                "Support=%.2f "
+                "Resistance=%.2f"
             ),
-            symbol,
-            rsi,
-            trend,
-            momentum,
-            volatility,
+            indicator_pack.market_structure.atr,
+            indicator_pack.market_structure.support,
+            indicator_pack.market_structure.resistance,
         )
 
         return indicator_pack
 
-    def _calculate_rsi(self, close: pd.Series) -> float:
+    # ---------------------------------------------------------
+    # Market Structure
+    # ---------------------------------------------------------
+
+    def _build_market_structure(
+        self,
+        history: pd.DataFrame,
+    ) -> MarketStructure:
+
+        atr = self._calculate_atr(history)
+
+        recent = history.tail(20)
+
+        support = float(recent["Low"].min())
+        resistance = float(recent["High"].max())
+
+        swing_low = float(history["Low"].tail(10).min())
+        swing_high = float(history["High"].tail(10).max())
+
+        average_range = float(
+            (history["High"] - history["Low"])
+            .tail(20)
+            .mean()
+        )
+
+        return MarketStructure(
+            atr=atr,
+            average_range=average_range,
+            swing_high=swing_high,
+            swing_low=swing_low,
+            resistance=resistance,
+            support=support,
+        )
+
+    def _calculate_atr(
+        self,
+        history: pd.DataFrame,
+        period: int = 14,
+    ) -> float:
+
+        high = history["High"]
+        low = history["Low"]
+        close = history["Close"]
+
+        previous_close = close.shift(1)
+
+        true_range = pd.concat(
+            [
+                high - low,
+                (high - previous_close).abs(),
+                (low - previous_close).abs(),
+            ],
+            axis=1,
+        ).max(axis=1)
+
+        atr = true_range.rolling(period).mean().iloc[-1]
+
+        return float(atr)
+
+    # ---------------------------------------------------------
+    # Existing indicators
+    # ---------------------------------------------------------
+
+    def _calculate_rsi(
+        self,
+        close: pd.Series,
+    ) -> float:
+
         period = self.config.rsi_period
 
         delta = close.diff()
@@ -89,14 +151,16 @@ class IndicatorBuilder:
 
         rsi = 100 - (100 / (1 + rs))
 
-        value = float(rsi.iloc[-1])
+        return max(0.0, min(100.0, float(rsi.iloc[-1])))
 
-        return max(0.0, min(100.0, value))
+    def _calculate_trend(
+        self,
+        close: pd.Series,
+    ) -> float:
 
-    def _calculate_trend(self, close: pd.Series) -> float:
-        period = self.config.trend_period
-
-        sma = close.rolling(period).mean()
+        sma = close.rolling(
+            self.config.trend_period
+        ).mean()
 
         latest = float(close.iloc[-1])
         average = float(sma.iloc[-1])
@@ -108,7 +172,11 @@ class IndicatorBuilder:
 
         return max(0.0, min(1.0, score))
 
-    def _calculate_momentum(self, close: pd.Series) -> float:
+    def _calculate_momentum(
+        self,
+        close: pd.Series,
+    ) -> float:
+
         period = self.config.momentum_period
 
         if len(close) <= period:
@@ -126,7 +194,11 @@ class IndicatorBuilder:
 
         return max(0.0, min(100.0, score))
 
-    def _calculate_volatility(self, close: pd.Series) -> float:
+    def _calculate_volatility(
+        self,
+        close: pd.Series,
+    ) -> float:
+
         period = self.config.volatility_period
 
         returns = close.pct_change()

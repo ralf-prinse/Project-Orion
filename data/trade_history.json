@@ -38,5 +38,21 @@
         "quantity": 1,
         "price": 115.87000274658203,
         "reason": "Handmatig gesloten via Trade Monitor."
+    },
+    {
+        "timestamp": "2026-07-06T18:40:26",
+        "action": "SELL",
+        "symbol": "BMW.DE",
+        "quantity": 2,
+        "price": 60.119998931884766,
+        "reason": "Handmatig gesloten via Trade Monitor."
+    },
+    {
+        "timestamp": "2026-07-06T19:58:50",
+        "action": "SELL",
+        "symbol": "SHOP",
+        "quantity": 1,
+        "price": 119.94999694824219,
+        "reason": "Handmatig gesloten via Trade Monitor."
     }
 ]

@@ -11,13 +11,6 @@ class OpenTradeStore:
     """
     Persistent JSON store for open trades.
 
-    Responsibilities
-    ----------------
-    - load open trades
-    - save open trades
-    - add open trade
-    - remove open trade
-
     No UI.
     No trading decisions.
     No exit decisions.
@@ -80,6 +73,14 @@ class OpenTradeStore:
             "lowest_price": trade.lowest_price,
             "stop_loss": trade.stop_loss,
             "take_profit": trade.take_profit,
+            "target_1": trade.target_1,
+            "target_2": trade.target_2,
+            "target_3": trade.target_3,
+            "risk_percent": trade.risk_percent,
+            "reward_percent": trade.reward_percent,
+            "risk_reward_ratio": trade.risk_reward_ratio,
+            "risk_plan_confidence": trade.risk_plan_confidence,
+            "risk_plan_notes": trade.risk_plan_notes,
             "trailing_stop": trade.trailing_stop,
             "status": trade.status.value,
             "exit_signal": trade.exit_signal.value,
@@ -97,6 +98,15 @@ class OpenTradeStore:
         }
 
     def _trade_from_dict(self, data: dict) -> Trade:
+        take_profit = float(data.get("take_profit", 0.0))
+
+        target_1 = float(
+            data.get(
+                "target_1",
+                take_profit,
+            )
+        )
+
         return Trade(
             symbol=str(data.get("symbol", "")).upper(),
             quantity=int(data.get("quantity", 0)),
@@ -110,7 +120,20 @@ class OpenTradeStore:
             highest_price=float(data.get("highest_price", 0.0)),
             lowest_price=float(data.get("lowest_price", 0.0)),
             stop_loss=float(data.get("stop_loss", 0.0)),
-            take_profit=float(data.get("take_profit", 0.0)),
+            take_profit=take_profit,
+            target_1=target_1,
+            target_2=float(data.get("target_2", 0.0)),
+            target_3=float(data.get("target_3", 0.0)),
+            risk_percent=float(data.get("risk_percent", 0.0)),
+            reward_percent=float(data.get("reward_percent", 0.0)),
+            risk_reward_ratio=float(data.get("risk_reward_ratio", 0.0)),
+            risk_plan_confidence=float(
+                data.get(
+                    "risk_plan_confidence",
+                    data.get("confidence", 0.0),
+                )
+            ),
+            risk_plan_notes=str(data.get("risk_plan_notes", "")),
             trailing_stop=(
                 float(data["trailing_stop"])
                 if data.get("trailing_stop") is not None

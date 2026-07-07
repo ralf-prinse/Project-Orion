@@ -1,58 +1,43 @@
-# ==========================
-# ORION PERSONAL UNIVERSE V1
-# ==========================
-
-# ===========
-# MEGA CAPS
-# ===========
 AAPL
 MSFT
 NVDA
 AMZN
 GOOGL
+GOOG
 META
 TSLA
 AVGO
 ORCL
-IBM
-CRM
-ADBE
 NFLX
 COST
 WMT
-PG
-KO
-PEP
-MCD
-DIS
-
-# ======================
-# AI / SEMICONDUCTORS
-# ======================
+ADBE
+CRM
 AMD
-ARM
-MU
-QCOM
-TXN
 INTC
+QCOM
+MU
+TXN
 AMAT
 LRCX
 KLAC
 MRVL
-ON
+ARM
+ASML
+TSM
+ADI
 NXPI
-MPWR
 MCHP
+MPWR
+ON
 TER
 ENTG
-ASML
-ASMI.AS
-BESI.AS
-TSM
-
-# ======================
-# CYBER SECURITY
-# ======================
+SMCI
+DELL
+HPQ
+IBM
+CSCO
+ANET
 PANW
 CRWD
 FTNT
@@ -63,15 +48,11 @@ DDOG
 CYBR
 S
 RBRK
-
-# ======================
-# CLOUD / SOFTWARE
-# ======================
+NOW
 SNOW
 SHOP
 TEAM
 INTU
-NOW
 MDB
 HUBS
 DOCN
@@ -79,40 +60,51 @@ APP
 DUOL
 PLTR
 PATH
-
-# ======================
-# FINANCIALS
-# ======================
+ADSK
+WDAY
+VEEV
+U
+TTD
+ROKU
+SQ
+PYPL
+FIS
+FI
+V
+MA
+AXP
 JPM
 GS
 MS
 BAC
 C
-AXP
 BLK
 SCHW
 SPGI
-V
-MA
-PYPL
-
-# ======================
-# HEALTHCARE
-# ======================
+ICE
+CME
+COIN
+HOOD
 LLY
 NVO
 JNJ
 ABBV
 MRK
+PFE
+BMY
+AMGN
+GILD
+REGN
+VRTX
 ISRG
-ABT
 TMO
 DHR
-VRTX
-
-# ======================
-# INDUSTRIALS
-# ======================
+ABT
+SYK
+MDT
+UNH
+ELV
+HUM
 GE
 CAT
 DE
@@ -122,21 +114,25 @@ HON
 ETN
 PH
 TT
-
-# ======================
-# ENERGY
-# ======================
+EMR
+ROK
+BA
+GD
+NOC
+UPS
+FDX
 XOM
 CVX
 COP
 SLB
 HAL
-SHEL.AS
+OXY
+EOG
+MPC
+VLO
+PSX
+SHEL
 BP
-
-# ======================
-# CONSUMER / RETAIL
-# ======================
 HD
 LOW
 TJX
@@ -146,10 +142,81 @@ CMG
 BKNG
 UBER
 ABNB
-
-# ======================
-# NETHERLANDS
-# ======================
+MCD
+DIS
+PG
+KO
+PEP
+COKE
+PM
+MO
+CL
+KMB
+TGT
+LULU
+CART
+CVNA
+F
+GM
+RIVN
+LCID
+TM
+HMC
+SONY
+SPOT
+EA
+TTWO
+RBLX
+ZM
+DASH
+EXPE
+MAR
+HLT
+DAL
+UAL
+AAL
+CCL
+RCL
+NCLH
+LIN
+APD
+SHW
+ECL
+NEM
+FCX
+ALB
+MOS
+DD
+DOW
+NEE
+DUK
+SO
+AEP
+EXC
+XEL
+CEG
+ENPH
+FSLR
+SEDG
+SPY
+QQQ
+IWM
+DIA
+XLK
+XLF
+XLE
+XLV
+XLI
+XLY
+XLP
+XLU
+SMH
+SOXX
+ARKK
+VTI
+VOO
+SCHD
+JEPI
 ASML.AS
 ASMI.AS
 BESI.AS
@@ -167,3 +234,26 @@ AKZA.AS
 AALB.AS
 RAND.AS
 UNA.AS
+DSM.AS
+UMG.AS
+PRX.AS
+ASM.DE
+SAP.DE
+SIE.DE
+ALV.DE
+DTE.DE
+MBG.DE
+BMW.DE
+VOW3.DE
+BAS.DE
+BAYN.DE
+RWE.DE
+EOAN.DE
+IFX.DE
+DBK.DE
+CBK.DE
+ADS.DE
+AIR.DE
+ENR.DE
+DHL.DE
+HEN3.DE

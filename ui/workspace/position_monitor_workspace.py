@@ -9,8 +9,9 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from ui.components.trade_card import TradeCard
+
 from models.trade_lifecycle import Trade
+from ui.components.trade_card import TradeCard
 from ui.foundation.position_monitor_presenter import PositionMonitorViewModel
 from ui.foundation.trade_monitor_presenter import TradeMonitorListViewModel
 from ui.workspace.base_workspace import BaseWorkspace
@@ -18,13 +19,6 @@ from ui.workspace.workspace_panel import WorkspacePanel
 
 
 class PositionMonitorWorkspace(BaseWorkspace):
-    """
-    Position Monitor workspace.
-
-    Presentation only.
-    User input is forwarded to the controller.
-    """
-
     INPUT_HEIGHT = 44
     BUTTON_HEIGHT = 48
     LABEL_WIDTH = 120
@@ -74,11 +68,15 @@ class PositionMonitorWorkspace(BaseWorkspace):
             title="Open Trades",
             body="Open trades worden geladen...",
         )
+
         self.open_trade_cards_container = QWidget()
         self.open_trade_cards_layout = QVBoxLayout()
         self.open_trade_cards_layout.setContentsMargins(0, 0, 0, 0)
         self.open_trade_cards_layout.setSpacing(12)
-        self.open_trade_cards_container.setLayout(self.open_trade_cards_layout)
+        self.open_trade_cards_container.setLayout(
+            self.open_trade_cards_layout
+        )
+
         self.signal_panel = WorkspacePanel(
             theme=self.theme,
             title="Exit Advies",
@@ -207,12 +205,31 @@ class PositionMonitorWorkspace(BaseWorkspace):
         self.on_close_trade_requested(symbol)
 
     def set_open_trades_view_model(
-    self,
-    view_model: TradeMonitorListViewModel,
-) -> None:
+        self,
+        view_model: TradeMonitorListViewModel,
+    ) -> None:
         self.open_trades_panel.set_title(view_model.title)
         self.open_trades_panel.set_body(view_model.summary)
         self.set_status_text(view_model.status)
+
+    def set_open_trade_cards(
+        self,
+        trades: list[Trade],
+    ) -> None:
+        while self.open_trade_cards_layout.count():
+            item = self.open_trade_cards_layout.takeAt(0)
+            widget = item.widget()
+
+            if widget is not None:
+                widget.deleteLater()
+
+        for trade in trades:
+            self.open_trade_cards_layout.addWidget(
+                TradeCard(
+                    theme=self.theme,
+                    trade=trade,
+                )
+            )
 
     def set_view_model(self, view_model: PositionMonitorViewModel) -> None:
         self.signal_panel.set_title(view_model.signal)
