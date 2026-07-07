@@ -1,44 +1,48 @@
 # ORION_MASTER_ARCHITECTURE.md
 
-> Documentation Version: v1.15
-> Architecture Version: v2.4
-> Last Updated: 2026-07-07
+> Documentation Version: v1.16  
+> Architecture Version: v2.8  
+> Last Updated: 2026-07-07  
+> Active Branch: fix/trading-config-indicators  
+> Regression Status: 46 tests PASS
 
 ---
 
-# PROJECT ORION
+# PROJECT ORION MASTER ARCHITECTURE
 
-## Master Architecture
+This document defines the current high-level architecture of Project Orion.
 
-This document defines the complete high-level architecture of Orion.
+The repository remains the primary source of truth.  
+If this document and the code disagree, the code wins.
 
-It serves as the single source of truth for all architectural decisions.
-
-Every subsystem must comply with this document.
+Before starting any new sprint, the full repository must be reviewed.
 
 ---
 
 # DESIGN PHILOSOPHY
 
-Orion is designed as a deterministic autonomous swing trading platform.
+Orion is a deterministic, modular, AI-assisted swing trading and paper-trading system.
 
 Primary goals:
 
 - deterministic
 - modular
 - explainable
-- regression-testable
-- broker independent
-- AI assisted
-- production ready
+- testable
+- broker-independent
+- paper-first
+- safe to extend
+- AI-assisted, not AI-controlled
 
 AI may assist with:
 
-- interpretation
+- explanation
 - summarization
-- market commentary
+- performance analysis
+- recommendations
+- strategy review
 
-AI may never directly generate:
+AI may never directly and non-deterministically generate:
 
 - BUY decisions
 - SELL decisions
@@ -46,781 +50,830 @@ AI may never directly generate:
 - targets
 - risk sizing
 - broker execution
+- automatic config mutation
 
-All trading decisions must remain deterministic.
-
----
-
-# CORE ARCHITECTURE
-
-Orion is divided into independent subsystems.
-
-Each subsystem has:
-
-- Models
-- Services
-- Tests
-
-Each orchestration layer:
-
-- accepts exactly one Context or State object
-- returns exactly one immutable Result object
-
-Pattern:
-
-Subsystem
-
-↓
-
-Context / State
-
-↓
-
-Engine
-
-↓
-
-Result
-
-This pattern is mandatory throughout the project.
+All trading decisions must remain deterministic and testable.
 
 ---
 
-# SYSTEM OVERVIEW
+# CORE ARCHITECTURE RULES
+
+Every subsystem should follow this pattern:
 
 ```text
-                    Market Data
-                         │
-                         ▼
-                Market Intelligence
-                         │
-                         ▼
-                 Trading Pipeline
-                         │
-                         ▼
-                  Risk Engine
-                         │
-                         ▼
-               Execution Engine
-                         │
-                         ▼
-                 Paper Broker
-                         │
-                         ▼
-                Trading Session
-                         │
-                         ▼
-              Position Management
-                         │
-                         ▼
-                 Trading Cycle
-                         │
-                         ▼
-             Paper Trading Runner
-```
+Context / State / Input Model
+        ↓
+Service / Orchestrator
+        ↓
+Immutable Result Model
 
----
+Rules:
 
-# CURRENT IMPLEMENTED SUBSYSTEMS
+One clear responsibility per service.
+One immutable Result object per orchestrator.
+Business logic belongs in services.
+Models remain lightweight.
+No duplicated business logic.
+No circular dependencies.
+No anonymous dict contracts between major subsystems.
+Regression tests are mandatory.
+Documentation must be updated after completed sprints.
+Real broker integration is forbidden until paper trading proves stable.
+CURRENT SYSTEM OVERVIEW
+config/watchlist.txt
+        ↓
+YahooProvider
+        ↓
+PaperTradingPipelineAdapter
+        ↓
+IndicatorBuilder
+        ↓
+TradingPipeline
+        ↓
+TradingPipelineResult
+        ↓
+LivePaperMarketScanner
+        ↓
+LivePaperCandidate[]
+        ↓
+PortfolioAllocator
+        ↓
+PortfolioAllocationDecision[]
+        ↓
+TradingCycle
+        ↓
+PaperTradingService
+        ↓
+ExecutionEngine
+        ↓
+PaperBroker
+        ↓
+PaperPortfolio / TradingSession
+        ↓
+AutonomousPaperTradingRunner
+        ↓
+TradeJournalBuilder
+        ↓
+PerformanceAnalyzer
+        ↓
+StrategyRecommendationEngine
+IMPLEMENTED SUBSYSTEMS
+1. Market Data
 
-```
-Market Analysis
+Purpose:
 
-Risk Engine
+Provide market data to the rest of Orion.
 
-Execution Layer
+Main components:
 
-Paper Trading
+providers/base_provider.py
+providers/yahoo_provider.py
+models/market_data.py
 
-Position Management
+Current provider:
 
-Trading Cycle
+YahooProvider
 
-Paper Trading Runner
-```
+Capabilities:
 
-All systems above are operational and covered by regression tests.
+get current price
+get current market data
+get historical OHLCV data
 
----
+Current dependency:
 
-# SUBSYSTEMS
+yfinance
 
----
+Important limitation:
 
-# 1. MARKET ANALYSIS
+YahooProvider currently needs review for:
 
-Purpose
+retry logic
+timeout handling
+caching
+batching
+large watchlist reliability
+2. Watchlist
 
-Analyze raw market data and produce deterministic trading decisions.
+Main file:
 
-Responsibilities
+config/watchlist.txt
 
-- collect indicator values
-- analyze trend
-- analyze volatility
-- detect market structure
-- detect momentum
-- combine signals
+Current status:
 
-Output
+259 symbols
 
-TradingDecision
+Contains:
 
-Main Components
+US equities
+US ETFs
+Dutch .AS tickers
+German .DE tickers
 
-- MarketScanner
-- AIMarketScanner
-- SignalFusionEngine
-- MarketIntelligenceEngine
-- TradingPipeline
+Rule:
 
-The Market Analysis subsystem never performs:
+Do not duplicate the watchlist unless there is a strong architectural reason.
 
-- risk calculations
-- execution
-- portfolio management
-- broker communication
+3. Indicator / Pipeline Adapter
 
----
+Purpose:
 
-# 2. RISK ENGINE
+Convert historical market data into pipeline-ready indicator input.
 
-Purpose
+Main components:
 
-Convert a trading decision into a deterministic RiskPlan.
+services/paper_trading_pipeline_adapter.py
+services/indicator_builder.py
+services/intelligence/intelligence_models.py
 
-Responsibilities
+Flow:
 
-- ATR stop-loss
-- volatility adjustments
-- market regime adjustments
-- reward targets
-- risk validation
+Historical OHLCV Data
+        ↓
+IndicatorBuilder
+        ↓
+IndicatorPack
+        ↓
+TradingPipeline
+4. Market Analysis / Trading Pipeline
 
-Input
+Purpose:
 
-RiskContext
+Analyze market conditions and produce deterministic trading decisions.
 
-Output
+Main components:
 
-RiskPlan
+services/orchestration/trading_pipeline.py
+models/trading_pipeline_result.py
+services/intelligence/signal_fusion_engine.py
+services/intelligence/market_intelligence_engine.py
+services/intelligence/ai_context_builder.py
+services/intelligence/ai_explainer.py
+services/decision/adaptive_decision_engine.py
+services/decision/position_sizing.py
 
-Main Components
+Output:
 
-- RiskContext
-- AdaptiveRiskEngine
-- RiskPlanValidator
+TradingPipelineResult
 
-The Risk subsystem never performs:
+Important rule:
 
-- market scanning
-- order execution
-- portfolio management
+TradingPipelineResult is the only valid contract between TradingPipeline and downstream systems.
 
----
+Forbidden legacy patterns:
 
-# 3. EXECUTION LAYER
+pipeline_output
+legacy_output
+result["pipeline"]
+result.items()
+result.keys()
+result.values()
+5. Risk Engine
 
-Purpose
+Purpose:
 
-Convert deterministic trading decisions into broker-neutral orders.
+Convert market and decision context into a deterministic RiskPlan.
 
-Responsibilities
+Main components:
 
-- validate execution
-- build orders
-- execute through broker abstraction
-- produce execution reports
+models/risk_plan.py
+services/risk/risk_context_builder.py
+services/risk/adaptive_risk_engine.py
+services/risk/risk_plan_validator.py
 
-Input
+Responsibilities:
 
+entry price
+stop loss
+targets
+risk percent
+reward percent
+risk/reward ratio
+confidence
+notes
+validation
+
+The Risk Engine must not:
+
+fetch market data
+execute trades
+mutate portfolio state
+6. Execution Layer
+
+Purpose:
+
+Convert deterministic trading requests into validated paper executions.
+
+Main components:
+
+models/execution_request.py
+models/execution_context.py
+models/execution_result.py
+services/execution_validator.py
+services/order_factory.py
+services/execution_engine.py
+services/execution_report_builder.py
+services/paper_broker.py
+
+Flow:
+
+ExecutionRequest
+        ↓
 ExecutionContext
-
-Output
-
+        ↓
+ExecutionValidator
+        ↓
+OrderFactory
+        ↓
+PaperBroker
+        ↓
+PortfolioManager
+        ↓
 ExecutionEngineResult
 
-Main Components
+Execution validation rejects:
 
-- ExecutionRequest
-- ExecutionContext
-- ExecutionValidator
-- OrderFactory
-- ExecutionEngine
-- ExecutionReportBuilder
+missing symbol
+non-positive entry price
+non-positive quantity
+non-positive confidence
+insufficient cash
+excessive position allocation
 
-Broker Implementation
+The Execution Layer must never generate BUY/SELL decisions.
 
-PaperBroker
+7. Paper Trading Foundation
 
-Future
+Purpose:
 
-BrokerAdapter
+Simulate trades with paper money.
 
-The Execution subsystem never generates BUY or SELL decisions.
+Main components:
 
----
+models/paper_portfolio.py
+models/paper_position.py
+models/trading_session.py
+services/paper_trading_service.py
+services/paper_position_update_service.py
+services/paper_position_close_service.py
+services/portfolio_manager.py
 
-# 4. PAPER TRADING
+Responsibilities:
 
-Purpose
+maintain cash
+maintain equity
+maintain positions
+open paper positions
+update paper positions
+close paper positions
 
-Execute trades in a deterministic simulated environment.
+The Paper Trading subsystem must not:
 
-Responsibilities
+scan markets
+calculate indicators
+generate trading decisions
+8. Position Management
 
-- maintain paper portfolio
-- maintain cash
-- maintain equity
-- simulate fills
-
-Main Components
-
-- PaperPortfolio
-- PaperPosition
-- TradingSession
-- PaperTradingService
-- PaperPositionUpdateService
-- PaperPositionCloseService
-
-The Paper Trading subsystem never:
-
-- scans markets
-- calculates indicators
-- generates trading decisions
-
----
-
-# 5. POSITION MANAGEMENT
-
-Purpose
+Purpose:
 
 Manage already opened positions.
 
-Responsibilities
+Main components:
 
-- break-even
-- trailing stop
-- time stop
-- health monitoring
-- position updates
+models/position_state.py
+services/position_state_factory.py
+services/position_state_store.py
+services/position_update_engine.py
+services/position_manager.py
+services/break_even_service.py
+services/trailing_stop_service.py
+services/time_stop_service.py
+services/position_management_summary_builder.py
 
-Input
+Responsibilities:
 
-PositionState
+break-even logic
+trailing stop logic
+time stop logic
+health updates
+position state updates
+position management summaries
 
-Output
+Position Management must not:
 
-PositionUpdateResult
+open new trades
+generate BUY signals
+fetch market data directly
+9. Trading Cycle
 
-Main Components
+Purpose:
 
-- PositionManager
-- PositionUpdateEngine
-- BreakEvenService
-- TrailingStopService
-- TimeStopService
-- PositionHealthService
-- PositionStateStore
-- PositionManagementSummaryBuilder
+Execute one deterministic trading tick.
 
-Position Management never:
+Main components:
 
-- opens trades
-- closes trades directly
-- generates BUY or SELL signals
+models/market_snapshot.py
+services/trading_cycle.py
+models/trading_cycle_result.py
 
----
+Input:
 
-# 6. TRADING CYCLE
+TradingSession + MarketSnapshot + quantity
 
-Purpose
-
-Execute one complete deterministic trading tick.
-
-Responsibilities
-
-- open positions
-- update positions
-- close positions
-- return updated TradingSession
-
-Input
-
-MarketSnapshot
-
-Output
+Output:
 
 TradingCycleResult
 
-Main Components
+Responsibilities:
 
-- MarketSnapshot
-- TradingCycle
-- TradingCycleResult
+open positions when approved
+update positions
+close positions where applicable
+return updated TradingSession
 
-TradingCycle is the orchestration layer connecting:
+TradingCycle must not:
+
+calculate indicators
+rank candidates
+allocate portfolio capital
+10. Paper Trading Runner
+
+Purpose:
+
+Run multiple deterministic TradingCycles.
+
+Main components:
+
+services/paper_trading_runner.py
+models/paper_trading_run_result.py
+
+Responsibilities:
+
+execute multiple TradingCycles
+preserve TradingSession
+collect cycle results
+11. Paper Trading Demo Runner
+
+Purpose:
+
+Provide deterministic end-to-end demo without external data.
+
+Main components:
+
+models/paper_trading_demo_result.py
+services/paper_trading_demo_runner.py
+run_paper_trading_demo.py
+
+Command:
+
+python run_paper_trading_demo.py
+
+This proves the software architecture works without relying on Yahoo Finance.
+
+12. Live Paper Market Scanner
+
+Purpose:
+
+Scan live market data and produce ranked candidates.
+
+Main components:
+
+models/live_paper_trading_config.py
+models/live_paper_trading_result.py
+services/live_paper_market_scanner.py
+run_live_paper_trading.py
+
+Responsibilities:
+
+load watchlist
+fetch historical market data
+run PaperTradingPipelineAdapter
+produce LivePaperCandidate objects
+rank candidates
+
+Important rule:
+
+LivePaperMarketScanner scans only.
+
+It must not:
+
+allocate capital
+execute trades
+mutate TradingSession
+place broker orders
+13. Portfolio Allocator
+
+Purpose:
+
+Choose which ranked candidates may receive paper capital.
+
+Main components:
+
+models/portfolio_allocation_result.py
+services/portfolio_allocator.py
+
+Responsibilities:
+
+sort candidates by score
+reject non-accepted candidates
+reject already-open positions
+respect max open positions
+respect available cash
+respect max position value
+calculate integer quantity
+explain allocation decision
+
+The allocator must not:
+
+fetch market data
+run the TradingPipeline
+execute trades
+mutate TradingSession
+14. Autonomous Paper Trading Runner
+
+Purpose:
+
+Run multiple live paper cycles while preserving one TradingSession.
+
+Main components:
+
+models/autonomous_paper_trading_config.py
+models/autonomous_paper_trading_result.py
+services/autonomous_paper_trading_runner.py
+run_autonomous_paper_trading.py
+
+Responsibilities:
+
+create one TradingSession
+run LivePaperMarketScanner
+run PortfolioAllocator
+execute approved allocations through TradingCycle
+preserve session across cycles
+return AutonomousPaperTradingResult
+
+Current status:
+
+Finite-run only
+
+This is intentional.
+
+No infinite unattended loop exists yet.
+
+Command:
+
+python run_autonomous_paper_trading.py
+15. Self-Evaluation Layer
+
+Purpose:
+
+Allow ORION to evaluate its own paper-trading behaviour.
+
+Main components:
+
+models/trade_journal_entry.py
+models/performance_analysis_result.py
+models/strategy_recommendation.py
+services/trade_journal_builder.py
+services/performance_analyzer.py
+services/strategy_recommendation_engine.py
+
+Flow:
+
+AutonomousPaperTradingResult
+        ↓
+TradeJournalBuilder
+        ↓
+TradeJournalEntry[]
+        ↓
+PerformanceAnalyzer
+        ↓
+PerformanceAnalysisResult
+        ↓
+StrategyRecommendationEngine
+        ↓
+StrategyRecommendationResult
+
+Current capabilities:
+
+journal entry creation
+win/loss analysis
+realized P/L analysis
+unrealized P/L analysis
+average confidence
+average expected risk
+dominant regime
+dominant volatility
+strategy recommendations
+
+Important safety rule:
+
+Recommendations are informational only.
+
+No automatic configuration mutation is currently allowed.
+
+CURRENT OPERATIONAL COMMANDS
+
+Run all tests:
+
+python run_tests.py
+
+Run deterministic paper demo:
+
+python run_paper_trading_demo.py
+
+Run live paper scanner:
+
+python run_live_paper_trading.py
+
+Run autonomous finite paper trading:
+
+python run_autonomous_paper_trading.py
+CURRENT TEST STATUS
+
+Current regression suite:
+
+46 tests PASS
+
+Health:
+
+ORION HEALTH: EXCELLENT
+CURRENT ARCHITECTURE STATUS
+
+The current architecture is stable enough to run finite autonomous paper-trading experiments.
+
+However, before any Sprint 7E work begins, the full repository must be reviewed.
+
+Reason:
+
+Sprint 6E through 7D introduced many important layers:
+
+typed pipeline result
+live market scanning
+portfolio allocation
+autonomous runner
+self-evaluation
+
+This is the correct moment to check for technical debt before adding controlled learning.
+
+KNOWN REVIEW TARGETS
+
+The next architecture review must check:
+
+Full project structure.
+All models.
+All services.
+Orchestration layers.
+Tests.
+Documentation.
+Dependencies.
+Data flows.
+Context/result patterns.
+Stores.
+Builders.
+Validators.
+Factories.
+Duplicate business logic.
+Circular dependencies.
+Public interface stability.
+Future change hotspots.
+Whether result models are still clean.
+Whether scanner/allocator/runner separation is correct.
+Whether TradeJournalBuilder records enough execution detail.
+Whether persistent journal storage is needed.
+Whether open position prices are refreshed correctly.
+Whether YahooProvider needs hardening.
+Whether autonomous runner needs market-hours awareness.
+Whether controlled learning should be the next sprint.
+CURRENT TECHNICAL DEBT
+
+Known items to review:
+
+LivePaperTradingResult
+
+Currently contains:
+
+executed_trades
+rejected_trades
+
+But after Sprint 7C, scanner no longer executes trades.
+
+Review whether these fields should remain, move, or be removed.
+
+TradeJournalBuilder
+
+Currently builds entries from autonomous allocation decisions.
+
+Review whether it should also record explicit execution result details.
+
+PaperPosition Price Updates
+
+Review whether current prices are refreshed sufficiently across live cycles.
+
+YahooProvider
+
+Needs review for:
+
+retries
+caching
+batching
+timeouts
+rate-limit resilience
+Persistent State
+
+Currently missing:
+
+persistent journal store
+persistent portfolio/session store
+long-term performance history
+Scheduler
+
+Currently missing:
+
+market-hours awareness
+periodic scheduled finite run
+daily report
+DEVELOPMENT PHASES
+Level 1 — Deterministic Paper Trading
+
+Status:
+
+Complete
+
+Includes:
 
 TradingPipeline
-
-↓
-
-Execution
-
-↓
-
-Paper Trading
-
-↓
-
-Position Management
-
-TradingCycle does not calculate indicators itself.
-
----
-
-# 7. PAPER TRADING RUNNER
-
-Purpose
-
-Replay deterministic trading cycles.
-
-Responsibilities
-
-- execute multiple TradingCycles
-- preserve TradingSession
-- collect history
-
-Input
-
-TradingSession
-
-+
-
-MarketSnapshots
-
-Output
-
-PaperTradingRunResult
-
-Main Components
-
-- PaperTradingRunner
-- PaperTradingRunResult
-
-Future responsibilities
-
-- historical replay
-- multi-symbol replay
-- live replay
-
----
-
-# ARCHITECTURAL RULES
-
-Every subsystem must satisfy the following rules.
-
-Rule 1
-
-One orchestration layer.
-
-Rule 2
-
-One Context or State object as input.
-
-Rule 3
-
-One immutable Result object as output.
-
-Rule 4
-
-No circular dependencies.
-
-Rule 5
-
-No duplicated business logic.
-
-Rule 6
-
-Business logic belongs inside services.
-
-Rule 7
-
-Models remain lightweight and deterministic.
-
-Rule 8
-
-Regression tests are mandatory.
-
----
-
-# FUTURE ARCHITECTURE
-
-The current implementation represents the foundation of Orion.
-
-The remaining development focuses on expanding capabilities without changing the architectural principles defined in this document.
-
-Every future subsystem must integrate into the existing deterministic pipeline.
-
----
-
-# TARGET AUTONOMOUS FLOW
-
-The final Orion architecture is designed as a continuous deterministic trading engine.
-
-```
-                Market Data
-                     │
-                     ▼
-             Indicator Builder
-                     │
-                     ▼
-              Trading Pipeline
-                     │
-                     ▼
-                Risk Engine
-                     │
-                     ▼
-             Execution Engine
-                     │
-                     ▼
-               Broker Adapter
-                     │
-                     ▼
-             Trading Session
-                     │
-                     ▼
-          Position Management
-                     │
-                     ▼
-             Portfolio Engine
-                     │
-                     ▼
-             Trading Cycle
-                     │
-                     ▼
-          Continuous Runner
-                     │
-                     └───────────────┐
-                                     │
-                                     ▼
-                             Next Market Tick
-```
-
----
-
-# DEVELOPMENT PHASES
-
-Development is divided into capability levels.
-
-The objective is to complete one fully operational capability before introducing the next.
-
----
-
-# LEVEL 1
-
-Deterministic Paper Trading
-
-Status
-
-Completed (Foundation)
-
-Capabilities
-
-- TradingPipeline
-- Risk Engine
-- Execution Engine
-- Paper Broker
-- Paper Portfolio
-- Position Management
-- Trading Cycle
-- Paper Trading Runner
-
-Current limitation
-
-TradingPipeline is not yet automatically connected to TradingCycle.
-
----
-
-# LEVEL 2
-
-Automatic TradingPipeline Integration
-
-Objective
-
-Remove manually prepared pipeline output.
-
-Future flow
-
-Market Data
-
-↓
-
-Indicator Builder
-
-↓
-
-TradingPipeline
-
-↓
-
-ExecutionRequest
-
-↓
-
-ExecutionEngine
-
-↓
-
-TradingCycle
-
-↓
-
-PaperTradingRunner
-
-New planned components
-
-- IndicatorBuilder
-- PipelineAdapter
-- TradingPipelineRunner
-
----
-
-# LEVEL 3
-
-Historical Replay Engine
-
-Objective
-
-Replay historical market data through the complete trading engine.
-
-Capabilities
-
-- multiple candles
-- multiple symbols
-- deterministic replay
-- portfolio evolution
-- trade history
-
-Planned components
-
-- ReplayEngine
-- CandleFeed
-- HistoricalSession
-
----
-
-# LEVEL 4
-
-Portfolio Intelligence
-
-Objective
-
-Evaluate the portfolio as a whole instead of evaluating only individual trades.
-
-Planned capabilities
-
-- total exposure
-- sector exposure
-- position sizing
-- capital allocation
-- portfolio heat
-- portfolio drawdown
-- portfolio risk
-- portfolio performance
-
-Possible components
-
-- PortfolioAnalytics
-- PortfolioAllocator
-- PortfolioRiskEngine
-- PortfolioPerformanceEngine
-- PortfolioReportBuilder
-
----
-
-# LEVEL 5
-
-Multi-Asset Trading
-
-Objective
-
-Trade multiple symbols simultaneously.
-
-Capabilities
-
-- concurrent open positions
-- portfolio-wide exposure control
-- ranking competing opportunities
-- capital allocation across symbols
-
-Possible components
-
-- OpportunityRanker
-- PortfolioAllocator
-- PositionSelector
-
----
-
-# LEVEL 6
-
-Broker Abstraction
-
-Objective
-
-Replace PaperBroker without changing business logic.
-
-Architecture
-
-ExecutionEngine
-
-↓
-
-Broker Interface
-
-↓
-
+Risk Engine
+Execution Engine
 Paper Broker
+Paper Portfolio
+Position Management
+Trading Cycle
+Paper Trading Runner
+Level 2 — Typed Pipeline Integration
+
+Status:
+
+Complete
+
+Includes:
+
+TradingPipelineResult
+typed-only downstream flow
+removal of legacy dict compatibility
+Level 3 — Live Paper Trading
+
+Status:
+
+Complete
+
+Includes:
+
+YahooProvider
+config/watchlist.txt
+LivePaperMarketScanner
+LivePaperTradingConfig
+live paper CLI
+Level 4 — Portfolio Allocation
+
+Status:
+
+Complete
+
+Includes:
+
+PortfolioAllocator
+PortfolioAllocationDecision
+PortfolioAllocationResult
+Level 5 — Autonomous Finite Paper Trading
+
+Status:
+
+Complete
+
+Includes:
+
+AutonomousPaperTradingRunner
+AutonomousPaperTradingConfig
+AutonomousPaperTradingResult
+multi-cycle session preservation
+Level 6 — Self-Evaluation
+
+Status:
+
+Complete
+
+Includes:
+
+TradeJournalEntry
+TradeJournalBuilder
+PerformanceAnalyzer
+StrategyRecommendationEngine
+Level 7 — Controlled Learning
+
+Status:
+
+Not started
+
+Potential future architecture:
+
+Trade Journal
+        ↓
+Performance Analysis
+        ↓
+Recommendations
+        ↓
+Hypothesis Generator
+        ↓
+Strategy Variant Comparison
+        ↓
+Approved Recommendation
+
+Important rule:
+
+No automatic strategy mutation until controlled hypothesis evaluation exists and is regression-tested.
+
+Level 8 — Scheduled Paper Trading
+
+Status:
+
+Not started
+
+Potential future capabilities:
+
+market-hours service
+periodic finite runs
+daily report
+persistent state
+no uncontrolled infinite loop by default
+Level 9 — Broker Abstraction / Real Broker
+
+Status:
+
+Not started
+
+Possible future broker adapters:
 
 Interactive Brokers
-
 Alpaca
+Saxo
+Trading212 research
 
-Trading212
+Rule:
 
-Future brokers
+Broker adapters may only execute deterministic orders.
 
-ExecutionEngine must never contain broker-specific code.
+Broker adapters may never calculate:
 
----
+BUY / SELL
+stop loss
+targets
+position size
+risk plan
+confidence
+DO NOT VIOLATE
 
-# LEVEL 7
+Do not:
 
-Live Trading
+reintroduce dict pipeline contracts
+bypass TradingPipeline
+bypass RiskPlan
+bypass ExecutionValidator
+combine scanner, allocator and runner responsibilities again
+let AI mutate trading config automatically
+connect real broker before paper trading proves stable
+create infinite unattended loops without explicit design
+duplicate watchlist files
+start Sprint 7E before full review
+NEXT REQUIRED ACTION
 
-Objective
+The next chat/session must begin with a full repository analysis of branch:
 
-Execute deterministic live trades through supported broker adapters.
+fix/trading-config-indicators
 
-Requirements
+It must not assume Sprint 7E is automatically correct.
 
-- deterministic execution
-- broker confirmation
-- retry handling
-- logging
-- audit trail
-- rollback protection
+It must first analyse:
 
-No trading logic may exist inside broker adapters.
+branch
+commits
+project structure
+models
+services
+orchestration layers
+tests
+docs
+architecture
+dependencies
+data flows
+stores
+builders
+validators
+factories
+technical debt
+code smells
+missing abstractions
+unstable interfaces
 
----
+Only after that should the next sprint be proposed.
 
-# LEVEL 8
-
-Autonomous Capital Management
-
-Objective
-
-Operate a complete investment account without manual intervention.
-
-Capabilities
-
-- portfolio optimization
-- cash management
-- exposure balancing
-- daily limits
-- weekly limits
-- risk budgeting
-
-Long-term objective
-
-User configures:
-
-- starting capital
-- allowed markets
-- maximum risk
-- trading schedule
-
-Orion manages the portfolio autonomously.
-
----
-
-# NON-NEGOTIABLE ARCHITECTURAL PRINCIPLES
-
-The following rules apply to every future subsystem.
-
-1.
-
-Every orchestration layer accepts exactly one Context or State object.
-
-2.
-
-Every orchestration layer returns exactly one immutable Result object.
-
-3.
-
-Business logic exists only inside services.
-
-4.
-
-Models remain lightweight.
-
-5.
-
-No duplicated business logic.
-
-6.
-
-No circular dependencies.
-
-7.
-
-No subsystem may bypass another subsystem.
-
-8.
-
-Regression tests are mandatory before every commit.
-
-9.
-
-Architecture changes must be reflected in this document before implementation.
-
-10.
-
-The TradingPipeline remains the single source of truth for trading decisions.
-
----
-
-# CURRENT PROJECT STATUS
-
-Architecture Version
-
-v2.4
-
-Documentation Version
-
-v1.15
-
-Project Health
-
-EXCELLENT
-
-Regression Status
-
-ALL TESTS PASSING
-
-Current Capability
-
-Deterministic autonomous paper trading foundation
-
-Next Milestone
-
-Automatic TradingPipeline Integration
-
-Long-Term Vision
-
-A deterministic, explainable, fully autonomous swing trading platform capable of managing real capital through broker-independent execution.
-
----
-
-END OF DOCUMENT
+END OF FILE
