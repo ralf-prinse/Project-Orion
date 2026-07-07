@@ -57,7 +57,8 @@ class OrionTestRunner:
             TestCommand("Position Manager", [sys.executable, "test_position_manager.py"]),
             TestCommand("Position Management Summary", [sys.executable, "test_position_management_summary.py"]),
             TestCommand("Position Management Summary Builder", [sys.executable, "test_position_management_summary_builder.py"]),
-
+            TestCommand("Portfolio Allocator", [sys.executable, "test_portfolio_allocator.py"]),
+            TestCommand("Autonomous Paper Trading Runner", [sys.executable, "test_autonomous_paper_trading_runner.py"]),
             TestCommand("Paper Trading Pipeline Adapter", [sys.executable, "test_paper_trading_pipeline_adapter.py"]),
             TestCommand("Paper Trading Service", [sys.executable, "test_paper_trading_service.py"]),
             TestCommand("Paper Position Update Service", [sys.executable, "test_paper_position_update_service.py"]),

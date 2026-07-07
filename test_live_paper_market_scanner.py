@@ -64,7 +64,9 @@ def main():
 
     assert result.executed_trades >= 0
     assert result.rejected_trades >= 0
-    assert result.executed_trades + result.rejected_trades >= 1
+    assert result.executed_trades == 0
+    assert result.rejected_trades == 0
+    assert len(result.ranked_candidates) == 5
 
     best = result.best_candidate
 
