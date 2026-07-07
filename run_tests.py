@@ -38,6 +38,15 @@ class OrionTestRunner:
             TestCommand("Adaptive Risk Engine", [sys.executable, "test_adaptive_risk_engine.py"]),
             TestCommand("Break Even Service", [sys.executable, "test_break_even_service.py"]),
             TestCommand("Trailing Stop Service", [sys.executable, "test_trailing_stop_service.py"]),
+            TestCommand("Hypothesis Evaluator", [sys.executable, "test_hypothesis_evaluator.py"]),
+            TestCommand(
+    "Hypothesis Context Builder",
+    [sys.executable, "test_hypothesis_context_builder.py"],
+),
+TestCommand(
+    "Hypothesis Evaluation Service",
+    [sys.executable, "test_hypothesis_evaluation_service.py"],
+),
             TestCommand("Time Stop Service", [sys.executable, "test_time_stop_service.py"]),
             TestCommand("Trade Journal Builder", [sys.executable, "test_trade_journal_builder.py"]),
             TestCommand("Performance Analyzer", [sys.executable, "test_performance_analyzer.py"]),
