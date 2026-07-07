@@ -39,7 +39,9 @@ class OrionTestRunner:
             TestCommand("Break Even Service", [sys.executable, "test_break_even_service.py"]),
             TestCommand("Trailing Stop Service", [sys.executable, "test_trailing_stop_service.py"]),
             TestCommand("Time Stop Service", [sys.executable, "test_time_stop_service.py"]),
-
+            TestCommand("Trade Journal Builder", [sys.executable, "test_trade_journal_builder.py"]),
+            TestCommand("Performance Analyzer", [sys.executable, "test_performance_analyzer.py"]),
+            TestCommand("Strategy Recommendation Engine", [sys.executable, "test_strategy_recommendation_engine.py"]),
             TestCommand("Execution Context", [sys.executable, "test_execution_context.py"]),
             TestCommand("Execution Models", [sys.executable, "test_execution_models.py"]),
             TestCommand("Execution Validator", [sys.executable, "test_execution_validator.py"]),
