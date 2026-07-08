@@ -70,7 +70,7 @@ class LivePaperMarketScanner:
         )
 
         candidates: list[LivePaperCandidate] = []
-        failed_symbols = 0
+        failed_symbol_errors: dict[str, str] = {}
         succeeded_symbols = 0
 
         for symbol in symbols:
@@ -96,8 +96,8 @@ class LivePaperMarketScanner:
 
                 succeeded_symbols += 1
 
-            except Exception:
-                failed_symbols += 1
+            except Exception as error:
+                failed_symbol_errors[symbol] = str(error)
 
         scan_duration_seconds = round(
             time.perf_counter() - started_at,
@@ -108,7 +108,8 @@ class LivePaperMarketScanner:
             session=current_session,
             scanned_symbols=len(symbols),
             succeeded_symbols=succeeded_symbols,
-            failed_symbols=failed_symbols,
+            failed_symbols=len(failed_symbol_errors),
+            failed_symbol_errors=failed_symbol_errors,
             scan_duration_seconds=scan_duration_seconds,
             candidates=candidates,
             executed_trades=0,

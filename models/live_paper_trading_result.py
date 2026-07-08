@@ -26,6 +26,7 @@ class LivePaperTradingResult:
     scanned_symbols: int
     succeeded_symbols: int
     failed_symbols: int
+    failed_symbol_errors: dict[str, str]
     scan_duration_seconds: float
 
     candidates: list[LivePaperCandidate]
