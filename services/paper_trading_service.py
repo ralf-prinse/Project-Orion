@@ -11,6 +11,9 @@ from services.execution_engine import (
     ExecutionEngine,
     ExecutionEngineResult,
 )
+from services.stores.repositories.paper_portfolio_repository import (
+    PaperPortfolioRepository,
+)
 from services.execution_request_builder import ExecutionRequestBuilder
 from services.position_state_store import PositionStateStore
 
@@ -31,10 +34,12 @@ class PaperTradingService:
         execution_engine: ExecutionEngine | None = None,
         request_builder: ExecutionRequestBuilder | None = None,
         position_state_store: PositionStateStore | None = None,
+        portfolio_repository: PaperPortfolioRepository | None = None,
     ):
         self.execution_engine = execution_engine or ExecutionEngine()
         self.request_builder = request_builder or ExecutionRequestBuilder()
         self.position_state_store = position_state_store or PositionStateStore()
+        self.portfolio_repository = portfolio_repository
 
     def open_position(
         self,

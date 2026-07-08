@@ -59,6 +59,18 @@ TestCommand(
     "Learning Pipeline",
     [sys.executable, "test_learning_pipeline.py"],
 ),
+TestCommand(
+    "Dataclass Serializer",
+    [sys.executable, "test_dataclass_serializer.py"],
+),
+TestCommand(
+    "JSON Paper Portfolio Repository",
+    [sys.executable, "test_json_paper_portfolio_repository.py"],
+),
+TestCommand(
+    "Paper Trading Service Persistence",
+    [sys.executable, "test_paper_trading_service_persistence.py"],
+),
             TestCommand("Time Stop Service", [sys.executable, "test_time_stop_service.py"]),
             TestCommand("Trade Journal Builder", [sys.executable, "test_trade_journal_builder.py"]),
             TestCommand("Performance Analyzer", [sys.executable, "test_performance_analyzer.py"]),
