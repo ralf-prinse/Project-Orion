@@ -36,6 +36,7 @@ class OrionTestRunner:
             TestCommand("Trading Config", [sys.executable, "test_trading_config.py"]),
             TestCommand("Live Paper Market Scanner", [sys.executable, "test_live_paper_market_scanner.py"]),
             TestCommand("Provider Retry Policy", [sys.executable, "test_provider_retry_policy.py"]),
+            TestCommand("Provider Statistics", [sys.executable, "test_provider_statistics.py"]),
             TestCommand("Adaptive Risk Engine", [sys.executable, "test_adaptive_risk_engine.py"]),
             TestCommand("Break Even Service", [sys.executable, "test_break_even_service.py"]),
             TestCommand("Trailing Stop Service", [sys.executable, "test_trailing_stop_service.py"]),

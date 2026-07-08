@@ -6,6 +6,7 @@ import yfinance as yf
 from models.market_data import MarketData
 from providers.base_provider import BaseMarketProvider
 from providers.provider_retry_policy import ProviderRetryPolicy
+from providers.provider_statistics import ProviderStatistics
 from services.logging_service import LoggingService
 
 
@@ -20,14 +21,17 @@ class YahooProvider(BaseMarketProvider):
     - Validate symbols
     - Log market data requests
     - Apply deterministic retry policy around Yahoo requests
+    - Record provider statistics for observability
     """
 
     def __init__(
         self,
         retry_policy: ProviderRetryPolicy | None = None,
+        statistics: ProviderStatistics | None = None,
     ):
         self.logger = LoggingService.get_logger("YahooProvider")
         self.retry_policy = retry_policy or ProviderRetryPolicy()
+        self.statistics = statistics or ProviderStatistics()
 
     def get_current_price(self, symbol: str) -> float:
         self.logger.info(
@@ -43,7 +47,8 @@ class YahooProvider(BaseMarketProvider):
         symbol = self._clean_symbol(symbol)
 
         return self.retry_policy.run(
-            lambda: self._get_market_data_once(symbol)
+            lambda: self._get_market_data_once(symbol),
+            statistics=self.statistics,
         )
 
     def _get_market_data_once(self, symbol: str) -> MarketData:
@@ -125,7 +130,8 @@ class YahooProvider(BaseMarketProvider):
                 symbol=symbol,
                 period=period,
                 interval=interval,
-            )
+            ),
+            statistics=self.statistics,
         )
 
     def _get_historical_data_once(
