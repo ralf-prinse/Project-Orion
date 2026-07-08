@@ -1,10 +1,10 @@
 # AI_CONTEXT.md
 
-> Documentation Version: v1.16  
-> Architecture Version: v2.8  
-> Last Updated: 2026-07-07  
-> Active Branch: fix/trading-config-indicators  
-> Regression Status: 46 tests PASS
+> Documentation Version: v1.17
+> Architecture Version: v3.1
+> Last Updated: 2026-07-08
+> Active Branch: fix/trading-config-indicators
+> Regression Status: 58 tests PASS
 
 ---
 
@@ -12,18 +12,19 @@
 
 ## Mission
 
-Project Orion is a deterministic, modular swing trading and paper-trading platform.
+Project Orion is a deterministic, modular, AI-assisted swing trading and paper-trading platform.
 
-The long-term objective is to operate as an autonomous paper-trading system first, and only later as a real broker-connected trading system if the strategy proves itself.
+The long-term objective is to operate first as a long-running autonomous paper-trading system that can monitor a broad market universe over days or weeks. Only after the paper-trading strategy proves stable and measurable should real broker integration be considered.
 
 Project Orion must remain:
 
-- deterministic
-- explainable
-- testable
-- broker-independent
-- modular
-- AI-assisted, never uncontrolled by AI
+* deterministic
+* explainable
+* testable
+* broker-independent
+* modular
+* paper-first
+* AI-assisted, never AI-controlled
 
 AI may help explain, summarize, evaluate and recommend, but AI must never make undocumented or non-deterministic trading decisions.
 
@@ -54,33 +55,48 @@ Every orchestrator should move toward this pattern:
 ```text
 One Context or State input
         ↓
-One orchestrator
+One orchestrator / service
         ↓
 One immutable Result output
+```
 
 Existing examples:
 
+```text
 RiskContext
         ↓
 AdaptiveRiskEngine
         ↓
 RiskPlan
+
 ExecutionContext
         ↓
 ExecutionEngine
         ↓
 ExecutionEngineResult
+
 TradingPipeline
         ↓
 TradingPipelineResult
+
 MarketSnapshot
         ↓
 TradingCycle
         ↓
 TradingCycleResult
+
 AutonomousPaperTradingRunner
         ↓
 AutonomousPaperTradingResult
+
+LearningPipeline
+        ↓
+LearningPipelineResult
+
+ContinuousPaperTradingRunner
+        ↓
+ContinuousPaperTradingRunResult
+```
 
 Business logic belongs in services.
 
@@ -94,56 +110,71 @@ No uncontrolled AI behaviour.
 
 Regression tests are mandatory after every logical step.
 
-CURRENT SYSTEM STATUS
-Regression
+---
+
+# CURRENT SYSTEM STATUS
+
+## Regression
 
 Current full regression suite:
 
-46 tests PASS
+```text
+58 tests PASS
+0 tests FAIL
+```
 
 Project health:
 
+```text
 ORION HEALTH: EXCELLENT
-COMPLETED SUBSYSTEMS
-Market Analysis
+```
+
+---
+
+# COMPLETED SUBSYSTEMS
+
+## Market Analysis
 
 Status: Complete.
 
 Contains:
 
-Market Scanner
-AI Market Scanner
-AI Scanner Presenter
-Signal Fusion
-Market Intelligence
-IndicatorBuilder
-TradingPipeline
-TradingPipelineResult
+* MarketScanner
+* AI MarketScanner
+* AI Scanner Presenter
+* SignalFusionEngine
+* MarketIntelligenceEngine
+* IndicatorBuilder
+* TradingPipeline
+* TradingPipelineResult
 
 Produces:
 
-deterministic trading decisions
-confidence
-position sizing
-risk plan
-AI context
-AI explanation
+* deterministic trading decisions
+* confidence
+* position sizing
+* risk plan
+* AI context
+* AI explanation
 
 Important architectural note:
 
-TradingPipelineResult is now the typed contract between the TradingPipeline and downstream layers.
+`TradingPipelineResult` is now the typed contract between the TradingPipeline and downstream layers.
 
 Legacy dictionary compatibility has been removed.
 
-No pipeline_output.
+Forbidden legacy patterns:
 
-No legacy_output.
+* `pipeline_output`
+* `legacy_output`
+* `result["pipeline"]`
+* `.items()` compatibility
+* `.keys()` compatibility
+* `.values()` compatibility
 
-No result["pipeline"].
+---
 
-No .items() compatibility.
-
-Trading Pipeline Integration
+## Trading Pipeline Integration
 
 Status: Complete.
 
@@ -151,6 +182,7 @@ The pipeline now feeds typed downstream paper-trading flow.
 
 Current typed route:
 
+```text
 Market History
         ↓
 IndicatorBuilder
@@ -168,287 +200,500 @@ PaperTradingService
 ExecutionRequestBuilder
         ↓
 ExecutionEngine
+```
 
 The old anonymous dictionary contract is removed.
 
-Risk Engine
+---
+
+## Risk Engine
 
 Status: Complete.
 
 Contains:
 
-RiskContext
-RiskContextBuilder
-AdaptiveRiskEngine
-ATR-based risk planning
-RiskPlan
-RiskPlanValidator
+* RiskContext
+* RiskContextBuilder
+* AdaptiveRiskEngine
+* ATR-based risk planning
+* RiskPlan
+* RiskPlanValidator
 
 Produces:
 
-deterministic RiskPlan
-stop loss
-targets
-risk percent
-reward percent
-risk/reward ratio
-confidence
-notes
-Execution Layer
+* deterministic RiskPlan
+* stop loss
+* targets
+* risk percent
+* reward percent
+* risk/reward ratio
+* confidence
+* notes
+
+---
+
+## Execution Layer
 
 Status: Complete.
 
 Contains:
 
-ExecutionRequest
-ExecutionContext
-ExecutionValidator
-OrderFactory
-ExecutionEngine
-PaperBroker
-ExecutionReportBuilder
+* ExecutionRequest
+* ExecutionContext
+* ExecutionValidator
+* OrderFactory
+* ExecutionEngine
+* PaperBroker
+* ExecutionReportBuilder
 
 Produces:
 
-ExecutionEngineResult
-deterministic validation
-deterministic order creation
-paper broker execution
-updated paper portfolio snapshot
+* ExecutionEngineResult
+* deterministic validation
+* deterministic order creation
+* paper broker execution
+* updated paper portfolio snapshot
 
 Important behaviour:
 
 Execution validation rejects invalid orders, including:
 
-missing symbol
-non-positive entry price
-non-positive quantity
-non-positive confidence
-insufficient cash
-excessive position allocation
-Paper Trading Foundation
+* missing symbol
+* non-positive entry price
+* non-positive quantity
+* non-positive confidence
+* insufficient cash
+* excessive position allocation
+
+---
+
+## Paper Trading Foundation
 
 Status: Complete.
 
 Contains:
 
-PaperPortfolio
-PaperPosition
-TradingSession
-PaperTradingService
-PaperPositionUpdateService
-PaperPositionCloseService
-PaperTradingRunner
-PaperTradingRunResult
+* PaperPortfolio
+* PaperPosition
+* TradingSession
+* PaperTradingService
+* PaperPositionUpdateService
+* PaperPositionCloseService
+* PaperTradingRunner
+* PaperTradingRunResult
 
 Supports:
 
-paper BUY/open position
-paper position update
-paper close
-multi-cycle deterministic replay
-session-level cash/equity/open-position tracking
-Position Management
+* paper BUY/open position
+* paper position update
+* paper close
+* multi-cycle deterministic replay
+* session-level cash/equity/open-position tracking
+
+PaperTradingService is now repository-aware and can persist portfolio state through a `PaperPortfolioRepository`.
+
+---
+
+## Position Management
 
 Status: Complete.
 
 Contains:
 
-PositionManager
-PositionUpdateEngine
-BreakEvenService
-TrailingStopService
-TimeStopService
-PositionState
-PositionStateFactory
-PositionStateStore
-PositionManagementSummary
-PositionManagementSummaryBuilder
+* PositionManager
+* PositionUpdateEngine
+* BreakEvenService
+* TrailingStopService
+* TimeStopService
+* PositionState
+* PositionStateFactory
+* PositionStateStore
+* PositionManagementSummary
+* PositionManagementSummaryBuilder
 
 Supports:
 
-break-even management
-trailing stop management
-time stop management
-position state updates
-position health summaries
-Live Market Data
+* break-even management
+* trailing stop management
+* time stop management
+* position state updates
+* position health summaries
+
+---
+
+## Live Market Data
 
 Status: Available.
 
 Current provider:
 
-YahooProvider
-BaseMarketProvider
+* YahooProvider
+* BaseMarketProvider
 
 Supports:
 
-current market data
-historical OHLCV data
-configurable period and interval
+* current market data
+* historical OHLCV data
+* configurable period and interval
 
 Important file:
 
+```text
 providers/yahoo_provider.py
+```
 
 Current live data dependency:
 
+```text
 yfinance
-Watchlist
+```
 
-Status: Available.
+Current review target:
 
-Main watchlist:
+YahooProvider still needs hardening for:
 
-config/watchlist.txt
+* retry handling
+* timeout handling
+* caching
+* batching
+* rate-limit resilience
+* large watchlist scans
 
-Contains:
+---
 
-259 symbols
+## Watchlist / Universe Loading
 
-The watchlist includes:
+Status: Operational.
 
-US equities
-US ETFs
-Dutch .AS tickers
-German .DE tickers
+Current source of truth for symbol loading:
 
-Examples:
+```text
+services/watchlist_service.py
+```
 
-AAPL
-MSFT
-NVDA
-ASML
-SPY
-QQQ
-ASML.AS
-INGA.AS
-SAP.DE
-BMW.DE
+Default universe file:
 
-This file must be reused for live paper trading.
+```text
+data/universes/swing.csv
+```
 
-Do not create a duplicate watchlist unless there is a strong architectural reason.
+WatchlistService:
 
-Paper Trading Demo Runner
+* loads symbols from the configured universe file
+* ignores blank lines
+* ignores comment lines starting with `#`
+* uppercases symbols
+* deduplicates symbols
+* returns sorted symbols
+
+Important rule:
+
+Do not create duplicate watchlist/universe-loading logic.
+
+`LivePaperMarketScanner` now routes symbol loading through `WatchlistService`.
+
+---
+
+## Paper Trading Demo Runner
 
 Status: Complete.
 
 Contains:
 
-PaperTradingDemoResult
-PaperTradingDemoRunner
-run_paper_trading_demo.py
+* PaperTradingDemoResult
+* PaperTradingDemoRunner
+* run_paper_trading_demo.py
 
 Purpose:
 
-deterministic end-to-end paper trading demo
-synthetic market history
-no external API dependency
-proves architecture works without live data
+* deterministic end-to-end paper trading demo
+* synthetic market history
+* no external API dependency
+* proves architecture works without live data
 
 Command:
 
+```text
 python run_paper_trading_demo.py
-Live Paper Market Scanner
+```
+
+Validated behaviour:
+
+* IndicatorBuilder works
+* TradingPipeline produces typed BUY result
+* PaperTradingService opens paper positions
+* TradingCycle updates positions across cycles
+* portfolio cash/equity updates correctly
+
+---
+
+## Live Paper Market Scanner
 
 Status: Complete.
 
 Contains:
 
-LivePaperTradingConfig
-LivePaperCandidate
-LivePaperTradingResult
-LivePaperMarketScanner
-run_live_paper_trading.py
+* LivePaperTradingConfig
+* LivePaperCandidate
+* LivePaperTradingResult
+* LivePaperMarketScanner
+* run_live_paper_trading.py
 
 Current responsibility:
 
-load symbols from config/watchlist.txt
-download historical market data through YahooProvider
-run PaperTradingPipelineAdapter
-produce ranked candidates
+```text
+WatchlistService
+        ↓
+YahooProvider
+        ↓
+PaperTradingPipelineAdapter
+        ↓
+LivePaperMarketScanner
+        ↓
+LivePaperCandidate[]
+        ↓
+LivePaperTradingResult
+```
 
-Important architectural rule after Sprint 7C:
+Important architectural rule:
 
-LivePaperMarketScanner scans only.
-
-It must not:
-
-allocate portfolio capital
-execute trades
-mutate TradingSession
-place real broker orders
-Portfolio Allocator
-
-Status: Complete.
-
-Contains:
-
-PortfolioAllocationDecision
-PortfolioAllocationResult
-PortfolioAllocator
-
-Responsibility:
-
-select accepted BUY candidates
-respect available cash
-respect max open positions
-respect max position value
-calculate integer quantities
-explain approval/rejection
+`LivePaperMarketScanner` scans only.
 
 It must not:
 
-fetch market data
-run TradingPipeline
-execute trades
-mutate TradingSession
-Autonomous Paper Trading Runner
+* allocate portfolio capital
+* execute trades
+* mutate TradingSession
+* place real broker orders
+* duplicate watchlist loading logic
 
-Status: Complete.
+Validated live scanner behaviour:
+
+* real Yahoo data can be fetched
+* symbols can be scanned
+* candidates are ranked
+* rejected candidates explain why they were rejected
+* scanner does not execute paper trades
+
+---
+
+## Portfolio Allocator
+
+Status: Complete / recently improved.
 
 Contains:
 
-AutonomousPaperTradingConfig
-AutonomousPaperTradingCycleResult
-AutonomousPaperTradingResult
-AutonomousPaperTradingRunner
-run_autonomous_paper_trading.py
+* PortfolioAllocationDecision
+* PortfolioAllocationResult
+* PortfolioAllocator
 
 Responsibility:
 
-preserve one TradingSession across multiple cycles
-call LivePaperMarketScanner
-call PortfolioAllocator
-execute approved allocations through TradingCycle
-return immutable autonomous result
+* select accepted BUY candidates
+* reject non-accepted candidates
+* reject already-open positions
+* respect available cash
+* respect legacy max open positions
+* respect max position value
+* respect max position size percentage
+* respect max portfolio exposure
+* respect minimum cash reserve
+* calculate integer quantities
+* explain approval/rejection
+
+It must not:
+
+* fetch market data
+* run TradingPipeline
+* execute trades
+* mutate TradingSession
+
+Current allocation config fields:
+
+* `max_position_value`
+* `max_position_size_pct`
+* `max_portfolio_exposure`
+* `min_cash_reserve_pct`
+* `max_open_positions`
+
+Important architectural direction:
+
+`max_open_positions` remains as a safety cap, but portfolio allocation is now moving toward risk-based limits instead of a small fixed number of positions.
+
+---
+
+## Autonomous Paper Trading Runner
+
+Status: Operational.
+
+Contains:
+
+* AutonomousPaperTradingConfig
+* AutonomousPaperTradingCycleResult
+* AutonomousPaperTradingResult
+* AutonomousPaperTradingRunner
+* run_autonomous_paper_trading.py
+
+Responsibility:
+
+* preserve one TradingSession across multiple cycles
+* call LivePaperMarketScanner
+* call PortfolioAllocator
+* execute approved allocations through TradingCycle
+* return immutable autonomous result
+* optionally load and save portfolio state through a PaperPortfolioRepository
 
 Current runner is finite.
 
-It does not run forever.
-
-This is intentional.
+This remains intentional.
 
 Command:
 
+```text
 python run_autonomous_paper_trading.py
-Self-Evaluation Layer
+```
+
+Validated autonomous paper-trading behaviour:
+
+* completed cycles
+* failed cycles tracked
+* executed trades tracked
+* rejected trades tracked
+* failed symbols tracked
+* open paper positions maintained
+* portfolio cash/equity updated
+
+---
+
+## Continuous Paper Trading Runner
+
+Status: Operational.
+
+Contains:
+
+* ContinuousRunnerConfig
+* ContinuousPaperTradingRunner
+* ContinuousPaperTradingRunResult
+* run_continuous_paper_trading.py
+
+Purpose:
+
+Run repeated autonomous paper-trading iterations until stopped.
+
+Current flow:
+
+```text
+ContinuousPaperTradingRunner
+        ↓
+AutonomousPaperTradingRunner
+        ↓
+LivePaperMarketScanner
+        ↓
+PortfolioAllocator
+        ↓
+TradingCycle
+        ↓
+PaperTradingService
+```
+
+Responsibilities:
+
+* repeatedly run finite autonomous paper-trading iterations
+* wait between iterations
+* support max_iterations for safe tests
+* stop cleanly on KeyboardInterrupt
+* optionally continue after exceptions
+* print iteration summaries
+
+It must not:
+
+* generate trading decisions
+* allocate capital directly
+* execute trades directly
+* mutate strategy configuration
+* duplicate AutonomousPaperTradingRunner logic
+
+Command:
+
+```text
+python run_continuous_paper_trading.py
+```
+
+Current default continuous interval:
+
+```text
+300 seconds
+```
+
+The current interval is a starting point for longer paper-trading experiments, not a final trading law.
+
+---
+
+## Persistence Layer
+
+Status: Operational foundation.
+
+Contains:
+
+* DataclassSerializer
+* PaperPortfolioRepository
+* JsonPaperPortfolioRepository
+* TradeJournalRepository
+* JsonlTradeJournalRepository
+
+Purpose:
+
+Enable ORION to persist paper-trading state across application restarts.
+
+Current persistence architecture:
+
+```text
+PaperPortfolio
+        ↓
+DataclassSerializer
+        ↓
+JsonPaperPortfolioRepository
+        ↓
+data/paper_portfolio.json
+```
+
+```text
+TradeJournalEntry
+        ↓
+DataclassSerializer
+        ↓
+JsonlTradeJournalRepository
+        ↓
+data/trade_journal.jsonl
+```
+
+Important rules:
+
+* Trading services depend on repository interfaces, not concrete file formats.
+* JSON is an implementation detail.
+* Future SQLite/PostgreSQL repositories should reuse the same contracts.
+* Repositories must not contain trading business logic.
+* Serialization logic belongs in DataclassSerializer, not in each repository.
+
+---
+
+## Self-Evaluation Layer
 
 Status: Complete.
 
 Contains:
 
-TradeJournalEntry
-PerformanceAnalysisResult
-StrategyRecommendation
-StrategyRecommendationResult
-TradeJournalBuilder
-PerformanceAnalyzer
-StrategyRecommendationEngine
+* TradeJournalEntry
+* PerformanceAnalysisResult
+* StrategyRecommendation
+* StrategyRecommendationResult
+* TradeJournalBuilder
+* PerformanceAnalyzer
+* StrategyRecommendationEngine
 
 Purpose:
 
+```text
 Autonomous Paper Trading Result
         ↓
 TradeJournalBuilder
@@ -462,8 +707,7 @@ PerformanceAnalysisResult
 StrategyRecommendationEngine
         ↓
 StrategyRecommendationResult
-
-This is the first foundation for ORION learning from its own behaviour.
+```
 
 Important safety rule:
 
@@ -473,11 +717,147 @@ It must not automatically modify config.
 
 No auto-tuning is currently allowed.
 
-CURRENT HIGH-LEVEL FLOW
+---
 
-The current full architecture is:
+## Controlled Learning / Hypothesis Evaluation
 
-config/watchlist.txt
+Status: Complete as deterministic foundation.
+
+Contains:
+
+* StrategyHypothesis
+* HypothesisEvaluationContext
+* HypothesisEvaluation
+* HypothesisEvaluationReport
+* HypothesisEvaluator
+* HypothesisContextBuilder
+* HypothesisEvaluationService
+* HypothesisReportBuilder
+* StrategyRecommendationEngine integration
+
+Purpose:
+
+Evaluate strategy hypotheses against performance metrics without mutating production strategy configuration.
+
+Current flow:
+
+```text
+PerformanceAnalysisResult
+        ↓
+HypothesisContextBuilder
+        ↓
+HypothesisEvaluationContext
+        ↓
+HypothesisEvaluator
+        ↓
+HypothesisEvaluation
+        ↓
+HypothesisReportBuilder
+        ↓
+HypothesisEvaluationReport
+        ↓
+StrategyRecommendationEngine
+```
+
+Important rules:
+
+* No AI.
+* No trading decisions.
+* No automatic config mutation.
+* No automatic strategy tuning.
+* Hypothesis evaluation is informational only.
+
+---
+
+## Learning Pipeline
+
+Status: Complete as deterministic first vertical slice.
+
+Contains:
+
+* StrategyIdea
+* StrategyIdeaBuilder
+* LearningPipelineResult
+* LearningPipeline
+
+Purpose:
+
+Convert performance analysis into deterministic strategy ideas through recommendations.
+
+Current flow:
+
+```text
+PerformanceAnalysisResult
+        ↓
+StrategyRecommendationEngine
+        ↓
+StrategyRecommendationResult
+        ↓
+StrategyIdeaBuilder
+        ↓
+StrategyIdea[]
+        ↓
+LearningPipelineResult
+```
+
+Important rules:
+
+* LearningPipeline does not execute trades.
+* LearningPipeline does not create strategy variants.
+* LearningPipeline does not perform replay testing.
+* LearningPipeline does not mutate configuration.
+* StrategyIdea contains intent only, not concrete parameter values.
+
+---
+
+## Strategy Variant Foundation
+
+Status: Started.
+
+Contains:
+
+* StrategyVariant
+* StrategyVariantProposal
+* StrategyIdea
+
+Important design decision:
+
+ORION must not jump directly from recommendation to concrete parameter mutation.
+
+Preferred future chain:
+
+```text
+StrategyRecommendation
+        ↓
+StrategyIdea
+        ↓
+ProposalGenerator
+        ↓
+StrategyVariantProposal
+        ↓
+StrategyVariant
+        ↓
+Controlled replay / comparison
+```
+
+Reason:
+
+Builders should assemble, not decide.
+
+Concrete parameter changes must be generated only by deterministic, tested proposal logic.
+
+---
+
+# CURRENT HIGH-LEVEL FLOW
+
+The current full runtime architecture is:
+
+```text
+data/universes/swing.csv
+        ↓
+WatchlistService
+        ↓
+LivePaperMarketScanner
         ↓
 YahooProvider
         ↓
@@ -488,8 +868,6 @@ IndicatorBuilder
 TradingPipeline
         ↓
 TradingPipelineResult
-        ↓
-LivePaperMarketScanner
         ↓
 LivePaperCandidate[]
         ↓
@@ -507,117 +885,207 @@ PaperPortfolio / TradingSession
         ↓
 AutonomousPaperTradingRunner
         ↓
+ContinuousPaperTradingRunner
+```
+
+The current self-evaluation / learning architecture is:
+
+```text
+AutonomousPaperTradingResult
+        ↓
 TradeJournalBuilder
+        ↓
+TradeJournalEntry[]
         ↓
 PerformanceAnalyzer
         ↓
+PerformanceAnalysisResult
+        ↓
 StrategyRecommendationEngine
-IMPORTANT ARCHITECTURAL DECISIONS
-Scanner / Allocator / Runner Separation
+        ↓
+StrategyRecommendationResult
+        ↓
+LearningPipeline
+        ↓
+StrategyIdea[]
+```
 
-Sprint 7C introduced a key architecture improvement.
+The current persistence architecture is:
 
-Responsibilities are now separated:
+```text
+PaperPortfolio
+        ↓
+PaperPortfolioRepository
+        ↓
+JsonPaperPortfolioRepository
+        ↓
+data/paper_portfolio.json
+```
 
+```text
+TradeJournalEntry
+        ↓
+TradeJournalRepository
+        ↓
+JsonlTradeJournalRepository
+        ↓
+data/trade_journal.jsonl
+```
+
+---
+
+# IMPORTANT ARCHITECTURAL DECISIONS
+
+## Scanner / Allocator / Runner Separation
+
+Responsibilities are separated:
+
+```text
 LivePaperMarketScanner = scan and rank
 PortfolioAllocator = choose what can be bought
 AutonomousPaperTradingRunner = orchestrate cycles and execute approved trades
-
-This prevents LivePaperMarketScanner from becoming too broad.
+ContinuousPaperTradingRunner = repeat finite autonomous runs over time
+```
 
 Do not collapse these responsibilities back into one service.
 
-Typed-Only Pipeline
+---
 
-The pipeline is now typed-only.
+## Typed-Only Pipeline
+
+The pipeline is typed-only.
 
 Use:
 
+```text
 TradingPipelineResult
+```
 
 Do not reintroduce anonymous dictionaries as pipeline contracts.
 
-Paper Before Real Broker
+---
+
+## Paper Before Real Broker
 
 ORION must prove itself with paper money before any real broker integration.
 
-Current paper capital examples:
+Current paper examples:
 
-€500 paper cash
-max 25 symbols per run initially
-max 3 open positions
-max €150 per position
-minimum confidence 0.75
+* €500 paper cash
+* 250 max symbols configured for larger scans
+* risk-based portfolio allocation
+* max €150 nominal position value
+* max 10% position size by equity
+* max 95% portfolio exposure
+* 5% minimum cash reserve
+* minimum confidence 0.75
+* continuous runner interval: 300 seconds
 
 These are configuration values, not hard-coded strategy laws.
 
-CURRENT TECHNICAL DEBT / REVIEW TARGETS
+---
 
-A full architecture review is required before Sprint 7E.
+## Persistence Before Long-Term Evaluation
 
-Review targets:
+Long-running paper trading requires persistent state.
 
-Confirm all new live/autonomous/self-evaluation services have clean boundaries.
-Check whether LivePaperTradingResult should keep executed_trades and rejected_trades now that the scanner no longer executes.
-Check whether autonomous paper trading needs a persistent journal store.
-Check whether TradeJournalBuilder should record only allocation decisions or also execution results.
-Check whether current unrealized P/L handling is sufficient.
-Check if portfolio position prices should be refreshed every autonomous cycle.
-Check if market-hours awareness is needed before longer live paper sessions.
-Check if YahooProvider needs batching, caching or retry handling before scanning all 259 symbols.
-Check if config objects should move toward explicit Context objects per orchestrator.
-Check whether recommendation output should feed a future Hypothesis Generator rather than direct config mutation.
-NEXT RECOMMENDED STEP
+Current persistence foundation exists for:
 
-Do not start Sprint 7E immediately.
+* PaperPortfolio
+* TradeJournalEntry
 
-First perform a full architecture review of the current branch:
+Still required for stronger long-term analysis:
 
+* richer daily reports
+* equity curve history
+* position lifecycle journal events
+* close-event persistence
+* market-hours aware scheduling
+
+---
+
+## AI Safety Rule
+
+AI may assist with:
+
+* explanations
+* summaries
+* reports
+* recommendations
+* architecture review
+
+AI may not:
+
+* place trades
+* mutate strategy config
+* bypass deterministic services
+* invent BUY/SELL decisions
+* override RiskPlan
+* override ExecutionValidator
+
+---
+
+# CURRENT TECHNICAL DEBT / REVIEW TARGETS
+
+Current review targets:
+
+* YahooProvider still needs retry, timeout, caching and batching.
+* LivePaperTradingResult still contains executed_trades and rejected_trades even though the scanner does not execute.
+* TradeJournalBuilder may need richer execution result details.
+* PaperPosition current prices must be reviewed during long-running sessions.
+* Position lifecycle should close positions based on stop/target logic during live cycles.
+* Market-hours scheduler is not implemented yet.
+* Continuous runner currently uses sleep interval, not exact wall-clock aligned scheduling.
+* WatchlistService is now the symbol-loading source; avoid duplicate universe managers unless needed.
+* Large watchlist scans need profiling before parallel scanning.
+* No real broker integration.
+* No automatic strategy mutation.
+* StrategyVariant / ProposalGenerator / Replay Comparison are not complete yet.
+
+---
+
+# NEXT RECOMMENDED STEP
+
+Current branch:
+
+```text
 fix/trading-config-indicators
+```
 
-The review must cover:
+Current status:
 
-complete project structure
-all models
-all services
-orchestration layers
-tests
-documentation
-dependencies
-data flows
-context/result patterns
-stores
-builders
-validators
-factories
-technical debt
-duplicate business logic
-circular dependencies
-public interface stability
+```text
+58 tests PASS
+```
 
-Only after that review should the next sprint be selected.
+The next sprint should be selected from the actual repository state.
 
-Likely direction after review:
+Recommended next direction:
 
-Sprint 7E — Controlled Learning / Hypothesis Evaluation
+```text
+Sprint 8.3 — Large Universe / Scalable Scanner Hardening
+```
 
-Possible future flow:
+Suggested goals:
 
-Trade Journal
-        ↓
-Performance Analysis
-        ↓
-Recommendations
-        ↓
-Hypothesis Generator
-        ↓
-Replay / Paper comparison
-        ↓
-Approved strategy changes
+1. Confirm `data/universes/swing.csv` content and symbol count.
+2. Increase scan universe carefully.
+3. Profile scan duration.
+4. Add scan timing metrics.
+5. Add YahooProvider retry/timeout handling.
+6. Add provider failure reporting.
+7. Consider bounded parallel scanning only after baseline timing is known.
+8. Keep WatchlistService as the only source of symbol loading.
 
-But this must not be assumed before repository analysis.
+Do not jump directly to real broker integration.
 
-DEVELOPMENT RULES
+Do not enable automatic config mutation.
+
+Do not create duplicate watchlist/universe-loading layers.
+
+---
+
+# DEVELOPMENT RULES
 
 Never bypass existing engines.
 
@@ -627,9 +1095,9 @@ Never reintroduce legacy dict contracts.
 
 Every subsystem must have:
 
-models
-services
-tests
+* models
+* services
+* tests
 
 Regression tests must pass before every commit.
 
@@ -641,38 +1109,74 @@ Work from the current branch.
 
 Do not assume an older sprint plan remains correct.
 
-CURRENT PROJECT HEALTH
+---
+
+# CURRENT PROJECT HEALTH
 
 Architecture:
 
-Stable, but ready for review
+```text
+Stable and actively evolving toward long-running paper trading
+```
 
 Regression:
 
-46 tests PASS
+```text
+58 tests PASS
+```
 
 Execution Layer:
 
+```text
 Complete
+```
 
 Paper Trading:
 
+```text
 Operational
+```
 
 Live Paper Trading:
 
-Operational, finite-run
+```text
+Operational
+```
 
 Autonomous Paper Trading:
 
-Operational, finite-run
+```text
+Operational, finite-run, portfolio persistence supported
+```
+
+Continuous Paper Trading:
+
+```text
+Operational, interval-based, manually stoppable
+```
+
+Persistence:
+
+```text
+Operational foundation
+```
 
 Self-Evaluation:
 
+```text
 Operational, recommendation-only
+```
+
+Controlled Learning:
+
+```text
+Operational foundation, no auto-tuning
+```
 
 Next focus:
 
-Full architecture review before Sprint 7E
+```text
+Scalable market universe scanning, YahooProvider hardening, scheduler, and long-running paper-trading validation
+```
 
 END OF FILE
