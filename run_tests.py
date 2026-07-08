@@ -75,6 +75,10 @@ TestCommand(
     "Autonomous Runner Persistence",
     [sys.executable, "test_autonomous_paper_trading_runner_persistence.py"],
 ),
+TestCommand(
+    "JSONL Trade Journal Repository",
+    [sys.executable, "test_jsonl_trade_journal_repository.py"],
+),
             TestCommand("Time Stop Service", [sys.executable, "test_time_stop_service.py"]),
             TestCommand("Trade Journal Builder", [sys.executable, "test_trade_journal_builder.py"]),
             TestCommand("Performance Analyzer", [sys.executable, "test_performance_analyzer.py"]),
