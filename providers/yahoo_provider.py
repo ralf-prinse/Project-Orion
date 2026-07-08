@@ -5,6 +5,7 @@ import yfinance as yf
 
 from models.market_data import MarketData
 from providers.base_provider import BaseMarketProvider
+from providers.provider_retry_policy import ProviderRetryPolicy
 from services.logging_service import LoggingService
 
 
@@ -18,13 +19,17 @@ class YahooProvider(BaseMarketProvider):
     - Retrieve historical OHLCV data
     - Validate symbols
     - Log market data requests
+    - Apply deterministic retry policy around Yahoo requests
     """
 
-    def __init__(self):
+    def __init__(
+        self,
+        retry_policy: ProviderRetryPolicy | None = None,
+    ):
         self.logger = LoggingService.get_logger("YahooProvider")
+        self.retry_policy = retry_policy or ProviderRetryPolicy()
 
     def get_current_price(self, symbol: str) -> float:
-
         self.logger.info(
             "Requesting current price for %s",
             symbol,
@@ -35,9 +40,13 @@ class YahooProvider(BaseMarketProvider):
         return market_data.current_price
 
     def get_market_data(self, symbol: str) -> MarketData:
-
         symbol = self._clean_symbol(symbol)
 
+        return self.retry_policy.run(
+            lambda: self._get_market_data_once(symbol)
+        )
+
+    def _get_market_data_once(self, symbol: str) -> MarketData:
         self.logger.info(
             "Downloading market data for %s",
             symbol,
@@ -48,7 +57,6 @@ class YahooProvider(BaseMarketProvider):
         history = ticker.history(period="5d")
 
         if history.empty:
-
             self.logger.error(
                 "No market data found for %s",
                 symbol,
@@ -81,7 +89,6 @@ class YahooProvider(BaseMarketProvider):
         )
 
         if previous_close is None and len(history) >= 2:
-
             previous_close = float(
                 history["Close"].iloc[-2]
             )
@@ -111,9 +118,22 @@ class YahooProvider(BaseMarketProvider):
         period: str = "3mo",
         interval: str = "1d",
     ) -> pd.DataFrame:
-
         symbol = self._clean_symbol(symbol)
 
+        return self.retry_policy.run(
+            lambda: self._get_historical_data_once(
+                symbol=symbol,
+                period=period,
+                interval=interval,
+            )
+        )
+
+    def _get_historical_data_once(
+        self,
+        symbol: str,
+        period: str,
+        interval: str,
+    ) -> pd.DataFrame:
         self.logger.info(
             (
                 "Downloading history for %s "
@@ -132,7 +152,6 @@ class YahooProvider(BaseMarketProvider):
         )
 
         if history.empty:
-
             self.logger.error(
                 "No historical data found for %s",
                 symbol,
@@ -154,7 +173,6 @@ class YahooProvider(BaseMarketProvider):
         self,
         symbol: str,
     ) -> str:
-
         symbol = symbol.strip().upper()
 
         if not symbol:
