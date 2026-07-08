@@ -12,7 +12,7 @@ class LivePaperTradingConfig:
     Uses real market data, but only paper money.
     """
 
-    watchlist_path: Path = Path("config/watchlist.txt")
+    watchlist_path: Path = Path("data/universes/swing.csv")
 
     initial_cash: float = 500.0
 
