@@ -11,6 +11,7 @@ from providers.yahoo_provider import YahooProvider
 from services.paper_trading_pipeline_adapter import (
     PaperTradingPipelineAdapter,
 )
+from services.watchlist_service import WatchlistService
 
 
 class LivePaperMarketScanner:
@@ -19,7 +20,7 @@ class LivePaperMarketScanner:
 
     Responsibilities
     ----------------
-    - Load symbols from watchlist
+    - Load symbols through WatchlistService
     - Download historical market data
     - Run IndicatorBuilder + TradingPipeline
     - Build ranked candidates
@@ -37,16 +38,25 @@ class LivePaperMarketScanner:
         config: LivePaperTradingConfig | None = None,
         provider: YahooProvider | None = None,
         adapter: PaperTradingPipelineAdapter | None = None,
+        watchlist_service: WatchlistService | None = None,
     ):
         self.config = config or LivePaperTradingConfig()
         self.provider = provider or YahooProvider()
         self.adapter = adapter or PaperTradingPipelineAdapter()
+        self.watchlist_service = (
+            watchlist_service
+            or WatchlistService(
+                watchlist_path=str(self.config.watchlist_path),
+            )
+        )
 
     def run(
         self,
         session: TradingSession | None = None,
     ) -> LivePaperTradingResult:
-        symbols = self._load_symbols()
+        symbols = self.watchlist_service.load_symbols()[
+            : self.config.max_symbols
+        ]
 
         current_session = session or TradingSession(
             name="Orion Live Paper Trading",
@@ -90,22 +100,6 @@ class LivePaperMarketScanner:
             executed_trades=0,
             rejected_trades=0,
         )
-
-    def _load_symbols(self) -> list[str]:
-        if not self.config.watchlist_path.exists():
-            raise FileNotFoundError(
-                f"Watchlist not found: {self.config.watchlist_path}"
-            )
-
-        symbols: list[str] = []
-
-        for line in self.config.watchlist_path.read_text().splitlines():
-            symbol = line.strip().upper()
-
-            if symbol and not symbol.startswith("#"):
-                symbols.append(symbol)
-
-        return symbols[: self.config.max_symbols]
 
     def _build_candidate(
         self,
