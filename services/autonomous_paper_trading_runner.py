@@ -9,6 +9,9 @@ from models.autonomous_paper_trading_result import (
     AutonomousPaperTradingCycleResult,
     AutonomousPaperTradingResult,
 )
+from services.stores.repositories.paper_portfolio_repository import (
+    PaperPortfolioRepository,
+)
 from models.market_snapshot import MarketSnapshot
 from models.paper_portfolio import PaperPortfolio
 from models.trading_session import TradingSession
@@ -42,6 +45,7 @@ class AutonomousPaperTradingRunner:
         scanner: LivePaperMarketScanner | None = None,
         allocator: PortfolioAllocator | None = None,
         trading_cycle: TradingCycle | None = None,
+        portfolio_repository: PaperPortfolioRepository | None = None,
     ):
         self.config = config or AutonomousPaperTradingConfig()
         self.scanner = scanner or LivePaperMarketScanner(
@@ -49,14 +53,14 @@ class AutonomousPaperTradingRunner:
         )
         self.allocator = allocator or PortfolioAllocator()
         self.trading_cycle = trading_cycle or TradingCycle()
+        self.portfolio_repository = portfolio_repository
 
     def run(self) -> AutonomousPaperTradingResult:
         session = TradingSession(
             name="Orion Autonomous Paper Trading",
-            portfolio=PaperPortfolio(
-                cash=self.config.live_config.initial_cash,
-            ),
+            portfolio=self._load_or_create_portfolio(),
         )
+        
 
         cycle_results: list[AutonomousPaperTradingCycleResult] = []
         completed_cycles = 0
@@ -111,6 +115,9 @@ class AutonomousPaperTradingRunner:
                 )
 
                 completed_cycles += 1
+                self._save_portfolio(
+                    session.portfolio,
+                )
 
                 if self.config.print_cycle_summary:
                     self._print_cycle_summary(
@@ -142,6 +149,29 @@ class AutonomousPaperTradingRunner:
             final_cash=session.cash,
             final_equity=session.equity,
         )
+
+    def _load_or_create_portfolio(self) -> PaperPortfolio:
+        if (
+            self.portfolio_repository is not None
+            and self.portfolio_repository.exists()
+        ):
+            return self.portfolio_repository.load()
+
+        return PaperPortfolio(
+            cash=self.config.live_config.initial_cash,
+        )
+
+    def _save_portfolio(
+        self,
+        portfolio: PaperPortfolio,
+    ) -> None:
+        if self.portfolio_repository is None:
+            return
+
+        self.portfolio_repository.save(
+            portfolio,
+        )
+
 
     def _print_cycle_summary(
         self,
