@@ -17,8 +17,9 @@ class PortfolioAllocator:
     ----------------
     - Select accepted BUY candidates
     - Respect available cash
-    - Respect maximum open positions
-    - Respect maximum position value
+    - Respect cash reserve
+    - Respect maximum portfolio exposure
+    - Respect maximum position size
     - Calculate integer quantities
 
     Does NOT
@@ -45,6 +46,18 @@ class PortfolioAllocator:
 
         available_cash = session.cash
         open_positions = session.open_positions
+        exposure_value = session.portfolio.positions_value
+        equity = session.equity
+
+        max_exposure_value = round(
+            equity * config.max_portfolio_exposure,
+            2,
+        )
+
+        cash_reserve = round(
+            equity * config.min_cash_reserve_pct,
+            2,
+        )
 
         for candidate in ranked_candidates:
             if not candidate.accepted:
@@ -80,12 +93,47 @@ class PortfolioAllocator:
                 )
                 continue
 
+            remaining_exposure_value = round(
+                max_exposure_value - exposure_value,
+                2,
+            )
+
+            spendable_cash = round(
+                available_cash - cash_reserve,
+                2,
+            )
+
+            if remaining_exposure_value <= 0:
+                decisions.append(
+                    PortfolioAllocationDecision(
+                        candidate=candidate,
+                        quantity=0,
+                        approved=False,
+                        reason="Maximum portfolio exposure reached.",
+                    )
+                )
+                continue
+
+            if spendable_cash <= 0:
+                decisions.append(
+                    PortfolioAllocationDecision(
+                        candidate=candidate,
+                        quantity=0,
+                        approved=False,
+                        reason="Cash reserve reached.",
+                    )
+                )
+                continue
+
             entry_price = candidate.result.risk_plan.entry_price
 
             quantity = self._calculate_quantity(
-                available_cash=available_cash,
+                available_cash=spendable_cash,
+                portfolio_equity=equity,
                 entry_price=entry_price,
                 max_position_value=config.max_position_value,
+                max_position_size_pct=config.max_position_size_pct,
+                remaining_exposure_value=remaining_exposure_value,
             )
 
             if quantity <= 0:
@@ -117,6 +165,12 @@ class PortfolioAllocator:
                 available_cash - estimated_value,
                 2,
             )
+
+            exposure_value = round(
+                exposure_value + estimated_value,
+                2,
+            )
+
             open_positions += 1
 
         return PortfolioAllocationResult(
@@ -126,18 +180,31 @@ class PortfolioAllocator:
     def _calculate_quantity(
         self,
         available_cash: float,
+        portfolio_equity: float,
         entry_price: float,
         max_position_value: float,
+        max_position_size_pct: float,
+        remaining_exposure_value: float,
     ) -> int:
         if available_cash <= 0:
+            return 0
+
+        if portfolio_equity <= 0:
             return 0
 
         if entry_price <= 0:
             return 0
 
+        max_position_by_pct = round(
+            portfolio_equity * max_position_size_pct,
+            2,
+        )
+
         available_value = min(
             available_cash,
             max_position_value,
+            max_position_by_pct,
+            remaining_exposure_value,
         )
 
         return int(

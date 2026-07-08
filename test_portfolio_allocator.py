@@ -69,6 +69,7 @@ def main():
         max_open_positions=2,
         min_confidence=0.75,
         max_position_value=150.0,
+        max_position_size_pct=0.30,
     )
 
     candidates = [

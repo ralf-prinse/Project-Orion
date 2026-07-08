@@ -1,0 +1,23 @@
+{
+  "cash": 205.52,
+  "positions": {
+    "NFLX": {
+      "symbol": "NFLX",
+      "quantity": 1,
+      "entry_price": 75.88,
+      "current_price": 75.88
+    },
+    "WMT": {
+      "symbol": "WMT",
+      "quantity": 1,
+      "entry_price": 113.42,
+      "current_price": 113.42
+    },
+    "INTC": {
+      "symbol": "INTC",
+      "quantity": 1,
+      "entry_price": 105.18,
+      "current_price": 105.18
+    }
+  }
+}
