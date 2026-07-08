@@ -55,6 +55,10 @@ TestCommand(
     "Strategy Recommendation With Hypotheses",
     [sys.executable, "test_strategy_recommendation_with_hypotheses.py"],
 ),
+TestCommand(
+    "Learning Pipeline",
+    [sys.executable, "test_learning_pipeline.py"],
+),
             TestCommand("Time Stop Service", [sys.executable, "test_time_stop_service.py"]),
             TestCommand("Trade Journal Builder", [sys.executable, "test_trade_journal_builder.py"]),
             TestCommand("Performance Analyzer", [sys.executable, "test_performance_analyzer.py"]),
