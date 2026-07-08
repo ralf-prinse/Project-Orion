@@ -39,7 +39,7 @@ def main():
     print("=========================================\n")
 
     config = LivePaperTradingConfig(
-        watchlist_path=Path("config/watchlist.txt"),
+        watchlist_path=Path("data/universes/swing.csv"),
         initial_cash=500.0,
         max_symbols=5,
         max_open_positions=3,
@@ -55,7 +55,9 @@ def main():
     result = scanner.run()
 
     assert result.scanned_symbols == 5
+    assert result.succeeded_symbols == 5
     assert result.failed_symbols == 0
+    assert result.scan_duration_seconds >= 0.0
     assert len(result.candidates) == 5
 
     assert result.session.cash >= 0.0

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import time
+
 from models.live_paper_trading_config import LivePaperTradingConfig
 from models.live_paper_trading_result import (
     LivePaperCandidate,
@@ -54,6 +56,8 @@ class LivePaperMarketScanner:
         self,
         session: TradingSession | None = None,
     ) -> LivePaperTradingResult:
+        started_at = time.perf_counter()
+
         symbols = self.watchlist_service.load_symbols()[
             : self.config.max_symbols
         ]
@@ -67,6 +71,7 @@ class LivePaperMarketScanner:
 
         candidates: list[LivePaperCandidate] = []
         failed_symbols = 0
+        succeeded_symbols = 0
 
         for symbol in symbols:
             try:
@@ -89,13 +94,22 @@ class LivePaperMarketScanner:
                     )
                 )
 
+                succeeded_symbols += 1
+
             except Exception:
                 failed_symbols += 1
+
+        scan_duration_seconds = round(
+            time.perf_counter() - started_at,
+            6,
+        )
 
         return LivePaperTradingResult(
             session=current_session,
             scanned_symbols=len(symbols),
+            succeeded_symbols=succeeded_symbols,
             failed_symbols=failed_symbols,
+            scan_duration_seconds=scan_duration_seconds,
             candidates=candidates,
             executed_trades=0,
             rejected_trades=0,

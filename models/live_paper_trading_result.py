@@ -24,7 +24,9 @@ class LivePaperTradingResult:
     session: TradingSession
 
     scanned_symbols: int
+    succeeded_symbols: int
     failed_symbols: int
+    scan_duration_seconds: float
 
     candidates: list[LivePaperCandidate]
 
