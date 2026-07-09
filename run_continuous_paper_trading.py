@@ -5,6 +5,9 @@ from models.autonomous_paper_trading_config import (
 )
 from models.continuous_runner_config import ContinuousRunnerConfig
 from models.live_paper_trading_config import LivePaperTradingConfig
+from services.autonomous_paper_trading_runner import (
+    AutonomousPaperTradingRunner,
+)
 from services.continuous_paper_trading_runner import (
     ContinuousPaperTradingRunner,
 )
@@ -25,16 +28,24 @@ def main():
         path="data/trade_journal.jsonl",
     )
 
-    config = ContinuousRunnerConfig(
-        autonomous_config=AutonomousPaperTradingConfig(
-            cycles=1,
-            sleep_seconds=0,
-            live_config=LivePaperTradingConfig(
-                initial_cash=500.0,
-                max_symbols=25,
-            ),
-            print_cycle_summary=True,
+    autonomous_config = AutonomousPaperTradingConfig(
+        cycles=1,
+        sleep_seconds=0,
+        live_config=LivePaperTradingConfig(
+            initial_cash=500.0,
+            max_symbols=25,
         ),
+        print_cycle_summary=True,
+    )
+
+    autonomous_runner = AutonomousPaperTradingRunner(
+        config=autonomous_config,
+        portfolio_repository=portfolio_repository,
+        trade_journal_repository=trade_journal_repository,
+    )
+
+    config = ContinuousRunnerConfig(
+        autonomous_config=autonomous_config,
         interval_seconds=300,
         max_iterations=None,
         stop_on_exception=False,
@@ -43,11 +54,8 @@ def main():
 
     runner = ContinuousPaperTradingRunner(
         config=config,
+        runner=autonomous_runner,
     )
-
-    # Inject persistence into the underlying autonomous runner.
-    runner.runner.portfolio_repository = portfolio_repository
-    runner.runner.trade_journal_repository = trade_journal_repository
 
     print("\n=========================================")
     print("ORION CONTINUOUS PAPER TRADING")
