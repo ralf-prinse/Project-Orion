@@ -85,6 +85,7 @@ TestCommand(
     "Continuous Paper Trading Runner",
     [sys.executable, "test_continuous_paper_trading_runner.py"],
 ),
+TestCommand("Position Monitor", [sys.executable, "test_position_monitor.py"]),
             TestCommand("Time Stop Service", [sys.executable, "test_time_stop_service.py"]),
             TestCommand("Trade Journal Builder", [sys.executable, "test_trade_journal_builder.py"]),
             TestCommand("Performance Analyzer", [sys.executable, "test_performance_analyzer.py"]),
