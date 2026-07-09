@@ -14,6 +14,7 @@ from models.market_snapshot import MarketSnapshot
 from models.paper_portfolio import PaperPortfolio
 from models.trading_session import TradingSession
 from providers.yahoo_provider import YahooProvider
+from services.exit_engine import ExitEngine
 from services.live_paper_market_scanner import LivePaperMarketScanner
 from services.portfolio_allocator import PortfolioAllocator
 from services.portfolio_revaluation_service import PortfolioRevaluationService
@@ -45,6 +46,7 @@ class AutonomousPaperTradingRunner:
         position_monitor: PositionMonitor | None = None,
         revaluation_service: PortfolioRevaluationService | None = None,
         price_provider: YahooProvider | None = None,
+        exit_engine: ExitEngine | None = None,
     ):
         self.config = config or AutonomousPaperTradingConfig()
         self.scanner = scanner or LivePaperMarketScanner(
@@ -62,6 +64,7 @@ class AutonomousPaperTradingRunner:
             revaluation_service or PortfolioRevaluationService()
         )
         self.price_provider = price_provider or YahooProvider()
+        self.exit_engine = exit_engine or ExitEngine()
 
     def run(self) -> AutonomousPaperTradingResult:
         session_id = self._build_session_id()
@@ -81,7 +84,7 @@ class AutonomousPaperTradingRunner:
                     session=session,
                 )
 
-                self._monitor_open_positions(
+                session = self._process_open_position_exits(
                     session=session,
                 )
 
@@ -209,22 +212,40 @@ class AutonomousPaperTradingRunner:
             portfolio=portfolio,
         )
 
-    def _monitor_open_positions(
+    def _process_open_position_exits(
         self,
         session: TradingSession,
-    ) -> None:
-        for position in session.portfolio.positions.values():
-            result = self.position_monitor.evaluate(
+    ) -> TradingSession:
+        portfolio = session.portfolio
+
+        for position in list(portfolio.positions.values()):
+            decision = self.position_monitor.evaluate(
                 position=position,
                 config=self.config.live_config,
             )
 
             print(
                 f"Position monitor: "
-                f"{result.symbol} -> {result.action} "
-                f"({result.unrealized_return_percent * 100:.2f}%) "
-                f"{result.reason}"
+                f"{decision.symbol} -> {decision.action} "
+                f"({decision.unrealized_return_percent * 100:.2f}%) "
+                f"{decision.reason}"
             )
+
+            result = self.exit_engine.execute(
+                portfolio=portfolio,
+                decision=decision,
+            )
+
+            if result.executed:
+                print(
+                    f"Exit executed: "
+                    f"{result.symbol} -> {result.action} | {result.reason}"
+                )
+
+        return TradingSession(
+            name=session.name,
+            portfolio=portfolio,
+        )
 
     def _load_or_create_portfolio(self) -> PaperPortfolio:
         if (
