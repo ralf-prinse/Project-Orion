@@ -62,7 +62,13 @@ class ContinuousPaperTradingRunner:
 
         while self._should_continue(iteration):
             try:
+                print("\n>>> Starting autonomous runner...")
+                print(f">>> Iteration: {iteration + 1}")
+
                 last_result = self.runner.run()
+
+                print(">>> Autonomous runner finished.")
+
                 iterations_completed += 1
 
                 if self.config.print_iteration_summary:
@@ -72,10 +78,14 @@ class ContinuousPaperTradingRunner:
                     )
 
             except KeyboardInterrupt:
+                print("\n>>> KeyboardInterrupt received.")
                 break
 
-            except Exception:
+            except Exception as exc:
                 failed_iterations += 1
+
+                print("\n>>> Autonomous runner raised exception:")
+                print(repr(exc))
 
                 if self.config.stop_on_exception:
                     break
@@ -83,6 +93,10 @@ class ContinuousPaperTradingRunner:
             iteration += 1
 
             if self._should_continue(iteration):
+                print(
+                    f">>> Sleeping for "
+                    f"{self.config.interval_seconds} seconds..."
+                )
                 time.sleep(self.config.interval_seconds)
 
         return ContinuousPaperTradingRunResult(
