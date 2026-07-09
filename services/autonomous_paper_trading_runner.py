@@ -10,17 +10,18 @@ from models.autonomous_paper_trading_result import (
     AutonomousPaperTradingCycleResult,
     AutonomousPaperTradingResult,
 )
+from models.market_snapshot import MarketSnapshot
+from models.paper_portfolio import PaperPortfolio
+from models.trading_session import TradingSession
+from services.live_paper_market_scanner import LivePaperMarketScanner
+from services.portfolio_allocator import PortfolioAllocator
+from services.position_monitor import PositionMonitor
 from services.stores.repositories.paper_portfolio_repository import (
     PaperPortfolioRepository,
 )
 from services.stores.repositories.trade_journal_repository import (
     TradeJournalRepository,
 )
-from models.market_snapshot import MarketSnapshot
-from models.paper_portfolio import PaperPortfolio
-from models.trading_session import TradingSession
-from services.live_paper_market_scanner import LivePaperMarketScanner
-from services.portfolio_allocator import PortfolioAllocator
 from services.trade_journal_builder import TradeJournalBuilder
 from services.trading_cycle import TradingCycle
 
@@ -28,22 +29,6 @@ from services.trading_cycle import TradingCycle
 class AutonomousPaperTradingRunner:
     """
     Finite autonomous paper trading runner.
-
-    Responsibilities
-    ----------------
-    - Preserve one TradingSession across multiple cycles
-    - Run live market scan
-    - Allocate portfolio capital
-    - Execute approved paper trades
-    - Return immutable autonomous result
-    - Optionally persist portfolio state
-    - Optionally persist trade journal entries
-
-    Does NOT
-    --------
-    - Fetch market data directly
-    - Rank candidates directly
-    - Place real broker orders
     """
 
     def __init__(
@@ -55,6 +40,7 @@ class AutonomousPaperTradingRunner:
         portfolio_repository: PaperPortfolioRepository | None = None,
         trade_journal_repository: TradeJournalRepository | None = None,
         trade_journal_builder: TradeJournalBuilder | None = None,
+        position_monitor: PositionMonitor | None = None,
     ):
         self.config = config or AutonomousPaperTradingConfig()
         self.scanner = scanner or LivePaperMarketScanner(
@@ -67,6 +53,7 @@ class AutonomousPaperTradingRunner:
         self.trade_journal_builder = (
             trade_journal_builder or TradeJournalBuilder()
         )
+        self.position_monitor = position_monitor or PositionMonitor()
 
     def run(self) -> AutonomousPaperTradingResult:
         session_id = self._build_session_id()
@@ -82,6 +69,10 @@ class AutonomousPaperTradingRunner:
 
         for cycle_index in range(self.config.cycles):
             try:
+                self._monitor_open_positions(
+                    session=session,
+                )
+
                 scan_result = self.scanner.run(
                     session=session,
                 )
@@ -171,6 +162,23 @@ class AutonomousPaperTradingRunner:
         )
 
         return result
+
+    def _monitor_open_positions(
+        self,
+        session: TradingSession,
+    ) -> None:
+        for position in session.portfolio.positions.values():
+            result = self.position_monitor.evaluate(
+                position=position,
+                config=self.config.live_config,
+            )
+
+            print(
+                f"Position monitor: "
+                f"{result.symbol} -> {result.action} "
+                f"({result.unrealized_return_percent * 100:.2f}%) "
+                f"{result.reason}"
+            )
 
     def _load_or_create_portfolio(self) -> PaperPortfolio:
         if (
