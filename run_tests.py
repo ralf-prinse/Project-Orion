@@ -97,6 +97,10 @@ TestCommand(
     "Dashboard Service",
     [sys.executable, "test_dashboard_service.py"],
 ),
+TestCommand(
+    "Trading Dashboard CLI Presenter",
+    [sys.executable, "test_trading_dashboard_cli_presenter.py"],
+),
             TestCommand("Position Monitor", [sys.executable, "test_position_monitor.py"]),
             TestCommand("Time Stop Service", [sys.executable, "test_time_stop_service.py"]),
             TestCommand("Trade Journal Builder", [sys.executable, "test_trade_journal_builder.py"]),
