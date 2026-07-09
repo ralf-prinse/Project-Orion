@@ -105,6 +105,10 @@ TestCommand(
     "Closed Trade Analytics Service",
     [sys.executable, "test_closed_trade_analytics_service.py"],
 ),
+TestCommand(
+    "Desktop Bootstrap",
+    [sys.executable, "test_desktop_bootstrap.py"],
+),
             TestCommand("Position Monitor", [sys.executable, "test_position_monitor.py"]),
             TestCommand("Time Stop Service", [sys.executable, "test_time_stop_service.py"]),
             TestCommand("Trade Journal Builder", [sys.executable, "test_trade_journal_builder.py"]),
