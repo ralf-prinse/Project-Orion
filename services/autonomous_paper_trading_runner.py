@@ -13,8 +13,10 @@ from models.autonomous_paper_trading_result import (
 from models.market_snapshot import MarketSnapshot
 from models.paper_portfolio import PaperPortfolio
 from models.trading_session import TradingSession
+from providers.yahoo_provider import YahooProvider
 from services.live_paper_market_scanner import LivePaperMarketScanner
 from services.portfolio_allocator import PortfolioAllocator
+from services.portfolio_revaluation_service import PortfolioRevaluationService
 from services.position_monitor import PositionMonitor
 from services.stores.repositories.paper_portfolio_repository import (
     PaperPortfolioRepository,
@@ -41,6 +43,8 @@ class AutonomousPaperTradingRunner:
         trade_journal_repository: TradeJournalRepository | None = None,
         trade_journal_builder: TradeJournalBuilder | None = None,
         position_monitor: PositionMonitor | None = None,
+        revaluation_service: PortfolioRevaluationService | None = None,
+        price_provider: YahooProvider | None = None,
     ):
         self.config = config or AutonomousPaperTradingConfig()
         self.scanner = scanner or LivePaperMarketScanner(
@@ -54,6 +58,10 @@ class AutonomousPaperTradingRunner:
             trade_journal_builder or TradeJournalBuilder()
         )
         self.position_monitor = position_monitor or PositionMonitor()
+        self.revaluation_service = (
+            revaluation_service or PortfolioRevaluationService()
+        )
+        self.price_provider = price_provider or YahooProvider()
 
     def run(self) -> AutonomousPaperTradingResult:
         session_id = self._build_session_id()
@@ -69,6 +77,10 @@ class AutonomousPaperTradingRunner:
 
         for cycle_index in range(self.config.cycles):
             try:
+                session = self._revalue_open_positions(
+                    session=session,
+                )
+
                 self._monitor_open_positions(
                     session=session,
                 )
@@ -134,8 +146,9 @@ class AutonomousPaperTradingRunner:
                         session=session,
                     )
 
-            except Exception:
+            except Exception as exc:
                 failed_cycles += 1
+                print(f"Autonomous cycle failed: {repr(exc)}")
 
                 if self.config.stop_on_exception:
                     break
@@ -162,6 +175,39 @@ class AutonomousPaperTradingRunner:
         )
 
         return result
+
+    def _revalue_open_positions(
+        self,
+        session: TradingSession,
+    ) -> TradingSession:
+        prices: dict[str, float] = {}
+
+        for symbol in session.portfolio.positions:
+            try:
+                prices[symbol] = self.price_provider.get_current_price(symbol)
+            except Exception as exc:
+                print(
+                    f"Portfolio revaluation skipped for {symbol}: "
+                    f"{repr(exc)}"
+                )
+
+        if not prices:
+            return session
+
+        portfolio = self.revaluation_service.revalue(
+            portfolio=session.portfolio,
+            prices=prices,
+        )
+
+        print(
+            "Portfolio revalued: "
+            f"{len(prices)} position price(s) updated."
+        )
+
+        return TradingSession(
+            name=session.name,
+            portfolio=portfolio,
+        )
 
     def _monitor_open_positions(
         self,
