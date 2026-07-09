@@ -11,11 +11,18 @@ from services.continuous_paper_trading_runner import (
 from services.stores.json_paper_portfolio_repository import (
     JsonPaperPortfolioRepository,
 )
+from services.stores.jsonl_trade_journal_repository import (
+    JsonlTradeJournalRepository,
+)
 
 
 def main():
     portfolio_repository = JsonPaperPortfolioRepository(
         path="data/paper_portfolio.json",
+    )
+
+    trade_journal_repository = JsonlTradeJournalRepository(
+        path="data/trade_journal.jsonl",
     )
 
     config = ContinuousRunnerConfig(
@@ -40,6 +47,7 @@ def main():
 
     # Inject persistence into the underlying autonomous runner.
     runner.runner.portfolio_repository = portfolio_repository
+    runner.runner.trade_journal_repository = trade_journal_repository
 
     print("\n=========================================")
     print("ORION CONTINUOUS PAPER TRADING")
@@ -47,6 +55,7 @@ def main():
     print("Press Ctrl+C to stop.")
     print("Interval: 300 seconds")
     print("Portfolio: data/paper_portfolio.json")
+    print("Trade journal: data/trade_journal.jsonl")
     print("=========================================\n")
 
     result = runner.run()
