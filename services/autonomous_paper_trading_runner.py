@@ -12,6 +12,7 @@ from models.autonomous_paper_trading_result import (
 )
 from models.market_snapshot import MarketSnapshot
 from models.paper_portfolio import PaperPortfolio
+from models.trade_journal_entry import TradeJournalEntry
 from models.trading_session import TradingSession
 from providers.yahoo_provider import YahooProvider
 from services.exit_engine import ExitEngine
@@ -86,6 +87,8 @@ class AutonomousPaperTradingRunner:
 
                 session = self._process_open_position_exits(
                     session=session,
+                    cycle_number=cycle_index + 1,
+                    session_id=session_id,
                 )
 
                 scan_result = self.scanner.run(
@@ -215,6 +218,8 @@ class AutonomousPaperTradingRunner:
     def _process_open_position_exits(
         self,
         session: TradingSession,
+        cycle_number: int,
+        session_id: str,
     ) -> TradingSession:
         portfolio = session.portfolio
 
@@ -242,10 +247,60 @@ class AutonomousPaperTradingRunner:
                     f"{result.symbol} -> {result.action} | {result.reason}"
                 )
 
+                self._append_exit_journal_entry(
+                    position=position,
+                    action=result.action,
+                    reason=result.reason,
+                    cycle_number=cycle_number,
+                    session_id=session_id,
+                )
+
         return TradingSession(
             name=session.name,
             portfolio=portfolio,
         )
+
+    def _append_exit_journal_entry(
+        self,
+        position,
+        action: str,
+        reason: str,
+        cycle_number: int,
+        session_id: str,
+    ) -> None:
+        if self.trade_journal_repository is None:
+            return
+
+        invested_amount = position.cost_basis
+        exit_value = position.market_value
+        realized_profit_loss = round(
+            exit_value - invested_amount,
+            2,
+        )
+
+        entry = TradeJournalEntry(
+            timestamp=datetime.now(),
+            symbol=position.symbol,
+            action="CLOSE_POSITION",
+            decision=action,
+            confidence=1.0,
+            score=0.0,
+            entry_price=position.entry_price,
+            exit_price=position.current_price,
+            quantity=position.quantity,
+            invested_amount=invested_amount,
+            realized_profit_loss=realized_profit_loss,
+            unrealized_profit_loss=0.0,
+            expected_risk=0.0,
+            regime="UNKNOWN",
+            volatility="UNKNOWN",
+            ai_summary=f"Exit executed by PositionMonitor: {action}",
+            recommendation_reason=reason,
+            cycle_number=cycle_number,
+            session_id=session_id,
+        )
+
+        self.trade_journal_repository.append(entry)
 
     def _load_or_create_portfolio(self) -> PaperPortfolio:
         if (
