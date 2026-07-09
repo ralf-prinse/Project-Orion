@@ -2,6 +2,7 @@ from services.dashboard_service import (
     DashboardPosition,
     DashboardSnapshot,
 )
+from models.closed_trade_statistics import ClosedTradeStatistics
 from ui.foundation.trading_dashboard_cli_presenter import (
     TradingDashboardCliPresenter,
 )
@@ -33,6 +34,18 @@ def test_trading_dashboard_cli_presenter_formats_snapshot():
                 unrealized_return_percent=16.47,
             )
         ],
+        closed_trade_statistics=ClosedTradeStatistics(
+            closed_trades=2,
+            winning_trades=1,
+            losing_trades=1,
+            winrate_percent=50.0,
+            closed_profit_loss=8.25,
+            average_winner=15.0,
+            average_loser=-6.75,
+            profit_factor=2.22,
+            largest_winner=15.0,
+            largest_loser=-6.75,
+        ),
     )
 
     output = presenter.present(snapshot)
@@ -43,6 +56,9 @@ def test_trading_dashboard_cli_presenter_formats_snapshot():
     assert "Open P/L" in output
     assert "Closed P/L" in output
     assert "Winrate" in output
+    assert "CLOSED TRADE ANALYTICS" in output
+    assert "Average Winner" in output
+    assert "Profit Factor" in output
     assert "NFLX" in output
     assert "€   12.50" in output
 

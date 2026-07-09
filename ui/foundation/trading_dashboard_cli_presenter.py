@@ -11,6 +11,7 @@ class TradingDashboardCliPresenter:
     Responsibilities:
     - Format DashboardSnapshot for terminal output.
     - Format recent trade journal entries.
+    - Format closed trade analytics.
 
     Does NOT:
     - calculate statistics
@@ -32,6 +33,23 @@ class TradingDashboardCliPresenter:
         lines.append("=" * 60)
         lines.append("")
 
+        self._append_portfolio(lines, snapshot)
+        self._append_trading_summary(lines, snapshot)
+        self._append_closed_trade_analytics(lines, snapshot)
+        self._append_open_positions(lines, snapshot)
+        self._append_recent_trades(
+            lines,
+            recent_trades or [],
+            max_recent_trades,
+        )
+
+        return "\n".join(lines)
+
+    def _append_portfolio(
+        self,
+        lines: list[str],
+        snapshot: DashboardSnapshot,
+    ) -> None:
         lines.append("PORTFOLIO")
         lines.append("-" * 60)
         lines.append(f"Cash             : € {snapshot.cash:.2f}")
@@ -42,6 +60,11 @@ class TradingDashboardCliPresenter:
         lines.append(f"Return           : {snapshot.total_return_percent:.2f}%")
         lines.append("")
 
+    def _append_trading_summary(
+        self,
+        lines: list[str],
+        snapshot: DashboardSnapshot,
+    ) -> None:
         lines.append("TRADING")
         lines.append("-" * 60)
         lines.append(f"Open Positions   : {snapshot.open_positions}")
@@ -51,14 +74,21 @@ class TradingDashboardCliPresenter:
         lines.append(f"Winrate          : {snapshot.winrate_percent:.2f}%")
         lines.append("")
 
-        self._append_open_positions(lines, snapshot)
-        self._append_recent_trades(
-            lines,
-            recent_trades or [],
-            max_recent_trades,
-        )
+    def _append_closed_trade_analytics(
+        self,
+        lines: list[str],
+        snapshot: DashboardSnapshot,
+    ) -> None:
+        stats = snapshot.closed_trade_statistics
 
-        return "\n".join(lines)
+        lines.append("CLOSED TRADE ANALYTICS")
+        lines.append("-" * 60)
+        lines.append(f"Average Winner   : € {stats.average_winner:.2f}")
+        lines.append(f"Average Loser    : € {stats.average_loser:.2f}")
+        lines.append(f"Profit Factor    : {stats.profit_factor:.2f}")
+        lines.append(f"Largest Winner   : € {stats.largest_winner:.2f}")
+        lines.append(f"Largest Loser    : € {stats.largest_loser:.2f}")
+        lines.append("")
 
     def _append_open_positions(
         self,
@@ -79,7 +109,8 @@ class TradingDashboardCliPresenter:
                 f"{position.quantity:>5}x   "
                 f"Entry €{position.entry_price:>8.2f}   "
                 f"Now €{position.current_price:>8.2f}   "
-                f"P/L €{position.unrealized_profit_loss:>8.2f}"
+                f"P/L €{position.unrealized_profit_loss:>8.2f}   "
+                f"{position.unrealized_return_percent:>7.2f}%"
             )
 
         lines.append("")

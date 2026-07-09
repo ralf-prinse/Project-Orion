@@ -2,8 +2,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from models.closed_trade_statistics import ClosedTradeStatistics
 from models.paper_portfolio import PaperPortfolio
 from models.trade_journal_entry import TradeJournalEntry
+from services.closed_trade_analytics_service import ClosedTradeAnalyticsService
 
 
 @dataclass(frozen=True)
@@ -31,9 +33,36 @@ class DashboardSnapshot:
     losing_trades: int
     winrate_percent: float
     positions: list[DashboardPosition]
+    closed_trade_statistics: ClosedTradeStatistics
 
 
 class DashboardService:
+    """
+    Builds deterministic dashboard snapshots.
+
+    Responsibilities:
+    - summarize paper portfolio state
+    - summarize closed trade journal statistics
+    - expose dashboard-safe data
+
+    Does NOT:
+    - load or save data
+    - print output
+    - make trading decisions
+    - mutate portfolio state
+    """
+
+    def __init__(
+        self,
+        closed_trade_analytics_service: (
+            ClosedTradeAnalyticsService | None
+        ) = None,
+    ):
+        self.closed_trade_analytics_service = (
+            closed_trade_analytics_service
+            or ClosedTradeAnalyticsService()
+        )
+
     def build(
         self,
         portfolio: PaperPortfolio,
@@ -50,43 +79,15 @@ class DashboardService:
             2,
         )
 
-        closed_entries = [
-            entry
-            for entry in journal_entries
-            if entry.action == "CLOSE_POSITION"
-        ]
-
-        closed_profit_loss = round(
-            sum(entry.realized_profit_loss for entry in closed_entries),
-            2,
-        )
-
-        winning_trades = len(
-            [
-                entry
-                for entry in closed_entries
-                if entry.realized_profit_loss > 0
-            ]
-        )
-
-        losing_trades = len(
-            [
-                entry
-                for entry in closed_entries
-                if entry.realized_profit_loss < 0
-            ]
-        )
-
-        closed_trades = len(closed_entries)
-
-        winrate_percent = (
-            round((winning_trades / closed_trades) * 100, 2)
-            if closed_trades > 0
-            else 0.0
+        closed_trade_statistics = (
+            self.closed_trade_analytics_service.analyze(
+                journal_entries=journal_entries,
+            )
         )
 
         total_profit_loss = round(
-            open_profit_loss + closed_profit_loss,
+            open_profit_loss
+            + closed_trade_statistics.closed_profit_loss,
             2,
         )
 
@@ -101,14 +102,15 @@ class DashboardService:
             equity=portfolio.equity,
             open_positions=len(portfolio.positions),
             open_profit_loss=open_profit_loss,
-            closed_profit_loss=closed_profit_loss,
+            closed_profit_loss=closed_trade_statistics.closed_profit_loss,
             total_profit_loss=total_profit_loss,
             total_return_percent=total_return_percent,
-            closed_trades=closed_trades,
-            winning_trades=winning_trades,
-            losing_trades=losing_trades,
-            winrate_percent=winrate_percent,
+            closed_trades=closed_trade_statistics.closed_trades,
+            winning_trades=closed_trade_statistics.winning_trades,
+            losing_trades=closed_trade_statistics.losing_trades,
+            winrate_percent=closed_trade_statistics.winrate_percent,
             positions=positions,
+            closed_trade_statistics=closed_trade_statistics,
         )
 
     def _build_position(
