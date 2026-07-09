@@ -7,9 +7,16 @@ from models.live_paper_trading_config import LivePaperTradingConfig
 from services.autonomous_paper_trading_runner import (
     AutonomousPaperTradingRunner,
 )
+from services.stores.jsonl_trade_journal_repository import (
+    JsonlTradeJournalRepository,
+)
 
 
 def main():
+    trade_journal_repository = JsonlTradeJournalRepository(
+        path="data/trade_journal.jsonl",
+    )
+
     live_config = LivePaperTradingConfig(
         initial_cash=500.0,
         max_symbols=25,
@@ -28,6 +35,7 @@ def main():
 
     runner = AutonomousPaperTradingRunner(
         config=config,
+        trade_journal_repository=trade_journal_repository,
     )
 
     result = runner.run()
