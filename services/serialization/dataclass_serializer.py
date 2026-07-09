@@ -8,6 +8,7 @@ from types import UnionType
 from typing import Any
 from typing import get_args
 from typing import get_origin
+from typing import get_type_hints
 
 
 class DataclassSerializer:
@@ -129,14 +130,20 @@ class DataclassSerializer:
             return model_type(data)
 
         if is_dataclass(model_type):
+            type_hints = get_type_hints(model_type)
             kwargs = {}
 
             for field in fields(model_type):
                 if field.name not in data:
                     continue
 
-                kwargs[field.name] = self.from_dict(
+                field_type = type_hints.get(
+                    field.name,
                     field.type,
+                )
+
+                kwargs[field.name] = self.from_dict(
+                    field_type,
                     data[field.name],
                 )
 
