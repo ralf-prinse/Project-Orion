@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+from datetime import datetime
 
 from models.autonomous_paper_trading_config import (
     AutonomousPaperTradingConfig,
@@ -12,11 +13,15 @@ from models.autonomous_paper_trading_result import (
 from services.stores.repositories.paper_portfolio_repository import (
     PaperPortfolioRepository,
 )
+from services.stores.repositories.trade_journal_repository import (
+    TradeJournalRepository,
+)
 from models.market_snapshot import MarketSnapshot
 from models.paper_portfolio import PaperPortfolio
 from models.trading_session import TradingSession
 from services.live_paper_market_scanner import LivePaperMarketScanner
 from services.portfolio_allocator import PortfolioAllocator
+from services.trade_journal_builder import TradeJournalBuilder
 from services.trading_cycle import TradingCycle
 
 
@@ -31,6 +36,8 @@ class AutonomousPaperTradingRunner:
     - Allocate portfolio capital
     - Execute approved paper trades
     - Return immutable autonomous result
+    - Optionally persist portfolio state
+    - Optionally persist trade journal entries
 
     Does NOT
     --------
@@ -46,6 +53,8 @@ class AutonomousPaperTradingRunner:
         allocator: PortfolioAllocator | None = None,
         trading_cycle: TradingCycle | None = None,
         portfolio_repository: PaperPortfolioRepository | None = None,
+        trade_journal_repository: TradeJournalRepository | None = None,
+        trade_journal_builder: TradeJournalBuilder | None = None,
     ):
         self.config = config or AutonomousPaperTradingConfig()
         self.scanner = scanner or LivePaperMarketScanner(
@@ -54,13 +63,18 @@ class AutonomousPaperTradingRunner:
         self.allocator = allocator or PortfolioAllocator()
         self.trading_cycle = trading_cycle or TradingCycle()
         self.portfolio_repository = portfolio_repository
+        self.trade_journal_repository = trade_journal_repository
+        self.trade_journal_builder = (
+            trade_journal_builder or TradeJournalBuilder()
+        )
 
     def run(self) -> AutonomousPaperTradingResult:
+        session_id = self._build_session_id()
+
         session = TradingSession(
             name="Orion Autonomous Paper Trading",
             portfolio=self._load_or_create_portfolio(),
         )
-        
 
         cycle_results: list[AutonomousPaperTradingCycleResult] = []
         completed_cycles = 0
@@ -115,6 +129,7 @@ class AutonomousPaperTradingRunner:
                 )
 
                 completed_cycles += 1
+
                 self._save_portfolio(
                     session.portfolio,
                 )
@@ -140,7 +155,7 @@ class AutonomousPaperTradingRunner:
             ):
                 time.sleep(self.config.sleep_seconds)
 
-        return AutonomousPaperTradingResult(
+        result = AutonomousPaperTradingResult(
             session=session,
             cycle_results=cycle_results,
             completed_cycles=completed_cycles,
@@ -149,6 +164,13 @@ class AutonomousPaperTradingRunner:
             final_cash=session.cash,
             final_equity=session.equity,
         )
+
+        self._save_trade_journal(
+            result=result,
+            session_id=session_id,
+        )
+
+        return result
 
     def _load_or_create_portfolio(self) -> PaperPortfolio:
         if (
@@ -172,6 +194,27 @@ class AutonomousPaperTradingRunner:
             portfolio,
         )
 
+    def _save_trade_journal(
+        self,
+        result: AutonomousPaperTradingResult,
+        session_id: str,
+    ) -> None:
+        if self.trade_journal_repository is None:
+            return
+
+        entries = self.trade_journal_builder.build(
+            result=result,
+            session_id=session_id,
+        )
+
+        for entry in entries:
+            self.trade_journal_repository.append(entry)
+
+    def _build_session_id(self) -> str:
+        return (
+            "autonomous-"
+            + datetime.now().strftime("%Y%m%d-%H%M%S")
+        )
 
     def _print_cycle_summary(
         self,

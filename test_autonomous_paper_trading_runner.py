@@ -12,6 +12,9 @@ from services.autonomous_paper_trading_runner import (
     AutonomousPaperTradingRunner,
 )
 from services.live_paper_market_scanner import LivePaperMarketScanner
+from services.stores.jsonl_trade_journal_repository import (
+    JsonlTradeJournalRepository,
+)
 
 
 class FakeYahooProvider:
@@ -40,8 +43,13 @@ class FakeYahooProvider:
 
 
 def main():
+    journal_path = Path("data/test_autonomous_trade_journal.jsonl")
+
+    if journal_path.exists():
+        journal_path.unlink()
+
     live_config = LivePaperTradingConfig(
-        watchlist_path=Path("config/watchlist.txt"),
+        watchlist_path=Path("data/universes/swing.csv"),
         initial_cash=500.0,
         max_symbols=5,
         max_open_positions=2,
@@ -62,9 +70,14 @@ def main():
         print_cycle_summary=False,
     )
 
+    trade_journal_repository = JsonlTradeJournalRepository(
+        path=journal_path,
+    )
+
     runner = AutonomousPaperTradingRunner(
         config=config,
         scanner=scanner,
+        trade_journal_repository=trade_journal_repository,
     )
 
     result = runner.run()
@@ -88,6 +101,26 @@ def main():
         assert cycle.scan.failed_symbols == 0
         assert cycle.allocation.approved_count >= 0
         assert cycle.allocation.rejected_count >= 0
+
+    assert journal_path.exists()
+
+    journal_entries = trade_journal_repository.load_all()
+
+    expected_entries = sum(
+        len(cycle.allocation.decisions)
+        for cycle in result.cycle_results
+    )
+
+    assert len(journal_entries) == expected_entries
+
+    first_entry = journal_entries[0]
+
+    assert first_entry.session_id.startswith("autonomous-")
+    assert first_entry.symbol
+    assert first_entry.action in {"OPEN_POSITION", "REJECTED"}
+    assert first_entry.decision in {"BUY", "HOLD", "SELL"}
+
+    trade_journal_repository.delete()
 
     print("AUTONOMOUS PAPER TRADING RUNNER: PASS ✅")
 
