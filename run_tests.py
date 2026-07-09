@@ -93,6 +93,10 @@ TestCommand(
     "Exit Engine",
     [sys.executable, "test_exit_engine.py"],
 ),
+TestCommand(
+    "Dashboard Service",
+    [sys.executable, "test_dashboard_service.py"],
+),
             TestCommand("Position Monitor", [sys.executable, "test_position_monitor.py"]),
             TestCommand("Time Stop Service", [sys.executable, "test_time_stop_service.py"]),
             TestCommand("Trade Journal Builder", [sys.executable, "test_trade_journal_builder.py"]),
