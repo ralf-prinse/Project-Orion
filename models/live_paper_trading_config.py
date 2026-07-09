@@ -18,8 +18,6 @@ class LivePaperTradingConfig:
 
     max_symbols: int = 250
 
-    # Legacy hard cap. Keep high by default; risk-based limits below
-    # now control allocation.
     max_open_positions: int = 50
 
     min_confidence: float = 0.75
@@ -36,3 +34,12 @@ class LivePaperTradingConfig:
     history_interval: str = "1d"
 
     allow_fractional_shares: bool = False
+
+    take_profit_percent: float = 0.08
+    stop_loss_percent: float = 0.04
+    trailing_stop_percent: float = 0.03
+    break_even_trigger_percent: float = 0.05
+    max_holding_days: int = 20
+
+    enable_trailing_stop: bool = True
+    enable_break_even: bool = True
