@@ -2,21 +2,15 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from models.autonomous_paper_trading_config import (
-    AutonomousPaperTradingConfig,
-)
+from models.autonomous_paper_trading_config import AutonomousPaperTradingConfig
 from models.live_paper_trading_config import LivePaperTradingConfig
 from models.paper_portfolio import PaperPortfolio
 from models.paper_position import PaperPosition
 from models.position_state import PositionState
 from models.risk_plan import RiskPlan
 from models.trading_session import TradingSession
-from services.autonomous_paper_trading_runner import (
-    AutonomousPaperTradingRunner,
-)
-from services.stores.json_trading_session_repository import (
-    JsonTradingSessionRepository,
-)
+from services.autonomous_paper_trading_runner import AutonomousPaperTradingRunner
+from services.stores.json_trading_session_repository import JsonTradingSessionRepository
 
 
 class EmptyScanner:
@@ -24,10 +18,7 @@ class EmptyScanner:
         return type(
             "ScanResult",
             (),
-            {
-                "candidates": [],
-                "scanned_symbols": 0,
-            },
+            {"candidates": [], "scanned_symbols": 0},
         )()
 
 
@@ -45,11 +36,13 @@ def build_config() -> AutonomousPaperTradingConfig:
         sleep_seconds=0,
         live_config=LivePaperTradingConfig(
             initial_cash=500.0,
+            take_profit_percent=0.05,
+            stop_loss_percent=0.04,
         ),
     )
 
 
-def build_session() -> TradingSession:
+def build_managed_session() -> TradingSession:
     return TradingSession(
         name="Position Lifecycle Test",
         portfolio=PaperPortfolio(
@@ -86,8 +79,8 @@ def build_session() -> TradingSession:
                 target_2=112.0,
                 target_3=120.0,
                 risk_percent=5.0,
-                reward_percent=4.0,
-                risk_reward_ratio=0.8,
+                reward_percent=20.0,
+                risk_reward_ratio=4.0,
                 confidence=0.90,
                 notes="Autonomous position lifecycle regression test.",
             ),
@@ -96,46 +89,107 @@ def build_session() -> TradingSession:
     )
 
 
-def test_runner_updates_and_persists_position_lifecycle():
-    repository = JsonTradingSessionRepository(
-        path=Path("output/test_autonomous_position_lifecycle.json"),
+def build_legacy_session() -> TradingSession:
+    return TradingSession(
+        name="Legacy Position Test",
+        portfolio=PaperPortfolio(
+            cash=400.0,
+            positions={
+                "AAPL": PaperPosition(
+                    symbol="AAPL",
+                    quantity=1,
+                    entry_price=100.0,
+                    current_price=100.0,
+                ),
+            },
+        ),
+        position_states={},
+        risk_plans={},
+        status="ACTIVE",
     )
 
+
+def run_session(filename: str, session: TradingSession, price: float):
+    repository = JsonTradingSessionRepository(
+        path=Path(f"output/{filename}"),
+    )
     repository.delete()
-    repository.save(build_session())
+    repository.save(session)
 
     runner = AutonomousPaperTradingRunner(
         config=build_config(),
         scanner=EmptyScanner(),
         trading_session_repository=repository,
-        price_provider=FixedPriceProvider(106.0),
+        price_provider=FixedPriceProvider(price),
     )
 
     result = runner.run()
+    assert result.failed_cycles == 0
+    return repository, result
+
+
+def test_runner_uses_managed_lifecycle_instead_of_fixed_take_profit():
+    repository, result = run_session(
+        "test_managed_lifecycle_routing.json",
+        build_managed_session(),
+        106.0,
+    )
 
     assert "AAPL" in result.session.portfolio.positions
-    assert result.session.portfolio.positions["AAPL"].current_price == 106.0
-
     state = result.session.position_states["AAPL"]
-
     assert state.current_price == 106.0
-    assert state.highest_price == 106.0
     assert state.target_1_hit is True
+    assert state.target_2_hit is False
+    assert state.target_3_hit is False
     assert state.break_even_active is True
     assert state.trailing_stop_active is True
     assert state.current_stop_loss > 100.0
+    repository.delete()
+
+
+def test_runner_executes_managed_dynamic_stop_exit():
+    repository, result = run_session(
+        "test_managed_dynamic_stop_exit.json",
+        build_managed_session(),
+        94.0,
+    )
+
+    assert "AAPL" not in result.session.portfolio.positions
+    assert "AAPL" not in result.session.position_states
+    assert "AAPL" not in result.session.risk_plans
+    assert result.session.portfolio.cash == 494.0
+    repository.delete()
+
+
+def test_runner_executes_managed_final_target_exit():
+    repository, result = run_session(
+        "test_managed_final_target_exit.json",
+        build_managed_session(),
+        120.0,
+    )
+
+    assert "AAPL" not in result.session.portfolio.positions
+    assert "AAPL" not in result.session.position_states
+    assert "AAPL" not in result.session.risk_plans
+    assert result.session.portfolio.cash == 520.0
+    repository.delete()
+
+
+def test_runner_uses_fixed_percentage_fallback_for_legacy_position():
+    repository, result = run_session(
+        "test_legacy_position_fallback.json",
+        build_legacy_session(),
+        106.0,
+    )
+
+    assert "AAPL" not in result.session.portfolio.positions
+    assert result.session.portfolio.cash == 506.0
+    assert result.session.position_states == {}
+    assert result.session.risk_plans == {}
 
     restored = repository.load()
-    restored_state = restored.position_states["AAPL"]
-
-    assert restored.portfolio.positions["AAPL"].current_price == 106.0
-    assert restored_state.current_price == 106.0
-    assert restored_state.highest_price == 106.0
-    assert restored_state.target_1_hit is True
-    assert restored_state.break_even_active is True
-    assert restored_state.trailing_stop_active is True
-    assert restored_state.current_stop_loss > 100.0
-
+    assert "AAPL" not in restored.portfolio.positions
+    assert restored.portfolio.cash == 506.0
     repository.delete()
 
 
@@ -146,7 +200,10 @@ def main():
     print("=========================================")
     print()
 
-    test_runner_updates_and_persists_position_lifecycle()
+    test_runner_uses_managed_lifecycle_instead_of_fixed_take_profit()
+    test_runner_executes_managed_dynamic_stop_exit()
+    test_runner_executes_managed_final_target_exit()
+    test_runner_uses_fixed_percentage_fallback_for_legacy_position()
 
     print("AUTONOMOUS POSITION LIFECYCLE: PASS")
 
