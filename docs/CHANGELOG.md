@@ -6,29 +6,98 @@
 
 ---
 
-# Sprint 8.6 — Dashboard & Trading Analytics
+# Sprint 8.9 — Persistent Position Lifecycle
 
 **Status:** In Progress
 
 ### Added
 
-- DashboardService
-- Dashboard snapshot model
-- Dashboard regression test
-- Dashboard portfolio statistics
-- Winrate calculation
-- Open/Closed P&L calculation
+- `TradingSessionRepository` abstraction.
+- `JsonTradingSessionRepository` implementation.
+- Complete TradingSession JSON persistence.
+- Regression coverage for session roundtrip and missing-session behaviour.
+- Autonomous runner support for `TradingSessionRepository`.
+- Autonomous position-lifecycle integration test.
 
 ### Improved
 
-- AI_CONTEXT rewritten and simplified
-- PROJECT_STATUS restructured
-- TODO restructured
-- Documentation responsibilities clarified
+- `AutonomousPaperTradingRunner` now loads and saves complete sessions.
+- `PositionState` and `RiskPlan` survive continuous iterations and restarts.
+- Portfolio revaluation preserves lifecycle dictionaries.
+- Executed exits remove matching lifecycle state and risk plans.
+- `PaperPositionUpdateService` is now used during autonomous price updates.
+- Existing break-even and trailing-stop services now update persistent state.
+- Highest price, current stop, target-hit and activation flags persist.
+- Portfolio-only repository support remains available during migration.
 
 ### Validation
 
-- 64 regression tests passing
+- Complete TradingSession save/load roundtrip validated.
+- Autonomous session recovery and persistence validated.
+- Break-even activation validated.
+- Trailing-stop activation and update validated.
+- Persistent lifecycle recovery validated.
+- 69 regression tests passing.
+
+---
+
+# Sprint 8.8 — Dashboard GUI Foundation
+
+**Status:** Foundation Complete; Further GUI Work Deferred
+
+### Added
+
+- Trading dashboard GUI presenter.
+- Trading dashboard workspace.
+- Trading dashboard controller.
+- Desktop bootstrap foundation.
+- Initial modular Live Desk package and reusable metric components.
+- GUI presenter, controller and bootstrap regressions.
+
+### Decision
+
+Further GUI expansion was deprioritized in favour of completing the persistent trading engine lifecycle.
+
+---
+
+# Sprint 8.7 — Closed Trade Analytics
+
+**Status:** Complete
+
+### Added
+
+- `ClosedTradeStatistics` model.
+- `ClosedTradeAnalyticsService`.
+- Average winner and average loser.
+- Profit factor.
+- Largest winner and largest loser.
+- Dashboard integration and CLI presentation.
+
+### Validation
+
+- Empty-history and populated-history analytics validated.
+- Dashboard service and CLI presenter regressions updated.
+
+---
+
+# Sprint 8.6 — Dashboard & Trading Analytics
+
+**Status:** Complete
+
+### Added
+
+- `DashboardService` and dashboard snapshot models.
+- `run_dashboard.py` live CLI dashboard.
+- Trading dashboard CLI presenter.
+- Cash, equity, open/closed/total P/L and return display.
+- Open-position overview with unrealized return percentage.
+- Recent OPEN_POSITION/CLOSE_POSITION filtering.
+- Dashboard regressions.
+
+### Improved
+
+- Dashboard reads the official paper portfolio and JSONL trade journal.
+- Rejected decision entries are excluded from the Recent Trades view.
 
 ---
 
@@ -38,34 +107,18 @@
 
 ### Added
 
-- Continuous autonomous paper trading runner
-- PositionMonitor
-- ExitEngine
-- PortfolioRevaluationService
-- Runtime portfolio persistence
-- Runtime trade journal
-- SELL journal entries
-- Trade journal builder
-- Trade journal repository
-
-### Improved
-
-- Continuous execution stability
-- Position lifecycle management
-- Portfolio recovery after restart
+- Continuous autonomous paper trading runner.
+- PositionMonitor.
+- ExitEngine.
+- PortfolioRevaluationService.
+- Runtime portfolio persistence.
+- Runtime JSONL trade journal.
+- CLOSE_POSITION journal entries.
+- Trade journal builder and repository.
 
 ### Validation
 
-Validated through multi-hour autonomous runtime.
-
-Confirmed:
-
-- Stable execution
-- Live portfolio updates
-- Portfolio persistence
-- Automatic BUY execution
-- Automatic SELL execution
-- Trade journal generation
+Multi-hour autonomous runtime confirmed stable scanning, BUY/SELL execution, portfolio persistence and journal generation.
 
 ---
 
@@ -75,74 +128,49 @@ Confirmed:
 
 ### Added
 
-- TradingPipeline
-- Signal layer
-- Decision layer
-- Risk layer
-- Portfolio allocation
-- Trade planning
-- AI explanation layer
+- TradingPipeline.
+- Signal, decision and risk layers.
+- Portfolio allocation.
+- Trade planning.
+- AI explanation layer.
 
 ### Improved
 
-- Deterministic architecture
-- Separation between AI and business logic
+- Deterministic architecture.
+- Strict separation between AI and business logic.
 
 ---
 
-# Sprint 8.3
+# Earlier Sprints
 
-### Added
+## Sprint 8.3
 
-- Market scanner
-- Indicator engine
-- Analysis engine
-- Signal generation
+- Market scanner.
+- Indicator engine.
+- Analysis engine.
+- Signal generation.
 
----
+## Sprint 8.2
 
-# Sprint 8.2
+- Portfolio, risk and trading models.
+- Persistence foundations.
 
-### Added
+## Sprint 8.1
 
-- Portfolio models
-- Risk models
-- Trading models
-- Persistence layer
-
----
-
-# Sprint 8.1
-
-### Added
-
-- Initial Orion architecture
-- Project structure
-- Dependency injection
-- Core services
-- Regression framework
+- Initial Orion architecture.
+- Project structure.
+- Dependency injection.
+- Core services.
+- Regression framework.
 
 ---
 
 # Documentation Policy
 
-Completed work is recorded only in this document.
-
-Current implementation belongs in:
-
-- PROJECT_STATUS.md
-
-Current priorities belong in:
-
-- TODO.md
-
-Long-term architecture belongs in:
-
-- ORION_MASTER_ARCHITECTURE.md
-
-Development context belongs in:
-
-- AI_CONTEXT.md
+- Current implementation: `PROJECT_STATUS.md`
+- Current priorities: `TODO.md`
+- Long-term architecture: `ORION_MASTER_ARCHITECTURE.md`
+- New-session context: `AI_CONTEXT.md`
 
 ---
 

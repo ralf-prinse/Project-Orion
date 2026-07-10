@@ -109,6 +109,14 @@ TestCommand(
     "Desktop Bootstrap",
     [sys.executable, "test_desktop_bootstrap.py"],
 ),
+TestCommand(
+    "JSON Trading Session Repository",
+    [sys.executable, "test_json_trading_session_repository.py"],
+),
+TestCommand(
+    "Autonomous Position Lifecycle",
+    [sys.executable, "test_autonomous_position_lifecycle.py"],
+),
             TestCommand("Position Monitor", [sys.executable, "test_position_monitor.py"]),
             TestCommand("Time Stop Service", [sys.executable, "test_time_stop_service.py"]),
             TestCommand("Trade Journal Builder", [sys.executable, "test_trade_journal_builder.py"]),

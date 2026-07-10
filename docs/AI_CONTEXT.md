@@ -12,10 +12,11 @@
 | Item | Value |
 |------|-------|
 | Project | Orion |
-| Development Phase | Autonomous Paper Trading |
-| Current Sprint | Sprint 8.6 – Dashboard & Trading Analytics |
-| Architecture | Deterministic |
-| Latest Validation | 64 regression tests passing |
+| Development Phase | Persistent Autonomous Paper Trading |
+| Current Sprint | Sprint 8.9 – Persistent Position Lifecycle |
+| Architecture | Deterministic, service-oriented |
+| Latest Validation | 69 regression tests passing |
+| Active Branch | `feature/trading-dashboard` |
 
 ---
 
@@ -23,144 +24,152 @@
 
 This document provides the minimum context required to continue development of Project Orion.
 
-Detailed implementation history belongs in `CHANGELOG.md`.
-
-Current implementation status belongs in `PROJECT_STATUS.md`.
-
-Long-term architectural decisions belong in `ORION_MASTER_ARCHITECTURE.md`.
+- Implementation history belongs in `CHANGELOG.md`.
+- Current implementation status belongs in `PROJECT_STATUS.md`.
+- Upcoming work belongs in `TODO.md`.
+- Permanent architectural rules belong in `ORION_MASTER_ARCHITECTURE.md`.
 
 ---
 
 # Current Project State
 
-Project Orion has completed its deterministic trading foundation.
+Project Orion has a complete deterministic autonomous paper-trading lifecycle with persistent portfolio, risk-plan and position-management state.
 
-Implemented systems include:
+Implemented and validated systems include:
 
-- Deterministic Trading Pipeline
-- Portfolio Engine
-- Risk Engine
-- Trade Planner
-- Paper Trading Engine
-- Continuous Autonomous Runner
-- Position Monitor
-- Exit Engine
-- Portfolio Revaluation
-- Trade Journal
-- Dashboard Service
+- deterministic Trading Pipeline;
+- adaptive Risk Engine and RiskPlan generation;
+- portfolio allocation;
+- paper BUY and SELL execution;
+- continuous autonomous runner;
+- complete TradingSession persistence;
+- portfolio revaluation;
+- persistent PositionState and RiskPlan recovery;
+- break-even and trailing-stop lifecycle updates;
+- position monitoring and exit execution;
+- JSONL trade journal;
+- dashboard service;
+- CLI trading dashboard;
+- closed-trade analytics;
+- dashboard GUI foundation.
 
-The platform is now transitioning from feature implementation towards trading analytics, optimisation and professional monitoring.
+The current priority is to complete lifecycle-aware exit evaluation and consolidate the active runtime around the persisted TradingSession.
 
 ---
 
-# Current Trading Stack
+# Active Runtime Flow
 
-```
+```text
 Market Data
       ↓
-Indicator Engine
+Indicators and Analysis
       ↓
-Analysis Layer
+Signals
       ↓
-Signal Layer
+Deterministic Decision
       ↓
-Decision Layer
+Adaptive RiskPlan
       ↓
-Portfolio Engine
+Portfolio Allocation
       ↓
-Risk Engine
+Paper Execution
       ↓
-Trade Planner
+TradingSession
+      ├── PaperPortfolio
+      ├── PositionState
+      └── RiskPlan
       ↓
-Paper Trading
+Persistent Session Repository
       ↓
-Position Monitor
+Position Lifecycle Update
+      ├── Break-even
+      └── Trailing stop
+      ↓
+Exit Evaluation
       ↓
 Exit Engine
       ↓
 Trade Journal
       ↓
-Dashboard
+Dashboard and Analytics
 ```
 
-Every layer has exactly one responsibility.
+---
+
+# Sources of Truth
+
+The active autonomous lifecycle uses:
+
+```text
+data/trading_session.json
+data/trade_journal.jsonl
+```
+
+During migration, `data/paper_portfolio.json` remains supported for backward compatibility.
+
+Older desktop runtime files such as `data/open_trades.json`, `data/trade_history.json` and `data/portfolio.json` belong to a legacy GUI flow and must not become dependencies of new autonomous functionality.
+
+Runtime data files are local artifacts and are normally not committed.
 
 ---
 
 # Architecture Principles
 
-The following principles are non-negotiable.
-
 ## Deterministic Backend
 
-All trading decisions are deterministic.
+All trading decisions and lifecycle updates are deterministic.
 
-Identical market data must always produce identical output.
-
----
+Identical inputs must produce identical outputs. Randomness is prohibited in trading logic.
 
 ## Separation of Responsibilities
 
-Business logic exists only inside backend services.
-
-The GUI is presentation only.
-
-Controllers orchestrate.
-
-Presenters transform data.
-
-Widgets never contain business logic.
-
----
+- Services own business logic.
+- Runners and controllers orchestrate.
+- Repositories load and persist state.
+- Presenters format data.
+- Widgets display prepared information only.
+- GUI code never owns trading logic.
 
 ## Artificial Intelligence
 
-AI may:
+AI may explain, summarize, compare and assist documentation.
 
-- explain
-- summarize
-- compare
-- generate natural language
+AI may never generate or override BUY/SELL decisions, confidence, risk, position sizing, exit thresholds or deterministic calculations.
 
-AI may never:
+## Existing Architecture First
 
-- generate BUY decisions
-- generate SELL decisions
-- calculate indicators
-- calculate confidence
-- calculate risk
-- calculate position sizing
-- override deterministic output
+Before implementing a feature:
+
+1. inspect the complete relevant runtime chain;
+2. locate existing services and models;
+3. avoid parallel implementations;
+4. extend the existing owner of the responsibility;
+5. add regression coverage before integration.
 
 ---
 
 # Current Development Focus
 
-Current priorities are:
+Sprint 8.9 focuses on the persistent position lifecycle.
 
-1. Trading Dashboard
-2. Closed Trade Analytics
-3. Adaptive Exit Optimisation
-4. Self-learning performance analysis
+Completed in this sprint:
 
-Future development should improve trading quality rather than expanding the deterministic architecture.
+- `TradingSessionRepository` contract;
+- `JsonTradingSessionRepository`;
+- complete session save/load roundtrip;
+- autonomous runner support for complete session persistence;
+- preservation of `PositionState` and `RiskPlan` across iterations and restarts;
+- integration of `PaperPositionUpdateService` into the autonomous runner;
+- persistent break-even and trailing-stop updates;
+- backward compatibility with portfolio-only persistence;
+- regressions expanded to 69 passing tests.
 
----
+Next logical step:
 
-# Development Workflow
-
-Every completed feature follows exactly the same workflow.
-
-1. Review existing implementation.
-2. Design architecture.
-3. Implement one complete feature.
-4. Execute regression tests.
-5. Validate behaviour manually.
-6. Synchronize documentation.
-7. Commit.
-8. Push to GitHub.
-
-No sprint is complete until all steps have been completed.
+```text
+Make exit evaluation consume the persisted PositionState and RiskPlan,
+then reduce the fixed-percentage PositionMonitor to a legacy fallback.
+```
 
 ---
 
@@ -174,27 +183,18 @@ python run_tests.py
 
 Current expected result:
 
+```text
+69 passed
 ```
-64 passed
+
+Key targeted validations:
+
+```powershell
+python test_json_trading_session_repository.py
+python test_autonomous_paper_trading_runner_persistence.py
+python test_autonomous_position_lifecycle.py
+python run_dashboard.py
 ```
-
-Regression tests must pass before documentation is updated.
-
----
-
-# Documentation Responsibilities
-
-Each document has a single responsibility.
-
-| Document | Responsibility |
-|-----------|----------------|
-| ORION_MASTER_ARCHITECTURE.md | Long-term architecture |
-| PROJECT_STATUS.md | Current implementation status |
-| TODO.md | Upcoming work |
-| CHANGELOG.md | Historical implementation log |
-| AI_CONTEXT.md | Development context for new sessions |
-
-Architectural information must never be duplicated outside the Master Architecture.
 
 ---
 
@@ -202,26 +202,19 @@ Architectural information must never be duplicated outside the Master Architectu
 
 Before writing code:
 
-1. Read all documentation.
-2. Analyse the complete source tree.
-3. Determine:
-   - current architecture
-   - current sprint
-   - completed work
-   - work in progress
-   - next logical implementation step
+1. read all five official project documents;
+2. inspect the complete relevant source and test chain;
+3. identify the active runtime and any legacy alternatives;
+4. determine the single owner of the requested responsibility;
+5. propose one stable implementation plan;
+6. prefer complete-file replacements;
+7. add or update regression tests;
+8. run `python run_tests.py`;
+9. update documentation only after the sprint is actually complete.
 
-Only then may implementation begin.
+Never assume a class is the active implementation merely because it exists.
 
-Never assume functionality exists.
-
-Prefer complete file replacements over fragmented snippets.
-
-Preserve deterministic behaviour.
-
-Respect the existing architecture.
-
-Update documentation after every completed sprint.
+Preserve deterministic behaviour and backward compatibility unless a deliberate migration removes it.
 
 ---
 

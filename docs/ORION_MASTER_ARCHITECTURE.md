@@ -199,10 +199,10 @@ Large architectural changes require regression validation before merge.
                  Trade Execution
                         │
                         ▼
-              Portfolio Management
+              TradingSession Update
                         │
                         ▼
-               Position Monitoring
+           Persistent Position Management
                         │
                         ▼
                   Exit Engine
@@ -374,22 +374,34 @@ It never modifies deterministic market analysis.
 
 ---
 
-## 7. Portfolio Layer
+## 7. Portfolio and Session Layer
 
 ### Responsibility
 
-Maintain the current portfolio state.
+Maintain portfolio state and the complete restart-safe lifecycle context.
+
+The canonical persistent aggregate is:
+
+```text
+TradingSession
+    ├── PaperPortfolio
+    ├── PositionState per managed symbol
+    └── RiskPlan per managed symbol
+```
 
 Responsibilities:
 
-- cash management
-- open positions
-- portfolio valuation
-- realized P/L
-- unrealized P/L
-- exposure tracking
+- cash management;
+- open positions;
+- portfolio valuation;
+- realized and unrealized P/L;
+- exposure tracking;
+- persistent risk-plan ownership;
+- persistent position-management state.
 
-Portfolio state is the single source of truth for all positions.
+`PaperPortfolio` is the financial source of truth. `TradingSession` is the lifecycle-persistence aggregate.
+
+Repositories persist state only and contain no trading logic.
 
 ---
 
@@ -420,22 +432,32 @@ Execution never performs market analysis.
 
 ### Responsibility
 
-Manage existing positions after execution.
+Manage existing positions after execution and preserve their deterministic lifecycle state.
 
-Components:
+Canonical components include:
 
-- PortfolioRevaluationService
-- PositionMonitor
+- TradingSession
+- PaperPositionUpdateService
+- PositionUpdateEngine
+- PositionManager
+- BreakEvenService
+- TrailingStopService
+- TimeStopService
+- PositionMonitor or lifecycle-aware exit evaluator
 - ExitEngine
 
 Responsibilities:
 
-- refresh prices
-- evaluate exits
-- execute exits
-- update portfolio
+- refresh open-position prices;
+- track highest and current prices;
+- maintain the active stop level;
+- record break-even and trailing-stop activation;
+- record target-hit state;
+- evaluate deterministic exits;
+- execute exits;
+- remove closed-position lifecycle state.
 
-This layer owns the complete lifecycle of open positions.
+This layer owns the complete lifecycle of open positions. The runner orchestrates it but does not duplicate its calculations.
 
 ---
 
@@ -485,6 +507,31 @@ Dashboard components never modify portfolio state.
 They consume information only.
 
 ---
+
+---
+
+# Persistence Architecture
+
+The canonical autonomous runtime persistence boundary is `TradingSessionRepository`.
+
+```text
+TradingSessionRepository
+        │
+        ▼
+TradingSession
+    ├── PaperPortfolio
+    ├── PositionState map
+    └── RiskPlan map
+```
+
+Rules:
+
+- repositories never calculate stops, targets, P/L or decisions;
+- services update domain state before persistence;
+- complete session state must survive runner iterations and restarts;
+- portfolio-only persistence may exist only as an explicit compatibility path during migration;
+- runtime JSON files are storage artifacts, not business models.
+
 
 # Artificial Intelligence
 
@@ -543,10 +590,13 @@ Portfolio Allocation
 Trade Execution
         │
         ▼
-Portfolio Update
+TradingSession Update
         │
         ▼
-Position Monitor
+Persistent Position Lifecycle
+        │
+        ▼
+Exit Evaluation
         │
         ▼
 Exit Engine
@@ -786,8 +836,10 @@ Future functionality should extend existing architecture rather than replacing i
 
 Expected future additions include:
 
+- lifecycle-aware exit evaluation
+- persistent time stops
 - dashboard GUI
-- adaptive exits
+- adaptive exit analytics
 - trade analytics
 - self-learning optimisation
 - broker integration

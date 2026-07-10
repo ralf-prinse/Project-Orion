@@ -4,39 +4,43 @@
 
 **Purpose:** Current Implementation Status  
 **Status:** Active Development  
-**Current Sprint:** Sprint 8.6 – Dashboard & Trading Analytics
+**Current Sprint:** Sprint 8.9 – Persistent Position Lifecycle
 
 ---
 
 # Executive Summary
 
-Project Orion has evolved into a deterministic autonomous paper trading platform.
+Project Orion is a deterministic autonomous paper-trading platform.
 
-The core trading lifecycle is now implemented and validated:
+The complete active lifecycle now persists not only the portfolio, but also the risk and management state required to continue open positions correctly across runner iterations and application restarts.
 
 ```text
 Market Scan
     ↓
 Trading Pipeline
     ↓
-Risk & Portfolio Validation
+Adaptive RiskPlan
+    ↓
+Portfolio Allocation
     ↓
 Paper BUY
     ↓
-Portfolio Revaluation
+TradingSession Persistence
+    ↓
+Portfolio and Position Lifecycle Update
+    ↓
+Break-even and Trailing Stop
     ↓
 Position Monitor
     ↓
-Exit Engine
-    ↓
-Paper SELL
+Exit Engine and Paper SELL
     ↓
 Trade Journal
     ↓
-Dashboard Service
+Dashboard and Closed-Trade Analytics
 ```
 
-The current development phase focuses on visibility, analytics and optimisation.
+The primary remaining lifecycle gap is that exit evaluation still uses the simple fixed-percentage `PositionMonitor` rather than the complete persisted `PositionState` and `RiskPlan`.
 
 ---
 
@@ -44,21 +48,61 @@ The current development phase focuses on visibility, analytics and optimisation.
 
 | Area | Status |
 |------|--------|
+| Market data and scanning | ✅ Complete |
 | Deterministic Trading Pipeline | ✅ Complete |
-| Portfolio Engine | ✅ Complete |
-| Risk Engine | ✅ Complete |
-| Trade Planner | ✅ Complete |
-| Paper Trading Engine | ✅ Complete |
-| Continuous Runner | ✅ Complete |
-| Position Monitor | ✅ Complete |
-| Portfolio Revaluation | ✅ Complete |
+| Adaptive Risk Engine | ✅ Complete |
+| Portfolio allocation | ✅ Complete |
+| Paper execution | ✅ Complete |
+| Continuous autonomous runner | ✅ Complete |
+| Paper portfolio persistence | ✅ Complete |
+| Complete TradingSession persistence | ✅ Complete |
+| PositionState persistence | ✅ Complete |
+| RiskPlan persistence | ✅ Complete |
+| Portfolio revaluation | ✅ Complete |
+| Break-even lifecycle update | ✅ Integrated |
+| Trailing-stop lifecycle update | ✅ Integrated |
+| Fixed-rule PositionMonitor | ✅ Operational |
+| Lifecycle-aware exit evaluation | 🚧 Next |
 | Exit Engine | ✅ Complete |
 | Trade Journal | ✅ Complete |
 | Dashboard Service | ✅ Complete |
-| Dashboard CLI | 🚧 Next |
-| Closed Trade Analytics | 🚧 Planned |
-| Adaptive Exit Optimizer | 🚧 Planned |
-| Broker Integration | ❌ Not started |
+| CLI Dashboard | ✅ Complete |
+| Closed Trade Analytics | ✅ Complete |
+| Dashboard GUI foundation | ✅ Foundation only |
+| Broker integration | ❌ Not started |
+| Real-money execution | ❌ Not started |
+
+---
+
+# Active Runtime State
+
+## TradingSession
+
+The complete runtime state consists of:
+
+```text
+TradingSession
+    ├── PaperPortfolio
+    ├── dict[str, PositionState]
+    ├── dict[str, RiskPlan]
+    ├── name
+    └── status
+```
+
+It is persisted through:
+
+```text
+TradingSessionRepository
+└── JsonTradingSessionRepository
+```
+
+Default storage target:
+
+```text
+data/trading_session.json
+```
+
+The runner still supports `PaperPortfolioRepository` during migration for backward compatibility.
 
 ---
 
@@ -68,164 +112,79 @@ The current development phase focuses on visibility, analytics and optimisation.
 
 Implemented:
 
-- Market data loading
-- Indicator calculation
-- Analysis layer
-- Signal layer
-- Decision layer
-- Risk validation
-- Position sizing
-- Trade planning
-- AI explanation layer
+- market universes and market-data providers;
+- deterministic indicators and analysis;
+- signal generation;
+- deterministic BUY/HOLD/SELL decisions;
+- confidence and scoring;
+- adaptive risk planning;
+- portfolio validation and allocation;
+- trade planning;
+- AI explanation of deterministic output.
 
-Rules:
+AI does not own trading calculations or decisions.
 
-- Trading decisions remain deterministic.
-- AI explains deterministic output only.
-- `TradingPipeline` remains the core decision engine.
-
----
-
-## Portfolio and Risk
+## Paper Execution
 
 Implemented:
 
-- Portfolio state
-- Cash validation
-- Existing position validation
-- Exposure validation
-- Position count validation
-- Maximum position value checks
-- Minimum cash reserve checks
+- execution validation;
+- order creation;
+- paper broker execution;
+- portfolio mutation through `PortfolioManager`;
+- execution reporting;
+- paper BUY and SELL lifecycle;
+- autonomous and continuous runners.
 
-The portfolio layer prevents duplicate positions and blocks trades that violate configured risk limits.
+## Persistent Position Lifecycle
 
----
+Implemented and validated:
 
-## Paper Trading
+- full `TradingSession` JSON roundtrip;
+- recovery of portfolio, position state and risk plans;
+- preservation of lifecycle state during portfolio price updates;
+- use of `PaperPositionUpdateService` inside the autonomous runner;
+- highest-price tracking;
+- break-even activation;
+- trailing-stop activation and updates;
+- target-hit state persistence;
+- removal of lifecycle state after a position is closed;
+- legacy fallback revaluation for positions without lifecycle state.
 
-Implemented:
-
-- Paper portfolio persistence
-- Paper positions
-- Paper BUY execution
-- Paper SELL execution
-- Continuous autonomous paper trading
-- Portfolio state recovery after restart
-- Runtime trade journal
-
-Validated behaviour:
-
-- Orion can run for several hours continuously.
-- Orion persists portfolio state.
-- Orion continues from prior paper portfolio state.
-- Orion rejects invalid trades.
-- Orion can close positions through the Exit Engine.
-
----
-
-## Position Lifecycle
+## Journal and Analytics
 
 Implemented:
 
-- Live portfolio revaluation
-- Position monitoring
-- Take-profit detection
-- Stop-loss detection
-- Maximum holding-time detection
-- Exit execution
-- SELL journal entries
+- JSONL trade-journal repository;
+- BUY, rejected decision and CLOSE_POSITION entries;
+- realized and unrealized P/L summaries;
+- winrate;
+- average winner and loser;
+- profit factor;
+- largest winner and loser;
+- recent real trade filtering.
 
-Current default exit settings:
-
-| Rule | Value |
-|------|-------|
-| Take Profit | 8% |
-| Stop Loss | 4% |
-| Trailing Stop | Configured, not fully optimised |
-| Break-even | Configured, not fully optimised |
-| Max Holding Time | 20 days |
-
----
-
-## Dashboard Foundation
+## Dashboard
 
 Implemented:
 
-- `DashboardService`
-- Dashboard snapshot model
-- Open P/L
-- Closed P/L
-- Total P/L
-- Winrate
-- Open position overview
+- `DashboardService` and snapshot models;
+- `run_dashboard.py`;
+- cash, equity, open/closed/total P/L;
+- return percentage and winrate;
+- open positions with unrealized return;
+- recent OPEN_POSITION/CLOSE_POSITION events;
+- closed-trade analytics;
+- CLI presenter;
+- GUI presenter, workspace, controller and desktop-bootstrap foundation.
 
-Current status:
-
-- Service layer complete.
-- CLI dashboard not yet implemented.
-- GUI dashboard not yet implemented.
-
----
-
-# Current Trading Capabilities
-
-Orion can currently:
-
-- scan configured market universes;
-- evaluate US, Dutch and German tickers;
-- generate deterministic BUY/HOLD/SELL decisions;
-- rank opportunities;
-- allocate paper capital;
-- reject trades based on risk rules;
-- open paper positions;
-- persist paper portfolio state;
-- update current prices for open positions;
-- monitor open positions;
-- close positions through exit rules;
-- write trading decisions to a journal;
-- run continuously in autonomous paper mode.
-
----
-
-# Current Sprint
-
-## Sprint 8.6 – Dashboard & Trading Analytics
-
-Status:
-
-```text
-IN PROGRESS
-```
-
-Objectives:
-
-1. Build a readable trading dashboard.
-2. Separate dashboard data from runtime logs.
-3. Add closed-trade analytics.
-4. Prepare adaptive exit optimisation.
-5. Prepare self-learning performance analysis.
-
-Completed in this sprint:
-
-- DashboardService
-- Dashboard snapshot model
-- Dashboard regression test
-- Regression suite expanded to 64 passing tests
-
-Next implementation step:
-
-```text
-run_dashboard.py
-```
-
-The next step is a CLI dashboard that reads the current paper portfolio and trade journal and presents a compact live overview.
+The GUI foundation is not the current development priority. The engine remains authoritative.
 
 ---
 
 # Validation Status
 
-Official regression command:
+Official command:
 
 ```powershell
 python run_tests.py
@@ -234,107 +193,83 @@ python run_tests.py
 Current expected result:
 
 ```text
-64 passed
+69 passed
 ```
 
-Latest validated components:
+Latest validated additions:
 
 | Component | Status |
 |-----------|--------|
-| Regression Test Suite | ✅ 64 passing |
-| Continuous Runner | ✅ Stable |
-| Paper Portfolio Persistence | ✅ Validated |
-| Trade Journal | ✅ Validated |
-| Portfolio Revaluation | ✅ Validated |
-| Position Monitor | ✅ Validated |
-| Exit Engine | ✅ Validated |
-| Dashboard Service | ✅ Validated |
+| JSON TradingSession Repository | ✅ Passing |
+| Complete session roundtrip | ✅ Passing |
+| Autonomous session recovery | ✅ Passing |
+| Autonomous session persistence | ✅ Passing |
+| Position lifecycle update | ✅ Passing |
+| Break-even update | ✅ Passing |
+| Trailing-stop update | ✅ Passing |
+| Persistent lifecycle recovery | ✅ Passing |
+| Backward-compatible portfolio persistence | ✅ Passing |
+
+Manual validation also confirmed the CLI dashboard against live paper runtime files.
 
 ---
 
-# Runtime Validation
+# Current Sprint
 
-Continuous paper trading has been tested over multiple hours.
+## Sprint 8.9 – Persistent Position Lifecycle
 
-Observed results:
-
-- Trade journal grew beyond 2000 entries.
-- Portfolio prices updated correctly.
-- Cash and positions remained consistent.
-- Exit Engine removed at least one open position.
-- Runtime continued scanning after portfolio updates.
-- No runtime crashes were observed during the latest long-running session.
-
-Runtime data files are local execution artifacts and should generally not be committed:
+Status:
 
 ```text
-data/paper_portfolio.json
-data/trade_journal.jsonl
+IN PROGRESS
 ```
+
+Completed:
+
+1. repository contract for complete TradingSession persistence;
+2. JSON implementation;
+3. save/load regression coverage;
+4. autonomous runner integration;
+5. state preservation across revaluation;
+6. position update engine integration;
+7. break-even and trailing-stop persistence;
+8. regression suite expanded to 69 passing tests.
+
+Next implementation step:
+
+```text
+Integrate lifecycle-aware exit evaluation using PositionState and RiskPlan.
+```
+
+The fixed-percentage `PositionMonitor` remains operational as a compatibility fallback until the new exit path is fully validated.
 
 ---
 
 # Known Limitations
 
-Current limitations:
-
-- No live CLI dashboard yet.
-- No GUI trading dashboard yet.
-- Trade journal still includes many rejected decisions.
-- Closed-trade analytics are not yet separated.
-- Take-profit and stop-loss values are still static.
-- Trailing stop is not yet fully operational.
-- Break-even logic is not yet fully operational.
-- No broker integration.
-- No real-money execution.
-- No adaptive strategy optimisation yet.
-
----
-
-# Next Planned Work
-
-Priority order:
-
-1. Build `run_dashboard.py`.
-2. Add readable terminal dashboard output.
-3. Add dashboard loading for:
-   - paper portfolio;
-   - trade journal;
-   - latest trades;
-   - open positions.
-4. Add closed trade analytics.
-5. Split execution journal from decision log if needed.
-6. Add adaptive exit optimisation.
-7. Add GUI dashboard.
-8. Add self-learning performance analysis.
+- Exit evaluation still primarily uses fixed percentages from `LivePaperTradingConfig`.
+- Maximum holding-time evaluation is not yet fully connected to persisted lifecycle timestamps.
+- Decision events and true trade events still share one JSONL journal.
+- The legacy desktop flow still uses separate `portfolio.json`, `open_trades.json` and `trade_history.json` storage.
+- The new GUI foundation is not yet the primary application entrypoint.
+- No broker integration or real-money execution exists.
+- Historical runtime files are not automatically migrated into `TradingSession`.
 
 ---
 
 # Project Direction
 
-Orion is no longer only a scanner or paper-buyer.
+The immediate objective is not to add new engines. It is to finish and consolidate the existing deterministic lifecycle.
 
-It now has a complete paper trading lifecycle.
+Priority order:
 
-The next development phase focuses on:
-
-- visibility;
-- analytics;
-- performance measurement;
-- exit optimisation;
-- strategy improvement.
-
-The primary question is shifting from:
-
-```text
-Can Orion trade autonomously?
-```
-
-to:
-
-```text
-How can Orion trade better?
-```
+1. lifecycle-aware exit evaluation;
+2. time-stop persistence and evaluation;
+3. long-running restart validation with `trading_session.json`;
+4. decision-log separation;
+5. engine consolidation and legacy mapping;
+6. performance and expectancy analytics;
+7. only then broader GUI and self-learning work.
 
 ---
 

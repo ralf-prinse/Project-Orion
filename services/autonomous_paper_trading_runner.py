@@ -17,14 +17,22 @@ from models.trading_session import TradingSession
 from providers.yahoo_provider import YahooProvider
 from services.exit_engine import ExitEngine
 from services.live_paper_market_scanner import LivePaperMarketScanner
+from services.paper_position_update_service import (
+    PaperPositionUpdateService,
+)
 from services.portfolio_allocator import PortfolioAllocator
-from services.portfolio_revaluation_service import PortfolioRevaluationService
+from services.portfolio_revaluation_service import (
+    PortfolioRevaluationService,
+)
 from services.position_monitor import PositionMonitor
 from services.stores.repositories.paper_portfolio_repository import (
     PaperPortfolioRepository,
 )
 from services.stores.repositories.trade_journal_repository import (
     TradeJournalRepository,
+)
+from services.stores.repositories.trading_session_repository import (
+    TradingSessionRepository,
 )
 from services.trade_journal_builder import TradeJournalBuilder
 from services.trading_cycle import TradingCycle
@@ -33,6 +41,22 @@ from services.trading_cycle import TradingCycle
 class AutonomousPaperTradingRunner:
     """
     Finite autonomous paper trading runner.
+
+    Responsibilities:
+    - load or create a complete TradingSession
+    - update existing position lifecycle state
+    - evaluate and execute exits
+    - scan for new candidates
+    - allocate capital
+    - execute paper trades
+    - persist complete session state
+    - append trade-journal entries
+
+    Does NOT:
+    - generate trading decisions directly
+    - calculate indicators
+    - calculate risk plans directly
+    - use AI for trading decisions
     """
 
     def __init__(
@@ -42,38 +66,48 @@ class AutonomousPaperTradingRunner:
         allocator: PortfolioAllocator | None = None,
         trading_cycle: TradingCycle | None = None,
         portfolio_repository: PaperPortfolioRepository | None = None,
+        trading_session_repository: TradingSessionRepository | None = None,
         trade_journal_repository: TradeJournalRepository | None = None,
         trade_journal_builder: TradeJournalBuilder | None = None,
+        position_update_service: PaperPositionUpdateService | None = None,
         position_monitor: PositionMonitor | None = None,
         revaluation_service: PortfolioRevaluationService | None = None,
         price_provider: YahooProvider | None = None,
         exit_engine: ExitEngine | None = None,
     ):
         self.config = config or AutonomousPaperTradingConfig()
+
         self.scanner = scanner or LivePaperMarketScanner(
             config=self.config.live_config,
         )
+
         self.allocator = allocator or PortfolioAllocator()
         self.trading_cycle = trading_cycle or TradingCycle()
+
         self.portfolio_repository = portfolio_repository
+        self.trading_session_repository = trading_session_repository
+
         self.trade_journal_repository = trade_journal_repository
         self.trade_journal_builder = (
             trade_journal_builder or TradeJournalBuilder()
         )
+
+        self.position_update_service = (
+            position_update_service or PaperPositionUpdateService()
+        )
+
         self.position_monitor = position_monitor or PositionMonitor()
+
         self.revaluation_service = (
             revaluation_service or PortfolioRevaluationService()
         )
+
         self.price_provider = price_provider or YahooProvider()
         self.exit_engine = exit_engine or ExitEngine()
 
     def run(self) -> AutonomousPaperTradingResult:
         session_id = self._build_session_id()
-
-        session = TradingSession(
-            name="Orion Autonomous Paper Trading",
-            portfolio=self._load_or_create_portfolio(),
-        )
+        session = self._load_or_create_session()
 
         cycle_results: list[AutonomousPaperTradingCycleResult] = []
         completed_cycles = 0
@@ -81,7 +115,7 @@ class AutonomousPaperTradingRunner:
 
         for cycle_index in range(self.config.cycles):
             try:
-                session = self._revalue_open_positions(
+                session = self._update_open_position_lifecycle(
                     session=session,
                 )
 
@@ -139,9 +173,7 @@ class AutonomousPaperTradingRunner:
 
                 completed_cycles += 1
 
-                self._save_portfolio(
-                    session.portfolio,
-                )
+                self._save_session(session)
 
                 if self.config.print_cycle_summary:
                     self._print_cycle_summary(
@@ -154,7 +186,11 @@ class AutonomousPaperTradingRunner:
 
             except Exception as exc:
                 failed_cycles += 1
-                print(f"Autonomous cycle failed: {repr(exc)}")
+
+                print(
+                    "Autonomous cycle failed: "
+                    f"{repr(exc)}"
+                )
 
                 if self.config.stop_on_exception:
                     break
@@ -182,38 +218,99 @@ class AutonomousPaperTradingRunner:
 
         return result
 
-    def _revalue_open_positions(
+    def _update_open_position_lifecycle(
         self,
         session: TradingSession,
     ) -> TradingSession:
-        prices: dict[str, float] = {}
+        """
+        Update all open positions with current market prices.
 
-        for symbol in session.portfolio.positions:
+        Positions with a persisted PositionState and RiskPlan use the
+        complete deterministic position-management lifecycle.
+
+        Legacy positions without lifecycle state use portfolio
+        revaluation only, preserving backward compatibility.
+        """
+
+        updated_session = session
+        fallback_prices: dict[str, float] = {}
+        updated_positions = 0
+
+        for symbol in list(session.portfolio.positions):
             try:
-                prices[symbol] = self.price_provider.get_current_price(symbol)
+                current_price = self.price_provider.get_current_price(
+                    symbol
+                )
             except Exception as exc:
                 print(
-                    f"Portfolio revaluation skipped for {symbol}: "
+                    f"Position update skipped for {symbol}: "
                     f"{repr(exc)}"
                 )
+                continue
 
-        if not prices:
-            return session
+            has_state = symbol in updated_session.position_states
+            has_risk_plan = symbol in updated_session.risk_plans
 
-        portfolio = self.revaluation_service.revalue(
-            portfolio=session.portfolio,
-            prices=prices,
-        )
+            if has_state and has_risk_plan:
+                update_result = (
+                    self.position_update_service.update_position(
+                        session=updated_session,
+                        symbol=symbol,
+                        current_price=current_price,
+                    )
+                )
 
-        print(
-            "Portfolio revalued: "
-            f"{len(prices)} position price(s) updated."
-        )
+                if update_result.updated:
+                    updated_session = update_result.session
+                    updated_positions += 1
 
-        return TradingSession(
-            name=session.name,
-            portfolio=portfolio,
-        )
+                    management = update_result.position_update
+
+                    if management is not None:
+                        actions = management.management.actions
+
+                        if actions:
+                            print(
+                                f"Position lifecycle: {symbol} | "
+                                + ", ".join(actions)
+                            )
+
+                    continue
+
+                print(
+                    f"Lifecycle update failed for {symbol}: "
+                    f"{update_result.message}"
+                )
+
+            fallback_prices[symbol] = current_price
+
+        if fallback_prices:
+            fallback_portfolio = self.revaluation_service.revalue(
+                portfolio=updated_session.portfolio,
+                prices=fallback_prices,
+            )
+
+            updated_session = TradingSession(
+                name=updated_session.name,
+                portfolio=fallback_portfolio,
+                position_states=dict(
+                    updated_session.position_states
+                ),
+                risk_plans=dict(
+                    updated_session.risk_plans
+                ),
+                status=updated_session.status,
+            )
+
+        total_updated = updated_positions + len(fallback_prices)
+
+        if total_updated:
+            print(
+                "Portfolio lifecycle updated: "
+                f"{total_updated} position price(s) processed."
+            )
+
+        return updated_session
 
     def _process_open_position_exits(
         self,
@@ -222,6 +319,8 @@ class AutonomousPaperTradingRunner:
         session_id: str,
     ) -> TradingSession:
         portfolio = session.portfolio
+        position_states = dict(session.position_states)
+        risk_plans = dict(session.risk_plans)
 
         for position in list(portfolio.positions.values()):
             decision = self.position_monitor.evaluate(
@@ -241,23 +340,34 @@ class AutonomousPaperTradingRunner:
                 decision=decision,
             )
 
-            if result.executed:
-                print(
-                    f"Exit executed: "
-                    f"{result.symbol} -> {result.action} | {result.reason}"
-                )
+            if not result.executed:
+                continue
 
-                self._append_exit_journal_entry(
-                    position=position,
-                    action=result.action,
-                    reason=result.reason,
-                    cycle_number=cycle_number,
-                    session_id=session_id,
-                )
+            print(
+                f"Exit executed: "
+                f"{result.symbol} -> {result.action} | "
+                f"{result.reason}"
+            )
+
+            self._append_exit_journal_entry(
+                position=position,
+                action=result.action,
+                reason=result.reason,
+                cycle_number=cycle_number,
+                session_id=session_id,
+            )
+
+            symbol = result.symbol.upper()
+
+            position_states.pop(symbol, None)
+            risk_plans.pop(symbol, None)
 
         return TradingSession(
             name=session.name,
             portfolio=portfolio,
+            position_states=position_states,
+            risk_plans=risk_plans,
+            status=session.status,
         )
 
     def _append_exit_journal_entry(
@@ -273,6 +383,7 @@ class AutonomousPaperTradingRunner:
 
         invested_amount = position.cost_basis
         exit_value = position.market_value
+
         realized_profit_loss = round(
             exit_value - invested_amount,
             2,
@@ -294,13 +405,27 @@ class AutonomousPaperTradingRunner:
             expected_risk=0.0,
             regime="UNKNOWN",
             volatility="UNKNOWN",
-            ai_summary=f"Exit executed by PositionMonitor: {action}",
+            ai_summary=(
+                f"Exit executed by PositionMonitor: {action}"
+            ),
             recommendation_reason=reason,
             cycle_number=cycle_number,
             session_id=session_id,
         )
 
         self.trade_journal_repository.append(entry)
+
+    def _load_or_create_session(self) -> TradingSession:
+        if (
+            self.trading_session_repository is not None
+            and self.trading_session_repository.exists()
+        ):
+            return self.trading_session_repository.load()
+
+        return TradingSession(
+            name="Orion Autonomous Paper Trading",
+            portfolio=self._load_or_create_portfolio(),
+        )
 
     def _load_or_create_portfolio(self) -> PaperPortfolio:
         if (
@@ -313,16 +438,17 @@ class AutonomousPaperTradingRunner:
             cash=self.config.live_config.initial_cash,
         )
 
-    def _save_portfolio(
+    def _save_session(
         self,
-        portfolio: PaperPortfolio,
+        session: TradingSession,
     ) -> None:
-        if self.portfolio_repository is None:
-            return
+        if self.trading_session_repository is not None:
+            self.trading_session_repository.save(session)
 
-        self.portfolio_repository.save(
-            portfolio,
-        )
+        if self.portfolio_repository is not None:
+            self.portfolio_repository.save(
+                session.portfolio
+            )
 
     def _save_trade_journal(
         self,
