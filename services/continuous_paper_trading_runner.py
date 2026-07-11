@@ -32,9 +32,11 @@ class ContinuousPaperTradingRunner:
 
     Responsibilities:
     - repeatedly run AutonomousPaperTradingRunner
+    - classify autonomous results as successful or failed iterations
+    - continue from repository-backed state after recoverable failures
     - wait between iterations
     - stop cleanly on KeyboardInterrupt
-    - optionally stop on exceptions
+    - optionally stop on failures
 
     Does NOT:
     - generate trading decisions
@@ -61,21 +63,42 @@ class ContinuousPaperTradingRunner:
         iteration = 0
 
         while self._should_continue(iteration):
+            should_stop = False
+
             try:
                 print("\n>>> Starting autonomous runner...")
                 print(f">>> Iteration: {iteration + 1}")
 
-                last_result = self.runner.run()
+                current_result = self.runner.run()
+                last_result = current_result
 
-                print(">>> Autonomous runner finished.")
+                if current_result.failed_cycles > 0:
+                    failed_iterations += 1
 
-                iterations_completed += 1
-
-                if self.config.print_iteration_summary:
-                    self._print_iteration_summary(
-                        iteration=iteration + 1,
-                        result=last_result,
+                    print(
+                        ">>> Autonomous runner finished with "
+                        f"{current_result.failed_cycles} failed cycle(s)."
                     )
+
+                    if self.config.print_iteration_summary:
+                        self._print_iteration_summary(
+                            iteration=iteration + 1,
+                            result=current_result,
+                            iteration_status="FAILED",
+                        )
+
+                    should_stop = self.config.stop_on_exception
+                else:
+                    iterations_completed += 1
+
+                    print(">>> Autonomous runner finished.")
+
+                    if self.config.print_iteration_summary:
+                        self._print_iteration_summary(
+                            iteration=iteration + 1,
+                            result=current_result,
+                            iteration_status="COMPLETED",
+                        )
 
             except KeyboardInterrupt:
                 print("\n>>> KeyboardInterrupt received.")
@@ -87,10 +110,12 @@ class ContinuousPaperTradingRunner:
                 print("\n>>> Autonomous runner raised exception:")
                 print(repr(exc))
 
-                if self.config.stop_on_exception:
-                    break
+                should_stop = self.config.stop_on_exception
 
             iteration += 1
+
+            if should_stop:
+                break
 
             if self._should_continue(iteration):
                 print(
@@ -118,9 +143,11 @@ class ContinuousPaperTradingRunner:
         self,
         iteration: int,
         result: AutonomousPaperTradingResult,
+        iteration_status: str,
     ) -> None:
         print(
             f"Continuous iteration {iteration}: "
+            f"status={iteration_status}, "
             f"completed_cycles={result.completed_cycles}, "
             f"failed_cycles={result.failed_cycles}, "
             f"cash=€{result.final_cash:.2f}, "
