@@ -7,8 +7,12 @@ from pathlib import Path
 from models.autonomous_paper_trading_config import (
     AutonomousPaperTradingConfig,
 )
-from models.continuous_runner_config import ContinuousRunnerConfig
-from models.live_paper_trading_config import LivePaperTradingConfig
+from models.continuous_runner_config import (
+    ContinuousRunnerConfig,
+)
+from models.live_paper_trading_config import (
+    LivePaperTradingConfig,
+)
 from services.autonomous_paper_trading_runner import (
     AutonomousPaperTradingRunner,
 )
@@ -36,26 +40,71 @@ class ContinuousRuntimeSettings:
     stop_on_exception: bool
     session_path: Path
     portfolio_path: Path
-    journal_path: Path
+    trade_journal_path: Path
+    decision_journal_path: Path
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
-            "Run Orion continuous paper trading with complete "
-            "TradingSession persistence."
+            "Run Orion continuous paper trading "
+            "with complete session persistence."
         ),
     )
-    parser.add_argument("--test", action="store_true")
-    parser.add_argument("--isolated", action="store_true")
-    parser.add_argument("--iterations", type=int, default=None)
-    parser.add_argument("--interval", type=int, default=None)
-    parser.add_argument("--max-symbols", type=int, default=None)
-    parser.add_argument("--initial-cash", type=float, default=500.0)
-    parser.add_argument("--stop-on-exception", action="store_true")
-    parser.add_argument("--session-path", type=Path, default=None)
-    parser.add_argument("--portfolio-path", type=Path, default=None)
-    parser.add_argument("--journal-path", type=Path, default=None)
+
+    parser.add_argument(
+        "--test",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--isolated",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--iterations",
+        type=int,
+        default=None,
+    )
+    parser.add_argument(
+        "--interval",
+        type=int,
+        default=None,
+    )
+    parser.add_argument(
+        "--max-symbols",
+        type=int,
+        default=None,
+    )
+    parser.add_argument(
+        "--initial-cash",
+        type=float,
+        default=500.0,
+    )
+    parser.add_argument(
+        "--stop-on-exception",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--session-path",
+        type=Path,
+        default=None,
+    )
+    parser.add_argument(
+        "--portfolio-path",
+        type=Path,
+        default=None,
+    )
+    parser.add_argument(
+        "--trade-journal-path",
+        type=Path,
+        default=None,
+    )
+    parser.add_argument(
+        "--decision-journal-path",
+        type=Path,
+        default=None,
+    )
+
     return parser
 
 
@@ -63,36 +112,82 @@ def resolve_settings(
     args: argparse.Namespace,
 ) -> ContinuousRuntimeSettings:
     if args.test:
-        interval_seconds = args.interval if args.interval is not None else 10
-        max_iterations = args.iterations if args.iterations is not None else 3
-        max_symbols = args.max_symbols if args.max_symbols is not None else 5
+        interval_seconds = (
+            args.interval
+            if args.interval is not None
+            else 10
+        )
+        max_iterations = (
+            args.iterations
+            if args.iterations is not None
+            else 3
+        )
+        max_symbols = (
+            args.max_symbols
+            if args.max_symbols is not None
+            else 5
+        )
     else:
-        interval_seconds = args.interval if args.interval is not None else 300
+        interval_seconds = (
+            args.interval
+            if args.interval is not None
+            else 300
+        )
         max_iterations = args.iterations
-        max_symbols = args.max_symbols if args.max_symbols is not None else 25
+        max_symbols = (
+            args.max_symbols
+            if args.max_symbols is not None
+            else 25
+        )
 
     if interval_seconds < 1:
-        raise ValueError("interval must be at least 1 second.")
-    if max_iterations is not None and max_iterations < 1:
-        raise ValueError("iterations must be at least 1.")
-    if max_symbols < 1:
-        raise ValueError("max-symbols must be at least 1.")
-    if args.initial_cash <= 0:
-        raise ValueError("initial-cash must be greater than zero.")
+        raise ValueError(
+            "interval must be at least 1 second."
+        )
 
-    default_session_path = Path("data/trading_session.json")
-    default_portfolio_path = Path("data/paper_portfolio.json")
-    default_journal_path = Path("data/trade_journal.jsonl")
+    if (
+        max_iterations is not None
+        and max_iterations < 1
+    ):
+        raise ValueError(
+            "iterations must be at least 1."
+        )
+
+    if max_symbols < 1:
+        raise ValueError(
+            "max-symbols must be at least 1."
+        )
+
+    if args.initial_cash <= 0:
+        raise ValueError(
+            "initial-cash must be greater than zero."
+        )
+
+    session_path = Path(
+        "data/trading_session.json"
+    )
+    portfolio_path = Path(
+        "data/paper_portfolio.json"
+    )
+    trade_journal_path = Path(
+        "data/trade_journal.jsonl"
+    )
+    decision_journal_path = Path(
+        "data/decision_journal.jsonl"
+    )
 
     if args.isolated:
-        default_session_path = Path(
+        session_path = Path(
             "data/optimization_trading_session.json"
         )
-        default_portfolio_path = Path(
+        portfolio_path = Path(
             "data/optimization_paper_portfolio.json"
         )
-        default_journal_path = Path(
+        trade_journal_path = Path(
             "data/optimization_trade_journal.jsonl"
+        )
+        decision_journal_path = Path(
+            "data/optimization_decision_journal.jsonl"
         )
 
     return ContinuousRuntimeSettings(
@@ -101,59 +196,93 @@ def resolve_settings(
         max_symbols=max_symbols,
         initial_cash=float(args.initial_cash),
         test_mode=bool(args.test),
-        stop_on_exception=bool(args.stop_on_exception),
-        session_path=args.session_path or default_session_path,
-        portfolio_path=args.portfolio_path or default_portfolio_path,
-        journal_path=args.journal_path or default_journal_path,
+        stop_on_exception=bool(
+            args.stop_on_exception
+        ),
+        session_path=(
+            args.session_path
+            or session_path
+        ),
+        portfolio_path=(
+            args.portfolio_path
+            or portfolio_path
+        ),
+        trade_journal_path=(
+            args.trade_journal_path
+            or trade_journal_path
+        ),
+        decision_journal_path=(
+            args.decision_journal_path
+            or decision_journal_path
+        ),
     )
 
 
 def build_runner(
     settings: ContinuousRuntimeSettings,
 ) -> ContinuousPaperTradingRunner:
-    session_repository = JsonTradingSessionRepository(
-        path=settings.session_path,
-    )
-    portfolio_repository = JsonPaperPortfolioRepository(
-        path=settings.portfolio_path,
-    )
-    trade_journal_repository = JsonlTradeJournalRepository(
-        path=settings.journal_path,
-    )
-
-    autonomous_config = AutonomousPaperTradingConfig(
-        cycles=1,
-        sleep_seconds=0,
-        live_config=LivePaperTradingConfig(
-            initial_cash=settings.initial_cash,
-            max_symbols=settings.max_symbols,
-        ),
-        print_cycle_summary=True,
+    autonomous_config = (
+        AutonomousPaperTradingConfig(
+            cycles=1,
+            sleep_seconds=0,
+            live_config=LivePaperTradingConfig(
+                initial_cash=settings.initial_cash,
+                max_symbols=settings.max_symbols,
+            ),
+            print_cycle_summary=True,
+        )
     )
 
-    autonomous_runner = AutonomousPaperTradingRunner(
-        config=autonomous_config,
-        trading_session_repository=session_repository,
-        portfolio_repository=portfolio_repository,
-        trade_journal_repository=trade_journal_repository,
-    )
-
-    continuous_config = ContinuousRunnerConfig(
-        autonomous_config=autonomous_config,
-        interval_seconds=settings.interval_seconds,
-        max_iterations=settings.max_iterations,
-        stop_on_exception=settings.stop_on_exception,
-        print_iteration_summary=True,
+    autonomous_runner = (
+        AutonomousPaperTradingRunner(
+            config=autonomous_config,
+            trading_session_repository=(
+                JsonTradingSessionRepository(
+                    path=settings.session_path,
+                )
+            ),
+            portfolio_repository=(
+                JsonPaperPortfolioRepository(
+                    path=settings.portfolio_path,
+                )
+            ),
+            trade_journal_repository=(
+                JsonlTradeJournalRepository(
+                    path=settings.trade_journal_path,
+                )
+            ),
+            decision_journal_repository=(
+                JsonlTradeJournalRepository(
+                    path=settings.decision_journal_path,
+                )
+            ),
+        )
     )
 
     return ContinuousPaperTradingRunner(
-        config=continuous_config,
+        config=ContinuousRunnerConfig(
+            autonomous_config=autonomous_config,
+            interval_seconds=(
+                settings.interval_seconds
+            ),
+            max_iterations=settings.max_iterations,
+            stop_on_exception=(
+                settings.stop_on_exception
+            ),
+            print_iteration_summary=True,
+        ),
         runner=autonomous_runner,
     )
 
 
-def print_startup(settings: ContinuousRuntimeSettings) -> None:
-    mode = "BOUNDED TEST" if settings.test_mode else "CONTINUOUS"
+def print_startup(
+    settings: ContinuousRuntimeSettings,
+) -> None:
+    mode = (
+        "BOUNDED TEST"
+        if settings.test_mode
+        else "CONTINUOUS"
+    )
     iterations = (
         str(settings.max_iterations)
         if settings.max_iterations is not None
@@ -166,13 +295,34 @@ def print_startup(settings: ContinuousRuntimeSettings) -> None:
     print("=========================================")
     print(f"Mode:             {mode}")
     print(f"Iterations:       {iterations}")
-    print(f"Interval:         {settings.interval_seconds} seconds")
-    print(f"Max symbols:      {settings.max_symbols}")
-    print(f"Initial cash:     EUR {settings.initial_cash:.2f}")
-    print(f"Stop on failure:  {settings.stop_on_exception}")
+    print(
+        "Interval:         "
+        f"{settings.interval_seconds} seconds"
+    )
+    print(
+        f"Max symbols:      {settings.max_symbols}"
+    )
+    print(
+        "Initial cash:     "
+        f"EUR {settings.initial_cash:.2f}"
+    )
+    print(
+        "Stop on failure:  "
+        f"{settings.stop_on_exception}"
+    )
     print(f"Session:          {settings.session_path}")
-    print(f"Portfolio mirror: {settings.portfolio_path}")
-    print(f"Trade journal:    {settings.journal_path}")
+    print(
+        "Portfolio mirror: "
+        f"{settings.portfolio_path}"
+    )
+    print(
+        "Trade journal:    "
+        f"{settings.trade_journal_path}"
+    )
+    print(
+        "Decision journal: "
+        f"{settings.decision_journal_path}"
+    )
     print("Press Ctrl+C to stop.")
     print("=========================================")
     print()
@@ -183,16 +333,38 @@ def print_result(result) -> None:
     print("=========================================")
     print("CONTINUOUS PAPER TRADING STOPPED")
     print("=========================================")
-    print(f"Iterations completed: {result.iterations_completed}")
-    print(f"Failed iterations:    {result.failed_iterations}")
+    print(
+        "Iterations completed: "
+        f"{result.iterations_completed}"
+    )
+    print(
+        "Failed iterations:    "
+        f"{result.failed_iterations}"
+    )
 
     if result.last_result is not None:
         session = result.last_result.session
-        print(f"Final cash:           EUR {result.last_result.final_cash:.2f}")
-        print(f"Final equity:         EUR {result.last_result.final_equity:.2f}")
-        print(f"Open positions:       {len(session.portfolio.positions)}")
-        print(f"Position states:      {len(session.position_states)}")
-        print(f"Risk plans:           {len(session.risk_plans)}")
+
+        print(
+            "Final cash:           "
+            f"EUR {result.last_result.final_cash:.2f}"
+        )
+        print(
+            "Final equity:         "
+            f"EUR {result.last_result.final_equity:.2f}"
+        )
+        print(
+            "Open positions:       "
+            f"{len(session.portfolio.positions)}"
+        )
+        print(
+            "Position states:      "
+            f"{len(session.position_states)}"
+        )
+        print(
+            "Risk plans:           "
+            f"{len(session.risk_plans)}"
+        )
 
     print("=========================================")
     print()
@@ -202,8 +374,10 @@ def main() -> None:
     args = build_parser().parse_args()
     settings = resolve_settings(args)
     print_startup(settings)
+
     runner = build_runner(settings)
     result = runner.run()
+
     print_result(result)
 
 
