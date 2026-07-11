@@ -69,3 +69,14 @@
 - GUI/dashboard foundation.
 
 # End
+
+## Sprint 9.0.1 — Runtime Supervisor
+
+- Added operational `RuntimeSupervisor` integration to the continuous runner.
+- Added mutable `RuntimeHealth` operational state.
+- Added immutable `RuntimeEvent` records.
+- Added `RuntimeEventRepository` protocol and JSONL implementation.
+- Added runtime start, iteration, failure and stop events.
+- Added CLI configuration for the runtime-event journal.
+- Preserved `TradingSession` as the only trading lifecycle owner.
+- Added targeted supervisor and repository tests.

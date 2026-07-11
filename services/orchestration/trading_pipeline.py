@@ -4,6 +4,9 @@ from models.trading_pipeline_result import TradingPipelineResult
 from services.logging_service import LoggingService
 from services.risk.risk_context_builder import RiskContextBuilder
 from services.intelligence.signal_fusion_engine import SignalFusionEngine
+from services.intelligence.investment_thesis_builder import (
+    InvestmentThesisBuilder,
+)
 from services.intelligence.intelligence_models import IndicatorPack
 from services.intelligence.market_intelligence_engine import (
     MarketIntelligenceEngine,
@@ -39,6 +42,7 @@ class TradingPipeline:
 
         self.fusion = SignalFusionEngine()
         self.intelligence = MarketIntelligenceEngine()
+        self.thesis_builder = InvestmentThesisBuilder()
         self.decision_engine = AdaptiveDecisionEngine()
         self.sizer = PositionSizer()
         self.risk_engine = AdaptiveRiskEngine()
@@ -144,6 +148,13 @@ class TradingPipeline:
                 + "\n".join(validation.errors)
             )
 
+        investment_thesis = self.thesis_builder.build(
+            indicators=indicator_data,
+            fused=fused,
+            intelligence=intelligence,
+            risk_plan=risk_plan,
+        )
+
         ai_context = self.ai_builder.build(
             {
                 "symbol": indicator_data.symbol,
@@ -207,4 +218,5 @@ class TradingPipeline:
             market_intelligence=intelligence,
             ai_context=ai_context,
             explanation=explanation,
+            investment_thesis=investment_thesis,
         )

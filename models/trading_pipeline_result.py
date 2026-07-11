@@ -28,3 +28,4 @@ class TradingPipelineResult:
     market_intelligence: Any
     ai_context: Any
     explanation: Any
+    investment_thesis: Any | None = None

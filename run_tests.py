@@ -28,6 +28,8 @@ class OrionTestRunner:
         self.commands = [
             TestCommand("Trading Pipeline", [sys.executable, "test_trading_pipeline.py"]),
             TestCommand("Trading Pipeline Result", [sys.executable, "test_trading_pipeline_result.py"]),
+            TestCommand("Investment Thesis Builder", [sys.executable, "test_investment_thesis_builder.py"]),
+            TestCommand("Strategy Thesis Pipeline", [sys.executable, "test_strategy_thesis_pipeline.py"]),
             TestCommand("Decision Smoke", [sys.executable, "test_decision_smoke.py"]),
             TestCommand("Intelligence Layer", [sys.executable, "test_intelligence_layer.py"]),
             TestCommand("AI Market Scanner", [sys.executable, "test_ai_market_scanner.py"]),
@@ -84,6 +86,14 @@ TestCommand(
 TestCommand(
     "Continuous Paper Trading Runner",
     [sys.executable, "test_continuous_paper_trading_runner.py"],
+),
+TestCommand(
+    "Runtime Supervisor",
+    [sys.executable, "test_runtime_supervisor.py"],
+),
+TestCommand(
+    "JSONL Runtime Event Repository",
+    [sys.executable, "test_jsonl_runtime_event_repository.py"],
 ),
 TestCommand(
     "Portfolio Revaluation",

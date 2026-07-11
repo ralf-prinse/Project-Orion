@@ -11,6 +11,7 @@ from models.continuous_runner_config import ContinuousRunnerConfig
 from services.autonomous_paper_trading_runner import (
     AutonomousPaperTradingRunner,
 )
+from services.runtime_supervisor import RuntimeSupervisor
 
 
 @dataclass(frozen=True)
@@ -25,17 +26,23 @@ class ContinuousPaperTradingRunner:
         self,
         config: ContinuousRunnerConfig,
         runner: AutonomousPaperTradingRunner | None = None,
+        supervisor: RuntimeSupervisor | None = None,
     ):
         self.config = config
         self.runner = runner or AutonomousPaperTradingRunner(
             config=config.autonomous_config,
         )
+        self.supervisor = supervisor
 
     def run(self) -> ContinuousPaperTradingRunResult:
         iterations_completed = 0
         failed_iterations = 0
         last_result: AutonomousPaperTradingResult | None = None
         iteration = 0
+        stop_reason = "Continuous runtime completed."
+
+        if self.supervisor is not None:
+            self.supervisor.runtime_started()
 
         while self._should_continue(iteration):
             should_stop = False
@@ -43,6 +50,9 @@ class ContinuousPaperTradingRunner:
             started_perf = time.perf_counter()
 
             try:
+                if self.supervisor is not None:
+                    self.supervisor.iteration_started(iteration + 1)
+
                 print()
                 print(
                     ">>> HEARTBEAT START "
@@ -68,9 +78,21 @@ class ContinuousPaperTradingRunner:
                             iteration_status="FAILED",
                             duration_seconds=duration_seconds,
                         )
+                    if self.supervisor is not None:
+                        self.supervisor.iteration_failed(
+                            iteration=iteration + 1,
+                            duration_seconds=duration_seconds,
+                            result=current_result,
+                        )
                     should_stop = self.config.stop_on_exception
                 else:
                     iterations_completed += 1
+                    if self.supervisor is not None:
+                        self.supervisor.iteration_completed(
+                            iteration=iteration + 1,
+                            result=current_result,
+                            duration_seconds=duration_seconds,
+                        )
                     print(">>> Autonomous runner finished.")
                     if self.config.print_iteration_summary:
                         self._print_iteration_summary(
@@ -89,6 +111,7 @@ class ContinuousPaperTradingRunner:
                 print()
                 print(">>> KeyboardInterrupt received during iteration.")
                 print(">>> Continuous runner stopping cleanly.")
+                stop_reason = "KeyboardInterrupt received during iteration."
                 break
 
             except Exception as exc:
@@ -101,16 +124,27 @@ class ContinuousPaperTradingRunner:
                     ">>> Failed iteration duration: "
                     f"{duration_seconds:.3f} seconds"
                 )
+                if self.supervisor is not None:
+                    self.supervisor.iteration_failed(
+                        iteration=iteration + 1,
+                        duration_seconds=duration_seconds,
+                        error=exc,
+                    )
                 should_stop = self.config.stop_on_exception
 
             iteration += 1
 
             if should_stop:
+                stop_reason = "Runtime stopped after a failed iteration."
                 break
 
             if self._should_continue(iteration):
                 if not self._sleep_until_next_iteration():
+                    stop_reason = "KeyboardInterrupt received during sleep."
                     break
+
+        if self.supervisor is not None:
+            self.supervisor.runtime_stopped(stop_reason)
 
         return ContinuousPaperTradingRunResult(
             iterations_completed=iterations_completed,

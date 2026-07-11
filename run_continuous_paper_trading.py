@@ -19,11 +19,15 @@ from services.autonomous_paper_trading_runner import (
 from services.continuous_paper_trading_runner import (
     ContinuousPaperTradingRunner,
 )
+from services.runtime_supervisor import RuntimeSupervisor
 from services.stores.json_paper_portfolio_repository import (
     JsonPaperPortfolioRepository,
 )
 from services.stores.json_trading_session_repository import (
     JsonTradingSessionRepository,
+)
+from services.stores.jsonl_runtime_event_repository import (
+    JsonlRuntimeEventRepository,
 )
 from services.stores.jsonl_trade_journal_repository import (
     JsonlTradeJournalRepository,
@@ -42,6 +46,7 @@ class ContinuousRuntimeSettings:
     portfolio_path: Path
     trade_journal_path: Path
     decision_journal_path: Path
+    runtime_event_path: Path
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -101,6 +106,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--decision-journal-path",
+        type=Path,
+        default=None,
+    )
+    parser.add_argument(
+        "--runtime-event-path",
         type=Path,
         default=None,
     )
@@ -175,6 +185,9 @@ def resolve_settings(
     decision_journal_path = Path(
         "data/decision_journal.jsonl"
     )
+    runtime_event_path = Path(
+        "data/runtime_events.jsonl"
+    )
 
     if args.isolated:
         session_path = Path(
@@ -188,6 +201,9 @@ def resolve_settings(
         )
         decision_journal_path = Path(
             "data/optimization_decision_journal.jsonl"
+        )
+        runtime_event_path = Path(
+            "data/optimization_runtime_events.jsonl"
         )
 
     return ContinuousRuntimeSettings(
@@ -214,6 +230,10 @@ def resolve_settings(
         decision_journal_path=(
             args.decision_journal_path
             or decision_journal_path
+        ),
+        runtime_event_path=(
+            args.runtime_event_path
+            or runtime_event_path
         ),
     )
 
@@ -272,6 +292,11 @@ def build_runner(
             print_iteration_summary=True,
         ),
         runner=autonomous_runner,
+        supervisor=RuntimeSupervisor(
+            event_repository=JsonlRuntimeEventRepository(
+                path=settings.runtime_event_path,
+            )
+        ),
     )
 
 
@@ -322,6 +347,10 @@ def print_startup(
     print(
         "Decision journal: "
         f"{settings.decision_journal_path}"
+    )
+    print(
+        "Runtime events:   "
+        f"{settings.runtime_event_path}"
     )
     print("Press Ctrl+C to stop.")
     print("=========================================")

@@ -20,6 +20,7 @@ def build_args(**overrides):
         "portfolio_path": None,
         "trade_journal_path": None,
         "decision_journal_path": None,
+        "runtime_event_path": None,
     }
     values.update(overrides)
     return Namespace(**values)
@@ -45,9 +46,12 @@ def test_isolated_paths():
     assert settings.decision_journal_path == Path(
         "data/optimization_decision_journal.jsonl"
     )
+    assert settings.runtime_event_path == Path(
+        "data/optimization_runtime_events.jsonl"
+    )
 
 
-def test_runner_uses_both_journals():
+def test_runner_uses_journals_and_runtime_supervisor():
     settings = resolve_settings(
         build_args(
             test=True,
@@ -73,6 +77,11 @@ def test_runner_uses_both_journals():
         .path
         == settings.decision_journal_path
     )
+    assert runner.supervisor is not None
+    assert (
+        runner.supervisor.event_repository.path
+        == settings.runtime_event_path
+    )
 
 
 def main():
@@ -83,7 +92,7 @@ def main():
     print()
 
     test_isolated_paths()
-    test_runner_uses_both_journals()
+    test_runner_uses_journals_and_runtime_supervisor()
 
     print(
         "CONTINUOUS RUNNER ENTRYPOINT: PASS"

@@ -120,3 +120,33 @@ def test_keyboard_interrupt_during_sleep_stops_cleanly():
     assert runner.calls == 1
     assert result.iterations_completed == 1
     assert result.failed_iterations == 0
+
+
+def test_continuous_runner_updates_runtime_supervisor():
+    from services.runtime_supervisor import RuntimeSupervisor
+
+    class EventRepository:
+        def __init__(self):
+            self.events = []
+
+        def append(self, event):
+            self.events.append(event)
+
+    repository = EventRepository()
+    supervisor = RuntimeSupervisor(event_repository=repository)
+    runner = DummyAutonomousRunner()
+    result = ContinuousPaperTradingRunner(
+        config=build_config(max_iterations=1),
+        runner=runner,
+        supervisor=supervisor,
+    ).run()
+
+    assert result.iterations_completed == 1
+    assert supervisor.health.status == "STOPPED"
+    assert supervisor.health.iterations_completed == 1
+    assert [event.event_type for event in repository.events] == [
+        "RUNTIME_STARTED",
+        "ITERATION_STARTED",
+        "ITERATION_COMPLETED",
+        "RUNTIME_STOPPED",
+    ]
