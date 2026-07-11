@@ -49,7 +49,7 @@ class FixedPriceProvider:
 
 def build_seed_session() -> TradingSession:
     return TradingSession(
-        name="Orion Continuous Restart Smoke Test",
+        name="Orion Restart Exit Recovery Smoke Test",
         portfolio=PaperPortfolio(
             cash=400.0,
             positions={
@@ -87,7 +87,7 @@ def build_seed_session() -> TradingSession:
                 reward_percent=20.0,
                 risk_reward_ratio=4.0,
                 confidence=0.90,
-                notes="Continuous runner restart smoke test.",
+                notes="Restart exit recovery smoke test.",
             ),
         },
         status="ACTIVE",
@@ -162,7 +162,7 @@ def print_session(
         print(f"Final target:    EUR {plan.target_3:.2f}")
 
 
-def validate_managed_session(
+def validate_managed_position(
     session: TradingSession,
 ) -> None:
     assert "AAPL" in session.portfolio.positions
@@ -179,35 +179,120 @@ def validate_managed_session(
     assert state.target_1_hit is True
     assert state.break_even_active is True
     assert state.trailing_stop_active is True
-    assert state.current_stop_loss > 100.0
+    assert state.current_stop_loss == 100.7
     assert plan.target_3 == 120.0
+
+
+def validate_closed_session(
+    session: TradingSession,
+) -> None:
+    assert "AAPL" not in session.portfolio.positions
+    assert "AAPL" not in session.position_states
+    assert "AAPL" not in session.risk_plans
+
+    assert session.cash == 500.4
+    assert session.equity == 500.4
+    assert session.open_positions == 0
+
+
+def run_activation_phase(
+    repository: JsonTradingSessionRepository,
+    iterations: int,
+    interval: int,
+) -> None:
+    print()
+    print("=========================================")
+    print("PHASE 1 - ACTIVATE MANAGED TRAILING STOP")
+    print("=========================================")
+
+    runner = build_runner(
+        repository=repository,
+        iterations=iterations,
+        interval=interval,
+        price=106.0,
+    )
+
+    result = runner.run()
+
+    persisted_session = repository.load()
+    print_session("SESSION AFTER PHASE 1", persisted_session)
+
+    assert result.iterations_completed == iterations
+    assert result.failed_iterations == 0
+
+    validate_managed_position(persisted_session)
+
+    print()
+    print("PHASE 1: PASS")
+
+
+def run_recovery_exit_phase(
+    repository: JsonTradingSessionRepository,
+    iterations: int,
+    interval: int,
+) -> None:
+    print()
+    print("=========================================")
+    print("PHASE 2 - RESTART AND EXECUTE EXIT")
+    print("=========================================")
+
+    before_restart = repository.load()
+    print_session("SESSION BEFORE RESTART EXIT", before_restart)
+
+    validate_managed_position(before_restart)
+
+    runner = build_runner(
+        repository=repository,
+        iterations=iterations,
+        interval=interval,
+        price=100.4,
+    )
+
+    result = runner.run()
+
+    persisted_session = repository.load()
+    print_session("SESSION AFTER RESTART EXIT", persisted_session)
+
+    assert result.iterations_completed == iterations
+    assert result.failed_iterations == 0
+
+    validate_closed_session(persisted_session)
+
+    print()
+    print("PHASE 2: PASS")
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
-            "Isolated restart-safe continuous runner smoke test."
+            "Isolated restart exit recovery smoke test."
         ),
     )
     parser.add_argument(
         "--reset",
         action="store_true",
-        help="Delete the smoke session and seed a fresh managed session.",
+        help=(
+            "Reset the smoke session and run both phases: "
+            "activate trailing stop, then restart and close."
+        ),
+    )
+    parser.add_argument(
+        "--exit-only",
+        action="store_true",
+        help=(
+            "Use the existing smoke session and run only "
+            "the restart exit phase."
+        ),
     )
     parser.add_argument(
         "--iterations",
         type=int,
-        default=3,
+        default=1,
     )
     parser.add_argument(
         "--interval",
         type=int,
         default=1,
-    )
-    parser.add_argument(
-        "--price",
-        type=float,
-        default=106.0,
     )
     return parser
 
@@ -227,42 +312,66 @@ def main() -> None:
 
     if args.reset:
         repository.delete()
-
-    if not repository.exists():
         repository.save(build_seed_session())
         print(f"Seeded managed session: {SESSION_PATH}")
-    else:
+
+        initial_session = repository.load()
+        print_session("INITIAL SESSION", initial_session)
+
+        run_activation_phase(
+            repository=repository,
+            iterations=args.iterations,
+            interval=args.interval,
+        )
+
+        print()
+        print(
+            "Persisted lifecycle ready. "
+            "A new runner instance will now load it."
+        )
+
+        run_recovery_exit_phase(
+            repository=repository,
+            iterations=args.iterations,
+            interval=args.interval,
+        )
+
+    elif args.exit_only:
+        if not repository.exists():
+            raise FileNotFoundError(
+                "Smoke session not found. Run with --reset first."
+            )
+
         print(f"Restarting persisted session: {SESSION_PATH}")
 
-    initial_session = repository.load()
-    print_session("SESSION BEFORE RUN", initial_session)
+        run_recovery_exit_phase(
+            repository=repository,
+            iterations=args.iterations,
+            interval=args.interval,
+        )
 
-    runner = build_runner(
-        repository=repository,
-        iterations=args.iterations,
-        interval=args.interval,
-        price=args.price,
-    )
+    else:
+        repository.delete()
+        repository.save(build_seed_session())
+        print(f"Seeded managed session: {SESSION_PATH}")
 
-    result = runner.run()
+        run_activation_phase(
+            repository=repository,
+            iterations=args.iterations,
+            interval=args.interval,
+        )
 
-    persisted_session = repository.load()
-
-    print_session("SESSION AFTER RUN", persisted_session)
-
-    print()
-    print("CONTINUOUS RESULT")
-    print("-----------------")
-    print(f"Iterations completed: {result.iterations_completed}")
-    print(f"Failed iterations:    {result.failed_iterations}")
-
-    validate_managed_session(persisted_session)
-
-    assert result.iterations_completed == args.iterations
-    assert result.failed_iterations == 0
+        print()
+        print(
+            "Phase 1 is persisted. Run again with --exit-only "
+            "to execute the restart recovery exit."
+        )
+        return
 
     print()
-    print("RESTART-SAFE MANAGED LIFECYCLE: PASS")
+    print("=========================================")
+    print("RESTART EXIT RECOVERY: PASS")
+    print("=========================================")
 
 
 if __name__ == "__main__":

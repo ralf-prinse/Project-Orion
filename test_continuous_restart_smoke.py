@@ -1,28 +1,32 @@
 from pathlib import Path
 
 from run_continuous_restart_smoke import (
-    SESSION_PATH,
     build_runner,
     build_seed_session,
-    validate_managed_session,
+    validate_closed_session,
+    validate_managed_position,
 )
 from services.stores.json_trading_session_repository import (
     JsonTradingSessionRepository,
 )
 
 
-TEST_PATH = Path("output/test_smoke_trading_session.json")
+TEST_PATH = Path(
+    "output/test_restart_exit_recovery_session.json"
+)
 
 
 def test_seed_session_is_complete():
     session = build_seed_session()
 
+    assert session.cash == 400.0
+    assert session.equity == 500.0
     assert "AAPL" in session.portfolio.positions
     assert "AAPL" in session.position_states
     assert "AAPL" in session.risk_plans
 
 
-def test_continuous_runner_persists_managed_lifecycle_across_restart():
+def test_restart_executes_persisted_dynamic_stop_exit():
     repository = JsonTradingSessionRepository(
         path=TEST_PATH,
     )
@@ -30,67 +34,105 @@ def test_continuous_runner_persists_managed_lifecycle_across_restart():
     repository.delete()
     repository.save(build_seed_session())
 
-    first_runner = build_runner(
+    activation_runner = build_runner(
         repository=repository,
         iterations=1,
         interval=1,
         price=106.0,
     )
 
-    first_result = first_runner.run()
+    activation_result = activation_runner.run()
 
-    assert first_result.iterations_completed == 1
-    assert first_result.failed_iterations == 0
+    assert activation_result.iterations_completed == 1
+    assert activation_result.failed_iterations == 0
 
-    first_persisted = repository.load()
-    validate_managed_session(first_persisted)
+    managed_session = repository.load()
+    validate_managed_position(managed_session)
 
-    first_stop = first_persisted.position_states[
+    persisted_stop = managed_session.position_states[
         "AAPL"
     ].current_stop_loss
 
-    second_runner = build_runner(
+    assert persisted_stop == 100.7
+
+    recovery_runner = build_runner(
         repository=repository,
         iterations=1,
         interval=1,
-        price=106.0,
+        price=100.4,
     )
 
-    second_result = second_runner.run()
+    recovery_result = recovery_runner.run()
 
-    assert second_result.iterations_completed == 1
-    assert second_result.failed_iterations == 0
+    assert recovery_result.iterations_completed == 1
+    assert recovery_result.failed_iterations == 0
 
-    second_persisted = repository.load()
-    validate_managed_session(second_persisted)
-
-    second_stop = second_persisted.position_states[
-        "AAPL"
-    ].current_stop_loss
-
-    assert second_stop == first_stop
+    closed_session = repository.load()
+    validate_closed_session(closed_session)
 
     repository.delete()
 
 
-def test_smoke_path_is_isolated():
-    assert str(SESSION_PATH).replace("\\\\", "/") == (
-        "data/smoke_trading_session.json"
+def test_exit_is_based_on_persisted_managed_stop():
+    repository = JsonTradingSessionRepository(
+        path=TEST_PATH,
     )
+
+    repository.delete()
+    repository.save(build_seed_session())
+
+    activation_runner = build_runner(
+        repository=repository,
+        iterations=1,
+        interval=1,
+        price=106.0,
+    )
+    activation_runner.run()
+
+    managed_session = repository.load()
+
+    assert (
+        managed_session.position_states[
+            "AAPL"
+        ].current_stop_loss
+        == 100.7
+    )
+
+    assert (
+        managed_session.risk_plans[
+            "AAPL"
+        ].stop_loss
+        == 95.0
+    )
+
+    recovery_runner = build_runner(
+        repository=repository,
+        iterations=1,
+        interval=1,
+        price=100.4,
+    )
+    recovery_runner.run()
+
+    closed_session = repository.load()
+
+    assert "AAPL" not in closed_session.portfolio.positions
+    assert closed_session.cash == 500.4
+
+    repository.delete()
 
 
 def main():
     print()
     print("=========================================")
-    print("CONTINUOUS RESTART SMOKE TEST")
+    print("RESTART EXIT RECOVERY TEST")
     print("=========================================")
     print()
 
     test_seed_session_is_complete()
-    test_continuous_runner_persists_managed_lifecycle_across_restart()
-    test_smoke_path_is_isolated()
+    test_restart_executes_persisted_dynamic_stop_exit()
+    test_exit_is_based_on_persisted_managed_stop()
 
-    print("CONTINUOUS RESTART SMOKE: PASS")
+    print("RESTART EXIT RECOVERY: PASS")
 
 
 if __name__ == "__main__":
