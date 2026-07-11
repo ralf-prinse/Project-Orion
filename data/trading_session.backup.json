@@ -1,0 +1,53 @@
+{
+  "name": "Orion Autonomous Paper Trading",
+  "portfolio": {
+    "cash": 47.07,
+    "positions": {
+      "NFLX": {
+        "symbol": "NFLX",
+        "quantity": 1,
+        "entry_price": 75.88,
+        "current_price": 73.37000274658203
+      },
+      "WMT": {
+        "symbol": "WMT",
+        "quantity": 1,
+        "entry_price": 113.42,
+        "current_price": 113.9000015258789
+      },
+      "INTC": {
+        "symbol": "INTC",
+        "quantity": 1,
+        "entry_price": 105.18,
+        "current_price": 109.83999633789062
+      },
+      "AGN.AS": {
+        "symbol": "AGN.AS",
+        "quantity": 6,
+        "entry_price": 7.7,
+        "current_price": 7.699999809265137
+      },
+      "AAL": {
+        "symbol": "AAL",
+        "quantity": 2,
+        "entry_price": 17.27,
+        "current_price": 16.950000762939453
+      },
+      "ABN.AS": {
+        "symbol": "ABN.AS",
+        "quantity": 1,
+        "entry_price": 38.25,
+        "current_price": 38.029998779296875
+      },
+      "AALB.AS": {
+        "symbol": "AALB.AS",
+        "quantity": 1,
+        "entry_price": 39.46,
+        "current_price": 39.29999923706055
+      }
+    }
+  },
+  "position_states": {},
+  "risk_plans": {},
+  "status": "ACTIVE"
+}
