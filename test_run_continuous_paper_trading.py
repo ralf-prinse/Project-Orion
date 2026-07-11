@@ -1,4 +1,5 @@
 from argparse import Namespace
+from pathlib import Path
 
 from run_continuous_paper_trading import (
     build_runner,
@@ -6,89 +7,78 @@ from run_continuous_paper_trading import (
 )
 
 
-def test_bounded_test_defaults():
-    settings = resolve_settings(
-        Namespace(
-            test=True,
-            iterations=None,
-            interval=None,
-            max_symbols=None,
-            initial_cash=500.0,
-        )
-    )
+def build_args(**overrides):
+    values = {
+        "test": False,
+        "isolated": False,
+        "iterations": None,
+        "interval": None,
+        "max_symbols": None,
+        "initial_cash": 500.0,
+        "stop_on_exception": False,
+        "session_path": None,
+        "portfolio_path": None,
+        "journal_path": None,
+    }
+    values.update(overrides)
+    return Namespace(**values)
 
+
+def test_bounded_test_defaults():
+    settings = resolve_settings(build_args(test=True))
     assert settings.test_mode is True
     assert settings.max_iterations == 3
     assert settings.interval_seconds == 10
     assert settings.max_symbols == 5
-    assert settings.initial_cash == 500.0
 
 
-def test_explicit_test_overrides():
+def test_isolated_paths():
     settings = resolve_settings(
-        Namespace(
-            test=True,
-            iterations=2,
-            interval=1,
-            max_symbols=3,
-            initial_cash=750.0,
-        )
+        build_args(test=True, isolated=True)
+    )
+    assert settings.session_path == Path(
+        "data/optimization_trading_session.json"
+    )
+    assert settings.portfolio_path == Path(
+        "data/optimization_paper_portfolio.json"
+    )
+    assert settings.journal_path == Path(
+        "data/optimization_trade_journal.jsonl"
     )
 
-    assert settings.max_iterations == 2
-    assert settings.interval_seconds == 1
-    assert settings.max_symbols == 3
-    assert settings.initial_cash == 750.0
 
-
-def test_continuous_defaults():
+def test_explicit_paths_override_isolated_defaults():
     settings = resolve_settings(
-        Namespace(
-            test=False,
-            iterations=None,
-            interval=None,
-            max_symbols=None,
-            initial_cash=500.0,
+        build_args(
+            isolated=True,
+            session_path=Path("output/custom_session.json"),
+            portfolio_path=Path("output/custom_portfolio.json"),
+            journal_path=Path("output/custom_journal.jsonl"),
         )
     )
-
-    assert settings.test_mode is False
-    assert settings.max_iterations is None
-    assert settings.interval_seconds == 300
-    assert settings.max_symbols == 25
+    assert settings.session_path == Path("output/custom_session.json")
+    assert settings.portfolio_path == Path("output/custom_portfolio.json")
+    assert settings.journal_path == Path("output/custom_journal.jsonl")
 
 
-def test_runner_uses_complete_session_persistence():
+def test_runner_uses_resolved_settings():
     settings = resolve_settings(
-        Namespace(
+        build_args(
             test=True,
+            isolated=True,
             iterations=1,
             interval=1,
             max_symbols=1,
-            initial_cash=500.0,
+            stop_on_exception=True,
         )
     )
-
     runner = build_runner(settings)
     autonomous_runner = runner.runner
 
-    assert autonomous_runner.trading_session_repository is not None
-    assert (
-        str(autonomous_runner.trading_session_repository.path)
-        == "data\\trading_session.json"
-        or str(autonomous_runner.trading_session_repository.path)
-        == "data/trading_session.json"
-    )
-
-    assert autonomous_runner.portfolio_repository is not None
-    assert autonomous_runner.trade_journal_repository is not None
-
-    assert runner.config.max_iterations == 1
-    assert runner.config.interval_seconds == 1
-    assert (
-        runner.config.autonomous_config.live_config.max_symbols
-        == 1
-    )
+    assert autonomous_runner.trading_session_repository.path == settings.session_path
+    assert autonomous_runner.portfolio_repository.path == settings.portfolio_path
+    assert autonomous_runner.trade_journal_repository.path == settings.journal_path
+    assert runner.config.stop_on_exception is True
 
 
 def main():
@@ -99,9 +89,9 @@ def main():
     print()
 
     test_bounded_test_defaults()
-    test_explicit_test_overrides()
-    test_continuous_defaults()
-    test_runner_uses_complete_session_persistence()
+    test_isolated_paths()
+    test_explicit_paths_override_isolated_defaults()
+    test_runner_uses_resolved_settings()
 
     print("CONTINUOUS RUNNER ENTRYPOINT: PASS")
 

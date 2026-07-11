@@ -1,0 +1,106 @@
+{
+  "name": "Orion Autonomous Paper Trading",
+  "portfolio": {
+    "cash": 388.77,
+    "positions": {
+      "AAL": {
+        "symbol": "AAL",
+        "quantity": 2,
+        "entry_price": 16.95,
+        "current_price": 16.950000762939453
+      },
+      "ABN.AS": {
+        "symbol": "ABN.AS",
+        "quantity": 1,
+        "entry_price": 38.03,
+        "current_price": 38.029998779296875
+      },
+      "AALB.AS": {
+        "symbol": "AALB.AS",
+        "quantity": 1,
+        "entry_price": 39.3,
+        "current_price": 39.29999923706055
+      }
+    }
+  },
+  "position_states": {
+    "AAL": {
+      "symbol": "AAL",
+      "entry_price": 16.95,
+      "current_stop_loss": 16.1,
+      "highest_price": 16.950000762939453,
+      "current_price": 16.950000762939453,
+      "break_even_active": false,
+      "trailing_stop_active": true,
+      "target_1_hit": false,
+      "target_2_hit": false,
+      "target_3_hit": false
+    },
+    "ABN.AS": {
+      "symbol": "ABN.AS",
+      "entry_price": 38.03,
+      "current_stop_loss": 36.94,
+      "highest_price": 38.03,
+      "current_price": 38.029998779296875,
+      "break_even_active": false,
+      "trailing_stop_active": false,
+      "target_1_hit": false,
+      "target_2_hit": false,
+      "target_3_hit": false
+    },
+    "AALB.AS": {
+      "symbol": "AALB.AS",
+      "entry_price": 39.3,
+      "current_stop_loss": 37.47,
+      "highest_price": 39.3,
+      "current_price": 39.29999923706055,
+      "break_even_active": false,
+      "trailing_stop_active": false,
+      "target_1_hit": false,
+      "target_2_hit": false,
+      "target_3_hit": false
+    }
+  },
+  "risk_plans": {
+    "AAL": {
+      "symbol": "AAL",
+      "entry_price": 16.95,
+      "stop_loss": 15.73,
+      "target_1": 20.5,
+      "target_2": 22.62,
+      "target_3": 25.11,
+      "risk_percent": 7.2,
+      "reward_percent": 20.94,
+      "risk_reward_ratio": 2.91,
+      "confidence": 0.883702533182917,
+      "notes": "Adaptive risk plan | confidence=0.88 | risk=0.0006 | volatility=LOW | regime=BULL | atr=0.7600 | stop_model=ATR"
+    },
+    "ABN.AS": {
+      "symbol": "ABN.AS",
+      "entry_price": 38.03,
+      "stop_loss": 36.94,
+      "target_1": 41.19,
+      "target_2": 43.09,
+      "target_3": 45.31,
+      "risk_percent": 2.87,
+      "reward_percent": 8.31,
+      "risk_reward_ratio": 2.9,
+      "confidence": 0.8787141840102881,
+      "notes": "Adaptive risk plan | confidence=0.88 | risk=0.0003 | volatility=LOW | regime=BULL | atr=0.6793 | stop_model=ATR"
+    },
+    "AALB.AS": {
+      "symbol": "AALB.AS",
+      "entry_price": 39.3,
+      "stop_loss": 37.47,
+      "target_1": 44.58,
+      "target_2": 47.75,
+      "target_3": 51.45,
+      "risk_percent": 4.66,
+      "reward_percent": 13.44,
+      "risk_reward_ratio": 2.89,
+      "confidence": 0.857888396314329,
+      "notes": "Adaptive risk plan | confidence=0.86 | risk=0.0004 | volatility=LOW | regime=BULL | atr=1.1429 | stop_model=ATR"
+    }
+  },
+  "status": "ACTIVE"
+}

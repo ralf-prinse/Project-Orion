@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import time
 from dataclasses import dataclass
+from datetime import datetime
 
 from models.autonomous_paper_trading_result import (
     AutonomousPaperTradingResult,
@@ -14,37 +15,12 @@ from services.autonomous_paper_trading_runner import (
 
 @dataclass(frozen=True)
 class ContinuousPaperTradingRunResult:
-    """
-    Result of one continuous runner session.
-
-    This result describes the runner session itself, not a trading
-    strategy result.
-    """
-
     iterations_completed: int
     failed_iterations: int
     last_result: AutonomousPaperTradingResult | None
 
 
 class ContinuousPaperTradingRunner:
-    """
-    Long-running paper trading runner.
-
-    Responsibilities:
-    - repeatedly run AutonomousPaperTradingRunner
-    - classify autonomous results as successful or failed iterations
-    - continue from repository-backed state after recoverable failures
-    - wait between iterations
-    - stop cleanly on KeyboardInterrupt
-    - optionally stop on failures
-
-    Does NOT:
-    - generate trading decisions
-    - allocate capital directly
-    - execute trades directly
-    - modify strategy configuration
-    """
-
     def __init__(
         self,
         config: ContinuousRunnerConfig,
@@ -59,57 +35,72 @@ class ContinuousPaperTradingRunner:
         iterations_completed = 0
         failed_iterations = 0
         last_result: AutonomousPaperTradingResult | None = None
-
         iteration = 0
 
         while self._should_continue(iteration):
             should_stop = False
+            iteration_started_at = datetime.now()
+            started_perf = time.perf_counter()
 
             try:
-                print("\n>>> Starting autonomous runner...")
+                print()
+                print(
+                    ">>> HEARTBEAT START "
+                    f"{iteration_started_at.isoformat(timespec='seconds')}"
+                )
+                print(">>> Starting autonomous runner...")
                 print(f">>> Iteration: {iteration + 1}")
 
                 current_result = self.runner.run()
                 last_result = current_result
+                duration_seconds = time.perf_counter() - started_perf
 
                 if current_result.failed_cycles > 0:
                     failed_iterations += 1
-
                     print(
                         ">>> Autonomous runner finished with "
                         f"{current_result.failed_cycles} failed cycle(s)."
                     )
-
                     if self.config.print_iteration_summary:
                         self._print_iteration_summary(
                             iteration=iteration + 1,
                             result=current_result,
                             iteration_status="FAILED",
+                            duration_seconds=duration_seconds,
                         )
-
                     should_stop = self.config.stop_on_exception
                 else:
                     iterations_completed += 1
-
                     print(">>> Autonomous runner finished.")
-
                     if self.config.print_iteration_summary:
                         self._print_iteration_summary(
                             iteration=iteration + 1,
                             result=current_result,
                             iteration_status="COMPLETED",
+                            duration_seconds=duration_seconds,
                         )
 
+                print(
+                    ">>> HEARTBEAT END "
+                    f"{datetime.now().isoformat(timespec='seconds')}"
+                )
+
             except KeyboardInterrupt:
-                print("\n>>> KeyboardInterrupt received.")
+                print()
+                print(">>> KeyboardInterrupt received during iteration.")
+                print(">>> Continuous runner stopping cleanly.")
                 break
 
             except Exception as exc:
                 failed_iterations += 1
-
-                print("\n>>> Autonomous runner raised exception:")
+                duration_seconds = time.perf_counter() - started_perf
+                print()
+                print(">>> Autonomous runner raised exception:")
                 print(repr(exc))
-
+                print(
+                    ">>> Failed iteration duration: "
+                    f"{duration_seconds:.3f} seconds"
+                )
                 should_stop = self.config.stop_on_exception
 
             iteration += 1
@@ -118,11 +109,8 @@ class ContinuousPaperTradingRunner:
                 break
 
             if self._should_continue(iteration):
-                print(
-                    f">>> Sleeping for "
-                    f"{self.config.interval_seconds} seconds..."
-                )
-                time.sleep(self.config.interval_seconds)
+                if not self._sleep_until_next_iteration():
+                    break
 
         return ContinuousPaperTradingRunResult(
             iterations_completed=iterations_completed,
@@ -130,27 +118,41 @@ class ContinuousPaperTradingRunner:
             last_result=last_result,
         )
 
-    def _should_continue(
-        self,
-        iteration: int,
-    ) -> bool:
+    def _should_continue(self, iteration: int) -> bool:
         if self.config.max_iterations is None:
             return True
-
         return iteration < self.config.max_iterations
+
+    def _sleep_until_next_iteration(self) -> bool:
+        print(
+            f">>> Sleeping for "
+            f"{self.config.interval_seconds} seconds..."
+        )
+        try:
+            time.sleep(self.config.interval_seconds)
+        except KeyboardInterrupt:
+            print()
+            print(">>> KeyboardInterrupt received during sleep.")
+            print(">>> Continuous runner stopping cleanly.")
+            return False
+        return True
 
     def _print_iteration_summary(
         self,
         iteration: int,
         result: AutonomousPaperTradingResult,
         iteration_status: str,
+        duration_seconds: float,
     ) -> None:
         print(
             f"Continuous iteration {iteration}: "
             f"status={iteration_status}, "
+            f"duration={duration_seconds:.3f}s, "
             f"completed_cycles={result.completed_cycles}, "
             f"failed_cycles={result.failed_cycles}, "
             f"cash=€{result.final_cash:.2f}, "
             f"equity=€{result.final_equity:.2f}, "
-            f"open_positions={len(result.session.portfolio.positions)}"
+            f"open_positions={len(result.session.portfolio.positions)}, "
+            f"position_states={len(result.session.position_states)}, "
+            f"risk_plans={len(result.session.risk_plans)}"
         )

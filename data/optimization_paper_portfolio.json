@@ -1,0 +1,23 @@
+{
+  "cash": 388.77,
+  "positions": {
+    "AAL": {
+      "symbol": "AAL",
+      "quantity": 2,
+      "entry_price": 16.95,
+      "current_price": 16.950000762939453
+    },
+    "ABN.AS": {
+      "symbol": "ABN.AS",
+      "quantity": 1,
+      "entry_price": 38.03,
+      "current_price": 38.029998779296875
+    },
+    "AALB.AS": {
+      "symbol": "AALB.AS",
+      "quantity": 1,
+      "entry_price": 39.3,
+      "current_price": 39.29999923706055
+    }
+  }
+}

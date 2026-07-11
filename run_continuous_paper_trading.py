@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass
+from pathlib import Path
 
 from models.autonomous_paper_trading_config import (
     AutonomousPaperTradingConfig,
@@ -32,6 +33,10 @@ class ContinuousRuntimeSettings:
     max_symbols: int
     initial_cash: float
     test_mode: bool
+    stop_on_exception: bool
+    session_path: Path
+    portfolio_path: Path
+    journal_path: Path
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -41,43 +46,16 @@ def build_parser() -> argparse.ArgumentParser:
             "TradingSession persistence."
         ),
     )
-
-    parser.add_argument(
-        "--test",
-        action="store_true",
-        help=(
-            "Run a bounded smoke test. Defaults to 3 iterations, "
-            "10 seconds and 5 symbols."
-        ),
-    )
-    parser.add_argument(
-        "--iterations",
-        type=int,
-        default=None,
-        help=(
-            "Maximum number of continuous iterations. "
-            "Omit for unlimited mode."
-        ),
-    )
-    parser.add_argument(
-        "--interval",
-        type=int,
-        default=None,
-        help="Seconds between continuous iterations.",
-    )
-    parser.add_argument(
-        "--max-symbols",
-        type=int,
-        default=None,
-        help="Maximum number of market symbols scanned per iteration.",
-    )
-    parser.add_argument(
-        "--initial-cash",
-        type=float,
-        default=500.0,
-        help="Initial paper cash when no prior state exists.",
-    )
-
+    parser.add_argument("--test", action="store_true")
+    parser.add_argument("--isolated", action="store_true")
+    parser.add_argument("--iterations", type=int, default=None)
+    parser.add_argument("--interval", type=int, default=None)
+    parser.add_argument("--max-symbols", type=int, default=None)
+    parser.add_argument("--initial-cash", type=float, default=500.0)
+    parser.add_argument("--stop-on-exception", action="store_true")
+    parser.add_argument("--session-path", type=Path, default=None)
+    parser.add_argument("--portfolio-path", type=Path, default=None)
+    parser.add_argument("--journal-path", type=Path, default=None)
     return parser
 
 
@@ -85,45 +63,37 @@ def resolve_settings(
     args: argparse.Namespace,
 ) -> ContinuousRuntimeSettings:
     if args.test:
-        interval_seconds = (
-            args.interval
-            if args.interval is not None
-            else 10
-        )
-        max_iterations = (
-            args.iterations
-            if args.iterations is not None
-            else 3
-        )
-        max_symbols = (
-            args.max_symbols
-            if args.max_symbols is not None
-            else 5
-        )
+        interval_seconds = args.interval if args.interval is not None else 10
+        max_iterations = args.iterations if args.iterations is not None else 3
+        max_symbols = args.max_symbols if args.max_symbols is not None else 5
     else:
-        interval_seconds = (
-            args.interval
-            if args.interval is not None
-            else 300
-        )
+        interval_seconds = args.interval if args.interval is not None else 300
         max_iterations = args.iterations
-        max_symbols = (
-            args.max_symbols
-            if args.max_symbols is not None
-            else 25
-        )
+        max_symbols = args.max_symbols if args.max_symbols is not None else 25
 
     if interval_seconds < 1:
         raise ValueError("interval must be at least 1 second.")
-
     if max_iterations is not None and max_iterations < 1:
         raise ValueError("iterations must be at least 1.")
-
     if max_symbols < 1:
         raise ValueError("max-symbols must be at least 1.")
-
     if args.initial_cash <= 0:
         raise ValueError("initial-cash must be greater than zero.")
+
+    default_session_path = Path("data/trading_session.json")
+    default_portfolio_path = Path("data/paper_portfolio.json")
+    default_journal_path = Path("data/trade_journal.jsonl")
+
+    if args.isolated:
+        default_session_path = Path(
+            "data/optimization_trading_session.json"
+        )
+        default_portfolio_path = Path(
+            "data/optimization_paper_portfolio.json"
+        )
+        default_journal_path = Path(
+            "data/optimization_trade_journal.jsonl"
+        )
 
     return ContinuousRuntimeSettings(
         interval_seconds=interval_seconds,
@@ -131,6 +101,10 @@ def resolve_settings(
         max_symbols=max_symbols,
         initial_cash=float(args.initial_cash),
         test_mode=bool(args.test),
+        stop_on_exception=bool(args.stop_on_exception),
+        session_path=args.session_path or default_session_path,
+        portfolio_path=args.portfolio_path or default_portfolio_path,
+        journal_path=args.journal_path or default_journal_path,
     )
 
 
@@ -138,15 +112,13 @@ def build_runner(
     settings: ContinuousRuntimeSettings,
 ) -> ContinuousPaperTradingRunner:
     session_repository = JsonTradingSessionRepository(
-        path="data/trading_session.json",
+        path=settings.session_path,
     )
-
     portfolio_repository = JsonPaperPortfolioRepository(
-        path="data/paper_portfolio.json",
+        path=settings.portfolio_path,
     )
-
     trade_journal_repository = JsonlTradeJournalRepository(
-        path="data/trade_journal.jsonl",
+        path=settings.journal_path,
     )
 
     autonomous_config = AutonomousPaperTradingConfig(
@@ -170,7 +142,7 @@ def build_runner(
         autonomous_config=autonomous_config,
         interval_seconds=settings.interval_seconds,
         max_iterations=settings.max_iterations,
-        stop_on_exception=False,
+        stop_on_exception=settings.stop_on_exception,
         print_iteration_summary=True,
     )
 
@@ -180,11 +152,8 @@ def build_runner(
     )
 
 
-def print_startup(
-    settings: ContinuousRuntimeSettings,
-) -> None:
+def print_startup(settings: ContinuousRuntimeSettings) -> None:
     mode = "BOUNDED TEST" if settings.test_mode else "CONTINUOUS"
-
     iterations = (
         str(settings.max_iterations)
         if settings.max_iterations is not None
@@ -200,9 +169,10 @@ def print_startup(
     print(f"Interval:         {settings.interval_seconds} seconds")
     print(f"Max symbols:      {settings.max_symbols}")
     print(f"Initial cash:     EUR {settings.initial_cash:.2f}")
-    print("Session:          data/trading_session.json")
-    print("Portfolio mirror: data/paper_portfolio.json")
-    print("Trade journal:    data/trade_journal.jsonl")
+    print(f"Stop on failure:  {settings.stop_on_exception}")
+    print(f"Session:          {settings.session_path}")
+    print(f"Portfolio mirror: {settings.portfolio_path}")
+    print(f"Trade journal:    {settings.journal_path}")
     print("Press Ctrl+C to stop.")
     print("=========================================")
     print()
@@ -218,36 +188,22 @@ def print_result(result) -> None:
 
     if result.last_result is not None:
         session = result.last_result.session
-
         print(f"Final cash:           EUR {result.last_result.final_cash:.2f}")
         print(f"Final equity:         EUR {result.last_result.final_equity:.2f}")
-        print(
-            "Open positions:       "
-            f"{len(session.portfolio.positions)}"
-        )
-        print(
-            "Position states:      "
-            f"{len(session.position_states)}"
-        )
-        print(
-            "Risk plans:           "
-            f"{len(session.risk_plans)}"
-        )
+        print(f"Open positions:       {len(session.portfolio.positions)}")
+        print(f"Position states:      {len(session.position_states)}")
+        print(f"Risk plans:           {len(session.risk_plans)}")
 
     print("=========================================")
     print()
 
 
 def main() -> None:
-    parser = build_parser()
-    args = parser.parse_args()
+    args = build_parser().parse_args()
     settings = resolve_settings(args)
-
     print_startup(settings)
-
     runner = build_runner(settings)
     result = runner.run()
-
     print_result(result)
 
 
