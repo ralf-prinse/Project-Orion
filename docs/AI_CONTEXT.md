@@ -1,221 +1,138 @@
-# PROJECT ORION
+# PROJECT ORION — AI CONTEXT
 
-# AI_CONTEXT
+**Status:** Engine consolidation complete  
+**Active branch:** `sprint-8.13-position-state-store-removal`  
+**Validation:** `69 passed`  
+**Updated:** 2026-07-11
 
-**Purpose:** Engineering Context  
-**Status:** Active Development
+## Purpose
 
----
+This is the first document to read in a new development chat. It provides the minimum context needed to continue safely.
 
-# Documentation Information
+Use together with:
 
-| Item | Value |
-|------|-------|
-| Project | Orion |
-| Development Phase | Persistent Autonomous Paper Trading |
-| Current Sprint | Sprint 8.9 – Persistent Position Lifecycle |
-| Architecture | Deterministic, service-oriented |
-| Latest Validation | 69 regression tests passing |
-| Active Branch | `feature/trading-dashboard` |
+- `ORION_MASTER_ARCHITECTURE.md`
+- `PROJECT_STATUS.md`
+- `TODO.md`
+- `CHANGELOG.md`
 
----
+## Current State
 
-# Purpose
+Project Orion has a deterministic, restart-safe autonomous paper-trading engine.
 
-This document provides the minimum context required to continue development of Project Orion.
+Completed and validated:
 
-- Implementation history belongs in `CHANGELOG.md`.
-- Current implementation status belongs in `PROJECT_STATUS.md`.
-- Upcoming work belongs in `TODO.md`.
-- Permanent architectural rules belong in `ORION_MASTER_ARCHITECTURE.md`.
+- deterministic market scan and Trading Pipeline;
+- adaptive `RiskPlan`;
+- portfolio allocation and paper execution;
+- complete `TradingSession` persistence;
+- managed `PositionState` lifecycle;
+- break-even, trailing-stop and lifecycle-aware exits;
+- restart exit recovery;
+- crash recovery;
+- session-integrity validation;
+- continuous runner heartbeat and graceful shutdown;
+- separate trade and decision journals;
+- 100-iteration operational validation;
+- removal of the legacy `PositionStateStore`.
 
----
-
-# Current Project State
-
-Project Orion has a complete deterministic autonomous paper-trading lifecycle with persistent portfolio, risk-plan and position-management state.
-
-Implemented and validated systems include:
-
-- deterministic Trading Pipeline;
-- adaptive Risk Engine and RiskPlan generation;
-- portfolio allocation;
-- paper BUY and SELL execution;
-- continuous autonomous runner;
-- complete TradingSession persistence;
-- portfolio revaluation;
-- persistent PositionState and RiskPlan recovery;
-- break-even and trailing-stop lifecycle updates;
-- position monitoring and exit execution;
-- JSONL trade journal;
-- dashboard service;
-- CLI trading dashboard;
-- closed-trade analytics;
-- dashboard GUI foundation.
-
-The current priority is to complete lifecycle-aware exit evaluation and consolidate the active runtime around the persisted TradingSession.
-
----
-
-# Active Runtime Flow
+## Runtime Source of Truth
 
 ```text
-Market Data
-      ↓
-Indicators and Analysis
-      ↓
-Signals
-      ↓
-Deterministic Decision
-      ↓
-Adaptive RiskPlan
-      ↓
-Portfolio Allocation
-      ↓
-Paper Execution
-      ↓
 TradingSession
-      ├── PaperPortfolio
-      ├── PositionState
-      └── RiskPlan
-      ↓
-Persistent Session Repository
-      ↓
-Position Lifecycle Update
-      ├── Break-even
-      └── Trailing stop
-      ↓
-Exit Evaluation
-      ↓
-Exit Engine
-      ↓
-Trade Journal
-      ↓
-Dashboard and Analytics
+├── PaperPortfolio
+├── dict[str, PositionState]
+└── dict[str, RiskPlan]
 ```
 
----
+`TradingSessionRepository` is the canonical persistence boundary.
 
-# Sources of Truth
+No service may introduce a second runtime-state owner.
 
-The active autonomous lifecycle uses:
+## Active Runtime
 
 ```text
-data/trading_session.json
-data/trade_journal.jsonl
+ContinuousPaperTradingRunner
+        ↓
+AutonomousPaperTradingRunner
+        ↓
+TradingSessionRepository
+        ↓
+TradingSession
+        ↓
+PaperPositionUpdateService
+        ↓
+PositionUpdateEngine
+        ↓
+BreakEvenService / TrailingStopService / TimeStopService
+        ↓
+PositionMonitor
+        ↓
+ExitEngine
 ```
 
-During migration, `data/paper_portfolio.json` remains supported for backward compatibility.
-
-Older desktop runtime files such as `data/open_trades.json`, `data/trade_history.json` and `data/portfolio.json` belong to a legacy GUI flow and must not become dependencies of new autonomous functionality.
-
-Runtime data files are local artifacts and are normally not committed.
-
----
-
-# Architecture Principles
-
-## Deterministic Backend
-
-All trading decisions and lifecycle updates are deterministic.
-
-Identical inputs must produce identical outputs. Randomness is prohibited in trading logic.
-
-## Separation of Responsibilities
-
-- Services own business logic.
-- Runners and controllers orchestrate.
-- Repositories load and persist state.
-- Presenters format data.
-- Widgets display prepared information only.
-- GUI code never owns trading logic.
-
-## Artificial Intelligence
-
-AI may explain, summarize, compare and assist documentation.
-
-AI may never generate or override BUY/SELL decisions, confidence, risk, position sizing, exit thresholds or deterministic calculations.
-
-## Existing Architecture First
-
-Before implementing a feature:
-
-1. inspect the complete relevant runtime chain;
-2. locate existing services and models;
-3. avoid parallel implementations;
-4. extend the existing owner of the responsibility;
-5. add regression coverage before integration.
-
----
-
-# Current Development Focus
-
-Sprint 8.9 focuses on the persistent position lifecycle.
-
-Completed in this sprint:
-
-- `TradingSessionRepository` contract;
-- `JsonTradingSessionRepository`;
-- complete session save/load roundtrip;
-- autonomous runner support for complete session persistence;
-- preservation of `PositionState` and `RiskPlan` across iterations and restarts;
-- integration of `PaperPositionUpdateService` into the autonomous runner;
-- persistent break-even and trailing-stop updates;
-- backward compatibility with portfolio-only persistence;
-- regressions expanded to 69 passing tests.
-
-Next logical step:
+## Journals
 
 ```text
-Make exit evaluation consume the persisted PositionState and RiskPlan,
-then reduce the fixed-percentage PositionMonitor to a legacy fallback.
+trade_journal.jsonl
+- OPEN_POSITION
+- CLOSE_POSITION
+
+decision_journal.jsonl
+- APPROVED
+- REJECTED
 ```
 
----
+Both use the existing `TradeJournalEntry` model and JSONL repository.
 
-# Validation
+## Non-Negotiable Rules
 
-Official regression command:
+1. Analyse the complete relevant runtime chain before changing code.
+2. Do not create duplicate models, engines or services.
+3. `TradingSession` remains the only lifecycle-state owner.
+4. Trading logic stays deterministic.
+5. AI may explain but never decide, size, approve or exit trades.
+6. GUI code remains presentation-only.
+7. Prefer complete-file replacements.
+8. Run targeted tests and then `python run_tests.py`.
+9. Commit and push only after all tests pass.
+
+## Current Branch Work
+
+Sprint 8.13 removed `PositionStateStore` and consolidated lifecycle ownership in `TradingSession`.
+
+Before starting new functionality:
 
 ```powershell
+git status
 python run_tests.py
 ```
 
-Current expected result:
+Expected:
 
 ```text
+nothing to commit, working tree clean
 69 passed
 ```
 
-Key targeted validations:
+## Recommended Next Step
 
-```powershell
-python test_json_trading_session_repository.py
-python test_autonomous_paper_trading_runner_persistence.py
-python test_autonomous_position_lifecycle.py
-python run_dashboard.py
-```
+Perform the Engine 1.0 review and freeze:
 
----
+- verify no remaining duplicate runtime ownership;
+- review remaining compatibility repositories;
+- confirm documentation and test runner alignment;
+- tag the stable engine baseline;
+- then begin Sprint 9.0 platform/dashboard work.
 
-# Instructions for Future AI Sessions
+## New Chat Opening Instruction
 
-Before writing code:
+A future chat must first:
 
-1. read all five official project documents;
-2. inspect the complete relevant source and test chain;
-3. identify the active runtime and any legacy alternatives;
-4. determine the single owner of the requested responsibility;
-5. propose one stable implementation plan;
-6. prefer complete-file replacements;
-7. add or update regression tests;
-8. run `python run_tests.py`;
-9. update documentation only after the sprint is actually complete.
+1. inspect this branch;
+2. read every file in `docs/`;
+3. confirm the runtime chain;
+4. confirm `69 passed`;
+5. propose the next step before writing code.
 
-Never assume a class is the active implementation merely because it exists.
-
-Preserve deterministic behaviour and backward compatibility unless a deliberate migration removes it.
-
----
-
-# End of AI_CONTEXT
+# End
