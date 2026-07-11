@@ -1,8 +1,6 @@
 from models.market_snapshot import MarketSnapshot
 from models.paper_portfolio import PaperPortfolio
 from models.trading_session import TradingSession
-from services.paper_trading_service import PaperTradingService
-from services.position_state_store import PositionStateStore
 from services.trading_cycle import TradingCycle
 
 
@@ -21,30 +19,20 @@ def build_pipeline_output() -> dict:
             "reward_percent": 30.0,
             "risk_reward_ratio": 6.0,
             "confidence": 0.91,
-            "notes": "PositionStateStore lifecycle synchronization test.",
+            "notes": "TradingSession lifecycle ownership test.",
         },
     }
 
 
-def test_shared_position_state_store_stays_synchronized():
-    shared_store = PositionStateStore()
-
-    paper_trading_service = PaperTradingService(
-        position_state_store=shared_store,
-    )
-
-    cycle = TradingCycle(
-        paper_trading_service=paper_trading_service,
-    )
+def test_trading_session_owns_full_lifecycle():
+    cycle = TradingCycle()
 
     session = TradingSession(
-        name="Position State Store Synchronization Test",
-        portfolio=PaperPortfolio(
-            cash=1000.0,
-        ),
+        name="TradingSession Ownership Test",
+        portfolio=PaperPortfolio(cash=1000.0),
     )
 
-    open_result = cycle.run(
+    opened = cycle.run(
         session=session,
         snapshot=MarketSnapshot(
             symbol="AAPL",
@@ -54,69 +42,42 @@ def test_shared_position_state_store_stays_synchronized():
         quantity=2,
     )
 
-    assert open_result.action == "OPEN_POSITION"
-    assert open_result.session.portfolio.cash == 800.0
-    assert "AAPL" in open_result.session.portfolio.positions
-    assert "AAPL" in open_result.session.position_states
-    assert "AAPL" in open_result.session.risk_plans
+    assert "AAPL" in opened.session.portfolio.positions
+    assert "AAPL" in opened.session.position_states
+    assert "AAPL" in opened.session.risk_plans
 
-    stored_after_open = shared_store.load("AAPL")
-
-    assert stored_after_open is not None
-    assert stored_after_open.current_price == 100.0
-    assert stored_after_open.current_stop_loss == 95.0
-
-    update_result = cycle.run(
-        session=open_result.session,
+    updated = cycle.run(
+        session=opened.session,
         snapshot=MarketSnapshot(
             symbol="AAPL",
             current_price=112.0,
         ),
     )
 
-    assert update_result.action == "UPDATE_POSITION"
-    assert "AAPL" in update_result.session.portfolio.positions
-    assert "AAPL" in update_result.session.position_states
-    assert "AAPL" in update_result.session.risk_plans
+    state = updated.session.position_states["AAPL"]
+    assert state.current_price == 112.0
+    assert state.highest_price == 112.0
+    assert state.target_1_hit is True
+    assert state.break_even_active is True
+    assert state.trailing_stop_active is True
 
-    session_state = update_result.session.position_states["AAPL"]
-    stored_after_update = shared_store.load("AAPL")
-
-    assert stored_after_update is not None
-    assert stored_after_update == session_state
-    assert stored_after_update.current_price == 112.0
-    assert stored_after_update.highest_price == 112.0
-    assert stored_after_update.target_1_hit is True
-    assert stored_after_update.break_even_active is True
-    assert stored_after_update.trailing_stop_active is True
-    assert stored_after_update.current_stop_loss == 106.4
-
-    close_result = cycle.run(
-        session=update_result.session,
+    closed = cycle.run(
+        session=updated.session,
         snapshot=MarketSnapshot(
             symbol="AAPL",
             current_price=106.0,
         ),
     )
 
-    assert close_result.action == "CLOSE_POSITION"
-    assert close_result.session.portfolio.cash == 1012.0
-    assert "AAPL" not in close_result.session.portfolio.positions
-    assert "AAPL" not in close_result.session.position_states
-    assert "AAPL" not in close_result.session.risk_plans
-    assert shared_store.load("AAPL") is None
+    assert closed.action == "CLOSE_POSITION"
+    assert closed.session.portfolio.positions == {}
+    assert closed.session.position_states == {}
+    assert closed.session.risk_plans == {}
 
 
 def main():
-    print()
-    print("=========================================")
-    print("POSITION STATE STORE LIFECYCLE SYNC TEST")
-    print("=========================================")
-    print()
-
-    test_shared_position_state_store_stays_synchronized()
-
-    print("POSITION STATE STORE LIFECYCLE SYNC: PASS")
+    test_trading_session_owns_full_lifecycle()
+    print("TRADING SESSION LIFECYCLE OWNERSHIP: PASS")
 
 
 if __name__ == "__main__":

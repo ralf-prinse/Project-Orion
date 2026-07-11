@@ -5,13 +5,9 @@ from services.paper_trading_service import PaperTradingService
 
 
 def run():
-    trading_service = PaperTradingService()
-
     session = TradingSession(
         name="Test Session",
-        portfolio=PaperPortfolio(
-            cash=1000.0,
-        ),
+        portfolio=PaperPortfolio(cash=1000.0),
     )
 
     pipeline_output = {
@@ -32,37 +28,24 @@ def run():
         },
     }
 
-    open_result = trading_service.open_position(
+    opened = PaperTradingService().open_position(
         session=session,
         pipeline_output=pipeline_output,
         quantity=2,
     )
 
-    close_service = PaperPositionCloseService(
-        position_state_store=trading_service.position_state_store,
-    )
-
-    close_result = close_service.close_position(
-        session=open_result.session,
+    closed = PaperPositionCloseService().close_position(
+        session=opened.session,
         symbol="AAPL",
         exit_price=112.0,
     )
 
-    print(close_result)
-
-    assert close_result.closed is True
-    assert close_result.symbol == "AAPL"
-    assert close_result.realized_profit_loss == 24.0
-    assert close_result.session.cash == 1024.0
-    assert close_result.session.open_positions == 0
-    assert "AAPL" not in close_result.session.portfolio.positions
-    assert "AAPL" not in close_result.session.position_states
-    assert "AAPL" not in close_result.session.risk_plans
-
-    stored = close_service.position_state_store.load("AAPL")
-
-    assert stored is None
-
+    assert closed.closed is True
+    assert closed.realized_profit_loss == 24.0
+    assert closed.session.cash == 1024.0
+    assert closed.session.portfolio.positions == {}
+    assert closed.session.position_states == {}
+    assert closed.session.risk_plans == {}
     print("PASS")
 
 

@@ -12,7 +12,6 @@ from services.execution_engine import (
     ExecutionEngineResult,
 )
 from services.execution_request_builder import ExecutionRequestBuilder
-from services.position_state_store import PositionStateStore
 
 
 @dataclass(frozen=True)
@@ -29,34 +28,19 @@ class PaperTradingService:
     """
     Opens paper positions inside a TradingSession.
 
-    Runtime ownership:
-    - TradingSession owns the portfolio, PositionState and RiskPlan.
-    - PositionStateStore remains a shared compatibility/runtime store
-      until its separate consolidation step.
-    - Persistence of a complete TradingSession is owned by the runner
-      through TradingSessionRepository.
-
-    This service does not own or persist a standalone PaperPortfolio.
+    TradingSession is the sole runtime owner of:
+    - portfolio
+    - PositionState
+    - RiskPlan
     """
 
     def __init__(
         self,
         execution_engine: ExecutionEngine | None = None,
         request_builder: ExecutionRequestBuilder | None = None,
-        position_state_store: PositionStateStore | None = None,
     ):
-        self.execution_engine = (
-            execution_engine
-            or ExecutionEngine()
-        )
-        self.request_builder = (
-            request_builder
-            or ExecutionRequestBuilder()
-        )
-        self.position_state_store = (
-            position_state_store
-            or PositionStateStore()
-        )
+        self.execution_engine = execution_engine or ExecutionEngine()
+        self.request_builder = request_builder or ExecutionRequestBuilder()
 
     def open_position(
         self,
@@ -107,8 +91,6 @@ class PaperTradingService:
 
             updated_session.position_states[symbol] = position_state
             updated_session.risk_plans[symbol] = request.risk_plan
-
-            self.position_state_store.save(position_state)
 
         return PaperTradeResult(
             executed=execution.execution.accepted,

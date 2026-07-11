@@ -9,24 +9,6 @@ from services.paper_trading_service import PaperTradingService
 
 
 class TradingCycle:
-    """
-    Executes one deterministic paper-trading cycle.
-
-    Responsibilities
-    ----------------
-    - Update existing paper position
-    - Close position if stop-loss is reached
-    - Open new paper position if no position exists
-    - Return updated TradingSession
-
-    Does NOT
-    --------
-    - Generate market data
-    - Generate BUY/HOLD/SELL directly
-    - Execute real broker orders
-    - Use AI
-    """
-
     def __init__(
         self,
         paper_trading_service: PaperTradingService | None = None,
@@ -34,24 +16,13 @@ class TradingCycle:
         close_service: PaperPositionCloseService | None = None,
     ):
         self.paper_trading_service = (
-            paper_trading_service
-            or PaperTradingService()
+            paper_trading_service or PaperTradingService()
         )
         self.update_service = (
-            update_service
-            or PaperPositionUpdateService(
-                position_state_store=(
-                    self.paper_trading_service.position_state_store
-                )
-            )
+            update_service or PaperPositionUpdateService()
         )
         self.close_service = (
-            close_service
-            or PaperPositionCloseService(
-                position_state_store=(
-                    self.paper_trading_service.position_state_store
-                )
-            )
+            close_service or PaperPositionCloseService()
         )
 
     def run(
@@ -60,7 +31,6 @@ class TradingCycle:
         snapshot: MarketSnapshot,
         quantity: int = 1,
     ) -> TradingCycleResult:
-
         symbol = snapshot.symbol.upper()
 
         if symbol in session.portfolio.positions:
@@ -83,7 +53,8 @@ class TradingCycle:
 
             if (
                 updated_state is not None
-                and snapshot.current_price <= updated_state.current_stop_loss
+                and snapshot.current_price
+                <= updated_state.current_stop_loss
             ):
                 close_result = self.close_service.close_position(
                     session=update_result.session,

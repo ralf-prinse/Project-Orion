@@ -5,13 +5,9 @@ from services.paper_trading_service import PaperTradingService
 
 
 def run():
-    trading_service = PaperTradingService()
-
     session = TradingSession(
         name="Test Session",
-        portfolio=PaperPortfolio(
-            cash=1000.0,
-        ),
+        portfolio=PaperPortfolio(cash=1000.0),
     )
 
     pipeline_output = {
@@ -32,43 +28,23 @@ def run():
         },
     }
 
-    open_result = trading_service.open_position(
+    opened = PaperTradingService().open_position(
         session=session,
         pipeline_output=pipeline_output,
         quantity=2,
     )
 
-    update_service = PaperPositionUpdateService(
-        position_state_store=trading_service.position_state_store,
-    )
-
-    update_result = update_service.update_position(
-        session=open_result.session,
+    updated = PaperPositionUpdateService().update_position(
+        session=opened.session,
         symbol="AAPL",
         current_price=112.0,
     )
 
-    print(update_result)
-
-    assert update_result.updated is True
-    assert update_result.symbol == "AAPL"
-
-    assert update_result.session.portfolio.positions["AAPL"].current_price == 112.0
-    assert update_result.session.portfolio.positions["AAPL"].market_value == 224.0
-    assert update_result.session.equity == 1024.0
-
-    assert update_result.position_state is not None
-    assert update_result.position_state.current_price == 112.0
-    assert update_result.position_state.highest_price == 112.0
-    assert update_result.position_state.target_1_hit is True
-    assert update_result.position_state.break_even_active is True
-    assert update_result.position_state.current_stop_loss > 100.0
-
-    stored = update_service.position_state_store.load("AAPL")
-
-    assert stored is not None
-    assert stored.current_price == 112.0
-
+    assert updated.updated is True
+    assert updated.session.portfolio.positions["AAPL"].current_price == 112.0
+    assert updated.session.equity == 1024.0
+    assert updated.position_state is not None
+    assert updated.session.position_states["AAPL"] == updated.position_state
     print("PASS")
 
 

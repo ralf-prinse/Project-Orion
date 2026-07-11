@@ -6,7 +6,6 @@ from models.paper_portfolio import PaperPortfolio
 from models.paper_position import PaperPosition
 from models.position_state import PositionState
 from models.trading_session import TradingSession
-from services.position_state_store import PositionStateStore
 from services.position_update_engine import (
     PositionUpdateEngine,
     PositionUpdateResult,
@@ -24,22 +23,12 @@ class PaperPositionUpdateResult:
 
 
 class PaperPositionUpdateService:
-    """
-    Updates an open paper position with a new market price.
-    """
-
     def __init__(
         self,
         position_update_engine: PositionUpdateEngine | None = None,
-        position_state_store: PositionStateStore | None = None,
     ):
         self.position_update_engine = (
-            position_update_engine
-            or PositionUpdateEngine()
-        )
-        self.position_state_store = (
-            position_state_store
-            or PositionStateStore()
+            position_update_engine or PositionUpdateEngine()
         )
 
     def update_position(
@@ -48,7 +37,6 @@ class PaperPositionUpdateService:
         symbol: str,
         current_price: float,
     ) -> PaperPositionUpdateResult:
-
         normalized_symbol = str(symbol).strip().upper()
 
         position = session.portfolio.positions.get(normalized_symbol)
@@ -57,32 +45,32 @@ class PaperPositionUpdateService:
 
         if position is None:
             return PaperPositionUpdateResult(
-                updated=False,
-                symbol=normalized_symbol,
-                session=session,
-                position_update=None,
-                position_state=None,
-                message="Position not found.",
+                False,
+                normalized_symbol,
+                session,
+                None,
+                None,
+                "Position not found.",
             )
 
         if state is None:
             return PaperPositionUpdateResult(
-                updated=False,
-                symbol=normalized_symbol,
-                session=session,
-                position_update=None,
-                position_state=None,
-                message="PositionState not found.",
+                False,
+                normalized_symbol,
+                session,
+                None,
+                None,
+                "PositionState not found.",
             )
 
         if risk_plan is None:
             return PaperPositionUpdateResult(
-                updated=False,
-                symbol=normalized_symbol,
-                session=session,
-                position_update=None,
-                position_state=None,
-                message="RiskPlan not found.",
+                False,
+                normalized_symbol,
+                session,
+                None,
+                None,
+                "RiskPlan not found.",
             )
 
         position_update = self.position_update_engine.update(
@@ -113,13 +101,11 @@ class PaperPositionUpdateService:
             status=session.status,
         )
 
-        self.position_state_store.save(position_update.state)
-
         return PaperPositionUpdateResult(
-            updated=True,
-            symbol=normalized_symbol,
-            session=updated_session,
-            position_update=position_update,
-            position_state=position_update.state,
-            message="Paper position updated.",
+            True,
+            normalized_symbol,
+            updated_session,
+            position_update,
+            position_update.state,
+            "Paper position updated.",
         )

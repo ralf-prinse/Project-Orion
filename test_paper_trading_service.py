@@ -54,24 +54,27 @@ def test_open_position_updates_complete_session():
     assert result.position_state.entry_price == 100.0
     assert result.position_state.current_stop_loss == 95.0
 
-    stored = service.position_state_store.load("AAPL")
+    assert (
+        result.session.position_states["AAPL"]
+        == result.position_state
+    )
 
-    assert stored is not None
-    assert stored.symbol == "AAPL"
 
-
-def test_service_has_no_standalone_portfolio_repository_dependency():
+def test_service_has_no_position_state_store_dependency():
     constructor_parameters = signature(
         PaperTradingService.__init__
     ).parameters
 
-    assert "portfolio_repository" not in constructor_parameters
+    assert (
+        "position_state_store"
+        not in constructor_parameters
+    )
 
     service = PaperTradingService()
 
     assert not hasattr(
         service,
-        "portfolio_repository",
+        "position_state_store",
     )
 
 
@@ -83,7 +86,7 @@ def main():
     print()
 
     test_open_position_updates_complete_session()
-    test_service_has_no_standalone_portfolio_repository_dependency()
+    test_service_has_no_position_state_store_dependency()
 
     print("PAPER TRADING SERVICE: PASS")
 
