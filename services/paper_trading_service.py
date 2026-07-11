@@ -11,9 +11,6 @@ from services.execution_engine import (
     ExecutionEngine,
     ExecutionEngineResult,
 )
-from services.stores.repositories.paper_portfolio_repository import (
-    PaperPortfolioRepository,
-)
 from services.execution_request_builder import ExecutionRequestBuilder
 from services.position_state_store import PositionStateStore
 
@@ -29,17 +26,37 @@ class PaperTradeResult:
 
 
 class PaperTradingService:
+    """
+    Opens paper positions inside a TradingSession.
+
+    Runtime ownership:
+    - TradingSession owns the portfolio, PositionState and RiskPlan.
+    - PositionStateStore remains a shared compatibility/runtime store
+      until its separate consolidation step.
+    - Persistence of a complete TradingSession is owned by the runner
+      through TradingSessionRepository.
+
+    This service does not own or persist a standalone PaperPortfolio.
+    """
+
     def __init__(
         self,
         execution_engine: ExecutionEngine | None = None,
         request_builder: ExecutionRequestBuilder | None = None,
         position_state_store: PositionStateStore | None = None,
-        portfolio_repository: PaperPortfolioRepository | None = None,
     ):
-        self.execution_engine = execution_engine or ExecutionEngine()
-        self.request_builder = request_builder or ExecutionRequestBuilder()
-        self.position_state_store = position_state_store or PositionStateStore()
-        self.portfolio_repository = portfolio_repository
+        self.execution_engine = (
+            execution_engine
+            or ExecutionEngine()
+        )
+        self.request_builder = (
+            request_builder
+            or ExecutionRequestBuilder()
+        )
+        self.position_state_store = (
+            position_state_store
+            or PositionStateStore()
+        )
 
     def open_position(
         self,
@@ -47,7 +64,6 @@ class PaperTradingService:
         pipeline_output: TradingPipelineResult | dict[str, Any],
         quantity: int,
     ) -> PaperTradeResult:
-
         request = self.request_builder.build(
             pipeline_output=pipeline_output,
             quantity=quantity,

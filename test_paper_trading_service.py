@@ -1,19 +1,12 @@
+from inspect import signature
+
 from models.paper_portfolio import PaperPortfolio
 from models.trading_session import TradingSession
 from services.paper_trading_service import PaperTradingService
 
 
-def run():
-    service = PaperTradingService()
-
-    session = TradingSession(
-        name="Test Session",
-        portfolio=PaperPortfolio(
-            cash=1000.0,
-        ),
-    )
-
-    pipeline_output = {
+def _pipeline_output() -> dict:
+    return {
         "symbol": "AAPL",
         "confidence": 0.91,
         "risk_plan": {
@@ -31,13 +24,22 @@ def run():
         },
     }
 
-    result = service.open_position(
-        session=session,
-        pipeline_output=pipeline_output,
-        quantity=2,
+
+def test_open_position_updates_complete_session():
+    service = PaperTradingService()
+
+    session = TradingSession(
+        name="Test Session",
+        portfolio=PaperPortfolio(
+            cash=1000.0,
+        ),
     )
 
-    print(result)
+    result = service.open_position(
+        session=session,
+        pipeline_output=_pipeline_output(),
+        quantity=2,
+    )
 
     assert result.executed is True
     assert result.symbol == "AAPL"
@@ -45,6 +47,7 @@ def run():
     assert result.session.open_positions == 1
     assert "AAPL" in result.session.portfolio.positions
     assert "AAPL" in result.session.position_states
+    assert "AAPL" in result.session.risk_plans
 
     assert result.position_state is not None
     assert result.position_state.symbol == "AAPL"
@@ -56,8 +59,34 @@ def run():
     assert stored is not None
     assert stored.symbol == "AAPL"
 
-    print("PASS")
+
+def test_service_has_no_standalone_portfolio_repository_dependency():
+    constructor_parameters = signature(
+        PaperTradingService.__init__
+    ).parameters
+
+    assert "portfolio_repository" not in constructor_parameters
+
+    service = PaperTradingService()
+
+    assert not hasattr(
+        service,
+        "portfolio_repository",
+    )
+
+
+def main():
+    print()
+    print("=========================================")
+    print("PAPER TRADING SERVICE CONSOLIDATION TEST")
+    print("=========================================")
+    print()
+
+    test_open_position_updates_complete_session()
+    test_service_has_no_standalone_portfolio_repository_dependency()
+
+    print("PAPER TRADING SERVICE: PASS")
 
 
 if __name__ == "__main__":
-    run()
+    main()
