@@ -10,6 +10,9 @@ from services.serialization.dataclass_serializer import (
 from services.stores.repositories.trading_session_repository import (
     TradingSessionRepository,
 )
+from services.trading_session_integrity_service import (
+    TradingSessionIntegrityService,
+)
 
 
 class JsonTradingSessionRepository(TradingSessionRepository):
@@ -22,16 +25,22 @@ class JsonTradingSessionRepository(TradingSessionRepository):
     - risk plans
     - session metadata
 
-    Contains no trading decisions or position-management logic.
+    Integrity is validated before save and after load.
+    The repository contains no trading decisions.
     """
 
     def __init__(
         self,
         path: Path | str = "data/trading_session.json",
         serializer: DataclassSerializer | None = None,
+        integrity_service: TradingSessionIntegrityService | None = None,
     ):
         self.path = Path(path)
         self.serializer = serializer or DataclassSerializer()
+        self.integrity_service = (
+            integrity_service
+            or TradingSessionIntegrityService()
+        )
 
     def exists(self) -> bool:
         return self.path.exists()
@@ -48,15 +57,21 @@ class JsonTradingSessionRepository(TradingSessionRepository):
             )
         )
 
-        return self.serializer.from_dict(
+        session = self.serializer.from_dict(
             TradingSession,
             data,
         )
+
+        self.integrity_service.validate(session)
+
+        return session
 
     def save(
         self,
         session: TradingSession,
     ) -> None:
+        self.integrity_service.validate(session)
+
         self.path.parent.mkdir(
             parents=True,
             exist_ok=True,
