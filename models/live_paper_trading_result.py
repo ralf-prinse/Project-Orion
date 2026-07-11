@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 from models.trading_pipeline_result import TradingPipelineResult
 from models.trading_session import TradingSession
+from models.opportunity_ranking import OpportunityRanking
 
 
 @dataclass(frozen=True)
@@ -13,6 +14,7 @@ class LivePaperCandidate:
     score: float
     accepted: bool
     reason: str
+    opportunity_ranking: OpportunityRanking | None = None
 
 
 @dataclass(frozen=True)

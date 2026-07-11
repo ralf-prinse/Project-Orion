@@ -10,6 +10,9 @@ from models.live_paper_trading_result import (
 from models.paper_portfolio import PaperPortfolio
 from models.trading_session import TradingSession
 from providers.yahoo_provider import YahooProvider
+from services.intelligence.opportunity_ranking_engine import (
+    OpportunityRankingEngine,
+)
 from services.paper_trading_pipeline_adapter import (
     PaperTradingPipelineAdapter,
 )
@@ -41,10 +44,12 @@ class LivePaperMarketScanner:
         provider: YahooProvider | None = None,
         adapter: PaperTradingPipelineAdapter | None = None,
         watchlist_service: WatchlistService | None = None,
+        ranking_engine: OpportunityRankingEngine | None = None,
     ):
         self.config = config or LivePaperTradingConfig()
         self.provider = provider or YahooProvider()
         self.adapter = adapter or PaperTradingPipelineAdapter()
+        self.ranking_engine = ranking_engine or OpportunityRankingEngine()
         self.watchlist_service = (
             watchlist_service
             or WatchlistService(
@@ -121,7 +126,8 @@ class LivePaperMarketScanner:
         symbol: str,
         result,
     ) -> LivePaperCandidate:
-        score = self._score_result(result)
+        opportunity_ranking = self.ranking_engine.rank(result)
+        score = opportunity_ranking.score
 
         if result.decision != "BUY":
             return LivePaperCandidate(
@@ -130,6 +136,7 @@ class LivePaperMarketScanner:
                 score=score,
                 accepted=False,
                 reason=f"Decision is {result.decision}, not BUY.",
+                opportunity_ranking=opportunity_ranking,
             )
 
         if result.confidence < self.config.min_confidence:
@@ -139,6 +146,7 @@ class LivePaperMarketScanner:
                 score=score,
                 accepted=False,
                 reason="Confidence below minimum threshold.",
+                opportunity_ranking=opportunity_ranking,
             )
 
         if result.risk_plan.entry_price > self.config.max_position_value:
@@ -148,6 +156,7 @@ class LivePaperMarketScanner:
                 score=score,
                 accepted=False,
                 reason="Entry price exceeds max position value.",
+                opportunity_ranking=opportunity_ranking,
             )
 
         return LivePaperCandidate(
@@ -156,6 +165,7 @@ class LivePaperMarketScanner:
             score=score,
             accepted=True,
             reason="Accepted candidate.",
+            opportunity_ranking=opportunity_ranking,
         )
 
     def _score_result(self, result) -> float:

@@ -165,6 +165,8 @@ TestCommand(
             TestCommand("Trade Monitor Presenter", [sys.executable, "test_trade_monitor_presenter.py"]),
 
             TestCommand("Market Pipeline Scanner Service", [sys.executable, "test_market_pipeline_scanner_service.py"]),
+            TestCommand("Opportunity Ranking Engine", [sys.executable, "test_opportunity_ranking_engine.py"]),
+            TestCommand("Opportunity Ranking Scanner", [sys.executable, "test_opportunity_ranking_scanner.py"]),
         ]
 
     def run(self):
