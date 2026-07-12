@@ -83,7 +83,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--initial-cash",
         type=float,
-        default=500.0,
+        default=10_000.0,
     )
     parser.add_argument(
         "--stop-on-exception",
@@ -147,7 +147,7 @@ def resolve_settings(
         max_symbols = (
             args.max_symbols
             if args.max_symbols is not None
-            else 25
+            else 150
         )
 
     if interval_seconds < 1:
