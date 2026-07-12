@@ -17,3 +17,9 @@ __pycache__/
 
 # Generated runtime test data
 data/test_*.json
+
+# Orion runtime and validation data
+data/*_journal.jsonl
+data/runtime_events.jsonl
+data/validation_*.json
+data/validation_*.jsonl
