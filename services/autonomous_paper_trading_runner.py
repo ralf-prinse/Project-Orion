@@ -298,9 +298,10 @@ class AutonomousPaperTradingRunner:
                 decision = (
                     self.position_monitor
                     .evaluate_managed(
-                        position,
-                        state,
-                        risk_plan,
+                        position=position,
+                        state=state,
+                        risk_plan=risk_plan,
+                        config=self.config.live_config,
                     )
                 )
             else:

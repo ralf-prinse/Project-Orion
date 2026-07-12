@@ -1,7 +1,7 @@
 from models.risk_plan import RiskPlan
 from services.position_state_factory import PositionStateFactory
 from services.position_update_engine import PositionUpdateEngine
-
+from datetime import UTC, datetime
 
 def run():
 
@@ -24,6 +24,17 @@ def run():
 
     state = factory.create(plan)
 
+    opened_at = datetime(
+        2026,
+        7,
+        10,
+        9,
+        0,
+        tzinfo=UTC,
+    )
+
+    state.opened_at = opened_at
+
     print("========== UPDATE ==========")
 
     result = engine.update(
@@ -40,6 +51,7 @@ def run():
     assert result.state.target_1_hit is True
     assert result.state.target_2_hit is False
     assert result.state.target_3_hit is False
+    assert result.state.opened_at == opened_at
 
     print("PASS")
 

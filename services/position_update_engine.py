@@ -88,6 +88,7 @@ class PositionUpdateEngine:
                 state.target_3_hit
                 or current_price >= risk_plan.target_3
             ),
+            opened_at=state.opened_at,
         )
 
         return PositionUpdateResult(

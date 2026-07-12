@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from datetime import UTC, datetime
 
 
 @dataclass
@@ -8,12 +9,12 @@ class PositionState:
     """
     Runtime state of an open position.
 
-    This object contains mutable state used by the
-    PositionManager while a trade is open.
+    TradingSession owns this state for the complete
+    lifetime of a managed paper position.
 
     No AI.
     No persistence logic.
-    No business decisions.
+    No trade execution.
     """
 
     symbol: str
@@ -35,3 +36,7 @@ class PositionState:
     target_2_hit: bool = False
 
     target_3_hit: bool = False
+
+    opened_at: datetime = field(
+        default_factory=lambda: datetime.now(UTC)
+    )

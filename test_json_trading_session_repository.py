@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from pathlib import Path
 
 from models.paper_portfolio import PaperPortfolio
@@ -18,6 +19,15 @@ def test_json_trading_session_repository_roundtrip():
     )
 
     repository.delete()
+
+    opened_at = datetime(
+        2026,
+        7,
+        10,
+        9,
+        0,
+        tzinfo=UTC,
+    )
 
     paper_position = PaperPosition(
         symbol="AAPL",
@@ -44,6 +54,7 @@ def test_json_trading_session_repository_roundtrip():
         target_1_hit=False,
         target_2_hit=False,
         target_3_hit=False,
+        opened_at=opened_at,
     )
 
     risk_plan = RiskPlan(
@@ -108,6 +119,7 @@ def test_json_trading_session_repository_roundtrip():
     assert loaded_state.target_1_hit is False
     assert loaded_state.target_2_hit is False
     assert loaded_state.target_3_hit is False
+    assert loaded_state.opened_at == opened_at
 
     assert loaded.risk_plans.keys() == {"AAPL"}
 
