@@ -3,7 +3,9 @@ from __future__ import annotations
 import argparse
 from dataclasses import dataclass
 from pathlib import Path
-
+from services.market_session_service import (
+    MarketSessionService,
+)
 from models.autonomous_paper_trading_config import (
     AutonomousPaperTradingConfig,
 )
@@ -292,10 +294,15 @@ def build_runner(
             print_iteration_summary=True,
         ),
         runner=autonomous_runner,
-        supervisor=RuntimeSupervisor(
+                supervisor=RuntimeSupervisor(
             event_repository=JsonlRuntimeEventRepository(
                 path=settings.runtime_event_path,
             )
+        ),
+        market_session_service=(
+            None
+            if settings.test_mode
+            else MarketSessionService()
         ),
     )
 
@@ -370,7 +377,10 @@ def print_result(result) -> None:
         "Failed iterations:    "
         f"{result.failed_iterations}"
     )
-
+    print(
+        "Idle iterations:      "
+        f"{result.idle_iterations}"
+    )
     if result.last_result is not None:
         session = result.last_result.session
 

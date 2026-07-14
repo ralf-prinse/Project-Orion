@@ -1,47 +1,125 @@
 {
-  "cash": 47.07,
+  "cash": 1828.39,
   "positions": {
-    "NFLX": {
-      "symbol": "NFLX",
-      "quantity": 1,
-      "entry_price": 75.88,
-      "current_price": 73.37000274658203
-    },
-    "WMT": {
-      "symbol": "WMT",
-      "quantity": 1,
-      "entry_price": 113.42,
-      "current_price": 113.9000015258789
-    },
-    "INTC": {
-      "symbol": "INTC",
-      "quantity": 1,
-      "entry_price": 105.18,
-      "current_price": 109.83999633789062
-    },
-    "AGN.AS": {
-      "symbol": "AGN.AS",
-      "quantity": 6,
-      "entry_price": 7.7,
-      "current_price": 7.699999809265137
-    },
-    "AAL": {
-      "symbol": "AAL",
+    "HUBS": {
+      "symbol": "HUBS",
       "quantity": 2,
-      "entry_price": 17.27,
-      "current_price": 16.950000762939453
+      "entry_price": 214.45,
+      "current_price": 217.58999633789062
     },
-    "ABN.AS": {
-      "symbol": "ABN.AS",
+    "MPC": {
+      "symbol": "MPC",
       "quantity": 1,
-      "entry_price": 38.25,
-      "current_price": 38.029998779296875
+      "entry_price": 293.62,
+      "current_price": 296.8800048828125
     },
-    "AALB.AS": {
-      "symbol": "AALB.AS",
+    "AAPL": {
+      "symbol": "AAPL",
       "quantity": 1,
-      "entry_price": 39.46,
-      "current_price": 39.29999923706055
+      "entry_price": 319.7,
+      "current_price": 317.30999755859375
+    },
+    "ANET": {
+      "symbol": "ANET",
+      "quantity": 2,
+      "entry_price": 188.71,
+      "current_price": 181.14999389648438
+    },
+    "APD": {
+      "symbol": "APD",
+      "quantity": 1,
+      "entry_price": 303.9,
+      "current_price": 301.9599914550781
+    },
+    "CMG": {
+      "symbol": "CMG",
+      "quantity": 13,
+      "entry_price": 36.42,
+      "current_price": 36.630001068115234
+    },
+    "ADBE": {
+      "symbol": "ADBE",
+      "quantity": 2,
+      "entry_price": 227.71,
+      "current_price": 230.61000061035156
+    },
+    "DTE.DE": {
+      "symbol": "DTE.DE",
+      "quantity": 18,
+      "entry_price": 26.73,
+      "current_price": 26.739999771118164
+    },
+    "ICE": {
+      "symbol": "ICE",
+      "quantity": 3,
+      "entry_price": 136.11,
+      "current_price": 137.6699981689453
+    },
+    "ELV": {
+      "symbol": "ELV",
+      "quantity": 1,
+      "entry_price": 423.09,
+      "current_price": 425.1700134277344
+    },
+    "IMCD.AS": {
+      "symbol": "IMCD.AS",
+      "quantity": 5,
+      "entry_price": 86.88,
+      "current_price": 86.19999694824219
+    },
+    "HOOD": {
+      "symbol": "HOOD",
+      "quantity": 4,
+      "entry_price": 112.28,
+      "current_price": 109.86000061035156
+    },
+    "INTU": {
+      "symbol": "INTU",
+      "quantity": 1,
+      "entry_price": 285.58,
+      "current_price": 289.760009765625
+    },
+    "FIS": {
+      "symbol": "FIS",
+      "quantity": 11,
+      "entry_price": 42.33,
+      "current_price": 41.93000030517578
+    },
+    "ADSK": {
+      "symbol": "ADSK",
+      "quantity": 2,
+      "entry_price": 211.38,
+      "current_price": 212.22000122070312
+    },
+    "GD": {
+      "symbol": "GD",
+      "quantity": 1,
+      "entry_price": 374.78,
+      "current_price": 372.7799987792969
+    },
+    "DHL.DE": {
+      "symbol": "DHL.DE",
+      "quantity": 8,
+      "entry_price": 56.82,
+      "current_price": 56.939998626708984
+    },
+    "EOAN.DE": {
+      "symbol": "EOAN.DE",
+      "quantity": 26,
+      "entry_price": 19.08,
+      "current_price": 19.104999542236328
+    },
+    "CRM": {
+      "symbol": "CRM",
+      "quantity": 2,
+      "entry_price": 169.06,
+      "current_price": 171.22000122070312
+    },
+    "HPQ": {
+      "symbol": "HPQ",
+      "quantity": 20,
+      "entry_price": 24.28,
+      "current_price": 24.770000457763672
     }
   }
 }
