@@ -164,6 +164,10 @@ TestCommand(
                 "IBKR Portfolio Service",
                 [sys.executable, "test_ibkr_portfolio_service.py"],
             ),
+                        TestCommand(
+                "IBKR Portfolio Pipeline",
+                [sys.executable, "test_ibkr_portfolio_pipeline.py"],
+            ),
             TestCommand("Portfolio Manager", [sys.executable, "test_portfolio_manager.py"]),
 
             TestCommand("Position State Factory", [sys.executable, "test_position_state_factory.py"]),
