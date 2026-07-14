@@ -149,6 +149,10 @@ TestCommand(
                 [sys.executable, "test_ibkr_broker.py"],
             ),
             TestCommand(
+                "Execution Engine IBKR",
+                [sys.executable, "test_execution_engine_ibkr.py"],
+            ),
+            TestCommand(
                 "IBKR Order Transport",
                 [sys.executable, "test_ibkr_order_transport.py"],
             ),
