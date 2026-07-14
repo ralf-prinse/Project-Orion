@@ -140,6 +140,10 @@ TestCommand(
             TestCommand("Execution Engine", [sys.executable, "test_execution_engine.py"]),
             TestCommand("Order Factory", [sys.executable, "test_order_factory.py"]),
             TestCommand("Paper Broker", [sys.executable, "test_paper_broker.py"]),
+            TestCommand(
+                "IBKR Account Service",
+                [sys.executable, "test_ibkr_account_service.py"],
+            ),
 
             TestCommand("Portfolio Manager", [sys.executable, "test_portfolio_manager.py"]),
 
