@@ -144,7 +144,14 @@ TestCommand(
                 "IBKR Account Service",
                 [sys.executable, "test_ibkr_account_service.py"],
             ),
-
+            TestCommand(
+                "IBKR Broker",
+                [sys.executable, "test_ibkr_broker.py"],
+            ),
+            TestCommand(
+                "IBKR Order Transport",
+                [sys.executable, "test_ibkr_order_transport.py"],
+            ),
             TestCommand("Portfolio Manager", [sys.executable, "test_portfolio_manager.py"]),
 
             TestCommand("Position State Factory", [sys.executable, "test_position_state_factory.py"]),
