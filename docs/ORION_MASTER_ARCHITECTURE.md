@@ -1,18 +1,24 @@
 # PROJECT ORION — MASTER ARCHITECTURE
 
-**Status:** Stable engine architecture  
-**Updated:** 2026-07-11
+**Status:** Stable deterministic architecture  
+**Updated:** 2026-07-14
 
-## Mission
+---
 
-Project Orion is a deterministic AI-assisted trading platform.
+# Mission
 
-AI explains deterministic output. It never creates or overrides trading decisions, confidence, risk plans, position size or exits.
+Project Orion is a deterministic swing-trading platform.
 
-## Core Flow
+Artificial Intelligence may explain deterministic output but never owns trading decisions, risk, execution or position management.
+
+---
+
+# Core Trading Flow
 
 ```text
 Market Data
+    ↓
+Quote Validation
     ↓
 Indicators
     ↓
@@ -26,41 +32,44 @@ Adaptive RiskPlan
     ↓
 Portfolio Allocation
     ↓
-Paper Execution
+Execution Engine
     ↓
 TradingSession
     ↓
 Position Management
     ↓
-Exit Evaluation
+Exit Engine
     ↓
-ExitEngine
-    ↓
-Trade Journal / Decision Journal
-    ↓
-Dashboard and Analytics
+Trade Journal
 ```
 
-## Canonical Runtime Aggregate
+Every layer has exactly one responsibility.
+
+No layer may bypass another.
+
+---
+
+# Canonical Runtime Aggregate
 
 ```text
 TradingSession
 ├── PaperPortfolio
 ├── dict[str, PositionState]
 ├── dict[str, RiskPlan]
-├── name
-└── status
+├── session metadata
+└── runtime status
 ```
 
 Rules:
 
-- `TradingSession` is the only lifecycle-state owner.
-- `PaperPortfolio` owns cash and positions inside the aggregate.
-- `PositionState` owns current managed-position state.
-- `RiskPlan` owns deterministic entry risk and targets.
-- no parallel in-memory state store is permitted.
+- TradingSession is the only lifecycle owner.
+- PositionState exists only inside TradingSession.
+- RiskPlan exists only inside TradingSession.
+- No parallel lifecycle state is allowed.
 
-## Persistence Boundary
+---
+
+# Persistence Boundary
 
 ```text
 TradingSessionRepository
@@ -68,13 +77,47 @@ TradingSessionRepository
 TradingSession
 ```
 
-Repositories only serialize and retrieve state. They never calculate decisions, stops, targets or P/L.
+Repositories only serialize.
 
-`JsonPaperPortfolioRepository` may exist only as an explicit compatibility mirror. It is not authoritative lifecycle state.
+Repositories never calculate:
 
-## Position Management
+- indicators;
+- decisions;
+- risk;
+- exits;
+- position management.
 
-Canonical chain:
+---
+
+# Execution
+
+Execution is intentionally separated.
+
+```text
+ExecutionEngine
+        ↓
+Broker.execute(order)
+```
+
+Current implementation:
+
+```text
+PaperBroker
+```
+
+Planned implementation:
+
+```text
+IbkrBroker
+```
+
+ExecutionEngine must remain broker-independent.
+
+---
+
+# Position Management
+
+Canonical flow:
 
 ```text
 PaperPositionUpdateService
@@ -90,113 +133,190 @@ PositionMonitor
 ExitEngine
 ```
 
-Responsibilities:
+Lifecycle ownership includes:
 
-- update current and highest prices;
-- maintain dynamic stop state;
-- record targets and activation flags;
-- evaluate deterministic exits;
-- close positions;
-- remove matching state and risk plans.
+- current price;
+- highest price;
+- stop loss;
+- break-even state;
+- trailing stop;
+- target flags;
+- deterministic exits.
 
-## Runtime Orchestration
+---
+
+# Runtime
+
+Runtime orchestration:
 
 ```text
 ContinuousPaperTradingRunner
+        ↓
+RuntimeSupervisor
         ↓
 AutonomousPaperTradingRunner
         ↓
 TradingSessionRepository
 ```
 
-Runners orchestrate only. They do not duplicate lifecycle calculations.
+Responsibilities:
 
-## Journaling
+RuntimeSupervisor
+
+- runtime health;
+- runtime events;
+- heartbeat;
+- failures;
+- graceful shutdown.
+
+RuntimeSupervisor never owns trading state.
+
+---
+
+# Market Sessions
+
+Trading only occurs while configured markets are open.
+
+Market sessions are:
+
+- timezone-aware;
+- DST-aware;
+- deterministic.
+
+When every configured market is closed:
 
 ```text
+MARKETS_IDLE
+```
+
+During idle:
+
+- no scans;
+- no orders;
+- no portfolio updates;
+- no failed iterations.
+
+---
+
+# Quote Validation
+
+Every market price must satisfy:
+
+- finite;
+- greater than zero;
+- not NaN;
+- not None.
+
+Invalid quotes are rejected before entering the trading pipeline.
+
+Portfolio equity may never become NaN.
+
+---
+
+# Journals
+
+Independent journals exist for:
+
 Trade Journal
+
 - OPEN_POSITION
 - CLOSE_POSITION
 
 Decision Journal
+
 - APPROVED
 - REJECTED
-```
 
-Both journals may share a model and repository implementation, but their files and semantics remain separate.
+Runtime Events
 
-## Layer Rules
+- runtime lifecycle
+- failures
+- idle transitions
 
-- Market providers supply raw data.
-- Indicators calculate values.
-- Analysis interprets indicators.
-- Signals describe conditions.
-- Decision logic produces BUY/HOLD/SELL.
-- Risk validates and plans.
-- Execution mutates paper state.
-- Position management owns open-position lifecycle.
-- Repositories persist.
-- Presenters format.
-- GUI displays only.
+Journals are immutable runtime evidence.
 
-No layer may bypass or duplicate another owner's responsibility.
+---
 
-## Design Principles
-
-- deterministic behaviour;
-- one owner per responsibility;
-- explicit dependencies;
-- composition over inheritance;
-- immutable models where practical;
-- no hidden global state;
-- complete regression coverage for architectural changes;
-- architecture analysis before implementation.
-
-## Artificial Intelligence
+# Artificial Intelligence
 
 Allowed:
 
-- explanation;
-- summarization;
-- comparison;
+- explanations;
+- summaries;
 - documentation;
-- analysis of deterministic historical outcomes.
+- historical analysis.
 
 Forbidden:
 
-- BUY/SELL/EXIT decisions;
-- confidence calculation;
+- BUY decisions;
+- SELL decisions;
+- EXIT decisions;
 - position sizing;
-- risk approval;
-- stop or target calculation;
-- direct execution;
-- silent configuration changes.
+- stop calculation;
+- order execution;
+- configuration changes.
 
-## Validation Policy
+---
 
-Before merge or release:
+# Architectural Rules
 
-```powershell
-python run_tests.py
-```
+Always:
 
-Expected current baseline:
+- one owner per responsibility;
+- deterministic behaviour;
+- explicit dependencies;
+- composition over inheritance;
+- immutable models where practical;
+- complete regression coverage;
+- architecture review before implementation.
+
+Never:
+
+- duplicate trading logic;
+- duplicate lifecycle state;
+- bypass TradingSession;
+- bypass Quote Validation;
+- bypass ExecutionEngine.
+
+---
+
+# Current Validation Baseline
+
+Regression:
 
 ```text
-69 passed
+75 passed
+0 failed
 ```
 
-Runtime-sensitive changes also require isolated smoke or duration validation.
+Operational validation:
 
-## Future Expansion
+- continuous runtime;
+- restart recovery;
+- market-session transitions;
+- runtime idle;
+- quote validation;
+- managed exits;
+- persistence.
 
-New platform features must build on this engine without changing ownership:
+---
 
-- dashboard;
-- analytics;
-- alerts;
-- broker compatibility;
-- strategy comparison;
-- multi-market support.
+# Next Architectural Milestone
+
+Interactive Brokers Paper integration.
+
+Only the broker implementation changes.
+
+The deterministic trading engine remains unchanged.
+
+```text
+ExecutionEngine
+        ↓
+IbkrBroker
+        ↓
+IBKR Paper
+```
+
+This preserves every deterministic layer while replacing only the execution backend.
 
 # End

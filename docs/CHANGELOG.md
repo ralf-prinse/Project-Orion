@@ -1,82 +1,145 @@
 # PROJECT ORION — CHANGELOG
 
-## Sprint 8.13 — Engine Consolidation
+---
 
-**Status:** Complete
+## 2026-07-14 — Sprint 9.3 (Started)
 
-### 8.13.1
+### Interactive Brokers Paper Integration
 
-- Removed unused `PaperPortfolioRepository` dependency from `PaperTradingService`.
-- Confirmed `TradingSession` owns portfolio changes produced by paper execution.
+Started integration with Interactive Brokers Paper Trading.
 
-### 8.13.2
+Completed:
 
-- Audited all `PositionStateStore` readers and writers.
-- Proved runtime decisions read lifecycle state from `TradingSession`.
-- Classified the store as a parallel compatibility mirror.
+- IBKR account approved.
+- Paper Trading account activated.
+- Trader Workstation installed.
+- TWS API configured.
+- Read-Only API enabled.
+- Python `ibapi` installed.
+- Successful TWS connection test.
+- Successful account reader validation.
 
-### 8.13.3
+No orders are submitted yet.
 
-- Removed `PositionStateStore`.
-- Removed store injection from open, update and close services.
-- Simplified `TradingCycle` construction.
-- Replaced store-synchronization tests with `TradingSession` ownership tests.
-- Preserved full open/update/close behaviour.
+---
 
-### Validation
+## 2026-07-13
 
-- targeted lifecycle tests passed;
-- restart and crash recovery remained green;
-- official suite remained `69 passed`.
+### Runtime Hardening
 
-## Sprint 8.12 — Continuous Runtime Hardening
+Completed:
 
-- Added heartbeat timestamps and iteration duration.
-- Added graceful shutdown during iteration and sleep.
-- Added isolated runtime paths.
-- Added failure classification and recovery.
-- Completed 10- and 100-iteration validation.
-- Observed stable memory and low CPU usage.
-- Separated trade journal from decision journal.
+- DST-aware market sessions.
+- Automatic market-idle mode.
+- Runtime sleeps while all configured markets are closed.
+- Continuous runner no longer generates unnecessary failed iterations overnight.
 
-## Sprint 8.11 — Reliability
+---
 
-- Added restart-safe managed exit validation.
-- Added session-integrity validation before save and after load.
-- Added crash-recovery validation.
-- Confirmed cleanup of position, state and risk plan after exit.
+### Quote Validation
 
-## Sprint 8.10 — Engine Consolidation Foundation
+Added central quote validation.
 
-- Analysed the complete position-management runtime.
-- Integrated managed lifecycle evaluation.
-- Preserved legacy fallback only where required.
-- Validated restart-safe lifecycle persistence.
+Validation now rejects:
 
-## Sprint 8.9 — Persistent Position Lifecycle
+- None
+- NaN
+- Infinity
+- Zero
+- Negative prices
 
-- Added complete `TradingSession` persistence.
-- Persisted portfolio, `PositionState` and `RiskPlan`.
-- Integrated lifecycle updates into autonomous execution.
-- Reached `69 passed`.
+Invalid prices no longer corrupt portfolio equity.
 
-## Sprints 8.4–8.8
+---
 
-- Deterministic Trading Pipeline.
-- Autonomous paper trading.
-- Dashboard and trading analytics.
-- Closed-trade analytics.
-- GUI/dashboard foundation.
+## 2026-07-12
+
+### Runtime Supervisor
+
+Completed:
+
+- RuntimeSupervisor
+- RuntimeHealth
+- RuntimeEvent journal
+- Graceful shutdown
+- Runtime recovery
+
+Added operational runtime monitoring without changing trading ownership.
+
+---
+
+### Position Lifecycle
+
+Completed deterministic managed lifecycle.
+
+Includes:
+
+- Break-even
+- Trailing stop
+- Time stop
+- Restart-safe recovery
+- Position cleanup
+- RiskPlan cleanup
+
+TradingSession remains the single lifecycle owner.
+
+---
+
+## 2026-07-11
+
+### TradingSession Consolidation
+
+Removed the legacy PositionStateStore.
+
+TradingSession became the sole owner of:
+
+- PaperPortfolio
+- PositionState
+- RiskPlan
+
+This completed the lifecycle ownership refactor.
+
+---
+
+### Continuous Paper Trading
+
+Completed the autonomous paper runtime.
+
+Includes:
+
+- Continuous runner
+- TradingSession persistence
+- Trade journal
+- Decision journal
+- Autonomous execution
+
+---
+
+## Regression Milestone
+
+Current baseline:
+
+```text
+75 passed
+0 failed
+```
+
+Every architectural change must preserve a fully green regression suite.
+
+---
+
+## Current State
+
+Project Orion now provides:
+
+- deterministic trading engine;
+- autonomous paper trading;
+- managed position lifecycle;
+- runtime supervision;
+- market-session awareness;
+- quote validation;
+- Interactive Brokers Paper connectivity.
+
+The next milestone is controlled paper order execution through IBKR.
 
 # End
-
-## Sprint 9.0.1 — Runtime Supervisor
-
-- Added operational `RuntimeSupervisor` integration to the continuous runner.
-- Added mutable `RuntimeHealth` operational state.
-- Added immutable `RuntimeEvent` records.
-- Added `RuntimeEventRepository` protocol and JSONL implementation.
-- Added runtime start, iteration, failure and stop events.
-- Added CLI configuration for the runtime-event journal.
-- Preserved `TradingSession` as the only trading lifecycle owner.
-- Added targeted supervisor and repository tests.

@@ -1,101 +1,108 @@
-# Sprint 9.0.1 — Runtime Supervisor
+# SPRINT 9.0.1 — RUNTIME SUPERVISOR
 
-## Status
+**Status:** Completed  
+**Completed:** 2026-07-12
 
-Implemented for local validation.
+---
 
-## Goal
+# Objective
 
-Add operational supervision to the continuous autonomous paper-trading runtime without introducing a second trading-state owner.
+Introduce operational supervision without creating a second owner of trading state.
 
-## Ownership rule
+TradingSession remains the only owner of:
 
-`TradingSession` remains the only owner of:
+- PaperPortfolio
+- PositionState
+- RiskPlan
 
-- `PaperPortfolio`;
-- `PositionState`;
-- `RiskPlan`;
-- managed-position lifecycle state.
+RuntimeSupervisor owns operational information only.
 
-`RuntimeSupervisor` owns operational metadata only. It observes runtime events and never modifies a `TradingSession`.
+---
 
-## Runtime chain
+# Architecture
 
 ```text
 ContinuousPaperTradingRunner
-        ├── AutonomousPaperTradingRunner
-        └── RuntimeSupervisor
-                ├── RuntimeHealth
-                └── RuntimeEventRepository
-                        └── JsonlRuntimeEventRepository
+        │
+        ├── RuntimeSupervisor
+        │
+        └── AutonomousPaperTradingRunner
+                │
+                ▼
+        TradingSession
 ```
 
-## Runtime events
+---
 
-The supervisor records:
+# RuntimeSupervisor Responsibilities
 
-- `RUNTIME_STARTED`;
-- `ITERATION_STARTED`;
-- `ITERATION_COMPLETED`;
-- `ITERATION_FAILED`;
-- `RUNTIME_STOPPED`.
+Tracks:
 
-Default file:
+- runtime lifecycle;
+- heartbeat;
+- completed iterations;
+- failed iterations;
+- last iteration duration;
+- runtime exceptions;
+- runtime status.
+
+Does **not**:
+
+- open trades;
+- close trades;
+- calculate risk;
+- modify TradingSession.
+
+---
+
+# Runtime Events
+
+Records:
+
+- RUNTIME_STARTED
+- ITERATION_STARTED
+- ITERATION_COMPLETED
+- ITERATION_FAILED
+- MARKETS_IDLE
+- RUNTIME_STOPPED
+
+Stored in:
 
 ```text
 data/runtime_events.jsonl
 ```
 
-Isolated runtime file:
+---
 
-```text
-data/optimization_runtime_events.jsonl
-```
+# Validation
 
-## Runtime health
-
-The in-memory health model exposes:
-
-- runtime status;
-- start and stop timestamps;
-- last heartbeat;
-- current iteration;
-- completed and failed iteration counts;
-- last iteration duration;
-- last exception;
-- open-position, position-state and risk-plan counts.
-
-## Safety boundaries
-
-The supervisor does not:
-
-- generate trading decisions;
-- calculate risk;
-- size positions;
-- open or close positions;
-- persist trading sessions;
-- recover or mutate lifecycle state.
-
-## Validation
-
-Targeted tests:
-
-```powershell
-python test_runtime_supervisor.py
-python test_jsonl_runtime_event_repository.py
-python test_run_continuous_paper_trading.py
-python test_continuous_paper_trading_runner.py
-```
-
-Full regression:
+Validated through:
 
 ```powershell
 python run_tests.py
 ```
 
-The central runner now contains two additional test modules, so the expected command baseline becomes:
+Regression baseline:
 
 ```text
-71 passed
+75 passed
 0 failed
 ```
+
+Operational validation included:
+
+- restart recovery;
+- graceful shutdown;
+- idle runtime;
+- runtime journaling;
+- market-session transitions.
+
+---
+
+# Result
+
+Runtime supervision became a permanent operational layer.
+
+It observes the runtime without affecting deterministic trading behaviour.
+
+# End

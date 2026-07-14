@@ -1,116 +1,201 @@
 # PROJECT ORION — PAPER VALIDATION CHECKLIST
 
-**Branch:** `validation-mode-v1`  
-**Version:** `v0.9-paper-validation`
+**Purpose:** Operational validation before enabling new functionality  
+**Branch:** `feature-ibkr-integration`  
+**Updated:** 2026-07-14
 
-## Voor de start
+---
 
-- [ ] Branch is `validation-mode-v1`
-- [ ] Git working tree is clean
-- [ ] Regressie: `75 passed`, `0 failed`
-- [ ] Cash: €10.000
-- [ ] Equity: €10.000
-- [ ] Open posities: 0
-- [ ] Position states: 0
-- [ ] Risk plans: 0
-- [ ] Session status: ACTIVE
-- [ ] Er draait nog geen andere Python-runner
+# Before Starting
 
-## Actieve configuratie
+Confirm:
 
-- [ ] Maximaal 20 open posities
-- [ ] Maximaal €500 per positie
-- [ ] Maximaal 5% per positie
-- [ ] Maximaal 90% portfolio-exposure
-- [ ] Minimaal 10% cashreserve
-- [ ] Maximaal 48 verstreken uren per positie
-- [ ] Maximaal 150 gescande symbolen
-- [ ] Fractionele aandelen uitgeschakeld
-- [ ] Broker: interne PaperBroker
+- [ ] Correct Git branch
+- [ ] Working tree is clean (runtime files excluded)
+- [ ] Regression suite: **75 passed, 0 failed**
+- [ ] TradingSession reset completed
+- [ ] Cash = €10,000
+- [ ] Equity = €10,000
+- [ ] Open positions = 0
+- [ ] Position states = 0
+- [ ] Risk plans = 0
+- [ ] Runtime journals preserved
+- [ ] Only one Orion runner is active
 
-## Starten
+---
+
+# Runtime Configuration
+
+Current validation profile:
+
+- [ ] Maximum 20 open positions
+- [ ] Approx. €500 maximum position value
+- [ ] Maximum 90% portfolio exposure
+- [ ] Minimum cash reserve enforced
+- [ ] Maximum holding time: 48 hours
+- [ ] Fractional shares disabled
+- [ ] Internal PaperBroker enabled
+- [ ] Quote validation enabled
+- [ ] Market session service enabled
+- [ ] RuntimeSupervisor enabled
+
+---
+
+# Start Runner
 
 ```powershell
 python run_continuous_paper_trading.py
+```
 
-Eerste cyclus
- Runner start zonder traceback
- Bestaande TradingSession wordt geladen
- Market scan wordt voltooid
- Decision journal krijgt entries
- Runtime event log krijgt entries
- Geen failed iterations
-Eerste BUY
- BUY-beslissing aanwezig
- Opportunity ranking aanwezig
- Allocation goedgekeurd
- Quantity groter dan 0
- Cash wordt correct verminderd
- PaperPosition wordt aangemaakt
- PositionState wordt aangemaakt
- RiskPlan wordt aangemaakt
- opened_at wordt in UTC opgeslagen
- OPEN_POSITION staat in het trade journal
-Positiebeheer
- Current price wordt bijgewerkt
- Highest price beweegt alleen omhoog
- opened_at blijft ongewijzigd
- Initial stop werkt
- Break-even werkt
- Trailing stop werkt
- Target-flags worden bijgewerkt
- Restart behoudt alle state
-Eerste SELL
- Exitreden wordt geregistreerd
- Actie is STOP_LOSS, TAKE_PROFIT of MAX_HOLDING_TIME
- Positie wordt verwijderd
- PositionState wordt verwijderd
- RiskPlan wordt verwijderd
- Cash wordt verhoogd
- CLOSE_POSITION staat in het trade journal
- Realized P&L wordt geregistreerd
-Einde handelsdag
+Confirm:
 
-Noteer:
+- [ ] Runner starts successfully
+- [ ] TradingSession loads
+- [ ] RuntimeSupervisor starts
+- [ ] No traceback
+- [ ] No failed iteration
 
-totaal aantal cycli;
-failed cycles;
-BUY-beslissingen;
-uitgevoerde aankopen;
-uitgevoerde verkopen;
-afgewezen kandidaten;
-open posities;
-cash;
-equity;
-realized P&L;
-unrealized P&L;
-gebruikte exitredenen;
-fouten en waarschuwingen.
-Freeze-regel
+---
 
-Tijdens de eerste validatierun:
+# Market Session Validation
 
-geen entrylogica wijzigen;
-geen exitpercentages wijzigen;
-geen indicatoren toevoegen;
-geen ranking aanpassen;
-alleen kritieke runtimebugs oplossen nadat de runner is gestopt.
-Stoppen
+If markets are closed:
 
-Stop gecontroleerd met:
+- [ ] Runtime enters `MARKETS_IDLE`
+- [ ] No scan starts
+- [ ] No BUY decisions
+- [ ] No portfolio updates
+- [ ] No failed iterations
+- [ ] Next market-open check is scheduled
 
-Ctrl+C
+If markets are open:
 
-Controleer daarna dat de sessie is opgeslagen en bewaar alle journals.
+- [ ] Market scan starts
+- [ ] Opportunity ranking completes
+- [ ] Decision journal receives entries
 
+---
 
-Commit en push:
+# Quote Validation
+
+Verify invalid prices are rejected:
+
+- [ ] None
+- [ ] NaN
+- [ ] Infinity
+- [ ] Zero
+- [ ] Negative values
+
+Verify:
+
+- [ ] Previous valid price is preserved
+- [ ] Portfolio equity remains finite
+- [ ] Runtime continues
+
+---
+
+# First BUY
+
+Confirm:
+
+- [ ] BUY decision exists
+- [ ] Allocation approved
+- [ ] Quantity > 0
+- [ ] Cash decreases
+- [ ] PaperPosition created
+- [ ] PositionState created
+- [ ] RiskPlan created
+- [ ] UTC timestamp stored
+- [ ] Trade journal updated
+
+---
+
+# Position Management
+
+Verify:
+
+- [ ] Current price updates
+- [ ] Highest price only increases
+- [ ] Initial stop active
+- [ ] Break-even activates
+- [ ] Trailing stop updates
+- [ ] Target flags update
+- [ ] Restart preserves lifecycle state
+
+---
+
+# First SELL
+
+Confirm:
+
+- [ ] Exit reason recorded
+- [ ] Position removed
+- [ ] PositionState removed
+- [ ] RiskPlan removed
+- [ ] Cash updated
+- [ ] CLOSE_POSITION recorded
+- [ ] Realized P&L stored
+
+---
+
+# Runtime Shutdown
+
+Stop using:
 
 ```powershell
-git add docs\PAPER_VALIDATION_CHECKLIST.md
-git commit -m "Add paper validation run checklist"
-git push
+Ctrl+C
+```
 
-Controleer ten slotte:
+Verify:
 
+- [ ] TradingSession saved
+- [ ] Runtime stopped cleanly
+- [ ] Journals preserved
+
+---
+
+# Validation Report
+
+Record:
+
+- completed iterations;
+- failed iterations;
+- BUY decisions;
+- executed trades;
+- rejected opportunities;
+- open positions;
+- cash;
+- equity;
+- realized P&L;
+- unrealized P&L;
+- runtime warnings;
+- runtime exceptions.
+
+---
+
+# Freeze Rule
+
+During validation:
+
+- Do not modify indicators.
+- Do not modify strategy logic.
+- Do not modify exit rules.
+- Do not modify ranking.
+- Only fix critical runtime defects after stopping the runner.
+
+---
+
+# Completion
+
+Before committing:
+
+```powershell
+python run_tests.py
 git status -sb
+```
+
+Only commit when:
+
+- regression suite passes;
+- runtime behaved correctly;
+- validation evidence is preserved.

@@ -1,64 +1,193 @@
 # PROJECT ORION — TODO
 
-**Current phase:** Engine 1.0 review  
-**Updated:** 2026-07-11
+**Branch:** `feature-ibkr-integration`  
+**Updated:** 2026-07-14
 
-## Immediate
+---
 
-- [ ] Commit and push Sprint 8.13.3 plus synchronized documentation.
-- [ ] Run final `python run_tests.py`.
-- [ ] Verify no active import of `position_state_store`.
-- [ ] Review `run_tests.py` names after legacy-removal tests.
-- [ ] Perform Engine 1.0 architecture review.
-- [ ] Create stable Engine 1.0 tag or release branch.
+# Current Phase
 
-## Engine 1.0 Review
+Sprint 9.3 — Interactive Brokers Paper Integration
 
-- [ ] Confirm `TradingSession` is the only lifecycle-state owner.
-- [ ] Confirm all persistence writes originate from runner orchestration.
-- [ ] Classify `JsonPaperPortfolioRepository` as compatibility or remove it in a later isolated sprint.
-- [ ] Review unused services, imports and tests before deletion.
-- [ ] Confirm restart, crash and integrity smoke tests remain documented.
-- [ ] Freeze the active runtime diagram.
+The deterministic paper engine is considered operational.
 
-## Sprint 9.0 Candidates
+Current work focuses exclusively on integrating Interactive Brokers Paper Trading without changing trading behaviour.
 
-Choose only after Engine 1.0 freeze:
+---
 
-1. Trading Dashboard integration with the consolidated engine.
-2. Runtime alerts and operational metrics.
-3. Performance analytics from the trade journal.
-4. Portfolio intelligence and exposure analysis.
-5. Configuration profiles and strategy comparison.
+# Highest Priority
 
-## Later
+## IBKR Integration
 
-- broker compatibility;
-- portfolio import/export;
-- longer paper-trading validation;
-- expectancy and exit-reason analytics;
-- multi-strategy support;
-- AI summaries of deterministic results.
+### 1. Production Account Service
 
-## Out of Scope Until Proven Safe
+Status:
 
-- real-money execution;
-- AI-generated BUY/SELL/EXIT decisions;
-- silent strategy mutation;
-- duplicate runtime state;
-- new engines that overlap existing services.
+IN PROGRESS
 
-## Development Checklist
+Goal:
 
-Every sprint:
+Replace the validated test account reader with a production-quality `IbkrAccountService`.
 
-1. inspect the complete relevant runtime;
-2. identify ownership;
-3. reuse existing models and services;
-4. update targeted regressions;
-5. run the full suite;
-6. perform runtime validation when relevant;
-7. synchronize docs;
-8. commit and push.
+Requirements:
 
-# End
+- connect;
+- read account;
+- read positions;
+- map to Orion models;
+- disconnect cleanly;
+- full regression coverage.
+
+---
+
+### 2. IbkrBroker
+
+Status:
+
+NOT STARTED
+
+Implement a production broker using the existing execution architecture.
+
+The broker must:
+
+- submit paper orders;
+- receive execution status;
+- receive fills;
+- report failures;
+- return Orion execution models.
+
+---
+
+### 3. Controlled Paper Order
+
+Status:
+
+NOT STARTED
+
+Submit one intentionally controlled paper BUY order.
+
+Validation:
+
+- order accepted;
+- fill received;
+- position visible;
+- Orion state updated;
+- no duplicate execution.
+
+---
+
+### 4. Portfolio Synchronization
+
+Status:
+
+NOT STARTED
+
+Synchronize:
+
+- IBKR positions;
+- Orion positions;
+- account balances;
+- execution results.
+
+Detect inconsistencies before trading continues.
+
+---
+
+### 5. Continuous IBKR Runner
+
+Status:
+
+NOT STARTED
+
+Create:
+
+```text
+run_continuous_ibkr_paper.py
+```
+
+The runtime should replace only the broker implementation while preserving the existing deterministic pipeline.
+
+---
+
+# Runtime Validation
+
+Continue validating:
+
+- idle behaviour;
+- DST transitions;
+- quote validation;
+- persistence;
+- managed exits;
+- restart recovery;
+- runtime stability.
+
+No strategy changes during validation.
+
+---
+
+# Strategy
+
+No active strategy work.
+
+Future improvements remain:
+
+- thesis comparison;
+- risk-budget sizing;
+- advanced ranking evaluation;
+- position review.
+
+These remain frozen until the IBKR integration is operational.
+
+---
+
+# GUI
+
+Low priority.
+
+Future work:
+
+- dashboard;
+- portfolio panels;
+- runtime monitor;
+- performance analytics.
+
+---
+
+# Technical Debt
+
+Future review:
+
+- dependency cleanup;
+- execution service simplification;
+- provider cleanup;
+- unused legacy code removal.
+
+Only perform cleanup when it reduces complexity without changing behaviour.
+
+---
+
+# Rules
+
+Always:
+
+- inspect existing architecture first;
+- avoid duplicate services;
+- preserve deterministic behaviour;
+- write targeted tests first;
+- execute the full regression suite;
+- commit only after all tests pass.
+
+---
+
+# Success Criteria
+
+Sprint 9.3 completes when:
+
+- Orion can connect to IBKR Paper.
+- Orion can read account data.
+- Orion can submit paper orders.
+- Orion receives fills.
+- Orion manages paper positions through the existing lifecycle.
+- The continuous runner operates through IBKR Paper with zero regression failures.
+
+Live trading is explicitly outside the scope of this sprint.

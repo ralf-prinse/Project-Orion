@@ -1,62 +1,181 @@
-# Project Orion Dependency Map
+# PROJECT ORION — DEPENDENCY MAP
 
-## Sprint 10.13 Scope
+**Status:** Active Architecture  
+**Updated:** 2026-07-14
 
-Sprint 10.13 focuses on maturing the dependency-injection foundation without performing a risky project-wide migration.
+---
 
-## Current Composition Root
+# Purpose
+
+This document describes the high-level dependency direction within Orion.
+
+It is intended as an architectural reference, not an implementation guide.
+
+---
+
+# Core Principle
+
+Dependencies always point inward toward deterministic business logic.
+
+Presentation and infrastructure depend on services.
+
+Services never depend on GUI code.
+
+---
+
+# Current Layering
 
 ```text
-app.py
-  └── OrionWindow
-
-ApplicationContainer
-  ├── ScanPipeline
-  └── ScanOrchestrator
-        └── ScanPipeline
+GUI / CLI
+        │
+        ▼
+Presenters
+        │
+        ▼
+Application Services
+        │
+        ▼
+Trading Services
+        │
+        ▼
+Domain Models
 ```
 
-## Intended Direction
+Infrastructure exists beside the services:
 
 ```text
-app.py
-  └── ApplicationContainer
-        ├── Configuration
-        ├── ScanPipeline
-        ├── ScanOrchestrator
-        ├── AnalysisEngine        (future migration)
-        ├── SignalEngine          (future migration)
-        ├── DecisionEngine        (future migration)
-        └── OrionWindow           (future migration)
+Providers
+Repositories
+Broker
+Configuration
+Runtime
 ```
 
-## Lifetime Guidance
+None of these own trading decisions.
 
-### Singleton Candidates
+---
 
-- Configuration services
-- Scan pipeline composition
-- Scan orchestrator
-- Registries
-- Provider adapters with shared cache/state
+# Execution Flow
 
-### Transient Candidates
+```text
+ExecutionEngine
+        │
+        ▼
+PaperBroker
+```
 
-- Per-scan context objects
-- Temporary report builders
-- Request-specific adapters
-- Test doubles when isolation is required
+Planned:
 
-## Dependency Rules
+```text
+ExecutionEngine
+        │
+        ▼
+IbkrBroker
+```
 
-- Application-level construction belongs in `core/container`.
-- Orchestration belongs in `core/orchestration`.
-- Business logic remains in `services`.
-- UI presentation remains in `ui`.
-- Providers remain isolated from decision and analysis logic.
+ExecutionEngine must remain independent from broker implementation details.
 
-## Technical Debt Notes
+---
 
-- `app.py` still constructs the GUI directly. This is acceptable for now, but GUI construction should eventually move behind the composition root.
-- Some legacy root-level tests remain outside the official `tests` regression suite.
-- `engines/` and `services/` both exist. This should be reviewed before v1.0 to ensure responsibilities remain clear.
+# Runtime Flow
+
+```text
+ContinuousPaperTradingRunner
+        │
+        ▼
+RuntimeSupervisor
+        │
+        ▼
+AutonomousPaperTradingRunner
+        │
+        ▼
+TradingSessionRepository
+```
+
+TradingSession remains the only owner of runtime trading state.
+
+---
+
+# Ownership Rules
+
+Trading decisions
+
+↓
+
+Decision Engine
+
+Risk
+
+↓
+
+AdaptiveRiskEngine
+
+Execution
+
+↓
+
+ExecutionEngine
+
+Lifecycle
+
+↓
+
+TradingSession
+
+Persistence
+
+↓
+
+Repositories
+
+Presentation
+
+↓
+
+Presenters
+
+GUI
+
+↓
+
+Qt
+
+---
+
+# Dependency Rules
+
+Allowed:
+
+- GUI → Presenters
+- Presenters → Services
+- Services → Models
+- Services → Providers
+- Services → Repositories
+- ExecutionEngine → Broker
+
+Forbidden:
+
+- GUI → Services with trading mutations
+- Providers → Decision logic
+- Repositories → Business logic
+- AI → Execution
+- Broker → Strategy
+
+---
+
+# Future Direction
+
+The only planned execution expansion is:
+
+```text
+PaperBroker
+IbkrBroker
+```
+
+Both must satisfy the same execution contract.
+
+No additional broker abstraction is currently planned.
+
+---
+
+# End

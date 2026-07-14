@@ -1,124 +1,244 @@
 # PROJECT ORION — TRADING STRATEGY
 
-**Status:** Deterministic engine operational  
-**Updated:** 2026-07-11
+**Status:** Active Paper Validation  
+**Updated:** 2026-07-14
 
-## Mission
+---
 
-Orion supports swing-trading decisions through transparent deterministic rules. It does not predict markets and does not delegate decisions to AI.
+# Strategy Objective
 
-## Principles
+Project Orion executes deterministic swing trades with an intended holding period of approximately **24–48 hours**.
 
-- capital preservation first;
-- every position has a predefined `RiskPlan`;
-- every result is reproducible;
-- missing a trade is acceptable;
-- uncontrolled losses are not;
-- no duplicate trading logic;
-- AI explains only.
+The objective is consistent, explainable and risk-controlled trading rather than maximizing trade frequency.
 
-## Deterministic Workflow
+Missing a trade is acceptable.
+
+Taking uncontrolled risk is not.
+
+---
+
+# Trading Philosophy
+
+Every position must satisfy all deterministic requirements before execution.
+
+No trade may exist without:
+
+- deterministic BUY decision;
+- validated market data;
+- complete RiskPlan;
+- approved portfolio allocation;
+- predefined exit conditions.
+
+Artificial Intelligence never participates in trade approval.
+
+---
+
+# Trading Pipeline
 
 ```text
 Market Data
-    ↓
-Indicators and Analysis
-    ↓
+        ↓
+Quote Validation
+        ↓
+Indicators
+        ↓
+Analysis
+        ↓
 Signals
-    ↓
+        ↓
 BUY / HOLD / SELL
-    ↓
-Risk Validation
-    ↓
+        ↓
 Adaptive RiskPlan
-    ↓
+        ↓
 Portfolio Allocation
-    ↓
-Paper Execution
-    ↓
-Managed Position Lifecycle
-    ↓
-Deterministic Exit
+        ↓
+Execution
+        ↓
+Managed Position
+        ↓
+Exit
 ```
 
-## Entry
+Every stage has exactly one owner.
 
-A position can open only after:
+---
 
-- deterministic BUY output;
-- confidence and portfolio validation;
-- accepted allocation;
-- valid quantity;
-- complete `RiskPlan`;
-- successful paper execution.
+# Market Data
 
-## RiskPlan
+Trading begins only after quote validation.
 
-Current lifecycle uses:
+Every price must be:
+
+- finite;
+- greater than zero;
+- not NaN;
+- not None.
+
+Invalid quotes are rejected before entering the strategy.
+
+---
+
+# Entry Conditions
+
+A position may open only when:
+
+- deterministic BUY;
+- sufficient confidence;
+- allocation approved;
+- quantity greater than zero;
+- RiskPlan complete;
+- execution succeeds.
+
+No discretionary override exists.
+
+---
+
+# RiskPlan
+
+Every position receives a deterministic RiskPlan containing:
 
 - entry price;
 - stop loss;
 - target 1;
 - target 2;
 - target 3;
-- risk percentage;
-- reward percentage;
+- expected risk;
+- expected reward;
 - risk/reward ratio;
 - confidence;
-- notes.
+- supporting notes.
 
-## Position Lifecycle
+The RiskPlan is immutable after entry except for managed stop adjustments.
+
+---
+
+# Position Management
+
+After entry Orion manages:
+
+- current price;
+- highest price;
+- break-even activation;
+- trailing stop;
+- target progress;
+- holding time.
+
+TradingSession owns all lifecycle state.
+
+---
+
+# Exit Conditions
+
+A position closes only through deterministic rules.
+
+Possible exit reasons include:
+
+- stop loss;
+- target reached;
+- trailing stop;
+- maximum holding time;
+- other deterministic lifecycle conditions.
+
+No manual AI exit exists.
+
+---
+
+# Market Sessions
+
+Trading only occurs while configured exchanges are open.
+
+Features:
+
+- European sessions;
+- United States sessions;
+- daylight-saving aware;
+- automatic idle mode.
+
+When every configured market is closed:
+
+- no new scans;
+- no new positions;
+- no portfolio updates;
+- runtime remains healthy.
+
+---
+
+# Portfolio Rules
+
+Current validation profile:
+
+- maximum 20 positions;
+- approximately €500 per position;
+- maximum 90% exposure;
+- minimum cash reserve;
+- deterministic allocation.
+
+These limits exist to collect statistically useful paper-trading data while controlling portfolio risk.
+
+---
+
+# Journaling
+
+Every important event is recorded.
+
+Trade Journal
+
+- opened positions;
+- closed positions.
+
+Decision Journal
+
+- accepted allocations;
+- rejected allocations.
+
+Runtime Events
+
+- runtime lifecycle;
+- failures;
+- idle transitions.
+
+---
+
+# Current Broker
+
+Current execution backend:
 
 ```text
-Open
-→ update price
-→ update highest price
-→ activate break-even when rules are met
-→ activate/update trailing stop
-→ record target hits
-→ evaluate exit
-→ close
-→ remove PositionState and RiskPlan
+PaperBroker
 ```
 
-All lifecycle state is owned by `TradingSession` and persists across restarts.
+Interactive Brokers Paper integration is under development.
 
-## Exit Evaluation
+The strategy itself must remain unchanged.
 
-Managed positions use persisted:
+Only the execution backend will be replaced.
 
-- current stop;
-- target levels;
-- target-hit flags;
-- break-even state;
-- trailing-stop state;
-- deterministic exit reasons.
+---
 
-Legacy positions without complete lifecycle metadata may use the fixed-percentage fallback until deliberately migrated.
+# Validation Policy
 
-## Journals
+During validation:
 
-- trade journal records executed opens and closes;
-- decision journal records approved and rejected allocation decisions.
+- no indicator tuning;
+- no strategy tuning;
+- no ranking adjustments;
+- no exit tuning.
 
-## Operational Rules
+Only stability and correctness fixes are allowed.
 
-- no live broker orders;
-- no real money;
-- no AI decisions;
-- no silent parameter changes;
-- configuration changes require explicit review and validation.
+---
 
-## Success Criteria
+# Success Criteria
 
-A strategy is acceptable only when it is:
+The strategy is considered production-ready only when it is:
 
 - deterministic;
-- risk-bounded;
-- explainable;
+- reproducible;
 - regression tested;
 - restart safe;
 - operationally stable;
-- measurable through actual trade outcomes.
+- successfully validated through extensive paper trading.
+
+Only then may live deployment be considered.
 
 # End
