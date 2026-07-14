@@ -179,6 +179,12 @@ class IbkrBroker:
         ibkr_order.action = order.side.strip().upper()
         ibkr_order.orderType = "MKT"
         ibkr_order.totalQuantity = int(order.quantity)
+
+        # Disable legacy attributes rejected by newer TWS versions
+        # for normal SMART-routed stock orders.
+        ibkr_order.eTradeOnly = False
+        ibkr_order.firmQuoteOnly = False
+
         ibkr_order.transmit = True
         return ibkr_order
 
