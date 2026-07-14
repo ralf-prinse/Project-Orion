@@ -49,13 +49,23 @@ class _IbkrOrderClient(EWrapper, EClient):
         EClient.__init__(self, self)
 
         self.connection_ready = threading.Event()
+        self.accounts_ready = threading.Event()
         self.terminal_event = threading.Event()
 
         self.next_order_id: int | None = None
         self.active_order_id: int | None = None
-        self.outcome: IbkrOrderOutcome | None = None
 
+        self.managed_accounts: list[str] = []
+        self.outcome: IbkrOrderOutcome | None = None
         self.errors: list[str] = []
+
+    def reset_connection_state(self) -> None:
+        self.connection_ready.clear()
+        self.accounts_ready.clear()
+
+        self.next_order_id = None
+        self.managed_accounts = []
+        self.errors = []
 
     def reset_order_state(
         self,
@@ -72,6 +82,21 @@ class _IbkrOrderClient(EWrapper, EClient):
     ) -> None:
         self.next_order_id = int(orderId)
         self.connection_ready.set()
+
+    def managedAccounts(
+        self,
+        accountsList: str,
+    ) -> None:
+        accounts = [
+            account.strip().upper()
+            for account in str(accountsList).split(",")
+            if account.strip()
+        ]
+
+        self.managed_accounts = list(
+            dict.fromkeys(accounts)
+        )
+        self.accounts_ready.set()
 
     def orderStatus(
         self,
@@ -93,7 +118,9 @@ class _IbkrOrderClient(EWrapper, EClient):
         if int(orderId) != self.active_order_id:
             return
 
-        normalized_status = str(status).strip().upper()
+        normalized_status = (
+            str(status).strip().upper()
+        )
 
         try:
             filled_quantity = int(
@@ -103,7 +130,9 @@ class _IbkrOrderClient(EWrapper, EClient):
             filled_quantity = 0
 
         try:
-            average_fill_price = float(avgFillPrice)
+            average_fill_price = float(
+                avgFillPrice
+            )
         except (TypeError, ValueError):
             average_fill_price = 0.0
 
@@ -194,6 +223,7 @@ class IbkrOrderTransport:
     Safety rules:
     - only TWS Paper port 7497 is accepted;
     - only DU-prefixed Paper accounts are accepted;
+    - the configured account must be returned by TWS;
     - order submission is disabled by default;
     - one order is handled at a time;
     - every operation has a bounded timeout;
@@ -248,12 +278,15 @@ class IbkrOrderTransport:
         self.host = host.strip()
         self.port = int(port)
         self.client_id = int(client_id)
+
         self.connection_timeout_seconds = float(
             connection_timeout_seconds
         )
+
         self.allow_order_submission = bool(
             allow_order_submission
         )
+
         self.disconnect_after_order = bool(
             disconnect_after_order
         )
@@ -261,12 +294,17 @@ class IbkrOrderTransport:
         self._client = client or _IbkrOrderClient()
         self._network_thread: threading.Thread | None = None
         self._submission_lock = threading.Lock()
+        self._verified_account_id: str | None = None
 
     @property
     def is_connected(self) -> bool:
         return bool(
             self._client.isConnected()
         )
+
+    @property
+    def verified_account_id(self) -> str | None:
+        return self._verified_account_id
 
     def submit_order(
         self,
@@ -351,6 +389,8 @@ class IbkrOrderTransport:
             )
             self._network_thread = None
 
+        self._verified_account_id = None
+
     def _connect(self) -> None:
         if self.is_connected:
             if self._client.next_order_id is None:
@@ -358,11 +398,17 @@ class IbkrOrderTransport:
                     "IBKR transport is connected but has no "
                     "valid next order ID."
                 )
+
+            if (
+                self._verified_account_id
+                != self.paper_account_id
+            ):
+                self._verify_managed_account()
+
             return
 
-        self._client.connection_ready.clear()
-        self._client.next_order_id = None
-        self._client.errors = []
+        self._verified_account_id = None
+        self._client.reset_connection_state()
 
         try:
             self._client.connect(
@@ -392,17 +438,69 @@ class IbkrOrderTransport:
                     "valid next order ID."
                 )
 
-            if self._client.errors:
-                raise IbkrOrderTransportError(
-                    "IBKR API error while connecting: "
-                    + " | ".join(
-                        self._client.errors
-                    )
-                )
+            self._raise_connection_errors()
+            self._verify_managed_account()
 
         except Exception:
             self.disconnect()
             raise
+
+    def _verify_managed_account(self) -> None:
+        self._client.accounts_ready.clear()
+        self._client.managed_accounts = []
+
+        self._client.reqManagedAccts()
+
+        if not self._client.accounts_ready.wait(
+            self.connection_timeout_seconds
+        ):
+            raise IbkrOrderTransportError(
+                "Timeout while waiting for IBKR managed "
+                "accounts."
+            )
+
+        self._raise_connection_errors()
+
+        returned_accounts = {
+            account.strip().upper()
+            for account in self._client.managed_accounts
+            if account.strip()
+        }
+
+        paper_accounts = {
+            account
+            for account in returned_accounts
+            if account.startswith("DU")
+        }
+
+        if self.paper_account_id not in paper_accounts:
+            returned_description = (
+                ", ".join(sorted(returned_accounts))
+                if returned_accounts
+                else "none"
+            )
+
+            raise IbkrOrderTransportError(
+                "Configured IBKR Paper account "
+                f"{self.paper_account_id} was not returned by "
+                "the connected TWS session. Returned accounts: "
+                f"{returned_description}."
+            )
+
+        self._verified_account_id = (
+            self.paper_account_id
+        )
+
+    def _raise_connection_errors(self) -> None:
+        if not self._client.errors:
+            return
+
+        raise IbkrOrderTransportError(
+            "IBKR API error while connecting: "
+            + " | ".join(
+                self._client.errors
+            )
+        )
 
     def _claim_order_id(self) -> int:
         next_order_id = self._client.next_order_id

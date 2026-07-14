@@ -17,10 +17,13 @@ from services.ibkr.ibkr_order_transport import (
 class FakeIbkrOrderClient:
     def __init__(self) -> None:
         self.connection_ready = threading.Event()
+        self.accounts_ready = threading.Event()
         self.terminal_event = threading.Event()
 
         self.next_order_id: int | None = None
         self.active_order_id: int | None = None
+
+        self.managed_accounts: list[str] = []
         self.outcome: IbkrOrderOutcome | None = None
         self.errors: list[str] = []
 
@@ -28,6 +31,7 @@ class FakeIbkrOrderClient:
         self.connect_called = False
         self.run_called = False
         self.disconnect_called = False
+        self.managed_accounts_requested = False
         self.place_order_called = False
         self.cancel_order_called = False
 
@@ -36,15 +40,29 @@ class FakeIbkrOrderClient:
         self.received_order = None
 
         self.emit_connection_ready = True
+        self.emit_accounts_ready = True
         self.emit_terminal_outcome = True
 
         self.returned_order_id = 500
+
+        self.returned_managed_accounts = [
+            "DU123456",
+        ]
+
         self.returned_outcome = IbkrOrderOutcome(
             status="FILLED",
             filled_quantity=1,
             average_fill_price=100.25,
             message="Filled by fake order client.",
         )
+
+    def reset_connection_state(self) -> None:
+        self.connection_ready.clear()
+        self.accounts_ready.clear()
+
+        self.next_order_id = None
+        self.managed_accounts = []
+        self.errors = []
 
     def connect(
         self,
@@ -70,6 +88,15 @@ class FakeIbkrOrderClient:
     def disconnect(self) -> None:
         self.disconnect_called = True
         self.connected = False
+
+    def reqManagedAccts(self) -> None:
+        self.managed_accounts_requested = True
+
+        if self.emit_accounts_ready:
+            self.managed_accounts = list(
+                self.returned_managed_accounts
+            )
+            self.accounts_ready.set()
 
     def reset_order_state(
         self,
@@ -123,6 +150,23 @@ def create_ibkr_order() -> IbkrOrder:
     return order
 
 
+def create_enabled_transport(
+    client: FakeIbkrOrderClient,
+    *,
+    disconnect_after_order: bool = True,
+    connection_timeout_seconds: float = 1.0,
+) -> IbkrOrderTransport:
+    return IbkrOrderTransport(
+        paper_account_id="DU123456",
+        allow_order_submission=True,
+        disconnect_after_order=disconnect_after_order,
+        connection_timeout_seconds=(
+            connection_timeout_seconds
+        ),
+        client=client,
+    )
+
+
 def test_submission_is_disabled_by_default() -> None:
     client = FakeIbkrOrderClient()
 
@@ -153,10 +197,8 @@ def test_submission_is_disabled_by_default() -> None:
 def test_submits_controlled_paper_order() -> None:
     client = FakeIbkrOrderClient()
 
-    transport = IbkrOrderTransport(
-        paper_account_id="du123456",
-        allow_order_submission=True,
-        client=client,
+    transport = create_enabled_transport(
+        client
     )
 
     outcome = transport.submit_order(
@@ -171,20 +213,131 @@ def test_submits_controlled_paper_order() -> None:
 
     assert client.connect_called is True
     assert client.run_called is True
+    assert client.managed_accounts_requested is True
     assert client.place_order_called is True
     assert client.received_order_id == 500
     assert client.received_order.account == "DU123456"
     assert client.disconnect_called is True
 
 
+def test_verifies_configured_paper_account() -> None:
+    client = FakeIbkrOrderClient()
+
+    transport = create_enabled_transport(
+        client,
+        disconnect_after_order=False,
+    )
+
+    transport.submit_order(
+        contract=create_contract(),
+        order=create_ibkr_order(),
+        timeout_seconds=1.0,
+    )
+
+    assert (
+        transport.verified_account_id
+        == "DU123456"
+    )
+
+    transport.disconnect()
+
+
+def test_rejects_missing_configured_paper_account() -> None:
+    client = FakeIbkrOrderClient()
+
+    client.returned_managed_accounts = [
+        "DU999999",
+    ]
+
+    transport = create_enabled_transport(
+        client
+    )
+
+    try:
+        transport.submit_order(
+            contract=create_contract(),
+            order=create_ibkr_order(),
+            timeout_seconds=1.0,
+        )
+    except IbkrOrderTransportError as exc:
+        assert (
+            "DU123456 was not returned"
+            in str(exc)
+        )
+    else:
+        raise AssertionError(
+            "Expected account mismatch to fail."
+        )
+
+    assert client.place_order_called is False
+    assert client.disconnect_called is True
+
+
+def test_rejects_when_only_live_account_is_returned() -> None:
+    client = FakeIbkrOrderClient()
+
+    client.returned_managed_accounts = [
+        "U123456",
+    ]
+
+    transport = create_enabled_transport(
+        client
+    )
+
+    try:
+        transport.submit_order(
+            contract=create_contract(),
+            order=create_ibkr_order(),
+            timeout_seconds=1.0,
+        )
+    except IbkrOrderTransportError as exc:
+        assert (
+            "DU123456 was not returned"
+            in str(exc)
+        )
+        assert "U123456" in str(exc)
+    else:
+        raise AssertionError(
+            "Expected live-only account response to fail."
+        )
+
+    assert client.place_order_called is False
+
+
+def test_managed_accounts_timeout_blocks_order() -> None:
+    client = FakeIbkrOrderClient()
+    client.emit_accounts_ready = False
+
+    transport = create_enabled_transport(
+        client,
+        connection_timeout_seconds=0.01,
+    )
+
+    try:
+        transport.submit_order(
+            contract=create_contract(),
+            order=create_ibkr_order(),
+            timeout_seconds=1.0,
+        )
+    except IbkrOrderTransportError as exc:
+        assert "managed accounts" in str(
+            exc
+        )
+    else:
+        raise AssertionError(
+            "Expected managed-account timeout."
+        )
+
+    assert client.place_order_called is False
+    assert client.disconnect_called is True
+
+
 def test_claims_and_increments_order_id() -> None:
     client = FakeIbkrOrderClient()
 
-    transport = IbkrOrderTransport(
-        paper_account_id="DU123456",
-        allow_order_submission=True,
+    transport = create_enabled_transport(
+        client,
         disconnect_after_order=False,
-        client=client,
     )
 
     transport.submit_order(
@@ -201,15 +354,14 @@ def test_claims_and_increments_order_id() -> None:
 
 def test_maps_cancelled_outcome() -> None:
     client = FakeIbkrOrderClient()
+
     client.returned_outcome = IbkrOrderOutcome(
         status="CANCELLED",
         message="Cancelled by fake client.",
     )
 
-    transport = IbkrOrderTransport(
-        paper_account_id="DU123456",
-        allow_order_submission=True,
-        client=client,
+    transport = create_enabled_transport(
+        client
     )
 
     outcome = transport.submit_order(
@@ -229,10 +381,8 @@ def test_timeout_cancels_order() -> None:
     client = FakeIbkrOrderClient()
     client.emit_terminal_outcome = False
 
-    transport = IbkrOrderTransport(
-        paper_account_id="DU123456",
-        allow_order_submission=True,
-        client=client,
+    transport = create_enabled_transport(
+        client
     )
 
     try:
@@ -258,11 +408,9 @@ def test_connection_timeout_disconnects() -> None:
     client = FakeIbkrOrderClient()
     client.emit_connection_ready = False
 
-    transport = IbkrOrderTransport(
-        paper_account_id="DU123456",
-        allow_order_submission=True,
+    transport = create_enabled_transport(
+        client,
         connection_timeout_seconds=0.01,
-        client=client,
     )
 
     try:
@@ -324,10 +472,8 @@ def test_rejects_non_paper_port() -> None:
 def test_rejects_non_stock_contract() -> None:
     client = FakeIbkrOrderClient()
 
-    transport = IbkrOrderTransport(
-        paper_account_id="DU123456",
-        allow_order_submission=True,
-        client=client,
+    transport = create_enabled_transport(
+        client
     )
 
     contract = create_contract()
@@ -354,10 +500,8 @@ def test_rejects_non_stock_contract() -> None:
 def test_rejects_non_smart_exchange() -> None:
     client = FakeIbkrOrderClient()
 
-    transport = IbkrOrderTransport(
-        paper_account_id="DU123456",
-        allow_order_submission=True,
-        client=client,
+    transport = create_enabled_transport(
+        client
     )
 
     contract = create_contract()
@@ -384,10 +528,8 @@ def test_rejects_non_smart_exchange() -> None:
 def test_rejects_sell_order() -> None:
     client = FakeIbkrOrderClient()
 
-    transport = IbkrOrderTransport(
-        paper_account_id="DU123456",
-        allow_order_submission=True,
-        client=client,
+    transport = create_enabled_transport(
+        client
     )
 
     order = create_ibkr_order()
@@ -414,10 +556,8 @@ def test_rejects_sell_order() -> None:
 def test_rejects_limit_order() -> None:
     client = FakeIbkrOrderClient()
 
-    transport = IbkrOrderTransport(
-        paper_account_id="DU123456",
-        allow_order_submission=True,
-        client=client,
+    transport = create_enabled_transport(
+        client
     )
 
     order = create_ibkr_order()
@@ -444,10 +584,8 @@ def test_rejects_limit_order() -> None:
 def test_rejects_zero_quantity() -> None:
     client = FakeIbkrOrderClient()
 
-    transport = IbkrOrderTransport(
-        paper_account_id="DU123456",
-        allow_order_submission=True,
-        client=client,
+    transport = create_enabled_transport(
+        client
     )
 
     order = create_ibkr_order()
@@ -474,10 +612,8 @@ def test_rejects_zero_quantity() -> None:
 def test_rejects_untransmitted_order() -> None:
     client = FakeIbkrOrderClient()
 
-    transport = IbkrOrderTransport(
-        paper_account_id="DU123456",
-        allow_order_submission=True,
-        client=client,
+    transport = create_enabled_transport(
+        client
     )
 
     order = create_ibkr_order()
@@ -505,10 +641,8 @@ def test_terminal_event_without_outcome_fails() -> None:
     client = FakeIbkrOrderClient()
     client.returned_outcome = None
 
-    transport = IbkrOrderTransport(
-        paper_account_id="DU123456",
-        allow_order_submission=True,
-        client=client,
+    transport = create_enabled_transport(
+        client
     )
 
     try:
@@ -539,12 +673,17 @@ def test_disconnect_is_idempotent() -> None:
     transport.disconnect()
 
     assert transport.is_connected is False
+    assert transport.verified_account_id is None
 
 
 def run() -> None:
     tests = [
         test_submission_is_disabled_by_default,
         test_submits_controlled_paper_order,
+        test_verifies_configured_paper_account,
+        test_rejects_missing_configured_paper_account,
+        test_rejects_when_only_live_account_is_returned,
+        test_managed_accounts_timeout_blocks_order,
         test_claims_and_increments_order_id,
         test_maps_cancelled_outcome,
         test_timeout_cancels_order,
