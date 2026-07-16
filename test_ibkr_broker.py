@@ -166,7 +166,7 @@ def test_rejects_empty_symbol_before_transport() -> None:
     assert transport.submit_called is False
 
 
-def test_rejects_sell_order_before_transport() -> None:
+def test_maps_market_sell_order() -> None:
     transport = FakeIbkrBrokerTransport()
 
     broker = IbkrBroker(
@@ -175,14 +175,23 @@ def test_rejects_sell_order_before_transport() -> None:
 
     result = broker.execute(
         create_order(
-            side="SELL",
+            side=" sell ",
+            quantity=2,
+            order_type=" market ",
         )
     )
 
-    assert result.accepted is False
-    assert result.status == "REJECTED"
-    assert "only BUY" in result.message
-    assert transport.submit_called is False
+    ibkr_order = transport.received_order
+
+    assert result.accepted is True
+    assert result.status == "FILLED"
+
+    assert transport.submit_called is True
+    assert ibkr_order is not None
+    assert ibkr_order.action == "SELL"
+    assert ibkr_order.orderType == "MKT"
+    assert ibkr_order.totalQuantity == 2
+    assert ibkr_order.transmit is True
 
 
 def test_rejects_unsupported_order_type_before_transport() -> None:
@@ -549,7 +558,7 @@ def run() -> None:
         test_maps_stock_contract,
         test_maps_market_buy_order,
         test_rejects_empty_symbol_before_transport,
-        test_rejects_sell_order_before_transport,
+        test_maps_market_sell_order,
         test_rejects_unsupported_order_type_before_transport,
         test_rejects_zero_quantity_before_transport,
         test_rejects_negative_quantity_before_transport,

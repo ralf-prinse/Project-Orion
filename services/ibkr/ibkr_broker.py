@@ -60,7 +60,7 @@ class IbkrBroker:
     submission before the controlled IBKR Paper-order milestone.
     """
 
-    SUPPORTED_SIDES = {"BUY"}
+    SUPPORTED_SIDES = {"BUY", "SELL"}
     SUPPORTED_ORDER_TYPES = {"MARKET"}
 
     def __init__(
@@ -137,7 +137,7 @@ class IbkrBroker:
 
         if side not in self.SUPPORTED_SIDES:
             return (
-                "IbkrBroker currently supports only BUY orders. "
+                "IbkrBroker supports only BUY and SELL orders. "
                 f"Received: {order.side!r}."
             )
 
