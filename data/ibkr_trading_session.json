@@ -1,0 +1,29 @@
+{
+  "name": "Orion Autonomous Paper Trading",
+  "portfolio": {
+    "cash": 9472.79,
+    "positions": {
+      "AAPL": {
+        "symbol": "AAPL",
+        "quantity": 1,
+        "entry_price": 316.58,
+        "current_price": 332.6050109863281
+      },
+      "AAL": {
+        "symbol": "AAL",
+        "quantity": 9,
+        "entry_price": 15.7711111,
+        "current_price": 15.71500015258789
+      },
+      "F": {
+        "symbol": "F",
+        "quantity": 10,
+        "entry_price": 14.290003,
+        "current_price": 14.135000228881836
+      }
+    }
+  },
+  "position_states": {},
+  "risk_plans": {},
+  "status": "ACTIVE"
+}

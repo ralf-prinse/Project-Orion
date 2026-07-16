@@ -229,10 +229,29 @@ def test_verifies_configured_account() -> None:
     transport.disconnect()
 
 
+def test_accepts_sell() -> None:
+    client = FakeIbkrOrderClient()
+    transport = create_transport(client)
+
+    order = create_order()
+    order.action = "SELL"
+
+    outcome = transport.submit_order(
+        contract=create_contract(),
+        order=order,
+        timeout_seconds=0.05,
+    )
+
+    assert outcome.status == "FILLED"
+    assert client.place_order_called is True
+    assert client.received_order.action == "SELL"
+
 def test_rejects_missing_account() -> None:
     client = FakeIbkrOrderClient()
     client.returned_managed_accounts = ["DU999999"]
+
     transport = create_transport(client)
+
     try:
         transport.submit_order(
             contract=create_contract(),
@@ -242,9 +261,11 @@ def test_rejects_missing_account() -> None:
     except IbkrOrderTransportError as exc:
         assert "was not returned" in str(exc)
     else:
-        raise AssertionError("Expected account mismatch.")
-    assert client.place_order_called is False
+        raise AssertionError(
+            "Expected account mismatch."
+        )
 
+    assert client.place_order_called is False
 
 def test_rejects_live_port() -> None:
     try:
@@ -309,7 +330,7 @@ def run() -> None:
         test_verifies_configured_account,
         test_rejects_missing_account,
         test_rejects_live_port,
-        test_rejects_sell,
+        test_accepts_sell,
         test_rejects_fractional_quantity,
         test_disconnect_is_idempotent,
     ]

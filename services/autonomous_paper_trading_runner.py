@@ -133,11 +133,15 @@ class AutonomousPaperTradingRunner:
 
                 executed_trades = 0
                 rejected_trades = 0
+                attempted_trade = False
+                opened_symbols: set[str] = set()
 
                 for decision in allocation_result.decisions:
                     if not decision.approved:
                         rejected_trades += 1
                         continue
+
+                    attempted_trade = True
 
                     cycle_result = self.trading_cycle.run(
                         session=session,
@@ -161,6 +165,9 @@ class AutonomousPaperTradingRunner:
 
                     if cycle_result.action == "OPEN_POSITION":
                         executed_trades += 1
+                        opened_symbols.add(
+                            decision.symbol.strip().upper()
+                        )
                         self._append_open_trade_journal_entry(
                             decision=decision,
                             session=session,
@@ -169,6 +176,26 @@ class AutonomousPaperTradingRunner:
                         )
                     else:
                         rejected_trades += 1
+
+                if (
+                    attempted_trade
+                    and self.trading_session_sync_service is not None
+                ):
+                    if opened_symbols:
+                        session = (
+                            self.trading_session_sync_service
+                            .synchronize(
+                                session,
+                                expected_symbols=opened_symbols,
+                                attempts=8,
+                                retry_delay_seconds=0.25,
+                            )
+                        )
+                    else:
+                        session = (
+                            self.trading_session_sync_service
+                            .synchronize(session)
+                        )
 
                 cycle_results.append(
                     AutonomousPaperTradingCycleResult(

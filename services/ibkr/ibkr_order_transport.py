@@ -516,9 +516,9 @@ class IbkrOrderTransport:
         except (TypeError, ValueError) as exc:
             raise ValueError("IBKR order quantity must be numeric.") from exc
 
-        if action != "BUY":
+        if action not in {"BUY", "SELL"}:
             raise ValueError(
-                "IbkrOrderTransport currently supports only BUY orders."
+                "IbkrOrderTransport supports only BUY or SELL orders."
             )
         if order_type != "MKT":
             raise ValueError(

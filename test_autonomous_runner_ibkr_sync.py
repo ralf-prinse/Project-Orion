@@ -20,13 +20,13 @@ from services.autonomous_paper_trading_runner import (
 
 class FakeSyncService:
     def __init__(self) -> None:
-        self.called = False
+        self.call_count = 0
 
     def synchronize(
         self,
         session: TradingSession,
     ) -> TradingSession:
-        self.called = True
+        self.call_count += 1
         session.portfolio = PaperPortfolio(
             cash=9999.0,
             positions={},
@@ -48,7 +48,7 @@ class FakeScanner:
     ) -> LivePaperTradingResult:
         self.called = True
 
-        assert self.sync_service.called is True
+        assert self.sync_service.call_count == 1
         assert session.cash == 9999.0
 
         return LivePaperTradingResult(
@@ -106,7 +106,7 @@ def test_runner_syncs_before_scan() -> None:
     assert result.completed_cycles == 1
     assert result.failed_cycles == 0
     assert result.session.cash == 9999.0
-    assert sync_service.called is True
+    assert sync_service.call_count == 1
     assert scanner.called is True
 
 
