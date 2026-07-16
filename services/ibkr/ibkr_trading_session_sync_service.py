@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+import math
 import time
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from typing import Protocol
 
 from models.trading_session import TradingSession
@@ -16,8 +17,8 @@ class CurrentPriceProvider(Protocol):
 
 class IbkrTradingSessionSyncError(RuntimeError):
     """
-    Raised when IBKR does not report an expected broker position
-    within the configured synchronization window.
+    Raised when IBKR does not report the expected post-fill
+    broker position state within the synchronization window.
     """
 
 
@@ -25,16 +26,25 @@ class IbkrTradingSessionSyncService:
     """
     Synchronizes an Orion TradingSession with the current IBKR account.
 
-    IBKR is treated as the source of truth for:
+    IBKR is authoritative for:
 
     - available cash;
     - open positions;
     - quantities;
     - average entry prices.
 
-    For post-fill synchronization, expected_symbols can be supplied.
-    The service then polls IBKR until those symbols appear or until
-    the configured number of attempts is exhausted.
+    Post-fill synchronization supports two expectations:
+
+    expected_symbols
+        Backwards-compatible BUY synchronization. Poll until every
+        expected symbol is present at IBKR.
+
+    expected_position_quantities
+        BUY and SELL synchronization. Poll until every supplied symbol
+        has the expected broker quantity.
+
+        An expected quantity of zero means that the position must be
+        absent from the IBKR portfolio.
     """
 
     def __init__(
@@ -53,14 +63,16 @@ class IbkrTradingSessionSyncService:
         session: TradingSession,
         *,
         expected_symbols: Iterable[str] | None = None,
+        expected_position_quantities: Mapping[str, float] | None = None,
         attempts: int = 1,
         retry_delay_seconds: float = 0.25,
     ) -> TradingSession:
         """
         Replace the local portfolio with the current IBKR portfolio.
 
-        When expected_symbols is supplied, IBKR positions are polled
-        until all expected symbols are visible.
+        When expectations are supplied, IBKR positions are polled until
+        the expected broker state is visible or all attempts have been
+        exhausted.
 
         The account connection is always closed.
         """
@@ -81,30 +93,39 @@ class IbkrTradingSessionSyncService:
             if str(symbol).strip()
         }
 
+        normalized_expected_quantities = (
+            self._normalize_expected_quantities(
+                expected_position_quantities
+            )
+        )
+
         self._account_service.connect()
 
         try:
             account = self._account_service.read_account()
 
             broker_positions = ()
-            reported_symbols: set[str] = set()
+            reported_quantities: dict[str, float] = {}
 
             for attempt_index in range(attempts):
-                broker_positions = (
+                broker_positions = tuple(
                     self._account_service.read_positions()
                 )
 
-                reported_symbols = {
-                    position.symbol.strip().upper()
+                reported_quantities = {
+                    position.symbol.strip().upper(): float(
+                        position.quantity
+                    )
                     for position in broker_positions
                 }
 
-                expected_positions_visible = (
-                    normalized_expected_symbols
-                    .issubset(reported_symbols)
-                )
-
-                if expected_positions_visible:
+                if self._expectations_satisfied(
+                    reported_quantities=reported_quantities,
+                    expected_symbols=normalized_expected_symbols,
+                    expected_quantities=(
+                        normalized_expected_quantities
+                    ),
+                ):
                     break
 
                 is_last_attempt = (
@@ -117,17 +138,13 @@ class IbkrTradingSessionSyncService:
                 ):
                     time.sleep(retry_delay_seconds)
 
-            missing_symbols = (
-                normalized_expected_symbols
-                - reported_symbols
+            self._raise_for_unsatisfied_expectations(
+                reported_quantities=reported_quantities,
+                expected_symbols=normalized_expected_symbols,
+                expected_quantities=(
+                    normalized_expected_quantities
+                ),
             )
-
-            if missing_symbols:
-                raise IbkrTradingSessionSyncError(
-                    "IBKR did not report the expected "
-                    "post-fill position(s): "
-                    + ", ".join(sorted(missing_symbols))
-                )
 
             current_prices = {
                 position.symbol.strip().upper():
@@ -167,3 +184,125 @@ class IbkrTradingSessionSyncService:
         }
 
         return session
+
+    def _normalize_expected_quantities(
+        self,
+        expected_position_quantities: (
+            Mapping[str, float] | None
+        ),
+    ) -> dict[str, float]:
+        normalized: dict[str, float] = {}
+
+        for symbol, quantity in (
+            expected_position_quantities or {}
+        ).items():
+            normalized_symbol = str(symbol).strip().upper()
+
+            if not normalized_symbol:
+                raise ValueError(
+                    "Expected position symbol must not be empty."
+                )
+
+            try:
+                normalized_quantity = float(quantity)
+            except (TypeError, ValueError) as exc:
+                raise ValueError(
+                    "Expected position quantity must be numeric."
+                ) from exc
+
+            if not math.isfinite(normalized_quantity):
+                raise ValueError(
+                    "Expected position quantity must be finite."
+                )
+
+            if normalized_quantity < 0:
+                raise ValueError(
+                    "Expected position quantity must not be negative."
+                )
+
+            normalized[normalized_symbol] = normalized_quantity
+
+        return normalized
+
+    def _expectations_satisfied(
+        self,
+        *,
+        reported_quantities: Mapping[str, float],
+        expected_symbols: set[str],
+        expected_quantities: Mapping[str, float],
+    ) -> bool:
+        reported_symbols = set(reported_quantities)
+
+        if not expected_symbols.issubset(reported_symbols):
+            return False
+
+        return all(
+            self._quantity_matches(
+                reported_quantity=reported_quantities.get(
+                    symbol,
+                    0.0,
+                ),
+                expected_quantity=expected_quantity,
+            )
+            for symbol, expected_quantity
+            in expected_quantities.items()
+        )
+
+    def _raise_for_unsatisfied_expectations(
+        self,
+        *,
+        reported_quantities: Mapping[str, float],
+        expected_symbols: set[str],
+        expected_quantities: Mapping[str, float],
+    ) -> None:
+        missing_symbols = (
+            expected_symbols
+            - set(reported_quantities)
+        )
+
+        if missing_symbols:
+            raise IbkrTradingSessionSyncError(
+                "IBKR did not report the expected "
+                "post-fill position(s): "
+                + ", ".join(sorted(missing_symbols))
+            )
+
+        quantity_mismatches: list[str] = []
+
+        for symbol, expected_quantity in (
+            expected_quantities.items()
+        ):
+            reported_quantity = reported_quantities.get(
+                symbol,
+                0.0,
+            )
+
+            if not self._quantity_matches(
+                reported_quantity=reported_quantity,
+                expected_quantity=expected_quantity,
+            ):
+                quantity_mismatches.append(
+                    f"{symbol}: expected "
+                    f"{expected_quantity:g}, reported "
+                    f"{reported_quantity:g}"
+                )
+
+        if quantity_mismatches:
+            raise IbkrTradingSessionSyncError(
+                "IBKR did not report the expected "
+                "post-fill position quantity: "
+                + "; ".join(quantity_mismatches)
+            )
+
+    def _quantity_matches(
+        self,
+        *,
+        reported_quantity: float,
+        expected_quantity: float,
+    ) -> bool:
+        return math.isclose(
+            float(reported_quantity),
+            float(expected_quantity),
+            rel_tol=0.0,
+            abs_tol=1e-9,
+        )

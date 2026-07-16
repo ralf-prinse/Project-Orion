@@ -5,6 +5,7 @@ from models.broker_position import BrokerPosition
 from models.paper_portfolio import PaperPortfolio
 from models.paper_position import PaperPosition
 from models.trading_session import TradingSession
+from models.position_state import PositionState
 from services.ibkr.ibkr_trading_session_sync_service import (
     IbkrTradingSessionSyncService,
 )
@@ -157,6 +158,151 @@ def test_sync_waits_for_expected_filled_symbol() -> None:
     assert result.portfolio.positions["F"].entry_price == 14.221
     assert result.portfolio.positions["F"].current_price == 14.25
 
+def test_post_fill_sync_removes_fully_sold_position() -> None:
+    account_service = FakeIbkrAccountService(
+        positions_sequence=[
+            [
+                IbkrPosition(
+                    symbol="AAPL",
+                    quantity=2,
+                    average_cost=100.0,
+                ),
+            ],
+            [],
+        ],
+    )
+
+    price_provider = FakePriceProvider(
+        prices={},
+    )
+
+    service = IbkrTradingSessionSyncService(
+        account_service=account_service,
+        price_provider=price_provider,
+    )
+
+    session = TradingSession(
+        name="SELL sync test",
+        portfolio=PaperPortfolio(
+            cash=800.0,
+            positions={
+                "AAPL": PaperPosition(
+                    symbol="AAPL",
+                    quantity=2,
+                    entry_price=100.0,
+                    current_price=110.0,
+                ),
+            },
+        ),
+        position_states={
+            "AAPL": PositionState(
+                symbol="AAPL",
+                entry_price=100.0,
+                current_stop_loss=95.0,
+                highest_price=110.0,
+                current_price=110.0,
+            ),
+        },
+        risk_plans={
+            "AAPL": create_risk_plan(),
+        },
+    )
+
+    synchronized = service.synchronize(
+        session,
+        expected_position_quantities={
+            "AAPL": 0,
+        },
+        attempts=2,
+        retry_delay_seconds=0.0,
+    )
+
+    assert account_service.read_positions_calls == 2
+
+    assert "AAPL" not in synchronized.portfolio.positions
+    assert "AAPL" not in synchronized.position_states
+    assert "AAPL" not in synchronized.risk_plans
+
+
+def test_post_fill_sync_keeps_partially_sold_position() -> None:
+    account_service = FakeIbkrAccountService(
+        positions_sequence=[
+            [
+                IbkrPosition(
+                    symbol="AAPL",
+                    quantity=5,
+                    average_cost=100.0,
+                ),
+            ],
+            [
+                IbkrPosition(
+                    symbol="AAPL",
+                    quantity=3,
+                    average_cost=100.0,
+                ),
+            ],
+        ],
+    )
+
+    price_provider = FakePriceProvider(
+        prices={
+            "AAPL": 110.0,
+        },
+    )
+
+    service = IbkrTradingSessionSyncService(
+        account_service=account_service,
+        price_provider=price_provider,
+    )
+
+    session = TradingSession(
+        name="Partial SELL sync test",
+        portfolio=PaperPortfolio(
+            cash=500.0,
+            positions={
+                "AAPL": PaperPosition(
+                    symbol="AAPL",
+                    quantity=5,
+                    entry_price=100.0,
+                    current_price=110.0,
+                ),
+            },
+        ),
+        position_states={
+            "AAPL": PositionState(
+                symbol="AAPL",
+                entry_price=100.0,
+                current_stop_loss=95.0,
+                highest_price=110.0,
+                current_price=110.0,
+            ),
+        },
+        risk_plans={
+            "AAPL": create_risk_plan(),
+        },
+    )
+
+    synchronized = service.synchronize(
+        session,
+        expected_position_quantities={
+            "AAPL": 3,
+        },
+        attempts=2,
+        retry_delay_seconds=0.0,
+    )
+
+    assert account_service.read_positions_calls == 2
+
+    assert "AAPL" in synchronized.portfolio.positions
+
+    position = synchronized.portfolio.positions["AAPL"]
+
+    assert position.quantity == 3
+    assert position.entry_price == 100.0
+    assert position.current_price == 110.0
+
+    assert "AAPL" in synchronized.position_states
+    assert "AAPL" in synchronized.risk_plans
 
 def run() -> None:
     test_sync_waits_for_expected_filled_symbol()
