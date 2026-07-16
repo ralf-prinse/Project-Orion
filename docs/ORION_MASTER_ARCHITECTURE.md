@@ -1,322 +1,444 @@
 # PROJECT ORION — MASTER ARCHITECTURE
 
-**Status:** Stable deterministic architecture  
-**Updated:** 2026-07-14
+**Architecture Version:** Sprint 11 Baseline
+
+**Status:** Active
+
+**Regression Baseline:** 88 / 88 Passed
+
+**Last Updated:** 2026-07-16
 
 ---
 
-# Mission
+# Philosophy
 
-Project Orion is a deterministic swing-trading platform.
+Project Orion is a deterministic autonomous trading platform.
 
-Artificial Intelligence may explain deterministic output but never owns trading decisions, risk, execution or position management.
+Artificial Intelligence assists the system by generating market intelligence and confidence scores.
+
+Artificial Intelligence never bypasses deterministic trading rules.
+
+Every trade must remain reproducible.
 
 ---
 
-# Core Trading Flow
+# Core Architecture
 
-```text
 Market Data
-    ↓
-Quote Validation
-    ↓
-Indicators
-    ↓
-Analysis
-    ↓
-Signals
-    ↓
-Deterministic Decision
-    ↓
-Adaptive RiskPlan
-    ↓
-Portfolio Allocation
-    ↓
+
+↓
+
+Scanner
+
+↓
+
+Trading Pipeline
+
+↓
+
+Portfolio Allocator
+
+↓
+
 Execution Engine
-    ↓
-TradingSession
-    ↓
-Position Management
-    ↓
-Exit Engine
-    ↓
-Trade Journal
-```
 
-Every layer has exactly one responsibility.
+↓
 
-No layer may bypass another.
+Broker
 
----
+↓
 
-# Canonical Runtime Aggregate
+Broker Truth Synchronization
 
-```text
-TradingSession
-├── PaperPortfolio
-├── dict[str, PositionState]
-├── dict[str, RiskPlan]
-├── session metadata
-└── runtime status
-```
+↓
 
-Rules:
+Trading Session
 
-- TradingSession is the only lifecycle owner.
-- PositionState exists only inside TradingSession.
-- RiskPlan exists only inside TradingSession.
-- No parallel lifecycle state is allowed.
+↓
+
+Persistence
+
+↓
+
+Analytics
+
+↓
+
+Learning
+
+No component may skip a layer.
 
 ---
 
-# Persistence Boundary
+# Runtime Ownership
 
-```text
-TradingSessionRepository
-        ↓
-TradingSession
-```
+The TradingSession is the single runtime authority.
 
-Repositories only serialize.
+TradingSession owns:
 
-Repositories never calculate:
+- PaperPortfolio
+- PositionState
+- RiskPlan
+- Runtime metadata
 
-- indicators;
-- decisions;
-- risk;
-- exits;
-- position management.
+No duplicated portfolio state may exist outside TradingSession.
+
+Repositories are persistence only.
 
 ---
 
-# Execution
+# Trading Pipeline
 
-Execution is intentionally separated.
+Responsibilities:
 
-```text
-ExecutionEngine
-        ↓
-Broker.execute(order)
-```
+- market analysis
+- indicator generation
+- market intelligence
+- signal fusion
+- confidence calculation
+- position sizing recommendation
+
+Output:
+
+TradingDecision
+
+The pipeline never communicates directly with the broker.
+
+---
+
+# Portfolio Allocator
+
+Responsibilities:
+
+- capital allocation
+- exposure limits
+- duplicate position prevention
+- portfolio constraints
+
+Output:
+
+Approved trading decisions.
+
+No broker interaction.
+
+---
+
+# Execution Engine
+
+Responsibilities:
+
+- validate execution request
+- build execution context
+- select broker
+- execute order
+
+ExecutionEngine contains no broker-specific implementation.
+
+---
+
+# Broker Layer
 
 Current implementation:
 
-```text
-PaperBroker
-```
+- PaperBroker
+- IbkrBroker
 
-Planned implementation:
+Both implement the same execution interface.
 
-```text
-IbkrBroker
-```
+Responsibilities:
 
-ExecutionEngine must remain broker-independent.
+- translate execution requests
+- submit orders
+- return deterministic execution results
 
 ---
 
-# Position Management
+# Interactive Brokers Layer
 
-Canonical flow:
+Components:
 
-```text
-PaperPositionUpdateService
-        ↓
-PositionUpdateEngine
-        ↓
-BreakEvenService
-TrailingStopService
-TimeStopService
-        ↓
-PositionMonitor
-        ↓
-ExitEngine
-```
+IbkrAccountService
 
-Lifecycle ownership includes:
+↓
 
-- current price;
-- highest price;
-- stop loss;
-- break-even state;
-- trailing stop;
-- target flags;
-- deterministic exits.
+IbkrPortfolioService
+
+↓
+
+IbkrExecutionService
+
+↓
+
+IbkrBroker
+
+↓
+
+IbkrOrderTransport
+
+Responsibilities:
+
+- account access
+- portfolio access
+- order transport
+- execution
+- reconciliation
+
+Broker state is always considered authoritative.
+
+---
+
+# Broker Truth Synchronization
+
+TradingSession never assumes a broker order succeeded.
+
+After execution:
+
+Broker
+
+↓
+
+TradingSessionSyncService
+
+↓
+
+TradingSession
+
+↓
+
+Persistence
+
+Local portfolio state is always replaced by broker truth.
+
+This prevents:
+
+- stale positions
+- duplicate positions
+- incorrect quantities
+- incorrect average prices
+
+---
+
+# Persistence
+
+Repositories persist state only.
+
+Repositories never contain business logic.
+
+Current repositories include:
+
+- TradingSessionRepository
+- PortfolioRepository
+- TradeJournalRepository
+- RuntimeEventRepository
 
 ---
 
 # Runtime
 
-Runtime orchestration:
-
-```text
 ContinuousPaperTradingRunner
-        ↓
-RuntimeSupervisor
-        ↓
+
+↓
+
 AutonomousPaperTradingRunner
-        ↓
-TradingSessionRepository
-```
+
+↓
+
+TradingCycle
+
+↓
+
+Execution
+
+↓
+
+Synchronization
+
+↓
+
+Persistence
+
+↓
+
+Next iteration
+
+The runtime must be restart-safe.
+
+---
+
+# Current Functional Status
+
+Completed:
+
+✓ Scanner
+
+✓ Trading Pipeline
+
+✓ Portfolio Allocation
+
+✓ Execution Engine
+
+✓ Paper Broker
+
+✓ Interactive Brokers BUY execution
+
+✓ Broker synchronization
+
+✓ Continuous runtime
+
+✓ Restart recovery
+
+✓ Session persistence
+
+Validated using Interactive Brokers Paper.
+
+---
+
+# Current Limitations
+
+SELL execution is not yet implemented.
+
+Current validation therefore uses:
+
+- BUY only
+- Paper account only
+- controlled portfolio size
+
+This limitation is intentional during validation.
+
+---
+
+# Sprint 11
+
+Autonomous Position Lifecycle
 
 Responsibilities:
 
-RuntimeSupervisor
+Position Monitor
 
-- runtime health;
-- runtime events;
-- heartbeat;
-- failures;
-- graceful shutdown.
+↓
 
-RuntimeSupervisor never owns trading state.
+Exit Engine
 
----
+↓
 
-# Market Sessions
+SELL Execution
 
-Trading only occurs while configured markets are open.
+↓
 
-Market sessions are:
+Broker Synchronization
 
-- timezone-aware;
-- DST-aware;
-- deterministic.
+↓
 
-When every configured market is closed:
+Portfolio Update
 
-```text
-MARKETS_IDLE
-```
-
-During idle:
-
-- no scans;
-- no orders;
-- no portfolio updates;
-- no failed iterations.
-
----
-
-# Quote Validation
-
-Every market price must satisfy:
-
-- finite;
-- greater than zero;
-- not NaN;
-- not None.
-
-Invalid quotes are rejected before entering the trading pipeline.
-
-Portfolio equity may never become NaN.
-
----
-
-# Journals
-
-Independent journals exist for:
+↓
 
 Trade Journal
 
-- OPEN_POSITION
-- CLOSE_POSITION
+↓
 
-Decision Journal
+Performance Analysis
 
-- APPROVED
-- REJECTED
+↓
 
-Runtime Events
-
-- runtime lifecycle
-- failures
-- idle transitions
-
-Journals are immutable runtime evidence.
+Learning
 
 ---
 
-# Artificial Intelligence
+# Learning Layer
 
-Allowed:
+Learning occurs only after completed trades.
 
-- explanations;
-- summaries;
-- documentation;
-- historical analysis.
+Workflow:
 
-Forbidden:
+Closed Trade
 
-- BUY decisions;
-- SELL decisions;
-- EXIT decisions;
-- position sizing;
-- stop calculation;
-- order execution;
-- configuration changes.
+↓
 
----
+Performance Analysis
 
-# Architectural Rules
+↓
 
-Always:
+Hypothesis Evaluation
 
-- one owner per responsibility;
-- deterministic behaviour;
-- explicit dependencies;
-- composition over inheritance;
-- immutable models where practical;
-- complete regression coverage;
-- architecture review before implementation.
+↓
 
-Never:
+Confidence Calibration
 
-- duplicate trading logic;
-- duplicate lifecycle state;
-- bypass TradingSession;
-- bypass Quote Validation;
-- bypass ExecutionEngine.
+↓
+
+Strategy Ranking
+
+↓
+
+Future Trade Selection
+
+Learning never changes deterministic trading rules directly.
 
 ---
 
-# Current Validation Baseline
+# Architectural Principles
 
-Regression:
+Always preserve:
 
-```text
-75 passed
-0 failed
-```
+Single Responsibility
 
-Operational validation:
+Deterministic Behaviour
 
-- continuous runtime;
-- restart recovery;
-- market-session transitions;
-- runtime idle;
-- quote validation;
-- managed exits;
-- persistence.
+Broker Truth
+
+Regression Safety
+
+Test Driven Development
+
+Persistence Separation
+
+No Business Logic in Repositories
+
+No Manual Portfolio Updates
 
 ---
 
-# Next Architectural Milestone
+# Definition of Complete Platform
 
-Interactive Brokers Paper integration.
+The platform is considered complete when it can autonomously:
 
-Only the broker implementation changes.
+Scan
 
-The deterministic trading engine remains unchanged.
+↓
 
-```text
-ExecutionEngine
-        ↓
-IbkrBroker
-        ↓
-IBKR Paper
-```
+Analyse
 
-This preserves every deterministic layer while replacing only the execution backend.
+↓
 
-# End
+BUY
+
+↓
+
+Manage Position
+
+↓
+
+SELL
+
+↓
+
+Synchronize Broker
+
+↓
+
+Persist Runtime
+
+↓
+
+Analyse Performance
+
+↓
+
+Learn
+
+↓
+
+Repeat
+
+without manual intervention while remaining fully deterministic and regression safe.

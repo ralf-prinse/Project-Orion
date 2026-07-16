@@ -1,193 +1,189 @@
 # PROJECT ORION — TODO
 
-**Branch:** `feature-ibkr-integration`  
-**Updated:** 2026-07-14
+**Current Sprint:** Sprint 11 — Autonomous Position Lifecycle
+
+**Regression Status:** ✅ 88 Passed | ❌ 0 Failed
 
 ---
 
-# Current Phase
+# Priority 1 — Complete Autonomous Position Lifecycle
 
-Sprint 9.3 — Interactive Brokers Paper Integration
+## 1. IBKR SELL Execution
 
-The deterministic paper engine is considered operational.
+Status: NOT STARTED
 
-Current work focuses exclusively on integrating Interactive Brokers Paper Trading without changing trading behaviour.
+Implement:
 
----
+- SELL order creation
+- SELL validation
+- SELL execution through IbkrBroker
+- SELL confirmation handling
+- SELL synchronization
+- SELL persistence
 
-# Highest Priority
+Definition of Done:
 
-## IBKR Integration
-
-### 1. Production Account Service
-
-Status:
-
-IN PROGRESS
-
-Goal:
-
-Replace the validated test account reader with a production-quality `IbkrAccountService`.
-
-Requirements:
-
-- connect;
-- read account;
-- read positions;
-- map to Orion models;
-- disconnect cleanly;
-- full regression coverage.
+Orion can close positions autonomously through Interactive Brokers Paper.
 
 ---
 
-### 2. IbkrBroker
+## 2. Position Monitor
 
-Status:
+Status: NOT STARTED
 
-NOT STARTED
+Implement continuous monitoring of all open positions.
 
-Implement a production broker using the existing execution architecture.
+Responsibilities:
 
-The broker must:
-
-- submit paper orders;
-- receive execution status;
-- receive fills;
-- report failures;
-- return Orion execution models.
+- load open positions
+- evaluate exit conditions
+- trigger ExecutionEngine when required
 
 ---
 
-### 3. Controlled Paper Order
+## 3. Exit Engine
 
-Status:
+Status: PARTIALLY IMPLEMENTED
 
-NOT STARTED
+Integrate existing services into one deterministic decision engine.
 
-Submit one intentionally controlled paper BUY order.
+Required:
 
-Validation:
+- Stop Loss
+- Take Profit
+- Break Even
+- Trailing Stop
+- Time Stop
 
-- order accepted;
-- fill received;
-- position visible;
-- Orion state updated;
-- no duplicate execution.
+Definition of Done:
 
----
-
-### 4. Portfolio Synchronization
-
-Status:
-
-NOT STARTED
-
-Synchronize:
-
-- IBKR positions;
-- Orion positions;
-- account balances;
-- execution results.
-
-Detect inconsistencies before trading continues.
+Every open position receives exactly one deterministic exit decision.
 
 ---
 
-### 5. Continuous IBKR Runner
+# Priority 2 — Portfolio Management
 
-Status:
+Implement autonomous portfolio management.
 
-NOT STARTED
+Remaining work:
 
-Create:
-
-```text
-run_continuous_ibkr_paper.py
-```
-
-The runtime should replace only the broker implementation while preserving the existing deterministic pipeline.
+- position replacement
+- capital reallocation
+- exposure limits
+- sector diversification
+- maximum portfolio risk
 
 ---
 
-# Runtime Validation
+# Priority 3 — Closed Trade Analytics
 
-Continue validating:
+After every completed trade:
 
-- idle behaviour;
-- DST transitions;
-- quote validation;
-- persistence;
-- managed exits;
-- restart recovery;
-- runtime stability.
+Generate:
 
-No strategy changes during validation.
+- trade statistics
+- performance metrics
+- attribution report
+- strategy effectiveness
+- execution quality
 
----
-
-# Strategy
-
-No active strategy work.
-
-Future improvements remain:
-
-- thesis comparison;
-- risk-budget sizing;
-- advanced ranking evaluation;
-- position review.
-
-These remain frozen until the IBKR integration is operational.
+Persist results for later analysis.
 
 ---
 
-# GUI
+# Priority 4 — Learning Pipeline
 
-Low priority.
+Feed completed trade data into Orion's learning components.
 
-Future work:
+Implement:
 
-- dashboard;
-- portfolio panels;
-- runtime monitor;
-- performance analytics.
+- outcome evaluation
+- hypothesis validation
+- confidence calibration
+- strategy ranking updates
 
----
+Note:
 
-# Technical Debt
-
-Future review:
-
-- dependency cleanup;
-- execution service simplification;
-- provider cleanup;
-- unused legacy code removal.
-
-Only perform cleanup when it reduces complexity without changing behaviour.
+The learning layer may influence future rankings but must never bypass deterministic trading rules.
 
 ---
 
-# Rules
+# Priority 5 — Long Duration Validation
 
-Always:
+After SELL execution is complete:
 
-- inspect existing architecture first;
-- avoid duplicate services;
-- preserve deterministic behaviour;
-- write targeted tests first;
-- execute the full regression suite;
-- commit only after all tests pass.
+Run staged validation:
+
+Phase 1
+
+- 2-hour continuous paper trading
+
+Phase 2
+
+- Full trading day
+
+Phase 3
+
+- Multiple consecutive trading days
+
+Validation criteria:
+
+- zero crashes
+- zero portfolio inconsistencies
+- zero synchronization errors
+- deterministic recovery after restart
 
 ---
 
-# Success Criteria
+# Live Trading Checklist
 
-Sprint 9.3 completes when:
+Before enabling live trading:
 
-- Orion can connect to IBKR Paper.
-- Orion can read account data.
-- Orion can submit paper orders.
-- Orion receives fills.
-- Orion manages paper positions through the existing lifecycle.
-- The continuous runner operates through IBKR Paper with zero regression failures.
+- SELL execution validated
+- Complete trade lifecycle validated
+- Multi-day paper validation completed
+- Performance reviewed
+- Risk limits verified
+- Manual approval
 
-Live trading is explicitly outside the scope of this sprint.
+Live trading remains disabled until all checklist items are complete.
+
+---
+
+# Guiding Principle
+
+No new features should bypass the established architecture.
+
+TradingPipeline
+
+↓
+
+PortfolioAllocator
+
+↓
+
+ExecutionEngine
+
+↓
+
+Broker
+
+↓
+
+Broker Truth Synchronization
+
+↓
+
+TradingSession
+
+↓
+
+Persistence
+
+↓
+
+Analytics
+
+↓
+
+Learning

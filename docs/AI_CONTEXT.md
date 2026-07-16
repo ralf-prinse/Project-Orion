@@ -1,202 +1,262 @@
 # PROJECT ORION — AI CONTEXT
 
-**Status:** Stable autonomous paper runtime; IBKR Paper integration started  
+**Status:** Stable autonomous IBKR Paper trading platform  
 **Active branch:** `feature-ibkr-integration`  
-**Stable validation tag:** `v0.9-paper-validation`  
-**Regression baseline:** `75 passed, 0 failed`  
-**Updated:** 2026-07-14
+**Regression baseline:** `88 passed, 0 failed`  
+**Updated:** 2026-07-16
 
-## Purpose
+---
 
-Read this document first when continuing Project Orion in a new development chat.
+# Purpose
 
-Then consult, only when relevant:
+Read this document first before continuing development.
 
-- `PROJECT_STATUS.md`
-- `TODO.md`
-- `ORION_MASTER_ARCHITECTURE.md`
-- `TRADING_STRATEGY.md`
-- `CHANGELOG.md`
+Then consult:
 
-Do not assume older sprint documents describe the current runtime.
+1. PROJECT_STATUS.md
+2. TODO.md
+3. ORION_MASTER_ARCHITECTURE.md
+4. CHANGELOG.md
 
-## Mission
+Older sprint documents and archived notes are historical only.
 
-Project Orion is a deterministic trading system intended for short swing trades, normally held for no more than 24–48 hours.
+---
 
-Artificial Intelligence may explain and analyse deterministic results. It must not independently decide, approve, size, open, manage or close trades.
+# Mission
 
-## Current State
+Project Orion is a deterministic swing-trading platform.
 
-The internal paper-trading runtime is operational and restart-safe.
+Artificial Intelligence assists with:
 
-Validated capabilities include:
-
-- deterministic market scanning and decision flow;
-- adaptive `RiskPlan` generation;
+- market analysis;
+- hypothesis generation;
 - opportunity ranking;
-- portfolio allocation and paper execution;
-- complete `TradingSession` persistence;
-- managed position lifecycle;
-- break-even and trailing-stop management;
-- deterministic stop, target and 48-hour exits;
-- restart and crash recovery;
-- continuous execution with graceful shutdown;
-- separate trade, decision and runtime-event journals;
-- DST-aware European and United States market sessions;
-- `MARKETS_IDLE` behaviour when every configured market is closed;
-- central quote validation;
-- rejection of `None`, `NaN`, infinity, zero and negative prices;
-- preservation of the previous valid price after a bad quote.
+- confidence estimation.
 
-## Canonical Runtime State
+Artificial Intelligence does **not** autonomously invent trading rules.
 
-```text
-TradingSession
-├── PaperPortfolio
-├── dict[str, PositionState]
-└── dict[str, RiskPlan]
+Trading decisions remain fully deterministic and reproducible.
 
-Rules:
+---
 
-TradingSession is the sole managed-position state owner.
-TradingSessionRepository is the authoritative persistence boundary.
-JsonPaperPortfolioRepository is only a compatibility mirror.
-No second lifecycle store may be introduced.
-Runtime data under data/ is not normal source code and should not be committed.
-Active Runtime
+# Current Development Phase
+
+Project Orion has completed the complete BUY execution chain using Interactive Brokers Paper Trading.
+
+The system can now autonomously:
+
+- scan markets;
+- analyse opportunities;
+- calculate deterministic risk;
+- allocate capital;
+- submit IBKR Paper BUY orders;
+- reconcile broker fills;
+- synchronize TradingSession with broker truth;
+- persist runtime state;
+- recover after restart.
+
+The BUY side is considered feature complete.
+
+Current focus has shifted to autonomous position management and SELL execution.
+
+---
+
+# Current Runtime
+
 ContinuousPaperTradingRunner
-        ├── MarketSessionService
-        ├── RuntimeSupervisor
-        └── AutonomousPaperTradingRunner
-                ↓
-        TradingSessionRepository
-                ↓
-        TradingSession
-                ↓
-        Position update and management
-                ↓
-        PositionMonitor
-                ↓
-        ExitEngine
 
-When all configured markets are closed:
+↓
 
-MARKETS_IDLE
-→ no scan
-→ no price revaluation
-→ no BUY or SELL
-→ no failed iteration
-→ periodic market-open check
+AutonomousPaperTradingRunner
 
-European and United States sessions use IANA time zones, so daylight-saving transitions are not represented by hardcoded Dutch clock times.
+↓
 
-Market-Data Safety
+TradingPipeline
 
-All prices entering the provider or position-update pipeline must be:
+↓
 
-convertible to float;
-finite;
-greater than zero.
+PortfolioAllocator
 
-Invalid quotes are rejected per symbol. They must never make portfolio equity NaN or fail an entire iteration.
+↓
 
-Journals
-data/trade_journal.jsonl
-- executed OPEN_POSITION
-- executed CLOSE_POSITION
+ExecutionEngine
 
-data/decision_journal.jsonl
-- approved and rejected allocation decisions
+↓
 
-data/runtime_events.jsonl
-- runtime lifecycle
-- completed and failed iterations
-- market-idle events
+IbkrBroker
 
-These files contain runtime evidence and are not normally committed.
+↓
 
-Current Paper Validation Profile
+IbkrOrderTransport
 
-Current validation target:
+↓
 
-starting capital: €10,000;
-maximum open positions: 20;
-maximum position value: approximately €500;
-maximum holding period: 48 elapsed hours;
-regular market sessions only;
-internal PaperBroker;
-strategy parameters frozen during clean comparison runs.
+Interactive Brokers Paper
 
-The purpose of this capital is rapid data collection. A later pre-live validation must be repeated with the intended live starting capital, currently approximately €500.
+↓
 
-IBKR Status
+TradingSessionSyncService
 
-Interactive Brokers is the intended external broker.
+↓
+
+TradingSessionRepository
+
+---
+
+# Canonical Runtime State
+
+TradingSession is the only authoritative runtime object.
+
+TradingSession owns:
+
+- PaperPortfolio
+- PositionState
+- RiskPlan
+
+No duplicated lifecycle state may exist elsewhere.
+
+Repositories are persistence only.
+
+Broker state always overrides local assumptions.
+
+---
+
+# Completed
+
+## Trading Engine
+
+- deterministic scanner
+- market intelligence
+- signal fusion
+- adaptive risk engine
+- opportunity ranking
+- portfolio allocation
+- execution pipeline
+
+## Paper Trading
 
 Completed:
 
-IBKR account approved;
-Paper Trading account active;
-paper balance set to €10,000;
-Trader Workstation installed;
-TWS Paper connection configured on 127.0.0.1:7497;
-socket clients enabled;
-Read-Only API enabled;
-official ibapi installed;
-test_ibkr_connection.py passes;
-test_ibkr_account_reader.py passes;
-account cash, net liquidation and positions can be read.
+- PaperBroker
+- TradingSession persistence
+- runtime supervisor
+- restart recovery
+- trade journal
+- runtime journal
+- portfolio persistence
 
-Not yet completed:
+## Interactive Brokers
 
-production IbkrAccountService;
-IBKR contract mapping;
-market-data integration;
-order-status and fill handling;
-controlled IBKR paper order;
-IbkrBroker.execute();
-portfolio reconciliation;
-autonomous execution through IBKR Paper.
+Completed:
 
-TWS must remain in Read-Only mode until the explicit controlled-order milestone.
+- account service
+- portfolio mapper
+- portfolio service
+- execution service
+- broker implementation
+- order transport
+- managed account validation
+- paper-only protection
+- late fill reconciliation
+- broker synchronization
+- continuous IBKR runner
+- autonomous BUY validation
 
-Existing Execution Architecture
+Validated using a real IBKR Paper account.
+
+---
+
+# Validation Status
+
+Current regression baseline:
+
+88 passed
+0 failed
+
+Validated:
+
+- BUY execution
+- broker synchronization
+- late fills
+- continuous runtime
+- TradingSession persistence
+- restart safety
+
+---
+
+# Not Yet Implemented
+
+The remaining major milestone is the autonomous position lifecycle.
+
+Remaining work:
+
+- SELL execution through IBKR
+- autonomous exit engine
+- stop loss execution
+- take profit execution
+- trailing stop execution
+- break-even execution
+- time stop execution
+- closed trade analytics
+- AI learning feedback loop
+
+---
+
+# Architectural Rules
+
+Always preserve:
+
+TradingPipeline
+
+↓
+
+PortfolioAllocator
+
+↓
+
 ExecutionEngine
-        ↓
-broker.execute(order)
 
-PaperBroker already implements the required execute() shape.
+↓
 
-The intended next implementation is an IbkrBroker with the same practical interface. Do not build an unnecessary multi-broker plugin platform or large broker factory.
+Broker
 
-Non-Negotiable Development Rules
-Inspect the complete relevant chain before changing code.
-Reuse existing models and services.
-Do not create duplicate decision, risk, execution or lifecycle owners.
-Keep trading behaviour deterministic.
-Keep GUI and presenters free of trading logic.
-Prefer complete-file replacements for user-applied changes.
-Add targeted tests for every behaviour change.
-Run python run_tests.py after targeted tests.
-Commit and push only after all tests pass.
-Never allow new IBKR code to reach the live account during development.
-Immediate Next Step
+↓
 
-Before submitting any IBKR order:
+Broker Truth Synchronization
 
-extract the proven read-only account code from the test script into a production service;
-map IBKR account and position data into Orion models;
-test connect/read/disconnect behaviour with test doubles;
-preserve TWS Read-Only mode;
-then design one explicitly controlled IBKR Paper order test.
-New Chat Opening Instruction
+↓
 
-A new development chat must first:
+TradingSession
 
-inspect branch feature-ibkr-integration;
-read this file and PROJECT_STATUS.md;
-inspect the relevant execution and IBKR files;
-confirm the current regression suite passes;
-verify TWS is connected to Paper Trading, not Live;
-propose one small commit before changing code.
+Never update portfolio state manually after execution.
+
+IBKR remains the single source of truth.
+
+---
+
+# Development Principles
+
+- deterministic first
+- test driven
+- regression safe
+- broker truth over local state
+- repositories never contain business logic
+- services remain single responsibility
+- architecture before optimisation
+
+---
+
+# Immediate Next Goal
+
+Sprint 11
+
+Autonomous Position Lifecycle
+
+Deliver:
+
+- complete SELL execution
+- broker synchronization after SELL
+- autonomous position monitoring
+- full end-to-end trade lifecycle
+
+BUY functionality is considered complete unless regressions are discovered.

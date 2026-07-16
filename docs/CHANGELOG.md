@@ -1,145 +1,192 @@
 # PROJECT ORION — CHANGELOG
 
+**Current Version:** Sprint 11 Baseline
+
+**Last Updated:** 2026-07-16
+
 ---
 
-## 2026-07-14 — Sprint 9.3 (Started)
+# Sprint 11 Baseline
 
-### Interactive Brokers Paper Integration
+## Major Milestone
 
-Started integration with Interactive Brokers Paper Trading.
+Completed the complete autonomous BUY execution chain using Interactive Brokers Paper Trading.
+
+Validated end-to-end:
+
+Market Scanner
+
+↓
+
+Trading Pipeline
+
+↓
+
+Portfolio Allocator
+
+↓
+
+Execution Engine
+
+↓
+
+IbkrBroker
+
+↓
+
+IBKR Paper
+
+↓
+
+Broker Truth Synchronization
+
+↓
+
+Trading Session Persistence
+
+Regression baseline:
+
+88 / 88 tests passed.
+
+---
+
+# Completed
+
+## AI Trading Platform
+
+Implemented:
+
+- AI Market Scanner
+- Market Intelligence
+- Signal Fusion
+- Opportunity Ranking
+- Adaptive Risk Engine
+- Strategy Recommendation
+- Investment Thesis Builder
+- Hypothesis Evaluation
+
+---
+
+## Trading Engine
 
 Completed:
 
-- IBKR account approved.
-- Paper Trading account activated.
-- Trader Workstation installed.
-- TWS API configured.
-- Read-Only API enabled.
-- Python `ibapi` installed.
-- Successful TWS connection test.
-- Successful account reader validation.
-
-No orders are submitted yet.
+- deterministic trading pipeline
+- execution engine
+- portfolio allocator
+- runtime supervisor
+- restart recovery
+- trading session persistence
 
 ---
 
-## 2026-07-13
-
-### Runtime Hardening
+## Paper Trading
 
 Completed:
 
-- DST-aware market sessions.
-- Automatic market-idle mode.
-- Runtime sleeps while all configured markets are closed.
-- Continuous runner no longer generates unnecessary failed iterations overnight.
+- Paper Broker
+- portfolio persistence
+- trade journal
+- runtime journal
+- continuous paper trading runner
 
 ---
 
-### Quote Validation
-
-Added central quote validation.
-
-Validation now rejects:
-
-- None
-- NaN
-- Infinity
-- Zero
-- Negative prices
-
-Invalid prices no longer corrupt portfolio equity.
-
----
-
-## 2026-07-12
-
-### Runtime Supervisor
+## Interactive Brokers Integration
 
 Completed:
 
-- RuntimeSupervisor
-- RuntimeHealth
-- RuntimeEvent journal
-- Graceful shutdown
-- Runtime recovery
+- account service
+- portfolio mapper
+- portfolio service
+- execution context builder
+- execution service
+- broker implementation
+- order transport
+- managed account validation
+- paper-only safety checks
+- late fill reconciliation
+- broker truth synchronization
+- continuous IBKR paper runner
 
-Added operational runtime monitoring without changing trading ownership.
-
----
-
-### Position Lifecycle
-
-Completed deterministic managed lifecycle.
-
-Includes:
-
-- Break-even
-- Trailing stop
-- Time stop
-- Restart-safe recovery
-- Position cleanup
-- RiskPlan cleanup
-
-TradingSession remains the single lifecycle owner.
+Validated using a real Interactive Brokers Paper account.
 
 ---
 
-## 2026-07-11
+## Runtime Validation
 
-### TradingSession Consolidation
+Successfully validated:
 
-Removed the legacy PositionStateStore.
+- autonomous BUY execution
+- broker synchronization
+- late fill reconciliation
+- session persistence
+- restart recovery
+- continuous runtime
 
-TradingSession became the sole owner of:
-
-- PaperPortfolio
-- PositionState
-- RiskPlan
-
-This completed the lifecycle ownership refactor.
-
----
-
-### Continuous Paper Trading
-
-Completed the autonomous paper runtime.
-
-Includes:
-
-- Continuous runner
-- TradingSession persistence
-- Trade journal
-- Decision journal
-- Autonomous execution
+The BUY side of Orion is now considered feature complete.
 
 ---
 
-## Regression Milestone
+# Architectural Improvements
 
-Current baseline:
+Introduced:
 
-```text
-75 passed
-0 failed
-```
-
-Every architectural change must preserve a fully green regression suite.
+- TradingSession as canonical runtime state
+- Broker Truth Synchronization
+- deterministic persistence model
+- repository separation
+- runtime event logging
+- portfolio synchronization after execution
 
 ---
 
-## Current State
+# Current Status
 
-Project Orion now provides:
+BUY execution:
 
-- deterministic trading engine;
-- autonomous paper trading;
-- managed position lifecycle;
-- runtime supervision;
-- market-session awareness;
-- quote validation;
-- Interactive Brokers Paper connectivity.
+COMPLETE
 
-The next milestone is controlled paper order execution through IBKR.
+SELL execution:
 
-# End
+NOT STARTED
+
+Autonomous Position Lifecycle:
+
+IN PROGRESS
+
+Learning Pipeline:
+
+FOUNDATION COMPLETE
+
+---
+
+# Next Sprint
+
+Sprint 11
+
+Autonomous Position Lifecycle
+
+Objectives:
+
+- autonomous SELL execution
+- exit engine integration
+- position monitoring
+- closed trade analytics
+- AI learning feedback
+
+---
+
+# Project State
+
+Current platform status:
+
+Stable
+
+Regression Safe
+
+Broker Validated
+
+Paper Trading Validated
+
+Ready for autonomous position lifecycle development.

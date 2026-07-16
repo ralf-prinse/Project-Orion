@@ -1,123 +1,266 @@
 # PROJECT ORION — PROJECT STATUS
 
-**Status:** Engine consolidation complete  
-**Branch:** `sprint-8.13-position-state-store-removal`  
-**Regression status:** `69 passed`  
-**Updated:** 2026-07-11
+**Project:** Orion Autonomous Trading Platform
 
-## Executive Summary
+**Status:** Active Development
 
-Orion now has a deterministic, persistent and operationally validated autonomous paper-trading engine.
+**Current Sprint:** Sprint 11 — Autonomous Position Lifecycle
 
-The complete lifecycle works across normal iterations, restarts and recoverable crashes:
+**Regression Status:** ✅ 88 Passed | ❌ 0 Failed
 
-```text
-Scan → Decision → RiskPlan → Open
-→ Update → Break-even → Trailing Stop
-→ Persist → Restart → Exit → Cleanup → Persist
-```
+**Last Updated:** 2026-07-16
 
-## Current Capability
+---
 
-| Area | Status |
-|---|---|
-| Deterministic Trading Pipeline | Complete |
-| Adaptive risk planning | Complete |
-| Paper BUY/SELL execution | Complete |
-| TradingSession persistence | Complete |
-| Managed position lifecycle | Complete |
-| Lifecycle-aware exits | Complete |
-| Restart recovery | Complete |
-| Crash recovery | Complete |
-| Session integrity | Complete |
-| Continuous runner | Complete |
-| Graceful shutdown | Complete |
-| Trade/decision journal separation | Complete |
-| Runtime ownership consolidation | Complete |
-| PositionStateStore removal | Complete |
-| Dashboard foundation | Available |
-| Broker integration | Not started |
-| Real-money trading | Out of scope |
+# Executive Summary
 
-## Canonical Runtime State
+Project Orion has successfully completed the complete autonomous BUY execution chain using Interactive Brokers Paper Trading.
 
-```text
-TradingSession
-├── PaperPortfolio
-├── PositionState map
-└── RiskPlan map
-```
+The platform can now autonomously:
 
-Persistence:
+- scan markets
+- analyse opportunities
+- calculate deterministic risk
+- allocate capital
+- submit IBKR Paper BUY orders
+- reconcile broker fills
+- synchronize broker state
+- persist runtime state
+- resume after restart
 
-```text
-TradingSessionRepository
-└── JsonTradingSessionRepository
-```
+The BUY side of Orion is considered feature complete.
 
-`PositionStateStore` has been removed. Lifecycle state is no longer mirrored in a second runtime store.
+Current development has shifted towards autonomous position management and SELL execution.
 
-## Continuous Runtime Validation
+---
 
-Validated scenarios:
+# Current Architecture Status
 
-- 10-iteration isolated run: pass;
-- 100-iteration isolated run: pass;
-- 0 failed iterations;
-- stable memory around 1150 MB;
-- CPU usage around 1%;
-- graceful `Ctrl+C` during sleep;
-- restart-safe dynamic-stop exit;
-- crash recovery from last durable session;
-- matching counts for positions, states and risk plans.
+## Core AI
 
-## Journaling
+Status: COMPLETE
 
-Trade and decision history are separated:
+Components:
 
-```text
-Trade journal
-- executed opens
-- executed closes
+- AI Market Scanner
+- Market Intelligence
+- Signal Fusion
+- Opportunity Ranking
+- Strategy Recommendation
+- Investment Thesis Builder
+- Hypothesis Evaluation
 
-Decision journal
-- approved allocations
-- rejected allocations
-```
+---
 
-A 10 × 10-symbol validation produced:
+## Trading Pipeline
 
-- 3 trade entries;
-- 100 decision entries.
+Status: COMPLETE
 
-## Known Compatibility
+Pipeline:
 
-`JsonPaperPortfolioRepository` remains available as a compatibility mirror in the current continuous entrypoint. It is not the lifecycle owner.
+Market Scanner
 
-Older GUI stores and flows must not become dependencies of new autonomous functionality.
+↓
 
-## Current Development Phase
+Trading Pipeline
 
-Sprint 8.13 is complete.
+↓
 
-Next phase:
+Portfolio Allocator
 
-```text
-Orion Engine 1.0 Review
-then
-Sprint 9.0 — Orion Platform
-```
+↓
 
-## Validation
+Execution Engine
 
-```powershell
-python run_tests.py
-```
+↓
 
-Expected:
+Broker
 
-```text
-69 passed
-```
+↓
 
-# End
+Broker Synchronization
+
+↓
+
+Trading Session
+
+---
+
+## Paper Trading
+
+Status: COMPLETE
+
+Completed:
+
+- Paper Broker
+- Trade Journal
+- Runtime Journal
+- Portfolio Persistence
+- Trading Session Persistence
+- Runtime Supervisor
+- Restart Recovery
+
+---
+
+## Interactive Brokers
+
+Status: COMPLETE (BUY)
+
+Completed:
+
+- Account Service
+- Portfolio Service
+- Portfolio Mapper
+- Execution Context Builder
+- Execution Service
+- Broker Implementation
+- Order Transport
+- Managed Account Validation
+- Paper-only Safety Checks
+- Late Fill Reconciliation
+- Trading Session Synchronization
+- Continuous Runner
+- Autonomous BUY Validation
+
+Validated against a real IBKR Paper account.
+
+---
+
+# Runtime Validation
+
+Successfully validated:
+
+✓ Continuous autonomous runtime
+
+✓ IBKR Paper BUY execution
+
+✓ Broker synchronization
+
+✓ Late fill reconciliation
+
+✓ Session persistence
+
+✓ Restart recovery
+
+✓ Regression suite
+
+Regression baseline:
+
+88 / 88 PASSED
+
+---
+
+# Remaining Functional Work
+
+The remaining major feature is the autonomous position lifecycle.
+
+Remaining work:
+
+## SELL Execution
+
+- IBKR SELL orders
+- SELL validation
+- SELL synchronization
+
+---
+
+## Position Monitoring
+
+- monitor every open position
+- evaluate exit conditions
+- execute exits autonomously
+
+---
+
+## Exit Engine
+
+Implement:
+
+- Take Profit
+- Stop Loss
+- Break Even
+- Trailing Stop
+- Time Stop
+
+---
+
+## Analytics
+
+After closing trades:
+
+- performance analysis
+- trade attribution
+- strategy evaluation
+- learning dataset generation
+
+---
+
+# Current Limitations
+
+Current validation intentionally limits:
+
+- BUY only
+- maximum open positions
+- Paper account only
+
+These limitations exist to ensure safe validation before enabling full autonomous portfolio management.
+
+---
+
+# Current Sprint
+
+Sprint 11
+
+Autonomous Position Lifecycle
+
+Objectives:
+
+1. Complete SELL execution
+
+2. Autonomous position monitoring
+
+3. Full trade lifecycle
+
+4. Closed trade analytics
+
+5. AI learning feedback
+
+---
+
+# Definition of Done
+
+Sprint 11 is complete when Orion can:
+
+BUY
+
+↓
+
+Manage Position
+
+↓
+
+SELL
+
+↓
+
+Synchronize Broker
+
+↓
+
+Update Portfolio
+
+↓
+
+Journal Trade
+
+↓
+
+Learn From Result
+
+without manual intervention.
+
+---
+
+# Long-term Goal
+
+A fully autonomous deterministic trading platform capable of operating continuously on Interactive Brokers with complete broker synchronization, deterministic decision making, autonomous portfolio management and continuous learning based on completed trades.
