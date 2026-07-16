@@ -56,6 +56,7 @@ class AutonomousPaperTradingRunner:
         revaluation_service=None,
         price_provider=None,
         exit_engine=None,
+        trading_session_sync_service=None,
     ):
         self.config = config or AutonomousPaperTradingConfig()
         self.scanner = scanner or LivePaperMarketScanner(
@@ -91,6 +92,9 @@ class AutonomousPaperTradingRunner:
         )
         self.price_provider = price_provider or YahooProvider()
         self.exit_engine = exit_engine or ExitEngine()
+        self.trading_session_sync_service = (
+            trading_session_sync_service
+        )
 
     def run(self):
         session_id = self._build_session_id()
@@ -103,6 +107,12 @@ class AutonomousPaperTradingRunner:
             cycle_number = cycle_index + 1
 
             try:
+                if self.trading_session_sync_service is not None:
+                    session = (
+                        self.trading_session_sync_service
+                        .synchronize(session)
+                    )
+
                 session = self._update_open_position_lifecycle(
                     session
                 )

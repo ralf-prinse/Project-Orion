@@ -203,6 +203,13 @@ TestCommand(
                     "test_ibkr_trading_session_sync_service.py",
                 ],
             ),
+            TestCommand(
+                "Autonomous Runner IBKR Sync",
+                [
+                    sys.executable,
+                    "test_autonomous_runner_ibkr_sync.py",
+                ],
+            ),
             TestCommand("Portfolio Manager", [sys.executable, "test_portfolio_manager.py"]),
 
             TestCommand("Position State Factory", [sys.executable, "test_position_state_factory.py"]),
