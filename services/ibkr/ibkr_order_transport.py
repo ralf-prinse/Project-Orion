@@ -241,6 +241,8 @@ class IbkrOrderTransport:
         client_id: int = 120,
         connection_timeout_seconds: float = 15.0,
         reconciliation_timeout_seconds: float = 5.0,
+        reconciliation_attempts: int = 3,
+        reconciliation_retry_delay_seconds: float = 0.25,
         allow_order_submission: bool = False,
         disconnect_after_order: bool = True,
         client: _IbkrOrderClient | None = None,
@@ -265,6 +267,16 @@ class IbkrOrderTransport:
                 "reconciliation_timeout_seconds must be greater than zero."
             )
 
+        if reconciliation_attempts <= 0:
+            raise ValueError(
+                "reconciliation_attempts must be greater than zero."
+            )
+
+        if reconciliation_retry_delay_seconds < 0:
+            raise ValueError(
+                "reconciliation_retry_delay_seconds must not be negative."
+            )
+
         self.paper_account_id = normalized_account_id
         self.host = host.strip()
         self.port = int(port)
@@ -272,6 +284,10 @@ class IbkrOrderTransport:
         self.connection_timeout_seconds = float(connection_timeout_seconds)
         self.reconciliation_timeout_seconds = float(
             reconciliation_timeout_seconds
+        )
+        self.reconciliation_attempts = int(reconciliation_attempts)
+        self.reconciliation_retry_delay_seconds = float(
+            reconciliation_retry_delay_seconds
         )
         self.allow_order_submission = bool(allow_order_submission)
         self.disconnect_after_order = bool(disconnect_after_order)
@@ -319,7 +335,7 @@ class IbkrOrderTransport:
                 if self._client.terminal_event.wait(float(timeout_seconds)):
                     return self._require_outcome()
 
-                reconciled = self._reconcile_execution()
+                reconciled = self._reconcile_execution_with_retries()
                 if reconciled is not None:
                     return reconciled
 
@@ -405,6 +421,32 @@ class IbkrOrderTransport:
                 f"accounts: {description}."
             )
         self._verified_account_id = self.paper_account_id
+
+    def _reconcile_execution_with_retries(
+        self,
+    ) -> IbkrOrderOutcome | None:
+        for attempt in range(self.reconciliation_attempts):
+            reconciled = self._reconcile_execution()
+
+            if reconciled is not None:
+                return reconciled
+
+            if self._client.terminal_event.is_set():
+                return self._require_outcome()
+
+            is_last_attempt = (
+                attempt == self.reconciliation_attempts - 1
+            )
+
+            if (
+                not is_last_attempt
+                and self.reconciliation_retry_delay_seconds > 0
+            ):
+                time.sleep(
+                    self.reconciliation_retry_delay_seconds
+                )
+
+        return None
 
     def _reconcile_execution(self) -> IbkrOrderOutcome | None:
         self._client.execution_reconciliation_ready.clear()

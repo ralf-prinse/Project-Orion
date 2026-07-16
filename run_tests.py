@@ -189,6 +189,20 @@ TestCommand(
                     "test_ibkr_trading_service.py",
                 ],
             ),
+                        TestCommand(
+                "IBKR Late Fill Reconciliation",
+                [
+                    sys.executable,
+                    "test_ibkr_late_fill_reconciliation.py",
+                ],
+            ),
+            TestCommand(
+                "IBKR Trading Session Sync Service",
+                [
+                    sys.executable,
+                    "test_ibkr_trading_session_sync_service.py",
+                ],
+            ),
             TestCommand("Portfolio Manager", [sys.executable, "test_portfolio_manager.py"]),
 
             TestCommand("Position State Factory", [sys.executable, "test_position_state_factory.py"]),
