@@ -37,11 +37,15 @@ class PaperPositionCloseService:
             )
 
         position_value = round(
-            position.quantity * float(exit_price),
+            position.quantity
+            * float(exit_price)
+            * position.fx_rate_to_base,
             2,
         )
         cost_basis = round(
-            position.quantity * position.entry_price,
+            position.quantity
+            * position.entry_price
+            * position.fx_rate_to_base,
             2,
         )
         realized_profit_loss = round(
@@ -63,10 +67,12 @@ class PaperPositionCloseService:
             portfolio=PaperPortfolio(
                 cash=round(session.portfolio.cash + position_value, 2),
                 positions=updated_positions,
+                base_currency=session.portfolio.base_currency,
             ),
             position_states=updated_states,
             risk_plans=updated_risk_plans,
             status=session.status,
+            peak_portfolio_value=session.peak_portfolio_value,
         )
 
         return PaperPositionCloseResult(

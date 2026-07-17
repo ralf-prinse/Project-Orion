@@ -1,5 +1,29 @@
 # CHANGELOG.md
 
+## 2026-07-17 - EUR valuation, official calendars and position adoption
+
+De autonome IBKR Paper runtime vereist nu EUR als account- en
+portefeuillebasisvaluta. USD-posities en Amerikaanse BUY-kandidaten worden met
+een gedeelde, gevalideerde USD/EUR-koers naar EUR omgerekend voor equity,
+cashreserve, exposure en trade-/portefeuillerisico. Koersprijzen, stop-losses en
+targets blijven in de noteringsvaluta zodat brokerorders en managed exits de
+correcte marktprijs gebruiken. Wanneer alleen een fallback-FX-koers beschikbaar
+is, stopt de IBKR-runtime fail-closed.
+
+`MarketSessionService` gebruikt `exchange_calendars` voor XAMS, XETR en XNYS.
+Daarmee worden beursvakanties, DST en verkorte handelsdagen door dezelfde
+per-symbool BUY- en SELL-gate verwerkt.
+
+De vier expliciet toegestane bestaande IBKR Paper-posities (`AAPL`, `AAL`,
+`ASML.AS` en `ASM.AS`) kunnen gecontroleerd en idempotent worden geadopteerd.
+Adoptie maakt een persistente `PositionState` en `RiskPlan` op basis van de
+bestaande Orion stop-, target-, trailing-stop-, break-even- en time-stopconfig.
+De audittrail vermeldt uitdrukkelijk dat de oorspronkelijke BUY-redenering niet
+beschikbaar is; er wordt geen historische handelsreden verzonnen. Na adoptie
+loopt een SELL via dezelfde canonieke managed-exit- en IBKR Paper-keten.
+
+Orderinzending blijft standaard uitgeschakeld.
+
 ## 2026-07-17 - Persistent EU/US IBKR Paper runtime foundation
 
 De canonieke autonome IBKR Paper factory ondersteunt nu persistente opslag van

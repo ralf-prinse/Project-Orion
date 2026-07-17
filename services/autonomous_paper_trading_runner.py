@@ -63,6 +63,7 @@ class AutonomousPaperTradingRunner:
         position_exit_execution_service=None,
         trading_session_sync_service=None,
         market_session_service: MarketSessionService | None = None,
+        position_adoption_service=None,
     ):
         self.config = config or AutonomousPaperTradingConfig()
         self.scanner = scanner or LivePaperMarketScanner(
@@ -107,6 +108,7 @@ class AutonomousPaperTradingRunner:
             trading_session_sync_service
         )
         self.market_session_service = market_session_service
+        self.position_adoption_service = position_adoption_service
 
     def run(self):
         session_id = self._build_session_id()
@@ -129,6 +131,20 @@ class AutonomousPaperTradingRunner:
                         self.trading_session_sync_service
                         .synchronize(session)
                     )
+
+                if self.position_adoption_service is not None:
+                    adoption = self.position_adoption_service.adopt(
+                        session=session,
+                        trading_config=self.config.live_config,
+                    )
+                    session = adoption.session
+                    self._append_adoption_journal_entries(
+                        records=adoption.records,
+                        session=session,
+                        cycle_number=cycle_number,
+                        session_id=session_id,
+                    )
+                    self._save_session(session)
 
                 session = self._update_open_position_lifecycle(
                     session
@@ -183,6 +199,12 @@ class AutonomousPaperTradingRunner:
                             ),
                         ),
                         quantity=decision.quantity,
+                        fx_rate_to_base=decision.fx_rate_to_base,
+                        currency=(
+                            "EUR"
+                            if decision.symbol.endswith((".AS", ".DE"))
+                            else "USD"
+                        ),
                     )
 
                     session = cycle_result.session
@@ -331,6 +353,9 @@ class AutonomousPaperTradingRunner:
                     updated_session.risk_plans
                 ),
                 status=updated_session.status,
+                peak_portfolio_value=(
+                    updated_session.peak_portfolio_value
+                ),
             )
 
         return updated_session
@@ -539,6 +564,7 @@ class AutonomousPaperTradingRunner:
                 session.risk_plans
             ),
             status=session.status,
+            peak_portfolio_value=session.peak_portfolio_value,
         )
 
         if self.trading_session_sync_service is not None:
@@ -638,6 +664,7 @@ class AutonomousPaperTradingRunner:
             position_states=position_states,
             risk_plans=risk_plans,
             status=session.status,
+            peak_portfolio_value=session.peak_portfolio_value,
         )
 
     def _append_open_trade_journal_entry(
@@ -670,6 +697,49 @@ class AutonomousPaperTradingRunner:
         self.trade_journal_repository.append(
             entry
         )
+
+    def _append_adoption_journal_entries(
+        self,
+        *,
+        records,
+        session,
+        cycle_number,
+        session_id,
+    ):
+        if self.trade_journal_repository is None:
+            return
+
+        for record in records:
+            if not record.adopted:
+                continue
+
+            position = session.portfolio.positions[record.symbol]
+            risk_plan = session.risk_plans[record.symbol]
+            self.trade_journal_repository.append(
+                TradeJournalEntry(
+                    timestamp=datetime.now(),
+                    symbol=record.symbol,
+                    action="ADOPT_POSITION",
+                    decision="ADOPT",
+                    confidence=0.0,
+                    score=0.0,
+                    entry_price=position.entry_price,
+                    exit_price=None,
+                    quantity=position.quantity,
+                    invested_amount=position.cost_basis,
+                    realized_profit_loss=0.0,
+                    unrealized_profit_loss=(
+                        position.unrealized_profit_loss
+                    ),
+                    expected_risk=risk_plan.risk_percent,
+                    regime="UNKNOWN",
+                    volatility="UNKNOWN",
+                    ai_summary=risk_plan.notes,
+                    recommendation_reason=record.reason,
+                    cycle_number=cycle_number,
+                    session_id=session_id,
+                )
+            )
 
     def _append_broker_exit_journal_entry(
         self,

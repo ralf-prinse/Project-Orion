@@ -38,6 +38,7 @@ class PortfolioManager:
         total_value = (
             result.executed_price
             * result.executed_quantity
+            * order.fx_rate_to_base
         )
 
         if side == "BUY":
@@ -47,6 +48,8 @@ class PortfolioManager:
                 quantity=result.executed_quantity,
                 price=result.executed_price,
                 total_cost=total_value,
+                currency=order.currency,
+                fx_rate_to_base=order.fx_rate_to_base,
             )
 
         if side == "SELL":
@@ -86,6 +89,8 @@ class PortfolioManager:
         quantity: int,
         price: float,
         total_cost: float,
+        currency: str,
+        fx_rate_to_base: float,
     ) -> PaperPortfolio:
 
         normalized_symbol = symbol.strip().upper()
@@ -96,6 +101,8 @@ class PortfolioManager:
             quantity=quantity,
             entry_price=price,
             current_price=price,
+            currency=currency,
+            fx_rate_to_base=fx_rate_to_base,
         )
 
         return PaperPortfolio(
@@ -104,6 +111,7 @@ class PortfolioManager:
                 2,
             ),
             positions=updated_positions,
+            base_currency=portfolio.base_currency,
         )
 
     def _apply_sell(
@@ -139,6 +147,8 @@ class PortfolioManager:
                 quantity=remaining_quantity,
                 entry_price=position.entry_price,
                 current_price=position.current_price,
+                currency=position.currency,
+                fx_rate_to_base=position.fx_rate_to_base,
             )
 
         return PaperPortfolio(
@@ -147,4 +157,5 @@ class PortfolioManager:
                 2,
             ),
             positions=updated_positions,
+            base_currency=portfolio.base_currency,
         )

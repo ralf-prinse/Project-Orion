@@ -10,6 +10,7 @@ from models.portfolio_allocation_result import (
 )
 from models.trading_session import TradingSession
 from services.risk import RiskContext, RiskManager, RiskProfile
+from services.market.fx_rate_service import FxRateService
 
 
 class PortfolioAllocator:
@@ -36,8 +37,12 @@ class PortfolioAllocator:
     def __init__(
         self,
         risk_manager: RiskManager | None = None,
+        fx_rate_service: FxRateService | None = None,
+        require_live_fx: bool = False,
     ) -> None:
         self.risk_manager = risk_manager or RiskManager()
+        self.fx_rate_service = fx_rate_service
+        self.require_live_fx = bool(require_live_fx)
 
     def allocate(
         self,
@@ -164,10 +169,28 @@ class PortfolioAllocator:
                 )
                 continue
 
+            try:
+                fx_rate = self._candidate_fx_rate(
+                    symbol=candidate.symbol,
+                    base_currency=config.base_currency,
+                )
+            except ValueError as exc:
+                decisions.append(
+                    PortfolioAllocationDecision(
+                        candidate=candidate,
+                        quantity=0,
+                        approved=False,
+                        reason=f"Risk gate rejected allocation; {exc}",
+                    )
+                )
+                continue
+
+            entry_value_base = entry_price * fx_rate
+
             quantity = self._calculate_quantity(
                 available_cash=spendable_cash,
                 portfolio_equity=equity,
-                entry_price=entry_price,
+                entry_price=entry_value_base,
                 max_position_value=config.max_position_value,
                 max_position_size_pct=config.max_position_size_pct,
                 remaining_exposure_value=remaining_exposure_value,
@@ -176,7 +199,7 @@ class PortfolioAllocator:
             if quantity <= 0:
                 if (
                     equity * config.max_position_size_pct
-                    < entry_price
+                    < entry_value_base
                 ):
                     rejection_reason = (
                         "Maximum position exposure does not allow "
@@ -198,7 +221,7 @@ class PortfolioAllocator:
                 continue
 
             estimated_value = round(
-                quantity * entry_price,
+                quantity * entry_value_base,
                 2,
             )
 
@@ -214,7 +237,7 @@ class PortfolioAllocator:
                 continue
 
             proposed_risk_amount = round(
-                quantity * (entry_price - stop_loss),
+                quantity * (entry_price - stop_loss) * fx_rate,
                 2,
             )
 
@@ -268,6 +291,7 @@ class PortfolioAllocator:
                     approved=True,
                     reason="Approved allocation.",
                     risk_result=risk_result,
+                    fx_rate_to_base=fx_rate,
                 )
             )
 
@@ -339,10 +363,50 @@ class PortfolioAllocator:
                 )
 
             risk_amount += (
-                quantity * max(entry_price - stop_loss, 0.0)
+                quantity
+                * max(entry_price - stop_loss, 0.0)
+                * getattr(position, "fx_rate_to_base", 1.0)
             )
 
         return round(risk_amount / portfolio_equity, 4), None
+
+    def _candidate_fx_rate(
+        self,
+        *,
+        symbol: str,
+        base_currency: str,
+    ) -> float:
+        if self.fx_rate_service is None:
+            return 1.0
+
+        normalized_base = base_currency.strip().upper()
+        if normalized_base != "EUR":
+            raise ValueError("portfolio base currency must be EUR.")
+
+        quote_currency = (
+            "EUR"
+            if str(symbol).strip().upper().endswith((".AS", ".DE"))
+            else "USD"
+        )
+        fx_rate = self.fx_rate_service.get_rate(
+            quote_currency,
+            normalized_base,
+        )
+
+        if self.require_live_fx and fx_rate.source == "fallback":
+            raise ValueError(
+                f"validated FX rate unavailable for {quote_currency}/"
+                f"{normalized_base}."
+            )
+
+        rate = float(fx_rate.rate)
+        if not math.isfinite(rate) or rate <= 0:
+            raise ValueError(
+                f"FX rate for {quote_currency}/{normalized_base} "
+                "must be finite and greater than zero."
+            )
+
+        return rate
 
     def _find_symbol_value(self, values: dict, symbol: str):
         comparison_symbol = self._comparison_symbol(symbol)

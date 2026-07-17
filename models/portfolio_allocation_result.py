@@ -20,6 +20,7 @@ class PortfolioAllocationDecision:
     approved: bool
     reason: str
     risk_result: RiskResult | None = None
+    fx_rate_to_base: float = 1.0
 
     @property
     def symbol(self) -> str:
@@ -28,7 +29,9 @@ class PortfolioAllocationDecision:
     @property
     def estimated_value(self) -> float:
         return round(
-            self.quantity * self.candidate.result.risk_plan.entry_price,
+            self.quantity
+            * self.candidate.result.risk_plan.entry_price
+            * self.fx_rate_to_base,
             2,
         )
 

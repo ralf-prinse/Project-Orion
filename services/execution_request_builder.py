@@ -24,22 +24,30 @@ class ExecutionRequestBuilder:
         self,
         pipeline_output: TradingPipelineResult | dict[str, Any],
         quantity: int,
+        fx_rate_to_base: float = 1.0,
+        currency: str = "EUR",
     ) -> ExecutionRequest:
         if isinstance(pipeline_output, TradingPipelineResult):
             return self._build_from_result(
                 result=pipeline_output,
                 quantity=quantity,
+                fx_rate_to_base=fx_rate_to_base,
+                currency=currency,
             )
 
         return self._build_from_legacy_dict(
             pipeline_output=pipeline_output,
             quantity=quantity,
+            fx_rate_to_base=fx_rate_to_base,
+            currency=currency,
         )
 
     def _build_from_result(
         self,
         result: TradingPipelineResult,
         quantity: int,
+        fx_rate_to_base: float,
+        currency: str,
     ) -> ExecutionRequest:
         return ExecutionRequest(
             symbol=result.symbol.upper(),
@@ -50,12 +58,16 @@ class ExecutionRequestBuilder:
             confidence=float(result.confidence),
             strategy="DEFAULT",
             source="TradingPipeline",
+            fx_rate_to_base=float(fx_rate_to_base),
+            currency=currency.strip().upper(),
         )
 
     def _build_from_legacy_dict(
         self,
         pipeline_output: dict[str, Any],
         quantity: int,
+        fx_rate_to_base: float,
+        currency: str,
     ) -> ExecutionRequest:
         risk_plan_data = pipeline_output["risk_plan"]
 
@@ -82,4 +94,6 @@ class ExecutionRequestBuilder:
             confidence=float(pipeline_output["confidence"]),
             strategy="DEFAULT",
             source="TradingPipeline",
+            fx_rate_to_base=float(fx_rate_to_base),
+            currency=currency.strip().upper(),
         )

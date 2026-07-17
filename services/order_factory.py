@@ -47,6 +47,8 @@ class OrderFactory:
             price=context.request.entry_price,
             created_at=datetime.now(),
             source="ExecutionEngine",
+            currency=context.request.currency,
+            fx_rate_to_base=context.request.fx_rate_to_base,
         )
 
     def _resolve_side(

@@ -4,3 +4,4 @@ plotly
 requests
 yfinance
 scikit-learn
+exchange-calendars>=4.11,<5

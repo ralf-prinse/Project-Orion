@@ -14,6 +14,8 @@ class LivePaperTradingConfig:
 
     watchlist_path: Path = Path("data/universes/swing.csv")
 
+    base_currency: str = "EUR"
+
     initial_cash: float = 10_000.0
 
     max_symbols: int = 150

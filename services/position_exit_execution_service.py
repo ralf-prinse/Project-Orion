@@ -115,6 +115,8 @@ class PositionExitExecutionService:
             confidence=1.0,
             strategy="POSITION_LIFECYCLE",
             source="PositionMonitor",
+            currency=position.currency,
+            fx_rate_to_base=position.fx_rate_to_base,
         )
 
         context = ExecutionContext(

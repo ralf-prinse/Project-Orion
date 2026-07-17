@@ -157,6 +157,61 @@ def test_dst_difference_between_us_and_europe():
     ).state is MarketSessionState.OPEN
 
 
+def test_nyse_independence_day_observed_is_closed():
+    service = MarketSessionService()
+    status = service.get_symbol_status(
+        "AAPL",
+        now=datetime(2026, 7, 3, 16, 0, tzinfo=UTC),
+    )
+
+    assert status.is_open is False
+    assert "holiday" in status.reason.lower()
+
+
+def test_nyse_thanksgiving_friday_uses_early_close():
+    service = MarketSessionService()
+    before_close = service.get_symbol_status(
+        "AAPL",
+        now=datetime(2026, 11, 27, 17, 59, tzinfo=UTC),
+    )
+    after_close = service.get_symbol_status(
+        "AAPL",
+        now=datetime(2026, 11, 27, 18, 1, tzinfo=UTC),
+    )
+
+    assert before_close.is_open is True
+    assert before_close.session_close.hour == 13
+    assert after_close.is_open is False
+
+
+def test_euronext_good_friday_is_closed():
+    service = MarketSessionService()
+    status = service.get_symbol_status(
+        "ASML.AS",
+        now=datetime(2026, 4, 3, 10, 0, tzinfo=UTC),
+    )
+
+    assert status.is_open is False
+    assert "holiday" in status.reason.lower()
+
+
+def test_euronext_christmas_eve_uses_early_close():
+    service = MarketSessionService()
+    before_close = service.get_symbol_status(
+        "ASML.AS",
+        now=datetime(2026, 12, 24, 13, 0, tzinfo=UTC),
+    )
+    after_close = service.get_symbol_status(
+        "ASML.AS",
+        now=datetime(2026, 12, 24, 13, 10, tzinfo=UTC),
+    )
+
+    assert before_close.is_open is True
+    assert before_close.session_close.hour == 14
+    assert before_close.session_close.minute == 5
+    assert after_close.is_open is False
+
+
 def run():
     test_market_resolution()
     test_european_markets_open_during_regular_session()
@@ -164,6 +219,10 @@ def run():
     test_all_markets_closed_after_us_close()
     test_weekend_is_closed()
     test_dst_difference_between_us_and_europe()
+    test_nyse_independence_day_observed_is_closed()
+    test_nyse_thanksgiving_friday_uses_early_close()
+    test_euronext_good_friday_is_closed()
+    test_euronext_christmas_eve_uses_early_close()
 
     print("MARKET SESSION SERVICE: PASS")
 

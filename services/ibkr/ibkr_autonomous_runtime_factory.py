@@ -26,9 +26,12 @@ from services.stores.repositories.trade_journal_repository import (
 from services.trading_cycle import TradingCycle
 from services.live_paper_market_scanner import LivePaperMarketScanner
 from services.market_session_service import MarketSessionService
+from services.market.fx_rate_service import FxRateService
+from services.portfolio_allocator import PortfolioAllocator
 from services.stores.repositories.paper_portfolio_repository import (
     PaperPortfolioRepository,
 )
+from services.ibkr.ibkr_portfolio_mapper import IbkrPortfolioMapper
 from services.stores.repositories.trading_session_repository import (
     TradingSessionRepository,
 )
@@ -83,6 +86,7 @@ class IbkrAutonomousRuntimeFactory:
         ) = None,
         portfolio_repository: PaperPortfolioRepository | None = None,
         trading_session_repository: TradingSessionRepository | None = None,
+        position_adoption_service=None,
         allow_order_submission: bool = False,
         host: str = DEFAULT_HOST,
         port: int = PAPER_PORT,
@@ -103,12 +107,21 @@ class IbkrAutonomousRuntimeFactory:
             )
 
         runtime_config = config or AutonomousPaperTradingConfig()
+        if runtime_config.live_config.base_currency.strip().upper() != "EUR":
+            raise ValueError(
+                "Autonomous IBKR Paper base currency must be EUR."
+            )
         price_provider = YahooProvider()
+        fx_rate_service = FxRateService()
         market_session_service = MarketSessionService()
         scanner = LivePaperMarketScanner(
             config=runtime_config.live_config,
             provider=price_provider,
             market_session_service=market_session_service,
+        )
+        allocator = PortfolioAllocator(
+            fx_rate_service=fx_rate_service,
+            require_live_fx=True,
         )
 
         account_service = IbkrAccountService(
@@ -152,12 +165,18 @@ class IbkrAutonomousRuntimeFactory:
             IbkrTradingSessionSyncService(
                 account_service=account_service,
                 price_provider=price_provider,
+                mapper=IbkrPortfolioMapper(
+                    base_currency="EUR",
+                    fx_rate_service=fx_rate_service,
+                    require_live_fx=True,
+                ),
             )
         )
 
         runner = AutonomousPaperTradingRunner(
             config=runtime_config,
             scanner=scanner,
+            allocator=allocator,
             trading_cycle=trading_cycle,
             portfolio_repository=portfolio_repository,
             trading_session_repository=trading_session_repository,
@@ -173,6 +192,7 @@ class IbkrAutonomousRuntimeFactory:
                 trading_session_sync_service
             ),
             market_session_service=market_session_service,
+            position_adoption_service=position_adoption_service,
         )
 
         return IbkrAutonomousRuntime(

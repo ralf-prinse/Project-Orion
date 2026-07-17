@@ -13,3 +13,5 @@ class Order:
     price: float
     created_at: datetime
     source: str = "ExecutionEngine"
+    currency: str = "EUR"
+    fx_rate_to_base: float = 1.0

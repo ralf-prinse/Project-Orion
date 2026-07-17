@@ -3,6 +3,7 @@ from __future__ import annotations
 from models.autonomous_paper_trading_config import (
     AutonomousPaperTradingConfig,
 )
+from models.live_paper_trading_config import LivePaperTradingConfig
 from services.ibkr.ibkr_autonomous_runtime_factory import (
     IbkrAutonomousRuntimeFactory,
 )
@@ -136,6 +137,17 @@ def test_wires_market_hours_to_buy_and_sell_paths() -> None:
     )
 
 
+def test_wires_explicit_position_adoption_service() -> None:
+    adoption_service = object()
+
+    runtime = IbkrAutonomousRuntimeFactory().build(
+        paper_account_id=PAPER_ACCOUNT_ID,
+        position_adoption_service=adoption_service,
+    )
+
+    assert runtime.runner.position_adoption_service is adoption_service
+
+
 def test_order_submission_is_disabled_by_default() -> None:
     runtime = create_runtime()
 
@@ -198,6 +210,24 @@ def test_rejects_non_paper_account_id() -> None:
         )
 
 
+def test_rejects_non_euro_runtime_base_currency() -> None:
+    factory = IbkrAutonomousRuntimeFactory()
+
+    try:
+        factory.build(
+            paper_account_id=PAPER_ACCOUNT_ID,
+            config=AutonomousPaperTradingConfig(
+                live_config=LivePaperTradingConfig(
+                    base_currency="USD",
+                )
+            ),
+        )
+    except ValueError as exc:
+        assert "base currency must be EUR" in str(exc)
+    else:
+        raise AssertionError("Expected non-EUR runtime to fail.")
+
+
 def run() -> None:
     tests = [
         test_builds_ibkr_autonomous_runtime,
@@ -207,12 +237,14 @@ def run() -> None:
         test_wires_separate_decision_journal_repository,
         test_wires_persistent_session_repositories,
         test_wires_market_hours_to_buy_and_sell_paths,
+        test_wires_explicit_position_adoption_service,
         test_order_submission_is_disabled_by_default,
         test_order_submission_can_be_enabled_explicitly,
         test_uses_separate_ibkr_client_ids,
         test_uses_ibkr_paper_port,
         test_rejects_empty_account_id,
         test_rejects_non_paper_account_id,
+        test_rejects_non_euro_runtime_base_currency,
     ]
 
     for test in tests:

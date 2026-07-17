@@ -9,6 +9,7 @@ from models.paper_position import PaperPosition
 class PaperPortfolio:
     cash: float
     positions: dict[str, PaperPosition] = field(default_factory=dict)
+    base_currency: str = "EUR"
 
     @property
     def positions_value(self) -> float:

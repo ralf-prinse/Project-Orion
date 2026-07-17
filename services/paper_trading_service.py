@@ -47,10 +47,14 @@ class PaperTradingService:
         session: TradingSession,
         pipeline_output: TradingPipelineResult | dict[str, Any],
         quantity: int,
+        fx_rate_to_base: float = 1.0,
+        currency: str = "EUR",
     ) -> PaperTradeResult:
         request = self.request_builder.build(
             pipeline_output=pipeline_output,
             quantity=quantity,
+            fx_rate_to_base=fx_rate_to_base,
+            currency=currency,
         )
 
         context = ExecutionContext(
@@ -69,6 +73,7 @@ class PaperTradingService:
             position_states=dict(session.position_states),
             risk_plans=dict(session.risk_plans),
             status=session.status,
+            peak_portfolio_value=session.peak_portfolio_value,
         )
 
         position_state: PositionState | None = None

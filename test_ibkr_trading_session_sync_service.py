@@ -200,11 +200,38 @@ def test_sync_restores_known_euronext_symbol_suffix() -> None:
     assert restored[0].symbol == "ASML.AS"
 
 
+def test_sync_maps_unknown_aeb_position_to_euronext_symbol() -> None:
+    service = IbkrTradingSessionSyncService(
+        account_service=FakeIbkrAccountService(),
+        price_provider=FakePriceProvider(),
+    )
+    broker_position = BrokerPosition(
+        account_id="DU123456",
+        symbol="ASM",
+        quantity=1.0,
+        average_cost=870.0,
+        currency="EUR",
+        security_type="STK",
+        exchange="AEB",
+    )
+
+    restored = service._restore_orion_symbols(
+        broker_positions=(broker_position,),
+        session=TradingSession(
+            name="Empty session",
+            portfolio=PaperPortfolio(cash=1000.0),
+        ),
+    )
+
+    assert restored[0].symbol == "ASM.AS"
+
+
 def run() -> None:
     tests = [
         test_sync_replaces_portfolio_with_ibkr_truth,
         test_sync_removes_stale_local_lifecycle_state,
         test_sync_restores_known_euronext_symbol_suffix,
+        test_sync_maps_unknown_aeb_position_to_euronext_symbol,
     ]
 
     passed = 0

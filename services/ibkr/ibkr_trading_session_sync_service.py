@@ -267,11 +267,28 @@ class IbkrTradingSessionSyncService:
                 self._comparison_symbol(position.symbol),
                 [],
             )
-            restored.append(
-                replace(position, symbol=candidates[0])
-                if len(candidates) == 1
-                else position
-            )
+            if len(candidates) == 1:
+                restored.append(
+                    replace(position, symbol=candidates[0])
+                )
+                continue
+
+            exchange = str(position.exchange).strip().upper()
+            currency = str(position.currency).strip().upper()
+            raw_symbol = str(position.symbol).strip().upper()
+
+            if (
+                not candidates
+                and exchange == "AEB"
+                and currency == "EUR"
+                and not raw_symbol.endswith(".AS")
+            ):
+                restored.append(
+                    replace(position, symbol=f"{raw_symbol}.AS")
+                )
+                continue
+
+            restored.append(position)
 
         return tuple(restored)
 

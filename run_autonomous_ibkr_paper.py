@@ -20,6 +20,8 @@ from services.stores.json_paper_portfolio_repository import (
 from services.stores.json_trading_session_repository import (
     JsonTradingSessionRepository,
 )
+from models.position_adoption import PositionAdoptionConfig
+from services.position_adoption_service import PositionAdoptionService
 
 
 ACCOUNT_ENVIRONMENT_VARIABLE = "ORION_IBKR_PAPER_ACCOUNT_ID"
@@ -98,6 +100,7 @@ def print_runtime_mode(
     print(f"Account:           {mask_account_id(paper_account_id)}")
     print("TWS host:          127.0.0.1")
     print("TWS Paper port:    7497")
+    print("Base currency:     EUR (required)")
     print("Cycles:            1")
     print("Maximum symbols:   6 (EU + US)")
     print("Maximum positions: 4")
@@ -112,6 +115,7 @@ def print_runtime_mode(
     print("BUY execution:     IBKR")
     print("SELL execution:    IBKR")
     print("Broker sync:       ENABLED")
+    print("Adopt positions:   AAPL, AAL, ASML.AS, ASM.AS")
     print("=========================================")
     print()
 
@@ -179,6 +183,16 @@ def main() -> None:
         ),
         portfolio_repository=JsonPaperPortfolioRepository(
             path="data/ibkr_autonomous_paper_portfolio.json",
+        ),
+        position_adoption_service=PositionAdoptionService(
+            PositionAdoptionConfig(
+                allowed_symbols=(
+                    "AAPL",
+                    "AAL",
+                    "ASML.AS",
+                    "ASM.AS",
+                ),
+            )
         ),
         allow_order_submission=allow_order_submission,
     )
