@@ -4,6 +4,7 @@ import math
 import threading
 import time
 from datetime import datetime
+import logging
 
 from ibapi.client import EClient
 from ibapi.contract import Contract
@@ -12,6 +13,8 @@ from ibapi.order import Order as IbkrOrder
 from ibapi.wrapper import EWrapper
 
 from services.ibkr.ibkr_broker import IbkrOrderOutcome
+
+logger = logging.getLogger(__name__)
 
 
 class IbkrOrderTransportError(RuntimeError):
@@ -67,6 +70,12 @@ class _IbkrOrderClient(EWrapper, EClient):
 
     def nextValidId(self, orderId: int) -> None:
         self.next_order_id = int(orderId)
+
+        logger.info(
+            "IBKR connection ready. nextValidId=%s",
+            self.next_order_id,
+        )
+
         self.connection_ready.set()
 
     def managedAccounts(self, accountsList: str) -> None:
@@ -76,6 +85,12 @@ class _IbkrOrderClient(EWrapper, EClient):
             if account.strip()
         ]
         self.managed_accounts = list(dict.fromkeys(accounts))
+
+        logger.info(
+            "IBKR managed accounts received: %s",
+            ", ".join(self.managed_accounts),
+        )
+
         self.accounts_ready.set()
 
     def orderStatus(
@@ -96,6 +111,21 @@ class _IbkrOrderClient(EWrapper, EClient):
             return
 
         normalized_status = str(status).strip().upper()
+
+        logger.info(
+            (
+                "IBKR orderStatus: "
+                "orderId=%s status=%s filled=%s remaining=%s "
+                "avgFillPrice=%s lastFillPrice=%s whyHeld=%s"
+            ),
+            orderId,
+            normalized_status,
+            filled,
+            remaining,
+            avgFillPrice,
+            lastFillPrice,
+            whyHeld,
+        )
         filled_quantity = self._safe_quantity(filled)
         average_fill_price = self._safe_float(avgFillPrice)
 
@@ -190,13 +220,31 @@ class _IbkrOrderClient(EWrapper, EClient):
         advanced_reject = str(advancedOrderRejectJson or "").strip()
         if advanced_reject:
             message += ", advanced_reject=" + advanced_reject
+
+        logger.error("IBKR API ERROR: %s", message)
+
         self.errors.append(message)
 
         if (
             self.active_order_id is not None
             and int(reqId) in {-1, self.active_order_id}
         ):
-            self.outcome = IbkrOrderOutcome(status="REJECTED", message=message)
+            warning_text = str(errorString).lower()
+
+            if (
+                error_code == 399
+                and "will not be placed at the exchange until" in warning_text
+            ):
+                logger.warning(
+                    "IBKR informational warning preserved: %s",
+                    message,
+                )
+                return
+
+            self.outcome = IbkrOrderOutcome(
+                status="REJECTED",
+                message=message,
+            )
             self.terminal_event.set()
 
     @staticmethod
@@ -329,11 +377,41 @@ class IbkrOrderTransport:
                 self._connect()
                 order_id = self._claim_order_id()
                 order.account = self.paper_account_id
+                order.tif = "DAY"
                 self._client.reset_order_state(order_id, expected_quantity)
+
+                logger.info(
+                    (
+                        "Submitting IBKR order: "
+                        "orderId=%s account=%s symbol=%s action=%s "
+                        "quantity=%s exchange=%s currency=%s"
+                    ),
+                    order_id,
+                    self.paper_account_id,
+                    contract.symbol,
+                    order.action,
+                    order.totalQuantity,
+                    contract.exchange,
+                    contract.currency,
+                )
+
                 self._client.placeOrder(order_id, contract, order)
 
                 if self._client.terminal_event.wait(float(timeout_seconds)):
-                    return self._require_outcome()
+                    outcome = self._require_outcome()
+
+                    logger.info(
+                        (
+                            "IBKR order completed: "
+                            "status=%s filled=%s avg_price=%s message=%s"
+                        ),
+                        outcome.status,
+                        outcome.filled_quantity,
+                        outcome.average_fill_price,
+                        outcome.message,
+                    )
+
+                    return outcome
 
                 reconciled = self._reconcile_execution_with_retries()
                 if reconciled is not None:

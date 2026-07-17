@@ -181,6 +181,7 @@ def test_terminal_order_status_returns_fill() -> None:
     assert outcome.status == "FILLED"
     assert outcome.filled_quantity == 1
     assert client.executions_requested is False
+    assert client.received_order.tif == "DAY"
 
 
 def test_timeout_reconciles_execution_before_cancel() -> None:
@@ -245,6 +246,8 @@ def test_accepts_sell() -> None:
     assert outcome.status == "FILLED"
     assert client.place_order_called is True
     assert client.received_order.action == "SELL"
+    assert client.received_order.tif == "DAY"
+
 
 def test_rejects_missing_account() -> None:
     client = FakeIbkrOrderClient()
@@ -261,11 +264,10 @@ def test_rejects_missing_account() -> None:
     except IbkrOrderTransportError as exc:
         assert "was not returned" in str(exc)
     else:
-        raise AssertionError(
-            "Expected account mismatch."
-        )
+        raise AssertionError("Expected account mismatch.")
 
     assert client.place_order_called is False
+
 
 def test_rejects_live_port() -> None:
     try:
@@ -274,23 +276,6 @@ def test_rejects_live_port() -> None:
         assert "7497" in str(exc)
     else:
         raise AssertionError("Expected live port rejection.")
-
-
-def test_rejects_sell() -> None:
-    client = FakeIbkrOrderClient()
-    order = create_order()
-    order.action = "SELL"
-    transport = create_transport(client)
-    try:
-        transport.submit_order(
-            contract=create_contract(),
-            order=order,
-            timeout_seconds=0.05,
-        )
-    except ValueError as exc:
-        assert "BUY" in str(exc)
-    else:
-        raise AssertionError("Expected SELL rejection.")
 
 
 def test_rejects_fractional_quantity() -> None:
