@@ -1,6 +1,11 @@
 from models.autonomous_paper_trading_config import (
     AutonomousPaperTradingConfig,
 )
+from models.autonomous_paper_trading_result import (
+    AutonomousPaperTradingCycleResult,
+    AutonomousPaperTradingResult,
+)
+from models.portfolio_allocation_result import PortfolioAllocationResult
 from models.live_paper_trading_config import LivePaperTradingConfig
 from models.live_paper_trading_result import (
     LivePaperCandidate,
@@ -409,3 +414,61 @@ def test_legacy_journal_entry_loads_without_risk_fields() -> None:
     assert restored.risk_allowed is None
     assert restored.risk_reasons == ()
     assert restored.risk_warnings == ()
+
+
+def test_execution_rejection_is_journaled_after_approval() -> None:
+    session = TradingSession(
+        name="Execution rejection journal",
+        portfolio=PaperPortfolio(cash=1_000.0),
+    )
+    decision = PortfolioAllocator().allocate(
+        session=session,
+        candidates=[_candidate("AAA")],
+        config=_config(),
+    ).approved[0]
+    result = AutonomousPaperTradingResult(
+        session=session,
+        cycle_results=[
+            AutonomousPaperTradingCycleResult(
+                scan=LivePaperTradingResult(
+                    session=session,
+                    scanned_symbols=1,
+                    succeeded_symbols=1,
+                    failed_symbols=0,
+                    failed_symbol_errors={},
+                    scan_duration_seconds=0.0,
+                    candidates=[decision.candidate],
+                    executed_trades=0,
+                    rejected_trades=1,
+                ),
+                allocation=PortfolioAllocationResult(
+                    decisions=[decision]
+                ),
+                executed_trades=0,
+                rejected_trades=1,
+                execution_rejections={
+                    "AAA": "IBKR order submission is disabled."
+                },
+            )
+        ],
+        completed_cycles=1,
+        failed_cycles=0,
+        initial_cash=1_000.0,
+        final_cash=1_000.0,
+        final_equity=1_000.0,
+    )
+
+    entries = TradeJournalBuilder().build_decision_entries(
+        result=result,
+        session_id="execution-rejection-test",
+    )
+
+    assert [entry.action for entry in entries] == [
+        "APPROVED",
+        "EXECUTION_REJECTED",
+    ]
+    assert entries[1].recommendation_reason == (
+        "IBKR order submission is disabled."
+    )
+    assert result.total_allocation_rejections == 0
+    assert result.total_execution_rejections == 1

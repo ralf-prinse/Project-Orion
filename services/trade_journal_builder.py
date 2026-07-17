@@ -63,6 +63,21 @@ class TradeJournalBuilder:
                     )
                 )
 
+                execution_rejection = (
+                    cycle.execution_rejections.get(
+                        decision.symbol.strip().upper()
+                    )
+                )
+                if execution_rejection is not None:
+                    entries.append(
+                        self.build_execution_rejection_entry(
+                            decision=decision,
+                            reason=execution_rejection,
+                            cycle_number=cycle_index,
+                            session_id=session_id,
+                        )
+                    )
+
         return entries
 
     def build_decision_entry(
@@ -99,6 +114,22 @@ class TradeJournalBuilder:
             session_id=session_id,
         )
 
+    def build_execution_rejection_entry(
+        self,
+        decision,
+        reason: str,
+        cycle_number: int,
+        session_id: str,
+    ) -> TradeJournalEntry:
+        return self._build_entry(
+            decision=decision,
+            position=None,
+            action="EXECUTION_REJECTED",
+            cycle_number=cycle_number,
+            session_id=session_id,
+            recommendation_reason=reason,
+        )
+
     def _build_entry(
         self,
         decision,
@@ -106,6 +137,7 @@ class TradeJournalBuilder:
         action: str,
         cycle_number: int,
         session_id: str,
+        recommendation_reason: str | None = None,
     ) -> TradeJournalEntry:
         candidate = decision.candidate
         pipeline_result = candidate.result
@@ -162,7 +194,11 @@ class TradeJournalBuilder:
             regime=regime,
             volatility=volatility,
             ai_summary=str(pipeline_result.explanation),
-            recommendation_reason=decision.reason,
+            recommendation_reason=(
+                recommendation_reason
+                if recommendation_reason is not None
+                else decision.reason
+            ),
             cycle_number=cycle_number,
             session_id=session_id,
             risk_allowed=(

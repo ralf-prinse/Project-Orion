@@ -1,5 +1,13 @@
 # CHANGELOG.md
 
+## 2026-07-17 - Explicit execution-rejection observability
+
+Een door risico goedgekeurde trade die later door de uitvoeringslaag wordt
+geblokkeerd, wordt nu afzonderlijk als `EXECUTION_REJECTED` met de concrete
+broker- of permissiereden in het beslisjournaal vastgelegd. De runnersamenvatting
+splitst allocatie- en uitvoeringsafwijzingen, en SAFE MODE toont BUY en SELL
+expliciet als `DISABLED`.
+
 ## 2026-07-17 - Post-fill cash ordering and IBKR log privacy
 
 De broker-truthsync leest de IBKR-accountwaarden nu pas nadat de verwachte

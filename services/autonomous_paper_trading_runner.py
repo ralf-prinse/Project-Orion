@@ -197,6 +197,7 @@ class AutonomousPaperTradingRunner:
                 rejected_trades = 0
                 attempted_trade = False
                 opened_symbols: set[str] = set()
+                execution_rejections: dict[str, str] = {}
 
                 for decision in allocation_result.decisions:
                     if not decision.approved:
@@ -244,6 +245,14 @@ class AutonomousPaperTradingRunner:
                         )
                     else:
                         rejected_trades += 1
+                        execution_rejections[
+                            decision.symbol.strip().upper()
+                        ] = cycle_result.message
+                        print(
+                            "Trade execution rejected: "
+                            f"{decision.symbol} | "
+                            f"{cycle_result.message}"
+                        )
 
                 if (
                     attempted_trade
@@ -280,6 +289,9 @@ class AutonomousPaperTradingRunner:
                         executed_trades=executed_trades,
                         rejected_trades=rejected_trades,
                         executed_exits=executed_exits,
+                        execution_rejections=(
+                            execution_rejections
+                        ),
                     )
                 )
 

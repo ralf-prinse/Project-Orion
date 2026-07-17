@@ -140,12 +140,23 @@ def print_runtime_mode(
     print(
         "BUY execution:     "
         + (
-            "BLOCKED BY EXIT_ONLY"
-            if execution_mode == AutonomousPaperTradingConfig.EXIT_ONLY
-            else "IBKR"
+            "DISABLED"
+            if not allow_order_submission
+            else (
+                "BLOCKED BY EXIT_ONLY"
+                if execution_mode == AutonomousPaperTradingConfig.EXIT_ONLY
+                else "IBKR"
+            )
         )
     )
-    print("SELL execution:    IBKR")
+    print(
+        "SELL execution:    "
+        + (
+            "IBKR"
+            if allow_order_submission
+            else "DISABLED"
+        )
+    )
     print("Broker sync:       ENABLED")
     print("Adopt positions:   AAPL, AAL, ASML.AS, ASM.AS")
     print("=========================================")
@@ -186,6 +197,14 @@ def print_result(result) -> None:
     print(f"Executed trades:  {result.total_executed_trades}")
     print(f"Executed exits:   {result.total_executed_exits}")
     print(f"Rejected trades:  {result.total_rejected_trades}")
+    print(
+        "Allocation rejects: "
+        f"{result.total_allocation_rejections}"
+    )
+    print(
+        "Execution rejects:  "
+        f"{result.total_execution_rejections}"
+    )
     print(f"Risk evaluations: {result.risk_evaluations}")
     print(f"Risk rejections:  {result.risk_rejections}")
     print(f"Final cash:       {result.final_cash:.2f}")

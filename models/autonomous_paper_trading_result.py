@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from dataclasses import field
 
 from models.live_paper_trading_result import LivePaperTradingResult
 from models.portfolio_allocation_result import PortfolioAllocationResult
@@ -19,6 +20,9 @@ class AutonomousPaperTradingCycleResult:
     executed_trades: int
     rejected_trades: int
     executed_exits: int = 0
+    execution_rejections: dict[str, str] = field(
+        default_factory=dict
+    )
 
 
 @dataclass(frozen=True)
@@ -56,6 +60,20 @@ class AutonomousPaperTradingResult:
     def total_failed_symbols(self) -> int:
         return sum(
             cycle.scan.failed_symbols
+            for cycle in self.cycle_results
+        )
+
+    @property
+    def total_allocation_rejections(self) -> int:
+        return sum(
+            cycle.allocation.rejected_count
+            for cycle in self.cycle_results
+        )
+
+    @property
+    def total_execution_rejections(self) -> int:
+        return sum(
+            len(cycle.execution_rejections)
             for cycle in self.cycle_results
         )
 
