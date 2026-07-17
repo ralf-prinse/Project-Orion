@@ -109,6 +109,33 @@ def test_wires_separate_decision_journal_repository() -> None:
     assert runtime.runner.decision_journal_repository is repository
 
 
+def test_wires_persistent_session_repositories() -> None:
+    session_repository = object()
+    portfolio_repository = object()
+
+    runtime = IbkrAutonomousRuntimeFactory().build(
+        paper_account_id=PAPER_ACCOUNT_ID,
+        trading_session_repository=session_repository,
+        portfolio_repository=portfolio_repository,
+    )
+
+    assert (
+        runtime.runner.trading_session_repository
+        is session_repository
+    )
+    assert runtime.runner.portfolio_repository is portfolio_repository
+
+
+def test_wires_market_hours_to_buy_and_sell_paths() -> None:
+    runtime = create_runtime()
+
+    assert runtime.runner.market_session_service is not None
+    assert (
+        runtime.runner.scanner.market_session_service
+        is runtime.runner.market_session_service
+    )
+
+
 def test_order_submission_is_disabled_by_default() -> None:
     runtime = create_runtime()
 
@@ -178,6 +205,8 @@ def run() -> None:
         test_buy_and_sell_share_execution_engine,
         test_runner_uses_composed_ibkr_services,
         test_wires_separate_decision_journal_repository,
+        test_wires_persistent_session_repositories,
+        test_wires_market_hours_to_buy_and_sell_paths,
         test_order_submission_is_disabled_by_default,
         test_order_submission_can_be_enabled_explicitly,
         test_uses_separate_ibkr_client_ids,

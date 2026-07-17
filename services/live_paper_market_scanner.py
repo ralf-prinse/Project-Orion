@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
+from datetime import UTC, datetime
 
 from models.live_paper_trading_config import LivePaperTradingConfig
 from models.live_paper_trading_result import (
@@ -17,6 +19,7 @@ from services.paper_trading_pipeline_adapter import (
     PaperTradingPipelineAdapter,
 )
 from services.watchlist_service import WatchlistService
+from services.market_session_service import MarketSessionService
 
 
 class LivePaperMarketScanner:
@@ -45,6 +48,8 @@ class LivePaperMarketScanner:
         adapter: PaperTradingPipelineAdapter | None = None,
         watchlist_service: WatchlistService | None = None,
         ranking_engine: OpportunityRankingEngine | None = None,
+        market_session_service: MarketSessionService | None = None,
+        clock: Callable[[], datetime] | None = None,
     ):
         self.config = config or LivePaperTradingConfig()
         self.provider = provider or YahooProvider()
@@ -56,6 +61,8 @@ class LivePaperMarketScanner:
                 watchlist_path=str(self.config.watchlist_path),
             )
         )
+        self.market_session_service = market_session_service
+        self.clock = clock or (lambda: datetime.now(UTC))
 
     def run(
         self,
@@ -80,6 +87,24 @@ class LivePaperMarketScanner:
 
         for symbol in symbols:
             try:
+                evaluated_at = self.clock()
+                if (
+                    self.market_session_service is not None
+                    and not self.market_session_service.is_symbol_market_open(
+                        symbol=symbol,
+                        now=evaluated_at,
+                    )
+                ):
+                    status = self.market_session_service.get_symbol_status(
+                        symbol=symbol,
+                        now=evaluated_at,
+                    )
+                    failed_symbol_errors[symbol] = (
+                        f"Market {status.market.code} is closed: "
+                        f"{status.reason}"
+                    )
+                    continue
+
                 history = self.provider.get_historical_data(
                     symbol=symbol,
                     period=self.config.history_period,

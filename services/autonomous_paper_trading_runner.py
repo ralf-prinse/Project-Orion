@@ -40,6 +40,7 @@ from services.stores.repositories.trading_session_repository import (
 )
 from services.trade_journal_builder import TradeJournalBuilder
 from services.trading_cycle import TradingCycle
+from services.market_session_service import MarketSessionService
 
 
 class AutonomousPaperTradingRunner:
@@ -61,6 +62,7 @@ class AutonomousPaperTradingRunner:
         exit_engine=None,
         position_exit_execution_service=None,
         trading_session_sync_service=None,
+        market_session_service: MarketSessionService | None = None,
     ):
         self.config = config or AutonomousPaperTradingConfig()
         self.scanner = scanner or LivePaperMarketScanner(
@@ -104,6 +106,7 @@ class AutonomousPaperTradingRunner:
         self.trading_session_sync_service = (
             trading_session_sync_service
         )
+        self.market_session_service = market_session_service
 
     def run(self):
         session_id = self._build_session_id()
@@ -408,6 +411,18 @@ class AutonomousPaperTradingRunner:
                 )
 
             if decision.action == "HOLD":
+                continue
+
+            if (
+                self.market_session_service is not None
+                and not self.market_session_service.is_symbol_market_open(
+                    symbol
+                )
+            ):
+                print(
+                    "Position exit skipped for "
+                    f"{symbol}: regular market session is closed."
+                )
                 continue
 
             if (

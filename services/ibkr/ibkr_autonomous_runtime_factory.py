@@ -24,6 +24,14 @@ from services.stores.repositories.trade_journal_repository import (
     TradeJournalRepository,
 )
 from services.trading_cycle import TradingCycle
+from services.live_paper_market_scanner import LivePaperMarketScanner
+from services.market_session_service import MarketSessionService
+from services.stores.repositories.paper_portfolio_repository import (
+    PaperPortfolioRepository,
+)
+from services.stores.repositories.trading_session_repository import (
+    TradingSessionRepository,
+)
 
 
 @dataclass(frozen=True)
@@ -73,6 +81,8 @@ class IbkrAutonomousRuntimeFactory:
         decision_journal_repository: (
             TradeJournalRepository | None
         ) = None,
+        portfolio_repository: PaperPortfolioRepository | None = None,
+        trading_session_repository: TradingSessionRepository | None = None,
         allow_order_submission: bool = False,
         host: str = DEFAULT_HOST,
         port: int = PAPER_PORT,
@@ -92,7 +102,14 @@ class IbkrAutonomousRuntimeFactory:
                 "account starting with 'DU'."
             )
 
+        runtime_config = config or AutonomousPaperTradingConfig()
         price_provider = YahooProvider()
+        market_session_service = MarketSessionService()
+        scanner = LivePaperMarketScanner(
+            config=runtime_config.live_config,
+            provider=price_provider,
+            market_session_service=market_session_service,
+        )
 
         account_service = IbkrAccountService(
             host=host,
@@ -139,8 +156,11 @@ class IbkrAutonomousRuntimeFactory:
         )
 
         runner = AutonomousPaperTradingRunner(
-            config=config or AutonomousPaperTradingConfig(),
+            config=runtime_config,
+            scanner=scanner,
             trading_cycle=trading_cycle,
+            portfolio_repository=portfolio_repository,
+            trading_session_repository=trading_session_repository,
             trade_journal_repository=trade_journal_repository,
             decision_journal_repository=(
                 decision_journal_repository
@@ -152,6 +172,7 @@ class IbkrAutonomousRuntimeFactory:
             trading_session_sync_service=(
                 trading_session_sync_service
             ),
+            market_session_service=market_session_service,
         )
 
         return IbkrAutonomousRuntime(

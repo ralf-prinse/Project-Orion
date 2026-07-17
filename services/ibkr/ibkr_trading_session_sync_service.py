@@ -3,6 +3,7 @@ from __future__ import annotations
 import math
 import time
 from collections.abc import Iterable, Mapping
+from dataclasses import replace
 from typing import Protocol
 
 from models.trading_session import TradingSession
@@ -146,6 +147,11 @@ class IbkrTradingSessionSyncService:
                 ),
             )
 
+            broker_positions = self._restore_orion_symbols(
+                broker_positions=broker_positions,
+                session=session,
+            )
+
             current_prices = {
                 position.symbol.strip().upper():
                 self._price_provider.get_current_price(
@@ -223,6 +229,51 @@ class IbkrTradingSessionSyncService:
             normalized[normalized_symbol] = normalized_quantity
 
         return normalized
+
+    def _restore_orion_symbols(
+        self,
+        *,
+        broker_positions,
+        session: TradingSession,
+    ):
+        """Restore Yahoo/Orion suffixes removed by IBKR contracts.
+
+        An IBKR stock contract reports ASML while Orion deliberately uses
+        ASML.AS for market data and market-session routing. A known local
+        symbol is reused only when it maps unambiguously to the broker
+        symbol. Unknown broker positions remain untouched and unmanaged.
+        """
+
+        known_symbols = {
+            str(symbol).strip().upper()
+            for symbol in (
+                set(session.portfolio.positions)
+                | set(session.position_states)
+                | set(session.risk_plans)
+            )
+            if str(symbol).strip()
+        }
+
+        aliases: dict[str, list[str]] = {}
+        for symbol in known_symbols:
+            aliases.setdefault(
+                self._comparison_symbol(symbol),
+                [],
+            ).append(symbol)
+
+        restored = []
+        for position in broker_positions:
+            candidates = aliases.get(
+                self._comparison_symbol(position.symbol),
+                [],
+            )
+            restored.append(
+                replace(position, symbol=candidates[0])
+                if len(candidates) == 1
+                else position
+            )
+
+        return tuple(restored)
 
     def _expectations_satisfied(
         self,

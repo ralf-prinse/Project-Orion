@@ -161,10 +161,50 @@ def test_sync_removes_stale_local_lifecycle_state() -> None:
     assert "MSFT" not in result.risk_plans
 
 
+def test_sync_restores_known_euronext_symbol_suffix() -> None:
+    service = IbkrTradingSessionSyncService(
+        account_service=FakeIbkrAccountService(),
+        price_provider=FakePriceProvider(),
+    )
+    session = TradingSession(
+        name="Known Euronext position",
+        portfolio=PaperPortfolio(
+            cash=9000.0,
+            positions={
+                "ASML.AS": PaperPosition(
+                    symbol="ASML.AS",
+                    quantity=1,
+                    entry_price=1200.0,
+                    current_price=1210.0,
+                ),
+            },
+        ),
+        position_states={"ASML.AS": DummyState(symbol="ASML.AS")},
+        risk_plans={"ASML.AS": DummyRiskPlan(symbol="ASML.AS")},
+    )
+    broker_position = BrokerPosition(
+        account_id="DU123456",
+        symbol="ASML",
+        quantity=1.0,
+        average_cost=1200.0,
+        currency="EUR",
+        security_type="STK",
+        exchange="AEB",
+    )
+
+    restored = service._restore_orion_symbols(
+        broker_positions=(broker_position,),
+        session=session,
+    )
+
+    assert restored[0].symbol == "ASML.AS"
+
+
 def run() -> None:
     tests = [
         test_sync_replaces_portfolio_with_ibkr_truth,
         test_sync_removes_stale_local_lifecycle_state,
+        test_sync_restores_known_euronext_symbol_suffix,
     ]
 
     passed = 0

@@ -14,6 +14,12 @@ from services.ibkr.ibkr_autonomous_runtime_factory import (
 from services.stores.jsonl_trade_journal_repository import (
     JsonlTradeJournalRepository,
 )
+from services.stores.json_paper_portfolio_repository import (
+    JsonPaperPortfolioRepository,
+)
+from services.stores.json_trading_session_repository import (
+    JsonTradingSessionRepository,
+)
 
 
 ACCOUNT_ENVIRONMENT_VARIABLE = "ORION_IBKR_PAPER_ACCOUNT_ID"
@@ -55,9 +61,9 @@ def order_submission_is_enabled() -> bool:
 
 def build_config() -> AutonomousPaperTradingConfig:
     live_config = LivePaperTradingConfig(
-        watchlist_path="data/universes/ibkr_euronext_validation.csv",
-        initial_cash=500.0,
-        max_symbols=1,
+        watchlist_path="data/universes/ibkr_eu_us_validation.csv",
+        initial_cash=10_000.0,
+        max_symbols=6,
         max_open_positions=4,
         min_confidence=0.75,
         max_position_value=1000.0,
@@ -93,7 +99,7 @@ def print_runtime_mode(
     print("TWS host:          127.0.0.1")
     print("TWS Paper port:    7497")
     print("Cycles:            1")
-    print("Maximum symbols:   1")
+    print("Maximum symbols:   6 (EU + US)")
     print("Maximum positions: 4")
     print(
         "Order submission: "
@@ -167,6 +173,12 @@ def main() -> None:
         ),
         decision_journal_repository=JsonlTradeJournalRepository(
             path="data/ibkr_autonomous_decision_journal.jsonl",
+        ),
+        trading_session_repository=JsonTradingSessionRepository(
+            path="data/ibkr_autonomous_trading_session.json",
+        ),
+        portfolio_repository=JsonPaperPortfolioRepository(
+            path="data/ibkr_autonomous_paper_portfolio.json",
         ),
         allow_order_submission=allow_order_submission,
     )

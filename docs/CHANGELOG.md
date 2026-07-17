@@ -1,5 +1,26 @@
 # CHANGELOG.md
 
+## 2026-07-17 - Persistent EU/US IBKR Paper runtime foundation
+
+De canonieke autonome IBKR Paper factory ondersteunt nu persistente opslag van
+de volledige `TradingSession` en `PaperPortfolio`. Daardoor blijven onder
+andere positielevenscyclus, stopplannen en de portfolio-high-watermark over
+afzonderlijke runnerstarts behouden.
+
+De BUY-scanner en managed SELL-keten controleren per symbool de reguliere
+marktsessie. Gesloten Amerikaanse of Europese markten veroorzaken geen
+orderpoging. Een gecombineerde, beperkte IBKR-validatiewatchlist bevat zowel
+Amerikaanse als Euronext-symbolen.
+
+IBKR-symbolen zonder Yahoo-marktsuffix worden bij synchronisatie teruggekoppeld
+naar een reeds bekend, eenduidig Orion-symbool. Zo blijft bijvoorbeeld een door
+Orion geopende `ASML.AS`-positie na broker-sync gekoppeld aan haar bestaande
+`PositionState` en `RiskPlan`.
+
+Orderinzending blijft standaard uitgeschakeld. Valuta-normalisatie voor een
+gemengde EUR/USD-portefeuille, beursvakanties/verkorte handelsdagen en bewuste
+adoptie van reeds bestaande brokerposities blijven activeringsvoorwaarden.
+
 ## 2026-07-17 - Portfolio-aware pre-order risk integration
 
 ### Canonical RiskManager gekoppeld

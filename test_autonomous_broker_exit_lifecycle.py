@@ -137,6 +137,11 @@ class FailingLegacyExitEngine:
         )
 
 
+class ClosedMarketSessionService:
+    def is_symbol_market_open(self, symbol: str) -> bool:
+        return False
+
+
 def create_session() -> TradingSession:
     return TradingSession(
         name="Autonomous broker exit lifecycle test",
@@ -228,6 +233,7 @@ def test_runner_routes_exit_through_broker_execution_and_sync() -> None:
     # TradingSession must now reflect authoritative broker truth.
     assert result.portfolio.cash == 987.0
     assert "AAPL" not in result.portfolio.positions
+
     assert "AAPL" not in result.position_states
     assert "AAPL" not in result.risk_plans
 
@@ -261,6 +267,27 @@ def test_runner_routes_exit_through_broker_execution_and_sync() -> None:
     )
     assert entry.cycle_number == 7
     assert entry.session_id == "SESSION-TEST-001"
+
+
+def test_runner_does_not_submit_sell_when_market_is_closed() -> None:
+    exit_service = FakePositionExitExecutionService()
+
+    runner = AutonomousPaperTradingRunner(
+        position_exit_execution_service=exit_service,
+        market_session_service=ClosedMarketSessionService(),
+        exit_engine=FailingLegacyExitEngine(),
+    )
+
+    result = runner._process_open_position_exits(
+        session=create_session(),
+        cycle_number=1,
+        session_id="SESSION-CLOSED-MARKET",
+    )
+
+    assert exit_service.execute_calls == 0
+    assert "AAPL" in result.portfolio.positions
+    assert "AAPL" in result.position_states
+    assert "AAPL" in result.risk_plans
 
 
 def test_runner_does_not_execute_or_sync_hold_decision() -> None:
@@ -305,6 +332,7 @@ def test_runner_does_not_execute_or_sync_hold_decision() -> None:
 def run() -> None:
     tests = [
         test_runner_routes_exit_through_broker_execution_and_sync,
+        test_runner_does_not_submit_sell_when_market_is_closed,
         test_runner_does_not_execute_or_sync_hold_decision,
     ]
 
