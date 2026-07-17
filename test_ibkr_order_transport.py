@@ -48,6 +48,7 @@ class FakeIbkrOrderClient:
         self.received_order = None
         self.emit_connection_ready = True
         self.emit_accounts_ready = True
+        self.emit_accounts_before_request = False
         self.emit_terminal_outcome = True
         self.emit_reconciled_execution = False
         self.returned_order_id = 500
@@ -73,6 +74,9 @@ class FakeIbkrOrderClient:
 
     def run(self) -> None:
         self.run_called = True
+        if self.emit_accounts_before_request:
+            self.managed_accounts = list(self.returned_managed_accounts)
+            self.accounts_ready.set()
         if self.emit_connection_ready:
             self.next_order_id = self.returned_order_id
             self.connection_ready.set()
@@ -149,6 +153,25 @@ def create_transport(client: FakeIbkrOrderClient, **kwargs) -> IbkrOrderTranspor
         client=client,
         **kwargs,
     )
+
+
+def test_preserves_managed_accounts_received_before_explicit_request() -> None:
+    client = FakeIbkrOrderClient()
+    client.emit_accounts_before_request = True
+    client.emit_accounts_ready = False
+    transport = create_transport(client, disconnect_after_order=False)
+
+    outcome = transport.submit_order(
+        contract=create_contract(),
+        order=create_order(),
+        timeout_seconds=0.05,
+    )
+
+    assert outcome.status == "FILLED"
+    assert client.managed_accounts_requested is False
+    assert client.place_order_called is True
+    assert transport.verified_account_id == "DU123456"
+    transport.disconnect()
 
 
 def test_submission_is_disabled_by_default() -> None:
@@ -308,6 +331,7 @@ def test_disconnect_is_idempotent() -> None:
 
 def run() -> None:
     tests = [
+        test_preserves_managed_accounts_received_before_explicit_request,
         test_submission_is_disabled_by_default,
         test_terminal_order_status_returns_fill,
         test_timeout_reconciles_execution_before_cancel,

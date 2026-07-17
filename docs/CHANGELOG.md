@@ -1,5 +1,18 @@
 # CHANGELOG.md
 
+## 2026-07-17 - IBKR managed-account handshake race fix
+
+De ordertransportlaag behoudt nu een geldige `managedAccounts`-callback die
+TWS direct na `startApi` kan sturen. Orion wist deze vroege accountlijst niet
+meer voordat de accountgate wordt uitgevoerd en vraagt de lijst alleen opnieuw
+op wanneer nog geen callback is ontvangen. Daarmee blijft de harde controle op
+het geconfigureerde Paper-account intact zonder de callbackvolgorde uit de
+praktijk onterecht als `Returned accounts: none` af te wijzen.
+
+Een regressietest bootst exact deze vroege callbackvolgorde na en verifieert dat
+de accountcontrole vóór orderplaatsing slaagt. Accountnummers worden bovendien
+gemaskeerd in transportlogs en foutmeldingen.
+
 ## 2026-07-17 - Atomic IBKR lifecycle price synchronization
 
 Een tweede runnerstart kon na broker-sync veilig maar onterecht stoppen wanneer
