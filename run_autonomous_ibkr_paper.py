@@ -26,8 +26,10 @@ from services.position_adoption_service import PositionAdoptionService
 
 ACCOUNT_ENVIRONMENT_VARIABLE = "ORION_IBKR_PAPER_ACCOUNT_ID"
 ORDER_PERMISSION_ENVIRONMENT_VARIABLE = "ORION_IBKR_ALLOW_ORDERS"
+EXECUTION_MODE_ENVIRONMENT_VARIABLE = "ORION_IBKR_EXECUTION_MODE"
 
-CONFIRMATION = "START ONE AUTONOMOUS IBKR PAPER CYCLE"
+EXIT_ONLY_CONFIRMATION = "START EXIT ONLY IBKR PAPER CYCLE"
+BUY_AND_SELL_CONFIRMATION = "START ONE AUTONOMOUS IBKR PAPER CYCLE"
 
 
 def read_required_paper_account_id() -> str:
@@ -61,12 +63,32 @@ def order_submission_is_enabled() -> bool:
     return value == "true"
 
 
-def build_config() -> AutonomousPaperTradingConfig:
+def read_execution_mode() -> str:
+    value = os.getenv(
+        EXECUTION_MODE_ENVIRONMENT_VARIABLE,
+        AutonomousPaperTradingConfig.EXIT_ONLY,
+    ).strip().upper()
+
+    if value not in {
+        AutonomousPaperTradingConfig.EXIT_ONLY,
+        AutonomousPaperTradingConfig.BUY_AND_SELL,
+    }:
+        raise RuntimeError(
+            f"{EXECUTION_MODE_ENVIRONMENT_VARIABLE} must be "
+            "EXIT_ONLY or BUY_AND_SELL."
+        )
+
+    return value
+
+
+def build_config(
+    execution_mode: str = AutonomousPaperTradingConfig.EXIT_ONLY,
+) -> AutonomousPaperTradingConfig:
     live_config = LivePaperTradingConfig(
         watchlist_path="data/universes/ibkr_eu_us_validation.csv",
         initial_cash=10_000.0,
         max_symbols=6,
-        max_open_positions=4,
+        max_open_positions=20,
         min_confidence=0.75,
         max_position_value=1000.0,
         max_position_size_pct=0.10,
@@ -74,6 +96,7 @@ def build_config() -> AutonomousPaperTradingConfig:
 
     return AutonomousPaperTradingConfig(
         live_config=live_config,
+        execution_mode=execution_mode,
         cycles=1,
         sleep_seconds=0.0,
         stop_on_exception=True,
@@ -92,6 +115,7 @@ def print_runtime_mode(
     *,
     paper_account_id: str,
     allow_order_submission: bool,
+    execution_mode: str,
 ) -> None:
     print()
     print("=========================================")
@@ -103,7 +127,8 @@ def print_runtime_mode(
     print("Base currency:     EUR (required)")
     print("Cycles:            1")
     print("Maximum symbols:   6 (EU + US)")
-    print("Maximum positions: 4")
+    print("Maximum positions: 20 (risk-limited ceiling)")
+    print(f"Execution mode:    {execution_mode}")
     print(
         "Order submission: "
         + (
@@ -112,7 +137,14 @@ def print_runtime_mode(
             else "DISABLED"
         )
     )
-    print("BUY execution:     IBKR")
+    print(
+        "BUY execution:     "
+        + (
+            "BLOCKED BY EXIT_ONLY"
+            if execution_mode == AutonomousPaperTradingConfig.EXIT_ONLY
+            else "IBKR"
+        )
+    )
     print("SELL execution:    IBKR")
     print("Broker sync:       ENABLED")
     print("Adopt positions:   AAPL, AAL, ASML.AS, ASM.AS")
@@ -127,12 +159,17 @@ def print_runtime_mode(
         print()
 
 
-def require_confirmation() -> bool:
+def require_confirmation(execution_mode: str) -> bool:
+    confirmation = (
+        EXIT_ONLY_CONFIRMATION
+        if execution_mode == AutonomousPaperTradingConfig.EXIT_ONLY
+        else BUY_AND_SELL_CONFIRMATION
+    )
     typed = input(
-        f"Type exactly '{CONFIRMATION}' to continue: "
+        f"Type exactly '{confirmation}' to continue: "
     ).strip()
 
-    if typed != CONFIRMATION:
+    if typed != confirmation:
         print("Confirmation mismatch. No runner was started.")
         return False
 
@@ -147,6 +184,7 @@ def print_result(result) -> None:
     print(f"Completed cycles: {result.completed_cycles}")
     print(f"Failed cycles:    {result.failed_cycles}")
     print(f"Executed trades:  {result.total_executed_trades}")
+    print(f"Executed exits:   {result.total_executed_exits}")
     print(f"Rejected trades:  {result.total_rejected_trades}")
     print(f"Risk evaluations: {result.risk_evaluations}")
     print(f"Risk rejections:  {result.risk_rejections}")
@@ -160,18 +198,20 @@ def print_result(result) -> None:
 def main() -> None:
     paper_account_id = read_required_paper_account_id()
     allow_order_submission = order_submission_is_enabled()
+    execution_mode = read_execution_mode()
 
     print_runtime_mode(
         paper_account_id=paper_account_id,
         allow_order_submission=allow_order_submission,
+        execution_mode=execution_mode,
     )
 
-    if not require_confirmation():
+    if not require_confirmation(execution_mode):
         return
 
     runtime = IbkrAutonomousRuntimeFactory().build(
         paper_account_id=paper_account_id,
-        config=build_config(),
+        config=build_config(execution_mode),
         trade_journal_repository=JsonlTradeJournalRepository(
             path="data/ibkr_autonomous_trade_journal.jsonl",
         ),

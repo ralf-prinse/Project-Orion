@@ -13,6 +13,8 @@ from models.market_snapshot import MarketSnapshot
 from models.paper_portfolio import PaperPortfolio
 from models.trade_journal_entry import TradeJournalEntry
 from models.trading_session import TradingSession
+from models.live_paper_trading_result import LivePaperTradingResult
+from models.portfolio_allocation_result import PortfolioAllocationResult
 from providers.yahoo_provider import YahooProvider
 from services.exit_engine import ExitEngine
 from services.live_paper_market_scanner import (
@@ -149,10 +151,15 @@ class AutonomousPaperTradingRunner:
                 session = self._update_open_position_lifecycle(
                     session
                 )
+                positions_before_exits = session.open_positions
                 session = self._process_open_position_exits(
                     session,
                     cycle_number,
                     session_id,
+                )
+                executed_exits = max(
+                    0,
+                    positions_before_exits - session.open_positions,
                 )
                 peak_portfolio_value = max(
                     peak_portfolio_value,
@@ -161,6 +168,22 @@ class AutonomousPaperTradingRunner:
                 session.peak_portfolio_value = (
                     peak_portfolio_value
                 )
+
+                if self._is_exit_only():
+                    cycle_results.append(
+                        AutonomousPaperTradingCycleResult(
+                            scan=self._empty_scan_result(session),
+                            allocation=PortfolioAllocationResult(
+                                decisions=[]
+                            ),
+                            executed_trades=0,
+                            rejected_trades=0,
+                            executed_exits=executed_exits,
+                        )
+                    )
+                    completed_cycles += 1
+                    self._save_session(session)
+                    continue
 
                 scan_result = self.scanner.run(
                     session=session
@@ -257,6 +280,7 @@ class AutonomousPaperTradingRunner:
                         allocation=allocation_result,
                         executed_trades=executed_trades,
                         rejected_trades=rejected_trades,
+                        executed_exits=executed_exits,
                     )
                 )
 
@@ -289,6 +313,28 @@ class AutonomousPaperTradingRunner:
         )
 
         return result
+
+    def _is_exit_only(self) -> bool:
+        return (
+            self.config.execution_mode
+            == AutonomousPaperTradingConfig.EXIT_ONLY
+        )
+
+    def _empty_scan_result(
+        self,
+        session: TradingSession,
+    ) -> LivePaperTradingResult:
+        return LivePaperTradingResult(
+            session=session,
+            scanned_symbols=0,
+            succeeded_symbols=0,
+            failed_symbols=0,
+            failed_symbol_errors={},
+            scan_duration_seconds=0.0,
+            candidates=[],
+            executed_trades=0,
+            rejected_trades=0,
+        )
 
     def _update_open_position_lifecycle(
         self,

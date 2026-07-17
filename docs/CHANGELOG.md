@@ -1,5 +1,23 @@
 # CHANGELOG.md
 
+## 2026-07-17 - Fail-closed IBKR EXIT_ONLY mode
+
+De autonome runner ondersteunt nu expliciet `EXIT_ONLY` en `BUY_AND_SELL`.
+De IBKR-entrypoint kiest standaard `EXIT_ONLY`; in die modus worden scanner,
+allocator en BUY-execution geheel overgeslagen, terwijl broker-sync,
+positieadoptie, lifecycle-updates en de canonieke managed SELL-keten actief
+blijven. Een afzonderlijke teller rapporteert werkelijk uitgevoerde exits.
+
+De interactieve bevestiging benoemt de gekozen modus. `BUY_AND_SELL` vereist
+zowel een expliciete environmentconfiguratie als de bestaande bevestiging en
+orderpermissie. De maximale positie-cap van de IBKR-configuratie is verhoogd
+van 4 naar 20, maar blijft uitsluitend een bovengrens: cashreserve,
+portfolio-exposure, positie-exposure, trade-risk, cumulatief risico en drawdown
+blijven ongewijzigd leidend.
+
+De lokale persistente IBKR sessie- en portefeuillebestanden zijn aan
+`.gitignore` toegevoegd; ze blijven lokaal beschikbaar maar komen niet in Git.
+
 ## 2026-07-17 - EUR valuation, official calendars and position adoption
 
 De autonome IBKR Paper runtime vereist nu EUR als account- en

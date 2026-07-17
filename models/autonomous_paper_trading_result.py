@@ -18,6 +18,7 @@ class AutonomousPaperTradingCycleResult:
 
     executed_trades: int
     rejected_trades: int
+    executed_exits: int = 0
 
 
 @dataclass(frozen=True)
@@ -55,6 +56,13 @@ class AutonomousPaperTradingResult:
     def total_failed_symbols(self) -> int:
         return sum(
             cycle.scan.failed_symbols
+            for cycle in self.cycle_results
+        )
+
+    @property
+    def total_executed_exits(self) -> int:
+        return sum(
+            cycle.executed_exits
             for cycle in self.cycle_results
         )
 
