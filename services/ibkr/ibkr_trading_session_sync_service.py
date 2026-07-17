@@ -104,8 +104,6 @@ class IbkrTradingSessionSyncService:
         self._account_service.connect()
 
         try:
-            account = self._account_service.read_account()
-
             broker_positions = ()
             reported_quantities: dict[str, float] = {}
 
@@ -147,6 +145,12 @@ class IbkrTradingSessionSyncService:
                     normalized_expected_quantities
                 ),
             )
+
+            # IBKR can publish the filled position before its account-summary
+            # values have caught up. Read cash only after the expected broker
+            # position has been observed so the persisted snapshot cannot use
+            # the pre-fill account summary merely because positions converged.
+            account = self._account_service.read_account()
 
             broker_positions = self._restore_orion_symbols(
                 broker_positions=broker_positions,

@@ -397,7 +397,7 @@ class IbkrOrderTransport:
                         "quantity=%s exchange=%s currency=%s"
                     ),
                     order_id,
-                    self.paper_account_id,
+                    _mask_account_id(self.paper_account_id),
                     contract.symbol,
                     order.action,
                     order.totalQuantity,

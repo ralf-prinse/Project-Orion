@@ -1,5 +1,18 @@
 # CHANGELOG.md
 
+## 2026-07-17 - Post-fill cash ordering and IBKR log privacy
+
+De broker-truthsync leest de IBKR-accountwaarden nu pas nadat de verwachte
+post-fill positiehoeveelheid zichtbaar is. Dit voorkomt dat een al bevestigde
+SELL wordt gecombineerd met een accountsummary die vlak vóór die fill was
+opgevraagd. Een regressietest simuleert expliciet een oud cashsaldo vóór en het
+bijgewerkte saldo ná de bevestigende positielijst.
+
+Orions orderlog maskeert het Paper-account voortaan ook bij orderinzending. De
+zeer uitvoerige `ibapi` INFO-protocoldumps zijn gedempt omdat daarin het volledige
+accountveld van een order kon verschijnen; waarschuwingen en fouten blijven
+zichtbaar.
+
 ## 2026-07-17 - IBKR managed-account handshake race fix
 
 De ordertransportlaag behoudt nu een geldige `managedAccounts`-callback die

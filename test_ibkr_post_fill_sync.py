@@ -52,6 +52,7 @@ class SequencedIbkrAccountService:
             tuple[BrokerPosition, ...]
         ],
         cash: float = 9450.0,
+        stale_cash_before_position_sync: float | None = None,
     ) -> None:
         if not positions_sequence:
             raise ValueError(
@@ -60,10 +61,14 @@ class SequencedIbkrAccountService:
 
         self.positions_sequence = positions_sequence
         self.cash = cash
+        self.stale_cash_before_position_sync = (
+            stale_cash_before_position_sync
+        )
 
         self.connect_calls = 0
         self.disconnect_calls = 0
         self.read_positions_calls = 0
+        self.account_read_position_counts: list[int] = []
 
     def connect(self) -> None:
         self.connect_calls += 1
@@ -72,10 +77,20 @@ class SequencedIbkrAccountService:
         self.disconnect_calls += 1
 
     def read_account(self) -> BrokerAccount:
+        self.account_read_position_counts.append(
+            self.read_positions_calls
+        )
+        cash = self.cash
+        if (
+            self.read_positions_calls == 0
+            and self.stale_cash_before_position_sync is not None
+        ):
+            cash = self.stale_cash_before_position_sync
+
         return BrokerAccount(
             broker_name="IBKR",
             account_id="DU123456",
-            cash=self.cash,
+            cash=cash,
             buying_power=20000.0,
             currency="EUR",
             status="ACTIVE",
@@ -234,6 +249,7 @@ def test_post_fill_sync_removes_fully_sold_position() -> None:
             (),
         ],
         cash=1020.0,
+        stale_cash_before_position_sync=800.0,
     )
 
     price_provider = FakePriceProvider(
@@ -271,6 +287,7 @@ def test_post_fill_sync_removes_fully_sold_position() -> None:
     assert account_service.connect_calls == 1
     assert account_service.disconnect_calls == 1
     assert account_service.read_positions_calls == 2
+    assert account_service.account_read_position_counts == [2]
 
     assert synchronized.portfolio.cash == 1020.0
     assert "AAPL" not in synchronized.portfolio.positions
