@@ -146,7 +146,6 @@ class AutonomousPaperTradingRunner:
                         cycle_number=cycle_number,
                         session_id=session_id,
                     )
-                    self._save_session(session)
 
                 session = self._update_open_position_lifecycle(
                     session

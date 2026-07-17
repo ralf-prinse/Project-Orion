@@ -1,5 +1,17 @@
 # CHANGELOG.md
 
+## 2026-07-17 - Atomic IBKR lifecycle price synchronization
+
+Een tweede runnerstart kon na broker-sync veilig maar onterecht stoppen wanneer
+de actuele `PaperPosition.current_price` al was vernieuwd en de persistente
+`PositionState.current_price` nog de vorige cyclusprijs bevatte. De sync werkt
+nu beide waarden atomair bij en verhoogt zo nodig ook `highest_price`.
+
+De premature session-save direct na idempotente adoptie is verwijderd; opslag
+vindt plaats nadat lifecycle-state en brokerportfolio consistent zijn. De
+integriteitscontrole blijft ongewijzigd streng en orderuitvoering vindt nog
+steeds pas daarna plaats.
+
 ## 2026-07-17 - Fail-closed IBKR EXIT_ONLY mode
 
 De autonome runner ondersteunt nu expliciet `EXIT_ONLY` en `BUY_AND_SELL`.

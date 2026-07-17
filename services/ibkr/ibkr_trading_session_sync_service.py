@@ -7,6 +7,7 @@ from dataclasses import replace
 from typing import Protocol
 
 from models.trading_session import TradingSession
+from models.position_state import PositionState
 from services.ibkr.ibkr_account_service import IbkrAccountService
 from services.ibkr.ibkr_portfolio_mapper import IbkrPortfolioMapper
 
@@ -175,11 +176,23 @@ class IbkrTradingSessionSyncService:
 
         session.portfolio = synchronized_portfolio
 
-        session.position_states = {
+        retained_states = {
             symbol: state
             for symbol, state in session.position_states.items()
             if symbol.strip().upper()
             in synchronized_symbols
+        }
+
+        session.position_states = {
+            symbol: self._synchronize_position_state_price(
+                state=state,
+                current_price=(
+                    synchronized_portfolio
+                    .positions[symbol]
+                    .current_price
+                ),
+            )
+            for symbol, state in retained_states.items()
         }
 
         session.risk_plans = {
@@ -190,6 +203,24 @@ class IbkrTradingSessionSyncService:
         }
 
         return session
+
+    def _synchronize_position_state_price(
+        self,
+        *,
+        state,
+        current_price: float,
+    ):
+        if not isinstance(state, PositionState):
+            return state
+
+        return replace(
+            state,
+            current_price=current_price,
+            highest_price=max(
+                state.highest_price,
+                current_price,
+            ),
+        )
 
     def _normalize_expected_quantities(
         self,

@@ -6,6 +6,7 @@ from models.broker_account import BrokerAccount
 from models.broker_position import BrokerPosition
 from models.paper_portfolio import PaperPortfolio
 from models.paper_position import PaperPosition
+from models.position_state import PositionState
 from models.trading_session import TradingSession
 from services.ibkr.ibkr_trading_session_sync_service import (
     IbkrTradingSessionSyncService,
@@ -226,12 +227,34 @@ def test_sync_maps_unknown_aeb_position_to_euronext_symbol() -> None:
     assert restored[0].symbol == "ASM.AS"
 
 
+def test_sync_updates_managed_state_price_atomically() -> None:
+    service = IbkrTradingSessionSyncService(
+        account_service=FakeIbkrAccountService(),
+        price_provider=FakePriceProvider(),
+    )
+    session = create_session()
+    session.position_states["AAPL"] = PositionState(
+        symbol="AAPL",
+        entry_price=300.0,
+        current_stop_loss=290.0,
+        highest_price=310.0,
+        current_price=305.0,
+    )
+
+    result = service.synchronize(session)
+
+    assert result.portfolio.positions["AAPL"].current_price == 320.0
+    assert result.position_states["AAPL"].current_price == 320.0
+    assert result.position_states["AAPL"].highest_price == 320.0
+
+
 def run() -> None:
     tests = [
         test_sync_replaces_portfolio_with_ibkr_truth,
         test_sync_removes_stale_local_lifecycle_state,
         test_sync_restores_known_euronext_symbol_suffix,
         test_sync_maps_unknown_aeb_position_to_euronext_symbol,
+        test_sync_updates_managed_state_price_atomically,
     ]
 
     passed = 0
