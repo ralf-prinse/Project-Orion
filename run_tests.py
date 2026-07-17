@@ -125,7 +125,24 @@ TestCommand(
 ),
 TestCommand(
     "Autonomous Position Lifecycle",
-    [sys.executable, "test_autonomous_position_lifecycle.py"],
+    [
+        sys.executable,
+        "test_autonomous_position_lifecycle.py",
+    ],
+),
+TestCommand(
+    "Position Exit Execution Service",
+    [
+        sys.executable,
+        "test_position_exit_execution_service.py",
+    ],
+),
+TestCommand(
+    "Autonomous Broker Exit Lifecycle",
+    [
+        sys.executable,
+        "test_autonomous_broker_exit_lifecycle.py",
+    ],
 ),
             TestCommand("Position Monitor", [sys.executable, "test_position_monitor.py"]),
             TestCommand("Time Stop Service", [sys.executable, "test_time_stop_service.py"]),

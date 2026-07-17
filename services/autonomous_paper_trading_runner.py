@@ -26,6 +26,9 @@ from services.portfolio_revaluation_service import (
     PortfolioRevaluationService,
 )
 from services.position_monitor import PositionMonitor
+from services.position_exit_execution_service import (
+    PositionExitExecutionService,
+)
 from services.stores.repositories.paper_portfolio_repository import (
     PaperPortfolioRepository,
 )
@@ -56,6 +59,7 @@ class AutonomousPaperTradingRunner:
         revaluation_service=None,
         price_provider=None,
         exit_engine=None,
+        position_exit_execution_service=None,
         trading_session_sync_service=None,
     ):
         self.config = config or AutonomousPaperTradingConfig()
@@ -92,6 +96,11 @@ class AutonomousPaperTradingRunner:
         )
         self.price_provider = price_provider or YahooProvider()
         self.exit_engine = exit_engine or ExitEngine()
+
+        self.position_exit_execution_service = (
+            position_exit_execution_service
+        )
+
         self.trading_session_sync_service = (
             trading_session_sync_service
         )
@@ -309,24 +318,53 @@ class AutonomousPaperTradingRunner:
         cycle_number,
         session_id,
     ):
-        portfolio = session.portfolio
-        position_states = dict(
-            session.position_states
-        )
-        risk_plans = dict(
-            session.risk_plans
-        )
+        """
+        Evaluate and execute exits for all currently open positions.
 
-        for position in list(
-            portfolio.positions.values()
+        Preferred execution path:
+
+        PositionMonitor
+        -> PositionExitExecutionService
+        -> ExecutionEngine
+        -> Broker
+        -> Broker Truth Synchronization
+        -> TradingSession
+        -> Journal
+
+        When no PositionExitExecutionService is configured, the legacy
+        local ExitEngine remains available for backwards compatibility
+        with existing paper-trading tests and runtimes.
+        """
+
+        updated_session = session
+
+        for original_position in list(
+            session.portfolio.positions.values()
         ):
             symbol = (
-                position.symbol
+                original_position.symbol
                 .strip()
                 .upper()
             )
-            state = position_states.get(symbol)
-            risk_plan = risk_plans.get(symbol)
+
+            # A previous exit in this same cycle may already have caused
+            # broker truth synchronization to remove this position.
+            position = (
+                updated_session
+                .portfolio
+                .positions
+                .get(symbol)
+            )
+
+            if position is None:
+                continue
+
+            state = updated_session.position_states.get(
+                symbol
+            )
+            risk_plan = updated_session.risk_plans.get(
+                symbol
+            )
 
             if (
                 state is not None
@@ -349,35 +387,201 @@ class AutonomousPaperTradingRunner:
                     )
                 )
 
-            result = self.exit_engine.execute(
-                portfolio=portfolio,
-                decision=decision,
-            )
-
-            if not result.executed:
+            if decision.action == "HOLD":
                 continue
 
-            self._append_exit_journal_entry(
-                position,
-                result.action,
-                decision.reason,
-                cycle_number,
-                session_id,
+            if (
+                self.position_exit_execution_service
+                is not None
+            ):
+                updated_session = (
+                    self._execute_broker_position_exit(
+                        session=updated_session,
+                        position=position,
+                        decision=decision,
+                        cycle_number=cycle_number,
+                        session_id=session_id,
+                    )
+                )
+                continue
+
+            updated_session = (
+                self._execute_legacy_local_exit(
+                    session=updated_session,
+                    position=position,
+                    decision=decision,
+                    cycle_number=cycle_number,
+                    session_id=session_id,
+                )
             )
 
-            closed_symbol = (
-                result.symbol
-                .strip()
-                .upper()
+        return updated_session
+        
+
+    def _execute_broker_position_exit(
+        self,
+        *,
+        session,
+        position,
+        decision,
+        cycle_number,
+        session_id,
+    ):
+        """
+        Execute one managed exit through ExecutionEngine and replace
+        provisional local state with authoritative broker truth.
+        """
+
+        exit_result = (
+            self.position_exit_execution_service
+            .execute(
+                session=session,
+                decision=decision,
             )
-            position_states.pop(
-                closed_symbol,
-                None,
+        )
+
+        if not exit_result.attempted:
+            return session
+
+        engine_result = exit_result.execution_result
+
+        if engine_result is None:
+            return session
+
+        execution = engine_result.execution
+
+        if not execution.accepted:
+            print(
+                "Position exit rejected for "
+                f"{position.symbol}: "
+                f"{execution.status} - "
+                f"{execution.message}"
             )
-            risk_plans.pop(
-                closed_symbol,
-                None,
+            return session
+
+        executed_quantity = execution.executed_quantity
+
+        if executed_quantity <= 0:
+            print(
+                "Position exit returned no executed "
+                f"quantity for {position.symbol}."
             )
+            return session
+
+        expected_remaining_quantity = (
+            position.quantity
+            - executed_quantity
+        )
+
+        if expected_remaining_quantity < 0:
+            raise RuntimeError(
+                "Executed SELL quantity exceeds the "
+                "open position quantity for "
+                f"{position.symbol}."
+            )
+
+        provisional_session = TradingSession(
+            name=session.name,
+            portfolio=engine_result.portfolio,
+            position_states=dict(
+                session.position_states
+            ),
+            risk_plans=dict(
+                session.risk_plans
+            ),
+            status=session.status,
+        )
+
+        if self.trading_session_sync_service is not None:
+            synchronized_session = (
+                self.trading_session_sync_service
+                .synchronize(
+                    provisional_session,
+                    expected_position_quantities={
+                        position.symbol:
+                        expected_remaining_quantity,
+                    },
+                    attempts=8,
+                    retry_delay_seconds=0.25,
+                )
+            )
+        else:
+            synchronized_session = provisional_session
+
+            if expected_remaining_quantity == 0:
+                synchronized_session.position_states.pop(
+                    position.symbol,
+                    None,
+                )
+                synchronized_session.risk_plans.pop(
+                    position.symbol,
+                    None,
+                )
+
+        self._append_broker_exit_journal_entry(
+            position=position,
+            decision=decision,
+            execution=execution,
+            cycle_number=cycle_number,
+            session_id=session_id,
+        )
+
+        return synchronized_session
+
+    def _execute_legacy_local_exit(
+        self,
+        *,
+        session,
+        position,
+        decision,
+        cycle_number,
+        session_id,
+    ):
+        """
+        Preserve the historical local PaperBroker exit route when no
+        broker-neutral exit execution service has been configured.
+
+        This path exists for backwards compatibility only.
+        """
+
+        portfolio = session.portfolio
+        position_states = dict(
+            session.position_states
+        )
+        risk_plans = dict(
+            session.risk_plans
+        )
+
+        result = self.exit_engine.execute(
+            portfolio=portfolio,
+            decision=decision,
+        )
+
+        if not result.executed:
+            return session
+
+        self._append_exit_journal_entry(
+            position,
+            result.action,
+            decision.reason,
+            cycle_number,
+            session_id,
+        )
+
+        closed_symbol = (
+            result.symbol
+            .strip()
+            .upper()
+        )
+
+        position_states.pop(
+            closed_symbol,
+            None,
+        )
+        risk_plans.pop(
+            closed_symbol,
+            None,
+        )
 
         return TradingSession(
             name=session.name,
@@ -412,6 +616,78 @@ class AutonomousPaperTradingRunner:
                 cycle_number=cycle_number,
                 session_id=session_id,
             )
+        )
+
+        self.trade_journal_repository.append(
+            entry
+        )
+
+    def _append_broker_exit_journal_entry(
+        self,
+        *,
+        position,
+        decision,
+        execution,
+        cycle_number,
+        session_id,
+    ):
+        """
+        Journal a confirmed broker SELL using actual fill information.
+
+        This method is called only after successful broker execution and
+        successful broker-truth synchronization.
+        """
+
+        if self.trade_journal_repository is None:
+            return
+
+        executed_quantity = (
+            execution.executed_quantity
+        )
+        executed_price = execution.executed_price
+
+        invested_amount = round(
+            position.entry_price
+            * executed_quantity,
+            2,
+        )
+
+        exit_value = round(
+            executed_price
+            * executed_quantity,
+            2,
+        )
+
+        entry = TradeJournalEntry(
+            timestamp=(
+                execution.executed_at
+                or datetime.now()
+            ),
+            symbol=position.symbol,
+            action="CLOSE_POSITION",
+            decision=decision.action,
+            confidence=1.0,
+            score=0.0,
+            entry_price=position.entry_price,
+            exit_price=executed_price,
+            quantity=executed_quantity,
+            invested_amount=invested_amount,
+            realized_profit_loss=round(
+                exit_value - invested_amount,
+                2,
+            ),
+            unrealized_profit_loss=0.0,
+            expected_risk=0.0,
+            regime="UNKNOWN",
+            volatility="UNKNOWN",
+            ai_summary=(
+                "Exit executed through broker-neutral "
+                "position lifecycle: "
+                f"{decision.action}"
+            ),
+            recommendation_reason=decision.reason,
+            cycle_number=cycle_number,
+            session_id=session_id,
         )
 
         self.trade_journal_repository.append(
