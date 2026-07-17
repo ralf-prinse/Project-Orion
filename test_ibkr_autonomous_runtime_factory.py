@@ -98,6 +98,17 @@ def test_runner_uses_composed_ibkr_services() -> None:
     )
 
 
+def test_wires_separate_decision_journal_repository() -> None:
+    repository = object()
+
+    runtime = IbkrAutonomousRuntimeFactory().build(
+        paper_account_id=PAPER_ACCOUNT_ID,
+        decision_journal_repository=repository,
+    )
+
+    assert runtime.runner.decision_journal_repository is repository
+
+
 def test_order_submission_is_disabled_by_default() -> None:
     runtime = create_runtime()
 
@@ -166,6 +177,7 @@ def run() -> None:
         test_execution_engine_uses_ibkr_broker,
         test_buy_and_sell_share_execution_engine,
         test_runner_uses_composed_ibkr_services,
+        test_wires_separate_decision_journal_repository,
         test_order_submission_is_disabled_by_default,
         test_order_submission_can_be_enabled_explicitly,
         test_uses_separate_ibkr_client_ids,

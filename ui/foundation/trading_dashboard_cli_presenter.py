@@ -37,6 +37,7 @@ class TradingDashboardCliPresenter:
         self._append_trading_summary(lines, snapshot)
         self._append_closed_trade_analytics(lines, snapshot)
         self._append_open_positions(lines, snapshot)
+        self._append_risk_decisions(lines, snapshot)
         self._append_recent_trades(
             lines,
             recent_trades or [],
@@ -150,6 +151,29 @@ class TradingDashboardCliPresenter:
                 f"{trade.action:<15}   "
                 f"{trade.decision:<15}   "
                 f"P/L {realized}"
+            )
+
+        lines.append("")
+
+    def _append_risk_decisions(
+        self,
+        lines: list[str],
+        snapshot: DashboardSnapshot,
+    ) -> None:
+        lines.append("RISK DECISIONS")
+        lines.append("-" * 60)
+        lines.append(
+            f"Evaluations      : {snapshot.risk_evaluations}"
+        )
+        lines.append(
+            f"Rejections      : {snapshot.risk_rejections}"
+        )
+
+        for decision in reversed(snapshot.risk_decisions[-10:]):
+            status = "ALLOWED" if decision.allowed else "BLOCKED"
+            lines.append(
+                f"{decision.symbol:<8}   {status:<7}   "
+                f"{decision.reason}"
             )
 
         lines.append("")

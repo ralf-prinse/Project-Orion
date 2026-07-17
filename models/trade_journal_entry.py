@@ -51,6 +51,22 @@ class TradeJournalEntry:
 
     session_id: str
 
+    risk_allowed: bool | None = None
+
+    proposed_risk_ratio: float | None = None
+
+    total_portfolio_risk: float | None = None
+
+    drawdown: float | None = None
+
+    cash_reserve_after_trade: float | None = None
+
+    position_exposure: float | None = None
+
+    risk_reasons: tuple[str, ...] = ()
+
+    risk_warnings: tuple[str, ...] = ()
+
     @property
     def total_return_percent(self) -> float:
         if self.invested_amount <= 0:

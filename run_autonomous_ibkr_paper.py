@@ -138,6 +138,8 @@ def print_result(result) -> None:
     print(f"Failed cycles:    {result.failed_cycles}")
     print(f"Executed trades:  {result.total_executed_trades}")
     print(f"Rejected trades:  {result.total_rejected_trades}")
+    print(f"Risk evaluations: {result.risk_evaluations}")
+    print(f"Risk rejections:  {result.risk_rejections}")
     print(f"Final cash:       {result.final_cash:.2f}")
     print(f"Final equity:     {result.final_equity:.2f}")
     print(f"Open positions:   {result.session.open_positions}")
@@ -162,6 +164,9 @@ def main() -> None:
         config=build_config(),
         trade_journal_repository=JsonlTradeJournalRepository(
             path="data/ibkr_autonomous_trade_journal.jsonl",
+        ),
+        decision_journal_repository=JsonlTradeJournalRepository(
+            path="data/ibkr_autonomous_decision_journal.jsonl",
         ),
         allow_order_submission=allow_order_submission,
     )

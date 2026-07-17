@@ -1,5 +1,6 @@
 from services.dashboard_service import (
     DashboardPosition,
+    DashboardRiskDecision,
     DashboardSnapshot,
 )
 from models.closed_trade_statistics import ClosedTradeStatistics
@@ -46,6 +47,19 @@ def test_trading_dashboard_cli_presenter_formats_snapshot():
             largest_winner=15.0,
             largest_loser=-6.75,
         ),
+        risk_decisions=[
+            DashboardRiskDecision(
+                timestamp="2026-07-09T19:00:00",
+                symbol="AMD",
+                allowed=False,
+                reason="Risk per trade limit exceeded.",
+                proposed_risk_ratio=0.02,
+                total_portfolio_risk=0.07,
+                drawdown=0.03,
+                cash_reserve_after_trade=0.40,
+                position_exposure=0.10,
+            )
+        ],
     )
 
     output = presenter.present(snapshot)
@@ -59,6 +73,9 @@ def test_trading_dashboard_cli_presenter_formats_snapshot():
     assert "CLOSED TRADE ANALYTICS" in output
     assert "Average Winner" in output
     assert "Profit Factor" in output
+    assert "RISK DECISIONS" in output
+    assert "AMD" in output
+    assert "BLOCKED" in output
     assert "NFLX" in output
     assert "€   12.50" in output
 

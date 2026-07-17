@@ -24,6 +24,10 @@ def main() -> None:
         path="data/trade_journal.jsonl",
     )
 
+    decision_journal_repository = JsonlTradeJournalRepository(
+        path="data/decision_journal.jsonl",
+    )
+
     if not portfolio_repository.exists():
         print("No paper portfolio found.")
         print("Run paper trading first:")
@@ -32,11 +36,13 @@ def main() -> None:
 
     portfolio = portfolio_repository.load()
     journal_entries = trade_journal_repository.load_all()
+    decision_entries = decision_journal_repository.load_all()
 
     snapshot = DashboardService().build(
         portfolio=portfolio,
         journal_entries=journal_entries,
         initial_cash=config.initial_cash,
+        decision_journal_entries=decision_entries,
     )
 
     output = TradingDashboardCliPresenter().present(

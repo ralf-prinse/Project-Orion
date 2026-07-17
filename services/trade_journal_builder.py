@@ -139,6 +139,12 @@ class TradeJournalBuilder:
             "UNKNOWN",
         )
 
+        risk_result = getattr(
+            decision,
+            "risk_result",
+            None,
+        )
+
         return TradeJournalEntry(
             timestamp=datetime.now(),
             symbol=decision.symbol,
@@ -159,4 +165,44 @@ class TradeJournalBuilder:
             recommendation_reason=decision.reason,
             cycle_number=cycle_number,
             session_id=session_id,
+            risk_allowed=(
+                risk_result.risk_allowed
+                if risk_result is not None
+                else None
+            ),
+            proposed_risk_ratio=(
+                risk_result.proposed_risk_ratio
+                if risk_result is not None
+                else None
+            ),
+            total_portfolio_risk=(
+                risk_result.total_portfolio_risk
+                if risk_result is not None
+                else None
+            ),
+            drawdown=(
+                risk_result.drawdown
+                if risk_result is not None
+                else None
+            ),
+            cash_reserve_after_trade=(
+                risk_result.cash_reserve_after_trade
+                if risk_result is not None
+                else None
+            ),
+            position_exposure=(
+                risk_result.position_exposure
+                if risk_result is not None
+                else None
+            ),
+            risk_reasons=(
+                tuple(risk_result.reasons)
+                if risk_result is not None
+                else ()
+            ),
+            risk_warnings=(
+                tuple(risk_result.warnings)
+                if risk_result is not None
+                else ()
+            ),
         )

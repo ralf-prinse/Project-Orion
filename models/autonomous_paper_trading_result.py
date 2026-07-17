@@ -59,6 +59,20 @@ class AutonomousPaperTradingResult:
         )
 
     @property
+    def risk_evaluations(self) -> int:
+        return sum(
+            len(cycle.allocation.risk_evaluated)
+            for cycle in self.cycle_results
+        )
+
+    @property
+    def risk_rejections(self) -> int:
+        return sum(
+            len(cycle.allocation.risk_rejected)
+            for cycle in self.cycle_results
+        )
+
+    @property
     def profit(self) -> float:
         return round(
             self.final_equity - self.initial_cash,

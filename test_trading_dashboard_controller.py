@@ -50,12 +50,17 @@ class FakeTradeJournalRepository:
 
 
 class FakeDashboardService:
+    def __init__(self):
+        self.decision_journal_entries = None
+
     def build(
         self,
         portfolio,
         journal_entries,
         initial_cash,
+        decision_journal_entries=None,
     ):
+        self.decision_journal_entries = decision_journal_entries
         return DashboardSnapshot(
             cash=500.0,
             equity=500.0,

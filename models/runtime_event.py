@@ -15,4 +15,6 @@ class RuntimeEvent:
     open_positions: int | None = None
     position_states: int | None = None
     risk_plans: int | None = None
+    risk_evaluations: int | None = None
+    risk_rejections: int | None = None
     error: str | None = None

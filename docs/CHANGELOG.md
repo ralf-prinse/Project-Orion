@@ -20,6 +20,20 @@ met een expliciete afwijzingsreden. De bestaande IBKR BUY-, SELL-,
 synchronisatie- en managed-exitketen blijft ongewijzigd. Live trading en
 zelfstandige AI/learning-aanpassingen zijn niet geactiveerd.
 
+### Risk observability gekoppeld
+
+De pre-order risk-uitkomsten worden nu als immutable snapshots opgenomen in
+het bestaande decision journal. Daardoor zijn onder andere risk allowed,
+trade-risico, cumulatief portefeuillerisico, drawdown, cashreserve,
+positie-exposure en de volledige redenen/waarschuwingen historisch auditbaar.
+
+De bestaande `RuntimeSupervisor` neemt aantallen risk-evaluaties en
+afwijzingen op in runtime health en runtime events. `DashboardService` leest
+het decision journal en projecteert de resultaten naar de bestaande CLI- en
+GUI-tradingdashboards. De autonome IBKR Paper runtime krijgt hiervoor een
+afzonderlijk decision journal; trade-events en decision-events blijven
+gescheiden.
+
 ## 2026-07-17
 
 ### IBKR Paper Trading volledig operationeel

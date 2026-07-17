@@ -1,12 +1,26 @@
+from models.autonomous_paper_trading_config import (
+    AutonomousPaperTradingConfig,
+)
 from models.live_paper_trading_config import LivePaperTradingConfig
-from models.live_paper_trading_result import LivePaperCandidate
+from models.live_paper_trading_result import (
+    LivePaperCandidate,
+    LivePaperTradingResult,
+)
 from models.paper_portfolio import PaperPortfolio
 from models.paper_position import PaperPosition
 from models.position_state import PositionState
 from models.risk_plan import RiskPlan
 from models.trading_pipeline_result import TradingPipelineResult
 from models.trading_session import TradingSession
+from services.autonomous_paper_trading_runner import (
+    AutonomousPaperTradingRunner,
+)
 from services.portfolio_allocator import PortfolioAllocator
+from services.serialization.dataclass_serializer import DataclassSerializer
+from services.stores.jsonl_trade_journal_repository import (
+    JsonlTradeJournalRepository,
+)
+from services.trade_journal_builder import TradeJournalBuilder
 
 
 def _candidate(
@@ -79,6 +93,23 @@ def test_allocator_blocks_risk_per_trade_limit() -> None:
 
     assert result.approved_count == 0
     assert "risk per trade limit exceeded" in result.rejected[0].reason
+    assert result.rejected[0].risk_result is not None
+    assert result.rejected[0].risk_result.risk_allowed is False
+
+    journal_entry = TradeJournalBuilder().build_decision_entry(
+        decision=result.rejected[0],
+        position=None,
+        cycle_number=1,
+        session_id="risk-audit-test",
+    )
+
+    assert journal_entry.risk_allowed is False
+    assert journal_entry.proposed_risk_ratio == 0.05
+    assert journal_entry.total_portfolio_risk == 0.05
+    assert journal_entry.risk_warnings == (
+        "Risk validation blocked proposal; "
+        "risk per trade limit exceeded.",
+    )
 
 
 def test_allocator_tracks_risk_across_approved_candidates() -> None:
@@ -287,3 +318,94 @@ def test_allocator_reports_total_exposure_rejection() -> None:
         result.rejected[0].reason
         == "Maximum portfolio exposure reached."
     )
+
+
+def test_autonomous_runner_persists_risk_rejection_audit(
+    tmp_path,
+) -> None:
+    candidate = _candidate("AAA", stop_loss=90.0)
+
+    class SingleCandidateScanner:
+        def run(self, session):
+            return LivePaperTradingResult(
+                session=session,
+                scanned_symbols=1,
+                succeeded_symbols=1,
+                failed_symbols=0,
+                failed_symbol_errors={},
+                scan_duration_seconds=0.0,
+                candidates=[candidate],
+                executed_trades=0,
+                rejected_trades=0,
+            )
+
+    repository = JsonlTradeJournalRepository(
+        path=tmp_path / "risk_decisions.jsonl",
+    )
+    config = AutonomousPaperTradingConfig(
+        cycles=1,
+        sleep_seconds=0.0,
+        print_cycle_summary=False,
+        live_config=_config(
+            max_risk_per_trade_pct=0.01,
+        ),
+    )
+    result = AutonomousPaperTradingRunner(
+        config=config,
+        scanner=SingleCandidateScanner(),
+        decision_journal_repository=repository,
+    ).run()
+
+    entries = repository.load_all()
+
+    assert result.risk_evaluations == 1
+    assert result.risk_rejections == 1
+    assert len(entries) == 1
+    assert entries[0].action == "REJECTED"
+    assert entries[0].risk_allowed is False
+    assert entries[0].proposed_risk_ratio == 0.05
+    assert entries[0].risk_warnings == (
+        "Risk validation blocked proposal; "
+        "risk per trade limit exceeded.",
+    )
+
+
+def test_legacy_journal_entry_loads_without_risk_fields() -> None:
+    candidate = _candidate("AAA")
+    decision = PortfolioAllocator().allocate(
+        session=TradingSession(
+            name="Legacy journal compatibility",
+            portfolio=PaperPortfolio(cash=1_000.0),
+        ),
+        candidates=[candidate],
+        config=_config(),
+    ).approved[0]
+    entry = TradeJournalBuilder().build_decision_entry(
+        decision=decision,
+        position=None,
+        cycle_number=1,
+        session_id="legacy-journal-test",
+    )
+    serializer = DataclassSerializer()
+    legacy_data = serializer.to_dict(entry)
+
+    for field_name in (
+        "risk_allowed",
+        "proposed_risk_ratio",
+        "total_portfolio_risk",
+        "drawdown",
+        "cash_reserve_after_trade",
+        "position_exposure",
+        "risk_reasons",
+        "risk_warnings",
+    ):
+        legacy_data.pop(field_name)
+
+    restored = serializer.from_dict(
+        type(entry),
+        legacy_data,
+    )
+
+    assert restored.risk_allowed is None
+    assert restored.risk_reasons == ()
+    assert restored.risk_warnings == ()

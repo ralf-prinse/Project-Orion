@@ -70,6 +70,9 @@ class IbkrAutonomousRuntimeFactory:
         paper_account_id: str,
         config: AutonomousPaperTradingConfig | None = None,
         trade_journal_repository: TradeJournalRepository | None = None,
+        decision_journal_repository: (
+            TradeJournalRepository | None
+        ) = None,
         allow_order_submission: bool = False,
         host: str = DEFAULT_HOST,
         port: int = PAPER_PORT,
@@ -139,6 +142,9 @@ class IbkrAutonomousRuntimeFactory:
             config=config or AutonomousPaperTradingConfig(),
             trading_cycle=trading_cycle,
             trade_journal_repository=trade_journal_repository,
+            decision_journal_repository=(
+                decision_journal_repository
+            ),
             price_provider=price_provider,
             position_exit_execution_service=(
                 position_exit_execution_service

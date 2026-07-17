@@ -256,6 +256,7 @@ class PortfolioAllocator:
                         reason=self._risk_rejection_reason(
                             risk_result.warnings
                         ),
+                        risk_result=risk_result,
                     )
                 )
                 continue
@@ -266,6 +267,7 @@ class PortfolioAllocator:
                     quantity=quantity,
                     approved=True,
                     reason="Approved allocation.",
+                    risk_result=risk_result,
                 )
             )
 

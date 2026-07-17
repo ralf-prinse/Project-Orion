@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from models.closed_trade_statistics import ClosedTradeStatistics
 from models.paper_portfolio import PaperPortfolio
@@ -20,6 +20,19 @@ class DashboardPosition:
 
 
 @dataclass(frozen=True)
+class DashboardRiskDecision:
+    timestamp: str
+    symbol: str
+    allowed: bool
+    reason: str
+    proposed_risk_ratio: float | None
+    total_portfolio_risk: float | None
+    drawdown: float | None
+    cash_reserve_after_trade: float | None
+    position_exposure: float | None
+
+
+@dataclass(frozen=True)
 class DashboardSnapshot:
     cash: float
     equity: float
@@ -34,6 +47,20 @@ class DashboardSnapshot:
     winrate_percent: float
     positions: list[DashboardPosition]
     closed_trade_statistics: ClosedTradeStatistics
+    risk_decisions: list[DashboardRiskDecision] = field(
+        default_factory=list
+    )
+
+    @property
+    def risk_evaluations(self) -> int:
+        return len(self.risk_decisions)
+
+    @property
+    def risk_rejections(self) -> int:
+        return sum(
+            not decision.allowed
+            for decision in self.risk_decisions
+        )
 
 
 class DashboardService:
@@ -68,6 +95,9 @@ class DashboardService:
         portfolio: PaperPortfolio,
         journal_entries: list[TradeJournalEntry],
         initial_cash: float,
+        decision_journal_entries: (
+            list[TradeJournalEntry] | None
+        ) = None,
     ) -> DashboardSnapshot:
         positions = [
             self._build_position(symbol, position)
@@ -97,6 +127,10 @@ class DashboardService:
             else 0.0
         )
 
+        risk_decisions = self._build_risk_decisions(
+            decision_journal_entries or [],
+        )
+
         return DashboardSnapshot(
             cash=round(portfolio.cash, 2),
             equity=portfolio.equity,
@@ -111,7 +145,53 @@ class DashboardService:
             winrate_percent=closed_trade_statistics.winrate_percent,
             positions=positions,
             closed_trade_statistics=closed_trade_statistics,
+            risk_decisions=risk_decisions,
         )
+
+    def _build_risk_decisions(
+        self,
+        entries: list[TradeJournalEntry],
+    ) -> list[DashboardRiskDecision]:
+        decisions: list[DashboardRiskDecision] = []
+
+        for entry in entries:
+            is_explicit_risk_gate = (
+                entry.recommendation_reason.startswith(
+                    "Risk gate rejected allocation;"
+                )
+            )
+
+            if (
+                entry.risk_allowed is None
+                and not is_explicit_risk_gate
+            ):
+                continue
+
+            decisions.append(
+                DashboardRiskDecision(
+                    timestamp=entry.timestamp.isoformat(),
+                    symbol=entry.symbol,
+                    allowed=(
+                        entry.risk_allowed
+                        if entry.risk_allowed is not None
+                        else False
+                    ),
+                    reason=entry.recommendation_reason,
+                    proposed_risk_ratio=(
+                        entry.proposed_risk_ratio
+                    ),
+                    total_portfolio_risk=(
+                        entry.total_portfolio_risk
+                    ),
+                    drawdown=entry.drawdown,
+                    cash_reserve_after_trade=(
+                        entry.cash_reserve_after_trade
+                    ),
+                    position_exposure=entry.position_exposure,
+                )
+            )
+
+        return decisions
 
     def _build_position(
         self,
