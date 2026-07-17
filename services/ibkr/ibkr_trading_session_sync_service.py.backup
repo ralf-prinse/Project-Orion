@@ -113,9 +113,9 @@ class IbkrTradingSessionSyncService:
                 )
 
                 reported_quantities = {
-                    self._comparison_symbol(
-                        position.symbol
-                    ): float(position.quantity)
+                    position.symbol.strip().upper(): float(
+                        position.quantity
+                    )
                     for position in broker_positions
                 }
 
@@ -232,18 +232,14 @@ class IbkrTradingSessionSyncService:
         expected_quantities: Mapping[str, float],
     ) -> bool:
         reported_symbols = set(reported_quantities)
-        expected_symbol_keys = {
-            self._comparison_symbol(symbol)
-            for symbol in expected_symbols
-        }
 
-        if not expected_symbol_keys.issubset(reported_symbols):
+        if not expected_symbols.issubset(reported_symbols):
             return False
 
         return all(
             self._quantity_matches(
                 reported_quantity=reported_quantities.get(
-                    self._comparison_symbol(symbol),
+                    symbol,
                     0.0,
                 ),
                 expected_quantity=expected_quantity,
@@ -259,12 +255,10 @@ class IbkrTradingSessionSyncService:
         expected_symbols: set[str],
         expected_quantities: Mapping[str, float],
     ) -> None:
-        missing_symbols = {
-            symbol
-            for symbol in expected_symbols
-            if self._comparison_symbol(symbol)
-            not in reported_quantities
-        }
+        missing_symbols = (
+            expected_symbols
+            - set(reported_quantities)
+        )
 
         if missing_symbols:
             raise IbkrTradingSessionSyncError(
@@ -279,7 +273,7 @@ class IbkrTradingSessionSyncService:
             expected_quantities.items()
         ):
             reported_quantity = reported_quantities.get(
-                self._comparison_symbol(symbol),
+                symbol,
                 0.0,
             )
 
@@ -299,14 +293,6 @@ class IbkrTradingSessionSyncService:
                 "post-fill position quantity: "
                 + "; ".join(quantity_mismatches)
             )
-
-    def _comparison_symbol(self, symbol: str) -> str:
-        normalized = str(symbol).strip().upper()
-
-        if normalized.endswith(".AS"):
-            return normalized[:-3]
-
-        return normalized
 
     def _quantity_matches(
         self,

@@ -1,189 +1,140 @@
-# PROJECT ORION — TODO
+# TODO.md
 
-**Current Sprint:** Sprint 11 — Autonomous Position Lifecycle
+# Project Orion - TODO
 
-**Regression Status:** ✅ 88 Passed | ❌ 0 Failed
-
----
-
-# Priority 1 — Complete Autonomous Position Lifecycle
-
-## 1. IBKR SELL Execution
-
-Status: NOT STARTED
-
-Implement:
-
-- SELL order creation
-- SELL validation
-- SELL execution through IbkrBroker
-- SELL confirmation handling
-- SELL synchronization
-- SELL persistence
-
-Definition of Done:
-
-Orion can close positions autonomously through Interactive Brokers Paper.
+Laatste update: 17-07-2026
 
 ---
 
-## 2. Position Monitor
+# Huidige prioriteit
 
-Status: NOT STARTED
+Geen nieuwe functionaliteit ontwikkelen voordat de bestaande codebase volledig is geïnventariseerd.
 
-Implement continuous monitoring of all open positions.
-
-Responsibilities:
-
-- load open positions
-- evaluate exit conditions
-- trigger ExecutionEngine when required
+De focus verschuift van **bouwen** naar **integreren**.
 
 ---
 
-## 3. Exit Engine
+# PRIORITEIT 1
 
-Status: PARTIALLY IMPLEMENTED
+## Volledige Functionele Audit
 
-Integrate existing services into one deterministic decision engine.
+Voer een volledige analyse uit van de complete Project Orion codebase.
 
-Required:
+Voor iedere service vastleggen:
 
+- bestaat de service?
+- volledig geïmplementeerd?
+- getest?
+- gebruikt door Autonomous Runner?
+- niet aangesloten?
+- vervangen door nieuwere implementatie?
+- kan direct geactiveerd worden?
+
+---
+
+# PRIORITEIT 2
+
+## Risk Management
+
+Controleer de bestaande implementaties van:
+
+- RiskPlan
+- Trailing Stop
+- Break Even
+- Time Stop
 - Stop Loss
 - Take Profit
-- Break Even
-- Trailing Stop
-- Time Stop
+- Position sizing
 
-Definition of Done:
+Doel:
 
-Every open position receives exactly one deterministic exit decision.
+Bepalen welke onderdelen al productierijp zijn.
 
 ---
 
-# Priority 2 — Portfolio Management
+# PRIORITEIT 3
 
-Implement autonomous portfolio management.
+## Exit Management
 
-Remaining work:
+Analyseer de volledige exit-flow.
 
-- position replacement
-- capital reallocation
-- exposure limits
-- sector diversification
-- maximum portfolio risk
+Controleer onder andere:
 
----
+- Exit Engine
+- Exit Evaluation
+- Position Exit Execution
+- Managed exits
+- Broker exits
 
-# Priority 3 — Closed Trade Analytics
+Doel:
 
-After every completed trade:
-
-Generate:
-
-- trade statistics
-- performance metrics
-- attribution report
-- strategy effectiveness
-- execution quality
-
-Persist results for later analysis.
+Volledig automatisch beheer van open posities.
 
 ---
 
-# Priority 4 — Learning Pipeline
+# PRIORITEIT 4
 
-Feed completed trade data into Orion's learning components.
+## Portfolio
 
-Implement:
+Controleer:
 
-- outcome evaluation
-- hypothesis validation
-- confidence calibration
-- strategy ranking updates
-
-Note:
-
-The learning layer may influence future rankings but must never bypass deterministic trading rules.
+- Portfolio synchronisatie
+- Position Monitoring
+- Cash Management
+- Equity updates
+- Portfolio allocatie
 
 ---
 
-# Priority 5 — Long Duration Validation
+# PRIORITEIT 5
 
-After SELL execution is complete:
+## Analyse & Monitoring
 
-Run staged validation:
+Inventariseer bestaande modules voor:
 
-Phase 1
+- Dashboard
+- Performance
+- Trade Journal
+- Logging
+- Metrics
+- Reporting
 
-- 2-hour continuous paper trading
-
-Phase 2
-
-- Full trading day
-
-Phase 3
-
-- Multiple consecutive trading days
-
-Validation criteria:
-
-- zero crashes
-- zero portfolio inconsistencies
-- zero synchronization errors
-- deterministic recovery after restart
+Bepaal welke direct gebruikt kunnen worden.
 
 ---
 
-# Live Trading Checklist
+# Pas NA de audit
 
-Before enabling live trading:
+Alleen wanneer duidelijk is dat functionaliteit ontbreekt:
 
-- SELL execution validated
-- Complete trade lifecycle validated
-- Multi-day paper validation completed
-- Performance reviewed
-- Risk limits verified
-- Manual approval
+- nieuwe modules ontwerpen
+- nieuwe services ontwikkelen
+- nieuwe tests schrijven
 
-Live trading remains disabled until all checklist items are complete.
+Voorkom dubbele implementaties.
 
 ---
 
-# Guiding Principle
+# Afgerond
 
-No new features should bypass the established architecture.
+✅ End-to-end IBKR Paper Trading
 
-TradingPipeline
+✅ Broker synchronisatie
 
-↓
+✅ Portfolio synchronisatie
 
-PortfolioAllocator
+✅ BUY Pipeline
 
-↓
+✅ Position Allocator
 
-ExecutionEngine
+✅ Order Execution
 
-↓
+✅ Post-fill Synchronisatie
 
-Broker
+✅ Autonomous Runner stabiel
 
-↓
+---
 
-Broker Truth Synchronization
+# Doel volgende ontwikkelfase
 
-↓
-
-TradingSession
-
-↓
-
-Persistence
-
-↓
-
-Analytics
-
-↓
-
-Learning
+Maximaal hergebruik van bestaande Orion-functionaliteit voordat nieuwe code wordt toegevoegd.

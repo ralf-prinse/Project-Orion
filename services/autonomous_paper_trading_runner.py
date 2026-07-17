@@ -391,6 +391,20 @@ class AutonomousPaperTradingRunner:
                 continue
 
             if (
+                self.position_exit_execution_service is not None
+                and (
+                    state is None
+                    or risk_plan is None
+                )
+            ):
+                print(
+                    "Broker position exit skipped for "
+                    f"{symbol}: position is not managed by Orion "
+                    "(PositionState or RiskPlan is missing)."
+                )
+                continue
+
+            if (
                 self.position_exit_execution_service
                 is not None
             ):

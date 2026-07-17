@@ -1,192 +1,125 @@
-# PROJECT ORION — CHANGELOG
+# CHANGELOG.md
 
-**Current Version:** Sprint 11 Baseline
+## 2026-07-17
 
-**Last Updated:** 2026-07-16
+### IBKR Paper Trading volledig operationeel
 
----
+De complete end-to-end IBKR Paper Trading workflow functioneert nu succesvol.
 
-# Sprint 11 Baseline
+Werkende keten:
 
-## Major Milestone
-
-Completed the complete autonomous BUY execution chain using Interactive Brokers Paper Trading.
-
-Validated end-to-end:
-
-Market Scanner
-
-↓
-
-Trading Pipeline
-
-↓
-
-Portfolio Allocator
-
-↓
-
-Execution Engine
-
-↓
-
-IbkrBroker
-
-↓
-
-IBKR Paper
-
-↓
-
-Broker Truth Synchronization
-
-↓
-
-Trading Session Persistence
-
-Regression baseline:
-
-88 / 88 tests passed.
-
----
-
-# Completed
-
-## AI Trading Platform
-
-Implemented:
-
-- AI Market Scanner
-- Market Intelligence
+- Universe loading
+- Yahoo Market Data
+- Indicator Builder
+- Trading Pipeline
 - Signal Fusion
-- Opportunity Ranking
-- Adaptive Risk Engine
-- Strategy Recommendation
-- Investment Thesis Builder
-- Hypothesis Evaluation
+- Position Allocation
+- Execution Engine
+- IBKR Order Transport
+- Broker Synchronization
+- Portfolio Synchronization
+- Autonomous Runner
 
 ---
 
-## Trading Engine
+### Broker Exit stabiliteit
 
-Completed:
+De Autonomous Runner probeerde eerder exits uit te voeren voor broker-posities die niet door Orion werden beheerd.
 
-- deterministic trading pipeline
-- execution engine
-- portfolio allocator
-- runtime supervisor
-- restart recovery
-- trading session persistence
+Oplossing:
 
----
+Brokerposities zonder `PositionState` of `RiskPlan` worden nu veilig overgeslagen.
 
-## Paper Trading
+Resultaat:
 
-Completed:
-
-- Paper Broker
-- portfolio persistence
-- trade journal
-- runtime journal
-- continuous paper trading runner
+- geen crashes meer
+- stabiele broker synchronisatie
 
 ---
 
-## Interactive Brokers Integration
+### Yahoo ticker correctie
 
-Completed:
+Yahoo ticker aangepast:
 
-- account service
-- portfolio mapper
-- portfolio service
-- execution context builder
-- execution service
-- broker implementation
-- order transport
-- managed account validation
-- paper-only safety checks
-- late fill reconciliation
-- broker truth synchronization
-- continuous IBKR paper runner
+```
+ASMI.AS
+```
 
-Validated using a real Interactive Brokers Paper account.
+naar
+
+```
+ASM.AS
+```
+
+Hierdoor werkt marktdata voor ASM International correct.
 
 ---
 
-## Runtime Validation
+### Position Allocation
 
-Successfully validated:
+Configuratie aangepast zodat ook aandelen met een hogere koers gekocht kunnen worden.
 
-- autonomous BUY execution
-- broker synchronization
-- late fill reconciliation
-- session persistence
-- restart recovery
-- continuous runtime
-
-The BUY side of Orion is now considered feature complete.
+Hierdoor kan de Position Allocator correct orders aanmaken voor dure aandelen.
 
 ---
 
-# Architectural Improvements
+### IBKR Post-Fill Synchronisatie
 
-Introduced:
+Synchronisatie tussen Yahoo-symbolen en IBKR-symbolen verbeterd.
 
-- TradingSession as canonical runtime state
-- Broker Truth Synchronization
-- deterministic persistence model
-- repository separation
-- runtime event logging
-- portfolio synchronization after execution
+Voorbeeld:
 
----
+```
+Yahoo
+ASM.AS
 
-# Current Status
+↓
 
-BUY execution:
+IBKR
+ASM
+```
 
-COMPLETE
+Resultaat:
 
-SELL execution:
-
-NOT STARTED
-
-Autonomous Position Lifecycle:
-
-IN PROGRESS
-
-Learning Pipeline:
-
-FOUNDATION COMPLETE
+De laatste synchronisatieproblemen na een BUY-order zijn opgelost.
 
 ---
 
-# Next Sprint
+### Eerste Repository Audit
 
-Sprint 11
+Een eerste architectuuranalyse van Project Orion is uitgevoerd.
 
-Autonomous Position Lifecycle
+Belangrijkste conclusie:
 
-Objectives:
+Een aanzienlijk deel van de gewenste functionaliteit blijkt al aanwezig te zijn.
 
-- autonomous SELL execution
-- exit engine integration
-- position monitoring
-- closed trade analytics
-- AI learning feedback
+Onder andere gevonden:
+
+- Trailing Stop
+- Break Even
+- Time Stop
+- Exit Engine
+- RiskPlan
+- Dashboard
+- Performance Analyse
+- Trade Journal
+- Position Monitoring
+- Portfolio Management
+
+De volgende ontwikkelfase richt zich daarom op het analyseren en activeren van bestaande modules in plaats van het ontwikkelen van nieuwe functionaliteit.
 
 ---
 
-# Project State
+### Ontwikkelstrategie gewijzigd
 
-Current platform status:
+De projectstrategie is aangepast.
 
-Stable
+Oude aanpak:
 
-Regression Safe
+> Nieuwe functionaliteit ontwikkelen.
 
-Broker Validated
+Nieuwe aanpak:
 
-Paper Trading Validated
+> Eerst de bestaande codebase volledig inventariseren, daarna alleen ontbrekende functionaliteit bouwen.
 
-Ready for autonomous position lifecycle development.
+Dit voorkomt dubbele implementaties en maakt maximaal gebruik van de bestaande Orion-architectuur.

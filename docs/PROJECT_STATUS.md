@@ -1,266 +1,193 @@
-# PROJECT ORION — PROJECT STATUS
+# PROJECT_STATUS.md
 
-**Project:** Orion Autonomous Trading Platform
+# Project Orion - Status
 
-**Status:** Active Development
-
-**Current Sprint:** Sprint 11 — Autonomous Position Lifecycle
-
-**Regression Status:** ✅ 88 Passed | ❌ 0 Failed
-
-**Last Updated:** 2026-07-16
+Laatste update: 17-07-2026
 
 ---
 
-# Executive Summary
+# Algemene status
 
-Project Orion has successfully completed the complete autonomous BUY execution chain using Interactive Brokers Paper Trading.
+Project Orion beschikt over een volledig werkende autonome IBKR Paper Trading infrastructuur.
 
-The platform can now autonomously:
+De complete end-to-end handelsketen is operationeel:
 
-- scan markets
-- analyse opportunities
-- calculate deterministic risk
-- allocate capital
-- submit IBKR Paper BUY orders
-- reconcile broker fills
-- synchronize broker state
-- persist runtime state
-- resume after restart
+- Universe selectie
+- Marktdata (Yahoo)
+- Indicator berekening
+- Trading Pipeline
+- AI besluitvorming
+- Position Allocation
+- Order creatie
+- IBKR Order Transport
+- Broker fills
+- Broker synchronisatie
+- Portfolio synchronisatie
 
-The BUY side of Orion is considered feature complete.
-
-Current development has shifted towards autonomous position management and SELL execution.
-
----
-
-# Current Architecture Status
-
-## Core AI
-
-Status: COMPLETE
-
-Components:
-
-- AI Market Scanner
-- Market Intelligence
-- Signal Fusion
-- Opportunity Ranking
-- Strategy Recommendation
-- Investment Thesis Builder
-- Hypothesis Evaluation
+De autonome runner voltooit een volledige cyclus zonder fouten.
 
 ---
 
-## Trading Pipeline
+# Werkende onderdelen
 
-Status: COMPLETE
+## Data
 
-Pipeline:
+✅ Yahoo Provider
 
-Market Scanner
+✅ Indicator Builder
+
+✅ Trading Pipeline
+
+✅ Signal Fusion
+
+---
+
+## Trading
+
+✅ BUY pipeline
+
+✅ Position Allocator
+
+✅ Execution Engine
+
+✅ Paper Trading Service
+
+✅ Autonomous Runner
+
+---
+
+## IBKR
+
+✅ Account Service
+
+✅ Broker
+
+✅ Order Transport
+
+✅ Broker Synchronisatie
+
+✅ Portfolio Synchronisatie
+
+---
+
+## Portfolio
+
+✅ Cash synchronisatie
+
+✅ Positie synchronisatie
+
+✅ Equity berekening
+
+---
+
+# Laatst opgeloste problemen
+
+## Broker exits
+
+Runner probeert geen exits meer uit te voeren voor broker-posities die niet door Orion worden beheerd.
+
+Resultaat:
+
+Geen crashes meer tijdens broker synchronisatie.
+
+---
+
+## Yahoo ticker
+
+ASM International:
+
+Oud:
+
+ASMI.AS
+
+Nieuw:
+
+ASM.AS
+
+---
+
+## Position sizing
+
+Position Allocator werkte correct, maar configuratie stond te laag voor dure aandelen.
+
+Configuratie aangepast.
+
+---
+
+## Post-fill synchronisatie
+
+Synchronisatie normaliseert nu Yahoo-symbolen en IBKR-symbolen.
+
+Voorbeeld:
+
+ASM.AS
 
 ↓
 
-Trading Pipeline
+ASM
 
-↓
-
-Portfolio Allocator
-
-↓
-
-Execution Engine
-
-↓
-
-Broker
-
-↓
-
-Broker Synchronization
-
-↓
-
-Trading Session
+Hierdoor verdween de laatste IBKR synchronisatie-fout.
 
 ---
 
-## Paper Trading
+# Huidige beperkingen
 
-Status: COMPLETE
+Wanneer het maximum aantal open posities is bereikt worden nieuwe BUY-signalen correct afgewezen.
 
-Completed:
-
-- Paper Broker
-- Trade Journal
-- Runtime Journal
-- Portfolio Persistence
-- Trading Session Persistence
-- Runtime Supervisor
-- Restart Recovery
+Dit is verwacht gedrag.
 
 ---
 
-## Interactive Brokers
+# Eerste Repository Audit
 
-Status: COMPLETE (BUY)
+Er is een eerste architectuur-audit uitgevoerd.
 
-Completed:
+Belangrijkste conclusie:
 
-- Account Service
-- Portfolio Service
-- Portfolio Mapper
-- Execution Context Builder
-- Execution Service
-- Broker Implementation
-- Order Transport
-- Managed Account Validation
-- Paper-only Safety Checks
-- Late Fill Reconciliation
-- Trading Session Synchronization
-- Continuous Runner
-- Autonomous BUY Validation
+Veel functionaliteit blijkt al aanwezig te zijn.
 
-Validated against a real IBKR Paper account.
+Onder andere:
 
----
-
-# Runtime Validation
-
-Successfully validated:
-
-✓ Continuous autonomous runtime
-
-✓ IBKR Paper BUY execution
-
-✓ Broker synchronization
-
-✓ Late fill reconciliation
-
-✓ Session persistence
-
-✓ Restart recovery
-
-✓ Regression suite
-
-Regression baseline:
-
-88 / 88 PASSED
-
----
-
-# Remaining Functional Work
-
-The remaining major feature is the autonomous position lifecycle.
-
-Remaining work:
-
-## SELL Execution
-
-- IBKR SELL orders
-- SELL validation
-- SELL synchronization
-
----
-
-## Position Monitoring
-
-- monitor every open position
-- evaluate exit conditions
-- execute exits autonomously
-
----
-
-## Exit Engine
-
-Implement:
-
-- Take Profit
-- Stop Loss
-- Break Even
 - Trailing Stop
+- Break Even
 - Time Stop
+- Exit Engine
+- RiskPlan
+- Position Monitoring
+- Performance Analyse
+- Dashboard
+- Trade Journal
+- Portfolio Management
+
+De verwachting is dat een aanzienlijk deel alleen nog gekoppeld hoeft te worden.
 
 ---
 
-## Analytics
+# Volgende fase
 
-After closing trades:
+Prioriteit heeft nu géén nieuwe ontwikkeling.
 
-- performance analysis
-- trade attribution
-- strategy evaluation
-- learning dataset generation
+De volgende ontwikkelfase bestaat uit een volledige functionele audit van de bestaande codebase.
 
----
+Doel:
 
-# Current Limitations
-
-Current validation intentionally limits:
-
-- BUY only
-- maximum open positions
-- Paper account only
-
-These limitations exist to ensure safe validation before enabling full autonomous portfolio management.
+- bestaande modules analyseren
+- vaststellen welke functionaliteit volledig af is
+- identificeren welke onderdelen nog niet door de Autonomous Runner worden gebruikt
+- bestaande componenten activeren voordat nieuwe code wordt geschreven
 
 ---
 
-# Current Sprint
+# Algemene projectstatus
 
-Sprint 11
+Architectuur: stabiel
 
-Autonomous Position Lifecycle
+IBKR infrastructuur: operationeel
 
-Objectives:
+Autonomous Runner: operationeel
 
-1. Complete SELL execution
+Trading Pipeline: operationeel
 
-2. Autonomous position monitoring
+Productiestatus:
 
-3. Full trade lifecycle
-
-4. Closed trade analytics
-
-5. AI learning feedback
-
----
-
-# Definition of Done
-
-Sprint 11 is complete when Orion can:
-
-BUY
-
-↓
-
-Manage Position
-
-↓
-
-SELL
-
-↓
-
-Synchronize Broker
-
-↓
-
-Update Portfolio
-
-↓
-
-Journal Trade
-
-↓
-
-Learn From Result
-
-without manual intervention.
-
----
-
-# Long-term Goal
-
-A fully autonomous deterministic trading platform capable of operating continuously on Interactive Brokers with complete broker synchronization, deterministic decision making, autonomous portfolio management and continuous learning based on completed trades.
+**Codebase is stabiel genoeg om de focus te verleggen van infrastructuur naar functionele integratie van bestaande modules.**

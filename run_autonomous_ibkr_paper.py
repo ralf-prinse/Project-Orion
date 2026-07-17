@@ -58,9 +58,10 @@ def build_config() -> AutonomousPaperTradingConfig:
         watchlist_path="data/universes/ibkr_euronext_validation.csv",
         initial_cash=500.0,
         max_symbols=1,
-        max_open_positions=3,
+        max_open_positions=4,
         min_confidence=0.75,
-        max_position_value=150.0,
+        max_position_value=1000.0,
+        max_position_size_pct=0.10,
     )
 
     return AutonomousPaperTradingConfig(
@@ -93,7 +94,7 @@ def print_runtime_mode(
     print("TWS Paper port:    7497")
     print("Cycles:            1")
     print("Maximum symbols:   1")
-    print("Maximum positions: 3")
+    print("Maximum positions: 4")
     print(
         "Order submission: "
         + (

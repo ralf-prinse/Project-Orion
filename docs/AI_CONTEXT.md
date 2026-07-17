@@ -1,262 +1,172 @@
-# PROJECT ORION — AI CONTEXT
+# AI_CONTEXT.md
 
-**Status:** Stable autonomous IBKR Paper trading platform  
-**Active branch:** `feature-ibkr-integration`  
-**Regression baseline:** `88 passed, 0 failed`  
-**Updated:** 2026-07-16
+## Project
+Project Orion
 
----
+AI-gestuurd autonoom tradingplatform met ondersteuning voor:
+- Backtesting
+- Paper Trading
+- IBKR Paper Trading
+- Toekomstige Live Trading
 
-# Purpose
-
-Read this document first before continuing development.
-
-Then consult:
-
-1. PROJECT_STATUS.md
-2. TODO.md
-3. ORION_MASTER_ARCHITECTURE.md
-4. CHANGELOG.md
-
-Older sprint documents and archived notes are historical only.
+Architectuur is modulair en production-ready. Nieuwe functionaliteit wordt uitsluitend toegevoegd via bestaande services en niet via tijdelijke oplossingen.
 
 ---
 
-# Mission
+# Huidige status
 
-Project Orion is a deterministic swing-trading platform.
+Project Orion heeft nu een volledig werkende end-to-end IBKR Paper Trading pipeline.
 
-Artificial Intelligence assists with:
+Werkend:
 
-- market analysis;
-- hypothesis generation;
-- opportunity ranking;
-- confidence estimation.
+- Universe loading
+- Yahoo market data
+- IndicatorBuilder
+- TradingPipeline
+- SignalFusion
+- PositionAllocator
+- ExecutionEngine
+- IBKR Order Transport
+- IBKR Broker
+- Order fills
+- Broker synchronization
+- Portfolio synchronization
+- Autonomous runner
 
-Artificial Intelligence does **not** autonomously invent trading rules.
-
-Trading decisions remain fully deterministic and reproducible.
-
----
-
-# Current Development Phase
-
-Project Orion has completed the complete BUY execution chain using Interactive Brokers Paper Trading.
-
-The system can now autonomously:
-
-- scan markets;
-- analyse opportunities;
-- calculate deterministic risk;
-- allocate capital;
-- submit IBKR Paper BUY orders;
-- reconcile broker fills;
-- synchronize TradingSession with broker truth;
-- persist runtime state;
-- recover after restart.
-
-The BUY side is considered feature complete.
-
-Current focus has shifted to autonomous position management and SELL execution.
+De volledige autonome cyclus draait succesvol zonder crashes.
 
 ---
 
-# Current Runtime
+# Laatste grote fixes
 
-ContinuousPaperTradingRunner
+## Broker exits
 
-↓
+Autonomous runner probeerde eerder exits uit te voeren voor broker-posities die niet door Orion waren geopend.
 
-AutonomousPaperTradingRunner
+Oplossing:
 
-↓
+Brokerposities zonder PositionState of RiskPlan worden nu netjes overgeslagen.
 
-TradingPipeline
+Resultaat:
 
-↓
-
-PortfolioAllocator
-
-↓
-
-ExecutionEngine
-
-↓
-
-IbkrBroker
-
-↓
-
-IbkrOrderTransport
-
-↓
-
-Interactive Brokers Paper
-
-↓
-
-TradingSessionSyncService
-
-↓
-
-TradingSessionRepository
+Geen crashes meer tijdens broker synchronization.
 
 ---
 
-# Canonical Runtime State
+## Yahoo symbolen
 
-TradingSession is the only authoritative runtime object.
+ASM International gebruikte eerst:
 
-TradingSession owns:
+ASMI.AS
 
-- PaperPortfolio
-- PositionState
+Correct Yahoo symbool:
+
+ASM.AS
+
+Universe is aangepast.
+
+---
+
+## Position allocation
+
+ASM kon niet gekocht worden omdat:
+
+max_position_value = 150
+
+lager was dan de aandelenprijs.
+
+Configuratie verhoogd waardoor allocation correct werkt.
+
+---
+
+## Post-fill synchronization
+
+Na een succesvolle BUY ontstond:
+
+IbkrTradingSessionSyncError
+
+Oorzaak:
+
+Yahoo gebruikte:
+
+ASM.AS
+
+IBKR rapporteerde:
+
+ASM
+
+Synchronisatie normaliseert symbolen nu correct.
+
+Resultaat:
+
+Volledige broker synchronization werkt.
+
+---
+
+# Huidige status Autonomous Runner
+
+Werkt volledig.
+
+Autonomous cycle:
+
+- succesvol
+- geen exceptions
+- broker sync werkt
+- portfolio sync werkt
+- BUY pipeline werkt
+- SELL infrastructuur aanwezig
+
+Wanneer maximum aantal posities bereikt is worden nieuwe BUY's correct geweigerd.
+
+---
+
+# Nieuwe belangrijke ontdekking
+
+Er is een eerste repository-audit uitgevoerd.
+
+Belangrijkste conclusie:
+
+Een groot deel van de functionaliteit bestaat al.
+
+Onder andere gevonden:
+
+- Trailing Stop
+- Break Even
+- Time Stop
+- Exit Engine
 - RiskPlan
+- Position Monitoring
+- Dashboard
+- Performance analyzers
+- Trade Journal
+- Portfolio Management
 
-No duplicated lifecycle state may exist elsewhere.
-
-Repositories are persistence only.
-
-Broker state always overrides local assumptions.
-
----
-
-# Completed
-
-## Trading Engine
-
-- deterministic scanner
-- market intelligence
-- signal fusion
-- adaptive risk engine
-- opportunity ranking
-- portfolio allocation
-- execution pipeline
-
-## Paper Trading
-
-Completed:
-
-- PaperBroker
-- TradingSession persistence
-- runtime supervisor
-- restart recovery
-- trade journal
-- runtime journal
-- portfolio persistence
-
-## Interactive Brokers
-
-Completed:
-
-- account service
-- portfolio mapper
-- portfolio service
-- execution service
-- broker implementation
-- order transport
-- managed account validation
-- paper-only protection
-- late fill reconciliation
-- broker synchronization
-- continuous IBKR runner
-- autonomous BUY validation
-
-Validated using a real IBKR Paper account.
+Waarschijnlijk hoeft een aanzienlijk deel alleen nog aangesloten te worden op de Autonomous Runner.
 
 ---
 
-# Validation Status
+# Prioriteit volgende chat
 
-Current regression baseline:
+NIET direct nieuwe functionaliteit bouwen.
 
-88 passed
-0 failed
+Eerst een volledige functionele audit uitvoeren.
 
-Validated:
+Doel:
 
-- BUY execution
-- broker synchronization
-- late fills
-- continuous runtime
-- TradingSession persistence
-- restart safety
+- bestaande services inventariseren
+- bepalen welke modules al volledig werken
+- vaststellen welke onderdelen nog niet gekoppeld zijn
+- voorkomen dat bestaande functionaliteit opnieuw gebouwd wordt
 
----
-
-# Not Yet Implemented
-
-The remaining major milestone is the autonomous position lifecycle.
-
-Remaining work:
-
-- SELL execution through IBKR
-- autonomous exit engine
-- stop loss execution
-- take profit execution
-- trailing stop execution
-- break-even execution
-- time stop execution
-- closed trade analytics
-- AI learning feedback loop
+Na de audit wordt bepaald welke functionaliteit daadwerkelijk nog ontwikkeld moet worden.
 
 ---
 
-# Architectural Rules
+# Ontwikkelprincipes
 
-Always preserve:
-
-TradingPipeline
-
-↓
-
-PortfolioAllocator
-
-↓
-
-ExecutionEngine
-
-↓
-
-Broker
-
-↓
-
-Broker Truth Synchronization
-
-↓
-
-TradingSession
-
-Never update portfolio state manually after execution.
-
-IBKR remains the single source of truth.
-
----
-
-# Development Principles
-
-- deterministic first
-- test driven
-- regression safe
-- broker truth over local state
-- repositories never contain business logic
-- services remain single responsibility
-- architecture before optimisation
-
----
-
-# Immediate Next Goal
-
-Sprint 11
-
-Autonomous Position Lifecycle
-
-Deliver:
-
-- complete SELL execution
-- broker synchronization after SELL
-- autonomous position monitoring
-- full end-to-end trade lifecycle
-
-BUY functionality is considered complete unless regressions are discovered.
+- Production quality
+- Clean Architecture
+- Geen tijdelijke oplossingen
+- Geen dubbele implementaties
+- Eerst bestaande code hergebruiken
+- Nieuwe functionaliteit alleen indien echt noodzakelijk
