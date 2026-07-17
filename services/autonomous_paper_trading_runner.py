@@ -812,13 +812,15 @@ class AutonomousPaperTradingRunner:
 
         invested_amount = round(
             position.entry_price
-            * executed_quantity,
+            * executed_quantity
+            * position.fx_rate_to_base,
             2,
         )
 
-        exit_value = round(
-            executed_price
-            * executed_quantity,
+        realized_profit_loss = round(
+            (executed_price - position.entry_price)
+            * executed_quantity
+            * position.fx_rate_to_base,
             2,
         )
 
@@ -836,10 +838,7 @@ class AutonomousPaperTradingRunner:
             exit_price=executed_price,
             quantity=executed_quantity,
             invested_amount=invested_amount,
-            realized_profit_loss=round(
-                exit_value - invested_amount,
-                2,
-            ),
+            realized_profit_loss=realized_profit_loss,
             unrealized_profit_loss=0.0,
             expected_risk=0.0,
             regime="UNKNOWN",

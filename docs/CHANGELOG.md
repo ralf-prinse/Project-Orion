@@ -8,6 +8,10 @@ SELL wordt gecombineerd met een accountsummary die vlak vóór die fill was
 opgevraagd. Een regressietest simuleert expliciet een oud cashsaldo vóór en het
 bijgewerkte saldo ná de bevestigende positielijst.
 
+Bevestigde brokerexits converteren `invested_amount` en gerealiseerde P&L nu
+met de gevalideerde positie-FX-koers naar de EUR-portefeuillebasis. Entry- en
+fillprijzen blijven terecht in de noteringsvaluta van het instrument.
+
 Orions orderlog maskeert het Paper-account voortaan ook bij orderinzending. De
 zeer uitvoerige `ibapi` INFO-protocoldumps zijn gedempt omdat daarin het volledige
 accountveld van een order kon verschijnen; waarschuwingen en fouten blijven

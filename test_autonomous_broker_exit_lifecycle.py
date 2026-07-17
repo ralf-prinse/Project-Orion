@@ -153,6 +153,8 @@ def create_session() -> TradingSession:
                     quantity=2,
                     entry_price=100.0,
                     current_price=94.0,
+                    currency="USD",
+                    fx_rate_to_base=0.9,
                 ),
             },
         ),
@@ -250,8 +252,10 @@ def test_runner_routes_exit_through_broker_execution_and_sync() -> None:
     assert entry.entry_price == 100.0
     assert entry.exit_price == 93.50
     assert entry.quantity == 2
-    assert entry.invested_amount == 200.0
-    assert entry.realized_profit_loss == -13.0
+    # Journal monetary totals use the EUR portfolio base currency while
+    # entry/exit prices remain in the USD quote currency.
+    assert entry.invested_amount == 180.0
+    assert entry.realized_profit_loss == -11.7
 
     assert entry.timestamp == datetime(
         2026,
