@@ -98,6 +98,7 @@ def build_complete_session() -> TradingSession:
             ),
         },
         status="ACTIVE",
+        peak_portfolio_value=550.0,
     )
 
 
@@ -174,6 +175,7 @@ def test_runner_loads_complete_trading_session():
     assert result.session.name == "Persistent Lifecycle Test"
     assert result.session.status == "ACTIVE"
     assert result.session.portfolio.cash == 400.0
+    assert result.session.peak_portfolio_value == 550.0
 
     assert "AAPL" in result.session.position_states
     assert result.session.position_states["AAPL"].highest_price == 108.0
@@ -211,6 +213,7 @@ def test_runner_saves_complete_trading_session():
     assert restored.portfolio.cash == 600.0
     assert restored.position_states == {}
     assert restored.risk_plans == {}
+    assert restored.peak_portfolio_value == 600.0
 
     repository.delete()
 

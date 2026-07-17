@@ -108,6 +108,11 @@ class AutonomousPaperTradingRunner:
     def run(self):
         session_id = self._build_session_id()
         session = self._load_or_create_session()
+        peak_portfolio_value = max(
+            session.peak_portfolio_value,
+            session.equity,
+        )
+        session.peak_portfolio_value = peak_portfolio_value
         cycle_results = []
         completed_cycles = 0
         failed_cycles = 0
@@ -129,6 +134,13 @@ class AutonomousPaperTradingRunner:
                     session,
                     cycle_number,
                     session_id,
+                )
+                peak_portfolio_value = max(
+                    peak_portfolio_value,
+                    session.equity,
+                )
+                session.peak_portfolio_value = (
+                    peak_portfolio_value
                 )
 
                 scan_result = self.scanner.run(
@@ -205,6 +217,14 @@ class AutonomousPaperTradingRunner:
                             self.trading_session_sync_service
                             .synchronize(session)
                         )
+
+                peak_portfolio_value = max(
+                    peak_portfolio_value,
+                    session.equity,
+                )
+                session.peak_portfolio_value = (
+                    peak_portfolio_value
+                )
 
                 cycle_results.append(
                     AutonomousPaperTradingCycleResult(

@@ -30,6 +30,12 @@ class LivePaperTradingConfig:
 
     min_cash_reserve_pct: float = 0.10
 
+    max_risk_per_trade_pct: float = 0.01
+
+    max_portfolio_risk_pct: float = 0.06
+
+    max_drawdown_pct: float = 0.10
+
     history_period: str = "3mo"
     history_interval: str = "1d"
 

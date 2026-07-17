@@ -22,6 +22,7 @@ class TradingSession:
     position_states: dict[str, PositionState] = field(default_factory=dict)
     risk_plans: dict[str, RiskPlan] = field(default_factory=dict)
     status: str = "ACTIVE"
+    peak_portfolio_value: float = 0.0
 
     @property
     def cash(self) -> float:

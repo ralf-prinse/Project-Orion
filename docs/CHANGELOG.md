@@ -1,5 +1,25 @@
 # CHANGELOG.md
 
+## 2026-07-17 - Portfolio-aware pre-order risk integration
+
+### Canonical RiskManager gekoppeld
+
+`services.risk.RiskManager` is als harde pre-order-gate gekoppeld aan
+`PortfolioAllocator`.
+
+De allocator toetst nu voor iedere voorgestelde BUY:
+
+- risico per trade op basis van quantity, entry en stop-loss;
+- cumulatief risico van bestaande en eerder goedgekeurde posities;
+- persistente portfolio drawdown vanaf de high-watermark;
+- minimale cashreserve;
+- positie- en totale portfolio-exposure.
+
+Posities zonder beheerde `RiskPlan` blokkeren nieuwe allocaties fail-closed,
+met een expliciete afwijzingsreden. De bestaande IBKR BUY-, SELL-,
+synchronisatie- en managed-exitketen blijft ongewijzigd. Live trading en
+zelfstandige AI/learning-aanpassingen zijn niet geactiveerd.
+
 ## 2026-07-17
 
 ### IBKR Paper Trading volledig operationeel
