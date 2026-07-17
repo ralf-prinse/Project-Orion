@@ -227,6 +227,20 @@ TestCommand(
                     "test_autonomous_runner_ibkr_sync.py",
                 ],
             ),
+                        TestCommand(
+                "IBKR Autonomous Runtime Factory",
+                [
+                    sys.executable,
+                    "test_ibkr_autonomous_runtime_factory.py",
+                ],
+            ),
+                        TestCommand(
+                "IBKR Autonomous Runtime Factory",
+                [
+                    sys.executable,
+                    "test_ibkr_autonomous_runtime_factory.py",
+                ],
+            ),
             TestCommand("Portfolio Manager", [sys.executable, "test_portfolio_manager.py"]),
 
             TestCommand("Position State Factory", [sys.executable, "test_position_state_factory.py"]),

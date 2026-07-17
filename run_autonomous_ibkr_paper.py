@@ -1,133 +1,69 @@
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass
-from pathlib import Path
-from models.autonomous_paper_trading_config import AutonomousPaperTradingConfig
-from models.live_paper_trading_config import LivePaperTradingConfig
-from models.trading_session import TradingSession
-from providers.yahoo_provider import YahooProvider
-from services.autonomous_paper_trading_runner import AutonomousPaperTradingRunner
-from services.execution_engine import ExecutionEngine
-from services.ibkr.ibkr_account_service import IbkrAccountService
-from services.ibkr.ibkr_broker import IbkrBroker
-from services.ibkr.ibkr_order_transport import IbkrOrderTransport
-from services.ibkr.ibkr_portfolio_mapper import IbkrPortfolioMapper
-from services.paper_trading_service import PaperTradingService
-from services.stores.jsonl_trade_journal_repository import JsonlTradeJournalRepository
-from services.trading_cycle import TradingCycle
 
+from models.autonomous_paper_trading_config import (
+    AutonomousPaperTradingConfig,
+)
+from models.live_paper_trading_config import (
+    LivePaperTradingConfig,
+)
+from services.ibkr.ibkr_autonomous_runtime_factory import (
+    IbkrAutonomousRuntimeFactory,
+)
+from services.stores.jsonl_trade_journal_repository import (
+    JsonlTradeJournalRepository,
+)
+
+
+ACCOUNT_ENVIRONMENT_VARIABLE = "ORION_IBKR_PAPER_ACCOUNT_ID"
+ORDER_PERMISSION_ENVIRONMENT_VARIABLE = "ORION_IBKR_ALLOW_ORDERS"
 
 CONFIRMATION = "START ONE AUTONOMOUS IBKR PAPER CYCLE"
 
 
-class InMemoryTradingSessionRepository:
-    def __init__(self, session: TradingSession) -> None:
-        self._session = session
+def read_required_paper_account_id() -> str:
+    account_id = os.getenv(
+        ACCOUNT_ENVIRONMENT_VARIABLE,
+        "",
+    ).strip().upper()
 
-    def exists(self) -> bool:
-        return True
+    if not account_id:
+        raise RuntimeError(
+            "IBKR Paper account ID is not configured. "
+            f"Set {ACCOUNT_ENVIRONMENT_VARIABLE} to your "
+            "Paper account ID beginning with 'DU'."
+        )
 
-    def load(self) -> TradingSession:
-        return self._session
-
-    def save(self, session: TradingSession) -> None:
-        self._session = session
-
-
-@dataclass(frozen=True)
-class DisabledExitResult:
-    executed: bool = False
-
-
-class BuyOnlyExitEngine:
-    """Prevents local-only SELL handling during the first IBKR validation."""
-
-    def execute(self, *, portfolio, decision) -> DisabledExitResult:
-        return DisabledExitResult()
-
-
-def require_account_id() -> str:
-    account_id = os.environ.get("ORION_IBKR_PAPER_ACCOUNT_ID", "").strip().upper()
     if not account_id.startswith("DU"):
         raise RuntimeError(
-            "Set ORION_IBKR_PAPER_ACCOUNT_ID to the DU-prefixed TWS Paper account."
+            f"{ACCOUNT_ENVIRONMENT_VARIABLE} must contain an "
+            "IBKR Paper account ID beginning with 'DU'."
         )
+
     return account_id
 
 
-def read_ibkr_session(account_id: str) -> TradingSession:
-    account_service = IbkrAccountService(
-        host="127.0.0.1",
-        port=7497,
-        client_id=110,
-        timeout_seconds=15.0,
-    )
-    price_provider = YahooProvider()
+def order_submission_is_enabled() -> bool:
+    value = os.getenv(
+        ORDER_PERMISSION_ENVIRONMENT_VARIABLE,
+        "",
+    ).strip().lower()
 
-    account_service.connect()
-    try:
-        account = account_service.read_account()
-
-        if account.account_id.strip().upper() != account_id:
-            raise RuntimeError(
-                "Connected TWS Paper account does not match "
-                "ORION_IBKR_PAPER_ACCOUNT_ID."
-            )
-
-        positions = account_service.read_positions()
-    finally:
-        account_service.disconnect()
-
-    current_prices = {
-        position.symbol.strip().upper(): price_provider.get_current_price(
-            position.symbol.strip().upper()
-        )
-        for position in positions
-    }
-
-    portfolio = IbkrPortfolioMapper().map(
-        account=account,
-        positions=positions,
-        current_prices=current_prices,
-    )
-    return TradingSession(
-        name="Orion Autonomous IBKR Paper Validation",
-        portfolio=portfolio,
-    )
+    return value == "true"
 
 
-def main() -> None:
-    account_id = require_account_id()
-    session = read_ibkr_session(account_id)
-
-    transport = IbkrOrderTransport(
-        paper_account_id=account_id,
-        host="127.0.0.1",
-        port=7497,
-        client_id=141,
-        allow_order_submission=True,
-        disconnect_after_order=True,
-    )
-    broker = IbkrBroker(
-        transport=transport,
-        timeout_seconds=45.0,
-        exchange="SMART",
-        currency="USD",
-    )
-    execution_engine = ExecutionEngine(broker=broker)
-    trading_service = PaperTradingService(execution_engine=execution_engine)
-    trading_cycle = TradingCycle(paper_trading_service=trading_service)
-
+def build_config() -> AutonomousPaperTradingConfig:
     live_config = LivePaperTradingConfig(
         watchlist_path="data/universes/ibkr_us_validation.csv",
-        initial_cash=session.cash,
+        initial_cash=500.0,
         max_symbols=1,
-        max_open_positions=max(session.open_positions + 1, 1),
+        max_open_positions=3,
         min_confidence=0.75,
         max_position_value=150.0,
     )
-    config = AutonomousPaperTradingConfig(
+
+    return AutonomousPaperTradingConfig(
         live_config=live_config,
         cycles=1,
         sleep_seconds=0.0,
@@ -135,34 +71,66 @@ def main() -> None:
         print_cycle_summary=True,
     )
 
-    print("\n=========================================")
-    print("ORION AUTONOMOUS IBKR PAPER VALIDATION")
-    print("=========================================")
-    print(f"Account:          {account_id[:2]}*****{account_id[-2:]}")
-    print(f"Starting cash:    {session.cash:.2f}")
-    print(f"Open positions:   {session.open_positions}")
-    print("Cycles:           1")
-    print("Exit execution:   DISABLED (BUY-only validation)")
-    print("Automatic retry:  NO")
-    print("=========================================\n")
 
-    typed = input(f"Type exactly '{CONFIRMATION}' to continue: ").strip()
+def mask_account_id(account_id: str) -> str:
+    if len(account_id) <= 4:
+        return "****"
+
+    return f"{account_id[:2]}*****{account_id[-2:]}"
+
+
+def print_runtime_mode(
+    *,
+    paper_account_id: str,
+    allow_order_submission: bool,
+) -> None:
+    print()
+    print("=========================================")
+    print("ORION AUTONOMOUS IBKR PAPER TRADING")
+    print("=========================================")
+    print(f"Account:           {mask_account_id(paper_account_id)}")
+    print("TWS host:          127.0.0.1")
+    print("TWS Paper port:    7497")
+    print("Cycles:            1")
+    print("Maximum symbols:   1")
+    print("Maximum positions: 3")
+    print(
+        "Order submission: "
+        + (
+            "ENABLED"
+            if allow_order_submission
+            else "DISABLED"
+        )
+    )
+    print("BUY execution:     IBKR")
+    print("SELL execution:    IBKR")
+    print("Broker sync:       ENABLED")
+    print("=========================================")
+    print()
+
+    if not allow_order_submission:
+        print(
+            "SAFE MODE: Orion can connect to TWS and synchronize "
+            "the Paper account, but IBKR order submission is disabled."
+        )
+        print()
+
+
+def require_confirmation() -> bool:
+    typed = input(
+        f"Type exactly '{CONFIRMATION}' to continue: "
+    ).strip()
+
     if typed != CONFIRMATION:
         print("Confirmation mismatch. No runner was started.")
-        return
+        return False
 
-    runner = AutonomousPaperTradingRunner(
-        config=config,
-        trading_cycle=trading_cycle,
-        trading_session_repository=InMemoryTradingSessionRepository(session),
-        trade_journal_repository=JsonlTradeJournalRepository(
-            path="data/ibkr_autonomous_trade_journal.jsonl",
-        ),
-        exit_engine=BuyOnlyExitEngine(),
-    )
-    result = runner.run()
+    return True
 
-    print("\n=========================================")
+
+def print_result(result) -> None:
+    print()
+    print("=========================================")
     print("AUTONOMOUS IBKR PAPER RESULT")
     print("=========================================")
     print(f"Completed cycles: {result.completed_cycles}")
@@ -172,7 +140,34 @@ def main() -> None:
     print(f"Final cash:       {result.final_cash:.2f}")
     print(f"Final equity:     {result.final_equity:.2f}")
     print(f"Open positions:   {result.session.open_positions}")
-    print("=========================================\n")
+    print("=========================================")
+    print()
+
+
+def main() -> None:
+    paper_account_id = read_required_paper_account_id()
+    allow_order_submission = order_submission_is_enabled()
+
+    print_runtime_mode(
+        paper_account_id=paper_account_id,
+        allow_order_submission=allow_order_submission,
+    )
+
+    if not require_confirmation():
+        return
+
+    runtime = IbkrAutonomousRuntimeFactory().build(
+        paper_account_id=paper_account_id,
+        config=build_config(),
+        trade_journal_repository=JsonlTradeJournalRepository(
+            path="data/ibkr_autonomous_trade_journal.jsonl",
+        ),
+        allow_order_submission=allow_order_submission,
+    )
+
+    result = runtime.runner.run()
+
+    print_result(result)
 
 
 if __name__ == "__main__":
