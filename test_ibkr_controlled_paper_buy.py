@@ -11,7 +11,7 @@ from services.ibkr.ibkr_order_transport import (
 
 
 EXPECTED_CONFIRMATION = "PLACE ONE IBKR PAPER BUY"
-SYMBOL = "AAPL"
+SYMBOL="ASML.AS"
 QUANTITY = 1
 REFERENCE_PRICE = 250.0
 PAPER_PORT = 7497

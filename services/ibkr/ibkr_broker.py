@@ -167,11 +167,20 @@ class IbkrBroker:
         return None
 
     def _build_contract(self, order: Order) -> Contract:
+        raw_symbol = order.symbol.strip().upper()
+
         contract = Contract()
-        contract.symbol = order.symbol.strip().upper()
         contract.secType = "STK"
         contract.exchange = self.exchange
-        contract.currency = self.currency
+
+        if raw_symbol.endswith(".AS"):
+            contract.symbol = raw_symbol.removesuffix(".AS")
+            contract.currency = "EUR"
+            contract.primaryExchange = "AEB"
+        else:
+            contract.symbol = raw_symbol
+            contract.currency = self.currency
+
         return contract
 
     def _build_ibkr_order(self, order: Order) -> IbkrOrder:

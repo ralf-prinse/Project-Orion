@@ -55,7 +55,7 @@ def order_submission_is_enabled() -> bool:
 
 def build_config() -> AutonomousPaperTradingConfig:
     live_config = LivePaperTradingConfig(
-        watchlist_path="data/universes/ibkr_us_validation.csv",
+        watchlist_path="data/universes/ibkr_euronext_validation.csv",
         initial_cash=500.0,
         max_symbols=1,
         max_open_positions=3,
