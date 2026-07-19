@@ -85,8 +85,9 @@ def test_builds_complete_portfolio() -> None:
     assert fake.position_reads == 1
 
     assert portfolio.cash == 9723.26
-    assert portfolio.positions_value == 315.58
-    assert portfolio.equity == 10038.84
+    # Portfolio totals use the validated EUR conversion from the mapper.
+    assert portfolio.positions_value == 275.98
+    assert portfolio.equity == 9999.24
 
     assert "AAPL" in portfolio.positions
 

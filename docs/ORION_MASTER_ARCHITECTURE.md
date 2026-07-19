@@ -88,6 +88,11 @@ lopen.
 - Decision Engine
 - Position Allocator
 
+`services.orchestration.TradingPipeline` gebruikt één actieve decisionlaag:
+`services.trading_decision`. De afzonderlijke `services/decisions`-package is
+uitsluitend research/explainability en heeft geen importpad naar de autonome
+IBKR-runtime. De oude root-`engines` en `ScannerService` bestaan niet meer.
+
 ---
 
 ## Risk

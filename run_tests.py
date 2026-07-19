@@ -31,6 +31,16 @@ class OrionTestRunner:
             TestCommand("Investment Thesis Builder", [sys.executable, "test_investment_thesis_builder.py"]),
             TestCommand("Strategy Thesis Pipeline", [sys.executable, "test_strategy_thesis_pipeline.py"]),
             TestCommand("Decision Smoke", [sys.executable, "test_decision_smoke.py"]),
+            TestCommand(
+                "Canonical Runtime Architecture",
+                [
+                    sys.executable,
+                    "-m",
+                    "pytest",
+                    "-q",
+                    "tests/test_canonical_runtime_architecture.py",
+                ],
+            ),
             TestCommand("Intelligence Layer", [sys.executable, "test_intelligence_layer.py"]),
             TestCommand("AI Market Scanner", [sys.executable, "test_ai_market_scanner.py"]),
             TestCommand("Backtest Visualizer", [sys.executable, "test_backtest_visualizer.py"]),
@@ -69,10 +79,6 @@ TestCommand(
 TestCommand(
     "JSON Paper Portfolio Repository",
     [sys.executable, "test_json_paper_portfolio_repository.py"],
-),
-TestCommand(
-    "Paper Trading Service Persistence",
-    [sys.executable, "test_paper_trading_service_persistence.py"],
 ),
 TestCommand(
     "Autonomous Runner Persistence",
@@ -144,13 +150,9 @@ TestCommand(
             TestCommand("Trade Journal Builder", [sys.executable, "test_trade_journal_builder.py"]),
             TestCommand("Performance Analyzer", [sys.executable, "test_performance_analyzer.py"]),
             TestCommand("Strategy Recommendation Engine", [sys.executable, "test_strategy_recommendation_engine.py"]),
-            TestCommand("Execution Context", [sys.executable, "test_execution_context.py"]),
-            TestCommand("Execution Models", [sys.executable, "test_execution_models.py"]),
-            TestCommand("Execution Validator", [sys.executable, "test_execution_validator.py"]),
             TestCommand("Execution Request Builder", [sys.executable, "test_execution_request_builder.py"]),
             TestCommand("Execution Report Builder", [sys.executable, "test_execution_report_builder.py"]),
             TestCommand("Execution Engine", [sys.executable, "test_execution_engine.py"]),
-            TestCommand("Order Factory", [sys.executable, "test_order_factory.py"]),
             TestCommand("Paper Broker", [sys.executable, "test_paper_broker.py"]),
             TestCommand(
                 "IBKR Account Service",

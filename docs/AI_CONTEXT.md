@@ -22,6 +22,11 @@ brokerinterface. Nieuwsintelligentie is gekoppeld als IBKR `SHADOW`-
 observatielaag en heeft geen invloed op orders. Gesloten trades worden als één
 record bewaard voor latere offline analyse; autonoom self-learning staat uit.
 
+Architectuurgrens: de actieve `TradingPipeline` gebruikt uitsluitend
+`services.trading_decision`. `services/decisions` is research/explainability en
+wordt niet door de autonome runner geïmporteerd. De oude `engines`- en
+`ScannerService`-keten is verwijderd. De volledige suite telt 555 groene tests.
+
 Werkend:
 
 - Universe loading

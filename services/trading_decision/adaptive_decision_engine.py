@@ -1,19 +1,8 @@
-from services.decision.decision_models import MarketSignal, TradeDecision
+from services.trading_decision.decision_models import MarketSignal, TradeDecision
 
 
 class AdaptiveDecisionEngine:
-    """
-    Dynamic threshold decision engine.
-
-    Input:
-    - MarketSignal
-
-    Output:
-    - TradeDecision
-
-    This engine decides BUY / SELL / HOLD only.
-    Position sizing is handled separately by PositionSizer.
-    """
+    """Canonical BUY/SELL/HOLD decision engine without position sizing."""
 
     def evaluate(self, signal: MarketSignal) -> TradeDecision:
         score = signal.score

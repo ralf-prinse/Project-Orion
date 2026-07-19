@@ -42,6 +42,14 @@ Nieuwe observatie-infrastructuur:
 - gesloten trades koppelen entry- en exitredenen via `trade_id`;
 - learning/AI-services mogen runtimeparameters nog niet aanpassen.
 
+Architectuuropschoning:
+
+- één canonieke actieve decisionnamespace: `services/trading_decision`;
+- oude directe decisionengine en dubbele `engines`/scannerketen verwijderd;
+- research/explainability blijft geïsoleerd in `services/decisions`;
+- lege placeholders en tests zonder assertions verwijderd;
+- volledige testsuite: 555 geslaagd, 0 mislukt.
+
 ---
 
 # Werkende onderdelen

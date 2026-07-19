@@ -1,5 +1,24 @@
 # CHANGELOG.md
 
+## 2026-07-19 - Canonical runtime architecture cleanup
+
+De actieve adaptieve decisioncomponenten zijn zonder strategiewijziging
+verplaatst van de dubbelzinnige `services/decision`-namespace naar de expliciete
+`services/trading_decision`-laag. `TradingPipeline` is de enige productie-eigenaar
+van deze decision- en sizingcomponenten. Een architectuurtest bewaakt dat de
+autonome IBKR-runtime geen research-decision- of learningservices activeert.
+
+De kapotte directe `DecisionEngine`, ongebruikte adapter, oude `engines`-
+scannerketen, lege runtime- en mapperplaceholders, een dubbel leeg decision-
+modelbestand en lege schijntests zijn verwijderd. Het lege
+`strategy_variant_proposal`-contract is vervangen door het reeds bestaande
+gelijknamige model in `models.strategy_variant`.
+
+Verouderde regressiefixtures zijn afgestemd op de huidige EUR-FX-mapping,
+`TradeJournalEntry` en `PerformanceAnalysisResult`. Persistentie blijft terecht
+eigendom van repositories/runners en niet van `PaperTradingService`. De volledige
+testsuite eindigt na deze cleanup op 555 geslaagde tests en nul failures.
+
 ## 2026-07-19 - Headless runtime, IBKR news shadow mode and trade memory
 
 De ongebruikte Qt-desktop-GUI, bijbehorende tests en `PySide6`-dependency zijn

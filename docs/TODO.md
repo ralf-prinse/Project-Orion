@@ -151,6 +151,12 @@ Voorkom dubbele implementaties.
 
 ✅ Gesloten trade-records met BUY/SELL-redenen en geraamde netto-P&L
 
+✅ Canonieke actieve decisionlaag afgescheiden van researchcode
+
+✅ Legacy `engines`/`ScannerService` en lege placeholders verwijderd
+
+✅ Volledige testsuite hersteld naar 555 geslaagd en 0 mislukt
+
 ---
 
 # Volgende schaalstappen
@@ -166,6 +172,10 @@ Voorkom dubbele implementaties.
 - pas daarna beslissen over een fail-closed nieuws-gate;
 - offline learning uitsluitend op `CompletedTradeRecord` ontwerpen, met
   menselijke goedkeuring en versiebeheer van parameterwijzigingen.
+- na Paper-validatie beoordelen of de geïsoleerde `services/decisions`-
+  researchlaag nog waarde toevoegt of verder kan worden geconsolideerd;
+- performance-research pas migreren naar `CompletedTradeRecord` nadat voldoende
+  volledig gesloten trades beschikbaar zijn.
 
 ---
 
