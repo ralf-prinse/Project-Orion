@@ -78,4 +78,5 @@ class PortfolioRevaluationService:
         return PaperPortfolio(
             cash=portfolio.cash,
             positions=updated_positions,
+            base_currency=portfolio.base_currency,
         )

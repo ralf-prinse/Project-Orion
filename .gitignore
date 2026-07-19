@@ -23,3 +23,5 @@ data/*_journal.jsonl
 data/runtime_events.jsonl
 data/validation_*.json
 data/validation_*.jsonl
+data/ibkr_autonomous_trading_session.json
+data/ibkr_autonomous_paper_portfolio.json

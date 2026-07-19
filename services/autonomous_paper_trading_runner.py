@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from datetime import datetime
 
 from models.autonomous_paper_trading_config import (
@@ -13,6 +14,8 @@ from models.market_snapshot import MarketSnapshot
 from models.paper_portfolio import PaperPortfolio
 from models.trade_journal_entry import TradeJournalEntry
 from models.trading_session import TradingSession
+from models.live_paper_trading_result import LivePaperTradingResult
+from models.portfolio_allocation_result import PortfolioAllocationResult
 from providers.yahoo_provider import YahooProvider
 from services.exit_engine import ExitEngine
 from services.live_paper_market_scanner import (
@@ -40,6 +43,7 @@ from services.stores.repositories.trading_session_repository import (
 )
 from services.trade_journal_builder import TradeJournalBuilder
 from services.trading_cycle import TradingCycle
+from services.market_session_service import MarketSessionService
 
 
 class AutonomousPaperTradingRunner:
@@ -61,6 +65,9 @@ class AutonomousPaperTradingRunner:
         exit_engine=None,
         position_exit_execution_service=None,
         trading_session_sync_service=None,
+        market_session_service: MarketSessionService | None = None,
+        position_adoption_service=None,
+        sleep_fn=None,
     ):
         self.config = config or AutonomousPaperTradingConfig()
         self.scanner = scanner or LivePaperMarketScanner(
@@ -104,10 +111,18 @@ class AutonomousPaperTradingRunner:
         self.trading_session_sync_service = (
             trading_session_sync_service
         )
+        self.market_session_service = market_session_service
+        self.position_adoption_service = position_adoption_service
+        self.sleep_fn = sleep_fn or time.sleep
 
     def run(self):
         session_id = self._build_session_id()
         session = self._load_or_create_session()
+        peak_portfolio_value = max(
+            session.peak_portfolio_value,
+            session.equity,
+        )
+        session.peak_portfolio_value = peak_portfolio_value
         cycle_results = []
         completed_cycles = 0
         failed_cycles = 0
@@ -122,14 +137,56 @@ class AutonomousPaperTradingRunner:
                         .synchronize(session)
                     )
 
+                if self.position_adoption_service is not None:
+                    adoption = self.position_adoption_service.adopt(
+                        session=session,
+                        trading_config=self.config.live_config,
+                    )
+                    session = adoption.session
+                    self._append_adoption_journal_entries(
+                        records=adoption.records,
+                        session=session,
+                        cycle_number=cycle_number,
+                        session_id=session_id,
+                    )
+
                 session = self._update_open_position_lifecycle(
                     session
                 )
+                positions_before_exits = session.open_positions
                 session = self._process_open_position_exits(
                     session,
                     cycle_number,
                     session_id,
                 )
+                executed_exits = max(
+                    0,
+                    positions_before_exits - session.open_positions,
+                )
+                peak_portfolio_value = max(
+                    peak_portfolio_value,
+                    session.equity,
+                )
+                session.peak_portfolio_value = (
+                    peak_portfolio_value
+                )
+
+                if self._is_exit_only():
+                    cycle_results.append(
+                        AutonomousPaperTradingCycleResult(
+                            scan=self._empty_scan_result(session),
+                            allocation=PortfolioAllocationResult(
+                                decisions=[]
+                            ),
+                            executed_trades=0,
+                            rejected_trades=0,
+                            executed_exits=executed_exits,
+                        )
+                    )
+                    completed_cycles += 1
+                    self._save_session(session)
+                    self._sleep_between_cycles(cycle_index)
+                    continue
 
                 scan_result = self.scanner.run(
                     session=session
@@ -144,6 +201,7 @@ class AutonomousPaperTradingRunner:
                 rejected_trades = 0
                 attempted_trade = False
                 opened_symbols: set[str] = set()
+                execution_rejections: dict[str, str] = {}
 
                 for decision in allocation_result.decisions:
                     if not decision.approved:
@@ -168,6 +226,12 @@ class AutonomousPaperTradingRunner:
                             ),
                         ),
                         quantity=decision.quantity,
+                        fx_rate_to_base=decision.fx_rate_to_base,
+                        currency=(
+                            "EUR"
+                            if decision.symbol.endswith((".AS", ".DE"))
+                            else "USD"
+                        ),
                     )
 
                     session = cycle_result.session
@@ -185,6 +249,14 @@ class AutonomousPaperTradingRunner:
                         )
                     else:
                         rejected_trades += 1
+                        execution_rejections[
+                            decision.symbol.strip().upper()
+                        ] = cycle_result.message
+                        print(
+                            "Trade execution rejected: "
+                            f"{decision.symbol} | "
+                            f"{cycle_result.message}"
+                        )
 
                 if (
                     attempted_trade
@@ -206,17 +278,30 @@ class AutonomousPaperTradingRunner:
                             .synchronize(session)
                         )
 
+                peak_portfolio_value = max(
+                    peak_portfolio_value,
+                    session.equity,
+                )
+                session.peak_portfolio_value = (
+                    peak_portfolio_value
+                )
+
                 cycle_results.append(
                     AutonomousPaperTradingCycleResult(
                         scan=scan_result,
                         allocation=allocation_result,
                         executed_trades=executed_trades,
                         rejected_trades=rejected_trades,
+                        executed_exits=executed_exits,
+                        execution_rejections=(
+                            execution_rejections
+                        ),
                     )
                 )
 
                 completed_cycles += 1
                 self._save_session(session)
+                self._sleep_between_cycles(cycle_index)
 
             except Exception as exc:
                 failed_cycles += 1
@@ -244,6 +329,39 @@ class AutonomousPaperTradingRunner:
         )
 
         return result
+
+    def _sleep_between_cycles(self, cycle_index: int) -> None:
+        is_last_cycle = cycle_index >= self.config.cycles - 1
+        if is_last_cycle or self.config.sleep_seconds <= 0:
+            return
+
+        print(
+            "Next autonomous cycle in "
+            f"{self.config.sleep_seconds:g} seconds."
+        )
+        self.sleep_fn(self.config.sleep_seconds)
+
+    def _is_exit_only(self) -> bool:
+        return (
+            self.config.execution_mode
+            == AutonomousPaperTradingConfig.EXIT_ONLY
+        )
+
+    def _empty_scan_result(
+        self,
+        session: TradingSession,
+    ) -> LivePaperTradingResult:
+        return LivePaperTradingResult(
+            session=session,
+            scanned_symbols=0,
+            succeeded_symbols=0,
+            failed_symbols=0,
+            failed_symbol_errors={},
+            scan_duration_seconds=0.0,
+            candidates=[],
+            executed_trades=0,
+            rejected_trades=0,
+        )
 
     def _update_open_position_lifecycle(
         self,
@@ -308,6 +426,9 @@ class AutonomousPaperTradingRunner:
                     updated_session.risk_plans
                 ),
                 status=updated_session.status,
+                peak_portfolio_value=(
+                    updated_session.peak_portfolio_value
+                ),
             )
 
         return updated_session
@@ -388,6 +509,18 @@ class AutonomousPaperTradingRunner:
                 )
 
             if decision.action == "HOLD":
+                continue
+
+            if (
+                self.market_session_service is not None
+                and not self.market_session_service.is_symbol_market_open(
+                    symbol
+                )
+            ):
+                print(
+                    "Position exit skipped for "
+                    f"{symbol}: regular market session is closed."
+                )
                 continue
 
             if (
@@ -504,6 +637,7 @@ class AutonomousPaperTradingRunner:
                 session.risk_plans
             ),
             status=session.status,
+            peak_portfolio_value=session.peak_portfolio_value,
         )
 
         if self.trading_session_sync_service is not None:
@@ -580,6 +714,12 @@ class AutonomousPaperTradingRunner:
             decision.reason,
             cycle_number,
             session_id,
+            estimated_trading_costs=(
+                decision.estimated_round_trip_costs
+            ),
+            estimated_net_profit_loss=(
+                decision.estimated_net_profit_loss
+            ),
         )
 
         closed_symbol = (
@@ -603,6 +743,7 @@ class AutonomousPaperTradingRunner:
             position_states=position_states,
             risk_plans=risk_plans,
             status=session.status,
+            peak_portfolio_value=session.peak_portfolio_value,
         )
 
     def _append_open_trade_journal_entry(
@@ -636,6 +777,49 @@ class AutonomousPaperTradingRunner:
             entry
         )
 
+    def _append_adoption_journal_entries(
+        self,
+        *,
+        records,
+        session,
+        cycle_number,
+        session_id,
+    ):
+        if self.trade_journal_repository is None:
+            return
+
+        for record in records:
+            if not record.adopted:
+                continue
+
+            position = session.portfolio.positions[record.symbol]
+            risk_plan = session.risk_plans[record.symbol]
+            self.trade_journal_repository.append(
+                TradeJournalEntry(
+                    timestamp=datetime.now(),
+                    symbol=record.symbol,
+                    action="ADOPT_POSITION",
+                    decision="ADOPT",
+                    confidence=0.0,
+                    score=0.0,
+                    entry_price=position.entry_price,
+                    exit_price=None,
+                    quantity=position.quantity,
+                    invested_amount=position.cost_basis,
+                    realized_profit_loss=0.0,
+                    unrealized_profit_loss=(
+                        position.unrealized_profit_loss
+                    ),
+                    expected_risk=risk_plan.risk_percent,
+                    regime="UNKNOWN",
+                    volatility="UNKNOWN",
+                    ai_summary=risk_plan.notes,
+                    recommendation_reason=record.reason,
+                    cycle_number=cycle_number,
+                    session_id=session_id,
+                )
+            )
+
     def _append_broker_exit_journal_entry(
         self,
         *,
@@ -662,13 +846,15 @@ class AutonomousPaperTradingRunner:
 
         invested_amount = round(
             position.entry_price
-            * executed_quantity,
+            * executed_quantity
+            * position.fx_rate_to_base,
             2,
         )
 
-        exit_value = round(
-            executed_price
-            * executed_quantity,
+        realized_profit_loss = round(
+            (executed_price - position.entry_price)
+            * executed_quantity
+            * position.fx_rate_to_base,
             2,
         )
 
@@ -686,10 +872,7 @@ class AutonomousPaperTradingRunner:
             exit_price=executed_price,
             quantity=executed_quantity,
             invested_amount=invested_amount,
-            realized_profit_loss=round(
-                exit_value - invested_amount,
-                2,
-            ),
+            realized_profit_loss=realized_profit_loss,
             unrealized_profit_loss=0.0,
             expected_risk=0.0,
             regime="UNKNOWN",
@@ -702,6 +885,13 @@ class AutonomousPaperTradingRunner:
             recommendation_reason=decision.reason,
             cycle_number=cycle_number,
             session_id=session_id,
+            estimated_trading_costs=(
+                decision.estimated_round_trip_costs
+            ),
+            estimated_net_profit_loss=(
+                decision.estimated_net_profit_loss
+            ),
+            profit_calculation_currency="EUR",
         )
 
         self.trade_journal_repository.append(
@@ -715,6 +905,8 @@ class AutonomousPaperTradingRunner:
         reason,
         cycle_number,
         session_id,
+        estimated_trading_costs=0.0,
+        estimated_net_profit_loss=0.0,
     ):
         if self.trade_journal_repository is None:
             return
@@ -748,6 +940,13 @@ class AutonomousPaperTradingRunner:
             recommendation_reason=reason,
             cycle_number=cycle_number,
             session_id=session_id,
+            estimated_trading_costs=(
+                estimated_trading_costs
+            ),
+            estimated_net_profit_loss=(
+                estimated_net_profit_loss
+            ),
+            profit_calculation_currency="EUR",
         )
 
         self.trade_journal_repository.append(

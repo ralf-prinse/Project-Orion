@@ -2,7 +2,7 @@
 
 # Project Orion - Status
 
-Laatste update: 17-07-2026
+Laatste update: 19-07-2026
 
 ---
 
@@ -25,6 +25,14 @@ De complete end-to-end handelsketen is operationeel:
 - Portfolio synchronisatie
 
 De autonome runner voltooit een volledige cyclus zonder fouten.
+
+De eerste schaalfase voor autonoom Paper-traden is operationeel:
+
+- 100 gecureerde EU/VS-symbolen;
+- batchgewijze historische marktdata met cache;
+- configureerbare begrensde cycli met 15-minuteninterval;
+- maximaal drie nieuwe posities per cyclus;
+- Xetra BUY-, suffix- en broker-syncsupport.
 
 ---
 
@@ -135,6 +143,10 @@ Hierdoor verdween de laatste IBKR synchronisatie-fout.
 Wanneer het maximum aantal open posities is bereikt worden nieuwe BUY-signalen correct afgewezen.
 
 Dit is verwacht gedrag.
+
+Yahoo blijft in deze fase de analysebron. Voor handel met echt geld moet actuele
+IBKR-marktdata voor posities en topkandidaten nog de execution-grade bron worden.
+De runtime accepteert bewust uitsluitend IBKR Paper-accounts met `DU`-prefix.
 
 ---
 

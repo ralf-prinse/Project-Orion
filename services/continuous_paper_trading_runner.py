@@ -456,7 +456,11 @@ class ContinuousPaperTradingRunner:
             f"position_states="
             f"{len(result.session.position_states)}, "
             f"risk_plans="
-            f"{len(result.session.risk_plans)}"
+            f"{len(result.session.risk_plans)}, "
+            f"risk_evaluations="
+            f"{result.risk_evaluations}, "
+            f"risk_rejections="
+            f"{result.risk_rejections}"
         )
 
     def _as_utc(

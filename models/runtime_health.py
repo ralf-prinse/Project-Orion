@@ -24,6 +24,8 @@ class RuntimeHealth:
     open_positions: int = 0
     position_states: int = 0
     risk_plans: int = 0
+    risk_evaluations: int = 0
+    risk_rejections: int = 0
 
     @property
     def is_running(self) -> bool:

@@ -33,7 +33,7 @@ def create_position(
     symbol: str = "AAPL",
     security_type: str = "STK",
     exchange: str = "SMART",
-    currency: str = "USD",
+    currency: str = "EUR",
     quantity: float = 2.0,
     average_cost: float = 100.0,
 ) -> BrokerPosition:

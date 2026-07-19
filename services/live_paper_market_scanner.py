@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import time
+from collections.abc import Callable
+from datetime import UTC, datetime
 
 from models.live_paper_trading_config import LivePaperTradingConfig
 from models.live_paper_trading_result import (
@@ -17,6 +19,8 @@ from services.paper_trading_pipeline_adapter import (
     PaperTradingPipelineAdapter,
 )
 from services.watchlist_service import WatchlistService
+from services.market_session_service import MarketSessionService
+from services.market_data.historical_provider import HistoricalDataProvider
 
 
 class LivePaperMarketScanner:
@@ -45,6 +49,9 @@ class LivePaperMarketScanner:
         adapter: PaperTradingPipelineAdapter | None = None,
         watchlist_service: WatchlistService | None = None,
         ranking_engine: OpportunityRankingEngine | None = None,
+        market_session_service: MarketSessionService | None = None,
+        historical_provider: HistoricalDataProvider | None = None,
+        clock: Callable[[], datetime] | None = None,
     ):
         self.config = config or LivePaperTradingConfig()
         self.provider = provider or YahooProvider()
@@ -56,6 +63,9 @@ class LivePaperMarketScanner:
                 watchlist_path=str(self.config.watchlist_path),
             )
         )
+        self.market_session_service = market_session_service
+        self.historical_provider = historical_provider
+        self.clock = clock or (lambda: datetime.now(UTC))
 
     def run(
         self,
@@ -78,13 +88,52 @@ class LivePaperMarketScanner:
         failed_symbol_errors: dict[str, str] = {}
         succeeded_symbols = 0
 
+        evaluated_at = self.clock()
+        open_symbols: list[str] = []
+
         for symbol in symbols:
-            try:
-                history = self.provider.get_historical_data(
+            if (
+                self.market_session_service is not None
+                and not self.market_session_service.is_symbol_market_open(
                     symbol=symbol,
-                    period=self.config.history_period,
-                    interval=self.config.history_interval,
+                    now=evaluated_at,
                 )
+            ):
+                status = self.market_session_service.get_symbol_status(
+                    symbol=symbol,
+                    now=evaluated_at,
+                )
+                failed_symbol_errors[symbol] = (
+                    f"Market {status.market.code} is closed: "
+                    f"{status.reason}"
+                )
+                continue
+
+            open_symbols.append(symbol)
+
+        prefetched_history = None
+        if self.historical_provider is not None and open_symbols:
+            prefetched_history = self.historical_provider.get_history(
+                symbols=open_symbols,
+                period=self.config.history_period,
+                interval=self.config.history_interval,
+            )
+
+        for symbol in open_symbols:
+            try:
+                if prefetched_history is not None:
+                    history = prefetched_history.get(symbol)
+                    if history is None or history.empty:
+                        raise ValueError(
+                            "No batched historical market data returned "
+                            f"for {symbol}."
+                        )
+                else:
+                    history = self.provider.get_historical_data(
+                        symbol=symbol,
+                        period=self.config.history_period,
+                        interval=self.config.history_interval,
+                    )
 
                 pipeline_result = self.adapter.run(
                     symbol=symbol,

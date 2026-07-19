@@ -173,6 +173,12 @@ class RuntimeSupervisor:
         self.health.risk_plans = len(
             session.risk_plans
         )
+        self.health.risk_evaluations = (
+            result.risk_evaluations
+        )
+        self.health.risk_rejections = (
+            result.risk_rejections
+        )
 
     def _record(
         self,
@@ -200,6 +206,12 @@ class RuntimeSupervisor:
                 open_positions=self.health.open_positions,
                 position_states=self.health.position_states,
                 risk_plans=self.health.risk_plans,
+                risk_evaluations=(
+                    self.health.risk_evaluations
+                ),
+                risk_rejections=(
+                    self.health.risk_rejections
+                ),
                 error=error,
             )
         )

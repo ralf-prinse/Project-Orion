@@ -15,6 +15,8 @@ def create_execution_result(
     side: str,
     quantity: int,
     price: float,
+    currency: str = "EUR",
+    fx_rate_to_base: float = 1.0,
 ) -> ExecutionResult:
     order = Order(
         symbol=symbol,
@@ -24,6 +26,8 @@ def create_execution_result(
         price=price,
         created_at=datetime.now(),
         source="test_portfolio_manager",
+        currency=currency,
+        fx_rate_to_base=fx_rate_to_base,
     )
 
     return ExecutionResult(
@@ -147,11 +151,32 @@ def test_applies_partial_sell_execution() -> None:
     assert snapshot.open_positions == 1
 
 
+def test_applies_usd_execution_in_euro_base_currency() -> None:
+    manager = PortfolioManager()
+    portfolio = PaperPortfolio(cash=1000.0, base_currency="EUR")
+    result = create_execution_result(
+        side="BUY",
+        quantity=2,
+        price=100.0,
+        currency="USD",
+        fx_rate_to_base=0.80,
+    )
+
+    updated = manager.apply_execution(portfolio=portfolio, result=result)
+
+    assert updated.cash == 840.0
+    assert updated.positions["AAPL"].currency == "USD"
+    assert updated.positions["AAPL"].fx_rate_to_base == 0.80
+    assert updated.positions_value == 160.0
+    assert updated.equity == 1000.0
+
+
 def run() -> None:
     tests = [
         test_applies_buy_execution,
         test_applies_complete_sell_execution,
         test_applies_partial_sell_execution,
+        test_applies_usd_execution_in_euro_base_currency,
     ]
 
     for test in tests:

@@ -3,9 +3,11 @@ from __future__ import annotations
 import math
 import time
 from collections.abc import Iterable, Mapping
+from dataclasses import replace
 from typing import Protocol
 
 from models.trading_session import TradingSession
+from models.position_state import PositionState
 from services.ibkr.ibkr_account_service import IbkrAccountService
 from services.ibkr.ibkr_portfolio_mapper import IbkrPortfolioMapper
 
@@ -102,8 +104,6 @@ class IbkrTradingSessionSyncService:
         self._account_service.connect()
 
         try:
-            account = self._account_service.read_account()
-
             broker_positions = ()
             reported_quantities: dict[str, float] = {}
 
@@ -146,6 +146,17 @@ class IbkrTradingSessionSyncService:
                 ),
             )
 
+            # IBKR can publish the filled position before its account-summary
+            # values have caught up. Read cash only after the expected broker
+            # position has been observed so the persisted snapshot cannot use
+            # the pre-fill account summary merely because positions converged.
+            account = self._account_service.read_account()
+
+            broker_positions = self._restore_orion_symbols(
+                broker_positions=broker_positions,
+                session=session,
+            )
+
             current_prices = {
                 position.symbol.strip().upper():
                 self._price_provider.get_current_price(
@@ -169,11 +180,23 @@ class IbkrTradingSessionSyncService:
 
         session.portfolio = synchronized_portfolio
 
-        session.position_states = {
+        retained_states = {
             symbol: state
             for symbol, state in session.position_states.items()
             if symbol.strip().upper()
             in synchronized_symbols
+        }
+
+        session.position_states = {
+            symbol: self._synchronize_position_state_price(
+                state=state,
+                current_price=(
+                    synchronized_portfolio
+                    .positions[symbol]
+                    .current_price
+                ),
+            )
+            for symbol, state in retained_states.items()
         }
 
         session.risk_plans = {
@@ -184,6 +207,24 @@ class IbkrTradingSessionSyncService:
         }
 
         return session
+
+    def _synchronize_position_state_price(
+        self,
+        *,
+        state,
+        current_price: float,
+    ):
+        if not isinstance(state, PositionState):
+            return state
+
+        return replace(
+            state,
+            current_price=current_price,
+            highest_price=max(
+                state.highest_price,
+                current_price,
+            ),
+        )
 
     def _normalize_expected_quantities(
         self,
@@ -223,6 +264,79 @@ class IbkrTradingSessionSyncService:
             normalized[normalized_symbol] = normalized_quantity
 
         return normalized
+
+    def _restore_orion_symbols(
+        self,
+        *,
+        broker_positions,
+        session: TradingSession,
+    ):
+        """Restore Yahoo/Orion suffixes removed by IBKR contracts.
+
+        An IBKR stock contract reports ASML while Orion deliberately uses
+        ASML.AS or SAP.DE for market data and market-session routing. A known local
+        symbol is reused only when it maps unambiguously to the broker
+        symbol. Unknown broker positions remain untouched and unmanaged.
+        """
+
+        known_symbols = {
+            str(symbol).strip().upper()
+            for symbol in (
+                set(session.portfolio.positions)
+                | set(session.position_states)
+                | set(session.risk_plans)
+            )
+            if str(symbol).strip()
+        }
+
+        aliases: dict[str, list[str]] = {}
+        for symbol in known_symbols:
+            aliases.setdefault(
+                self._comparison_symbol(symbol),
+                [],
+            ).append(symbol)
+
+        restored = []
+        for position in broker_positions:
+            candidates = aliases.get(
+                self._comparison_symbol(position.symbol),
+                [],
+            )
+            if len(candidates) == 1:
+                restored.append(
+                    replace(position, symbol=candidates[0])
+                )
+                continue
+
+            exchange = str(position.exchange).strip().upper()
+            currency = str(position.currency).strip().upper()
+            raw_symbol = str(position.symbol).strip().upper()
+
+            if (
+                not candidates
+                and exchange == "AEB"
+                and currency == "EUR"
+                and not raw_symbol.endswith(".AS")
+            ):
+                restored.append(
+                    replace(position, symbol=f"{raw_symbol}.AS")
+                )
+                continue
+
+            if (
+                not candidates
+                and exchange in {"IBIS", "IBIS2"}
+                and currency == "EUR"
+                and not raw_symbol.endswith(".DE")
+            ):
+                restored.append(
+                    replace(position, symbol=f"{raw_symbol}.DE")
+                )
+                continue
+
+            restored.append(position)
+
+        return tuple(restored)
 
     def _expectations_satisfied(
         self,
@@ -303,7 +417,7 @@ class IbkrTradingSessionSyncService:
     def _comparison_symbol(self, symbol: str) -> str:
         normalized = str(symbol).strip().upper()
 
-        if normalized.endswith(".AS"):
+        if normalized.endswith((".AS", ".DE")):
             return normalized[:-3]
 
         return normalized

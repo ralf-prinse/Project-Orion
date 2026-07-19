@@ -37,6 +37,12 @@ class LoggingService:
             ],
         )
 
+        # ibapi logs serialized protocol payloads at INFO, including the
+        # account field embedded in outbound orders. Orion keeps its own
+        # lifecycle logs while suppressing those noisy, sensitive wire dumps.
+        logging.getLogger("ibapi.client").setLevel(logging.WARNING)
+        logging.getLogger("ibapi.wrapper").setLevel(logging.WARNING)
+
         cls._configured = True
 
     @classmethod

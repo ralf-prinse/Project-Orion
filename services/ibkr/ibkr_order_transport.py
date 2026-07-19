@@ -17,6 +17,13 @@ from services.ibkr.ibkr_broker import IbkrOrderOutcome
 logger = logging.getLogger(__name__)
 
 
+def _mask_account_id(account_id: str) -> str:
+    normalized = str(account_id).strip().upper()
+    if len(normalized) <= 4:
+        return "****"
+    return f"{normalized[:2]}*****{normalized[-2:]}"
+
+
 class IbkrOrderTransportError(RuntimeError):
     """Raised when an IBKR order operation cannot finish safely."""
 
@@ -88,7 +95,10 @@ class _IbkrOrderClient(EWrapper, EClient):
 
         logger.info(
             "IBKR managed accounts received: %s",
-            ", ".join(self.managed_accounts),
+            ", ".join(
+                _mask_account_id(account)
+                for account in self.managed_accounts
+            ),
         )
 
         self.accounts_ready.set()
@@ -387,7 +397,7 @@ class IbkrOrderTransport:
                         "quantity=%s exchange=%s currency=%s"
                     ),
                     order_id,
-                    self.paper_account_id,
+                    _mask_account_id(self.paper_account_id),
                     contract.symbol,
                     order.action,
                     order.totalQuantity,
@@ -473,9 +483,11 @@ class IbkrOrderTransport:
             raise
 
     def _verify_managed_account(self) -> None:
-        self._client.accounts_ready.clear()
-        self._client.managed_accounts = []
-        self._client.reqManagedAccts()
+        # TWS may emit managedAccounts immediately after startApi, before
+        # Orion explicitly calls reqManagedAccts. Preserve that valid early
+        # callback instead of clearing it and racing a second request.
+        if not self._client.accounts_ready.is_set():
+            self._client.reqManagedAccts()
 
         if not self._client.accounts_ready.wait(self.connection_timeout_seconds):
             raise IbkrOrderTransportError(
@@ -492,9 +504,16 @@ class IbkrOrderTransport:
             account for account in returned_accounts if account.startswith("DU")
         }
         if self.paper_account_id not in paper_accounts:
-            description = ", ".join(sorted(returned_accounts)) or "none"
+            description = (
+                ", ".join(
+                    _mask_account_id(account)
+                    for account in sorted(returned_accounts)
+                )
+                or "none"
+            )
             raise IbkrOrderTransportError(
-                f"Configured IBKR Paper account {self.paper_account_id} was "
+                "Configured IBKR Paper account "
+                f"{_mask_account_id(self.paper_account_id)} was "
                 "not returned by the connected TWS session. Returned "
                 f"accounts: {description}."
             )

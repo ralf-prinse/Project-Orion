@@ -15,3 +15,5 @@ class ExecutionRequest:
     confidence: float
     strategy: str = "DEFAULT"
     source: str = "TradingPipeline"
+    currency: str = "EUR"
+    fx_rate_to_base: float = 1.0

@@ -177,6 +177,10 @@ class IbkrBroker:
             contract.symbol = raw_symbol.removesuffix(".AS")
             contract.currency = "EUR"
             contract.primaryExchange = "AEB"
+        elif raw_symbol.endswith(".DE"):
+            contract.symbol = raw_symbol.removesuffix(".DE")
+            contract.currency = "EUR"
+            contract.primaryExchange = "IBIS"
         else:
             contract.symbol = raw_symbol
             contract.currency = self.currency

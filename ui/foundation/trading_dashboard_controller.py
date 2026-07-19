@@ -38,6 +38,9 @@ class TradingDashboardController:
         workspace: TradingDashboardWorkspace,
         portfolio_repository: JsonPaperPortfolioRepository | None = None,
         trade_journal_repository: JsonlTradeJournalRepository | None = None,
+        decision_journal_repository: (
+            JsonlTradeJournalRepository | None
+        ) = None,
         dashboard_service: DashboardService | None = None,
         presenter: TradingDashboardGuiPresenter | None = None,
         config: LivePaperTradingConfig | None = None,
@@ -55,6 +58,12 @@ class TradingDashboardController:
                 path="data/trade_journal.jsonl",
             )
         )
+        self.decision_journal_repository = (
+            decision_journal_repository
+            or JsonlTradeJournalRepository(
+                path="data/decision_journal.jsonl",
+            )
+        )
         self.dashboard_service = dashboard_service or DashboardService()
         self.presenter = presenter or TradingDashboardGuiPresenter()
         self.config = config or LivePaperTradingConfig()
@@ -68,11 +77,15 @@ class TradingDashboardController:
 
         portfolio = self.portfolio_repository.load()
         journal_entries = self.trade_journal_repository.load_all()
+        decision_entries = (
+            self.decision_journal_repository.load_all()
+        )
 
         snapshot = self.dashboard_service.build(
             portfolio=portfolio,
             journal_entries=journal_entries,
             initial_cash=self.config.initial_cash,
+            decision_journal_entries=decision_entries,
         )
 
         workspace_model = self.presenter.create_workspace(

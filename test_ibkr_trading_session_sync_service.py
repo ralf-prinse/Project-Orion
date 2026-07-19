@@ -6,6 +6,7 @@ from models.broker_account import BrokerAccount
 from models.broker_position import BrokerPosition
 from models.paper_portfolio import PaperPortfolio
 from models.paper_position import PaperPosition
+from models.position_state import PositionState
 from models.trading_session import TradingSession
 from services.ibkr.ibkr_trading_session_sync_service import (
     IbkrTradingSessionSyncService,
@@ -161,10 +162,125 @@ def test_sync_removes_stale_local_lifecycle_state() -> None:
     assert "MSFT" not in result.risk_plans
 
 
+def test_sync_restores_known_euronext_symbol_suffix() -> None:
+    service = IbkrTradingSessionSyncService(
+        account_service=FakeIbkrAccountService(),
+        price_provider=FakePriceProvider(),
+    )
+    session = TradingSession(
+        name="Known Euronext position",
+        portfolio=PaperPortfolio(
+            cash=9000.0,
+            positions={
+                "ASML.AS": PaperPosition(
+                    symbol="ASML.AS",
+                    quantity=1,
+                    entry_price=1200.0,
+                    current_price=1210.0,
+                ),
+            },
+        ),
+        position_states={"ASML.AS": DummyState(symbol="ASML.AS")},
+        risk_plans={"ASML.AS": DummyRiskPlan(symbol="ASML.AS")},
+    )
+    broker_position = BrokerPosition(
+        account_id="DU123456",
+        symbol="ASML",
+        quantity=1.0,
+        average_cost=1200.0,
+        currency="EUR",
+        security_type="STK",
+        exchange="AEB",
+    )
+
+    restored = service._restore_orion_symbols(
+        broker_positions=(broker_position,),
+        session=session,
+    )
+
+    assert restored[0].symbol == "ASML.AS"
+
+
+def test_sync_maps_unknown_aeb_position_to_euronext_symbol() -> None:
+    service = IbkrTradingSessionSyncService(
+        account_service=FakeIbkrAccountService(),
+        price_provider=FakePriceProvider(),
+    )
+    broker_position = BrokerPosition(
+        account_id="DU123456",
+        symbol="ASM",
+        quantity=1.0,
+        average_cost=870.0,
+        currency="EUR",
+        security_type="STK",
+        exchange="AEB",
+    )
+
+    restored = service._restore_orion_symbols(
+        broker_positions=(broker_position,),
+        session=TradingSession(
+            name="Empty session",
+            portfolio=PaperPortfolio(cash=1000.0),
+        ),
+    )
+
+    assert restored[0].symbol == "ASM.AS"
+
+
+def test_sync_maps_unknown_ibis_position_to_xetra_symbol() -> None:
+    service = IbkrTradingSessionSyncService(
+        account_service=FakeIbkrAccountService(),
+        price_provider=FakePriceProvider(),
+    )
+    broker_position = BrokerPosition(
+        account_id="DU123456",
+        symbol="SAP",
+        quantity=1.0,
+        average_cost=250.0,
+        currency="EUR",
+        security_type="STK",
+        exchange="IBIS",
+    )
+
+    restored = service._restore_orion_symbols(
+        broker_positions=(broker_position,),
+        session=TradingSession(
+            name="Empty session",
+            portfolio=PaperPortfolio(cash=1000.0),
+        ),
+    )
+
+    assert restored[0].symbol == "SAP.DE"
+
+
+def test_sync_updates_managed_state_price_atomically() -> None:
+    service = IbkrTradingSessionSyncService(
+        account_service=FakeIbkrAccountService(),
+        price_provider=FakePriceProvider(),
+    )
+    session = create_session()
+    session.position_states["AAPL"] = PositionState(
+        symbol="AAPL",
+        entry_price=300.0,
+        current_stop_loss=290.0,
+        highest_price=310.0,
+        current_price=305.0,
+    )
+
+    result = service.synchronize(session)
+
+    assert result.portfolio.positions["AAPL"].current_price == 320.0
+    assert result.position_states["AAPL"].current_price == 320.0
+    assert result.position_states["AAPL"].highest_price == 320.0
+
+
 def run() -> None:
     tests = [
         test_sync_replaces_portfolio_with_ibkr_truth,
         test_sync_removes_stale_local_lifecycle_state,
+        test_sync_restores_known_euronext_symbol_suffix,
+        test_sync_maps_unknown_aeb_position_to_euronext_symbol,
+        test_sync_updates_managed_state_price_atomically,
     ]
 
     passed = 0

@@ -13,11 +13,22 @@ from services.ibkr.ibkr_portfolio_service import IbkrPortfolioService
 from services.paper_trading_pipeline_adapter import (
     PaperTradingPipelineAdapter,
 )
+from services.market.fx_rate_service import FxRate
 
 
 @dataclass(frozen=True)
 class FakeIndicatorPack:
     symbol: str
+
+
+class FixedFxRateService:
+    def get_rate(self, from_currency: str, to_currency: str) -> FxRate:
+        return FxRate(
+            from_currency=from_currency,
+            to_currency=to_currency,
+            rate=0.80 if from_currency != to_currency else 1.0,
+            source="test",
+        )
 
 
 class FakeAccountService:
@@ -137,7 +148,10 @@ def test_ibkr_portfolio_is_passed_to_existing_pipeline() -> None:
 
     portfolio_service = IbkrPortfolioService(
         account_service=account_service,
-        mapper=IbkrPortfolioMapper(),
+        mapper=IbkrPortfolioMapper(
+            fx_rate_service=FixedFxRateService(),
+            require_live_fx=True,
+        ),
     )
 
     portfolio = portfolio_service.read_portfolio(
@@ -166,7 +180,7 @@ def test_ibkr_portfolio_is_passed_to_existing_pipeline() -> None:
     assert account_service.position_reads == 1
 
     assert portfolio.cash == 9723.26
-    assert portfolio.equity == 10038.84
+    assert portfolio.equity == 9975.72
     assert set(portfolio.positions) == {"AAPL"}
 
     position = portfolio.positions["AAPL"]

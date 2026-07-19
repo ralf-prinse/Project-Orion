@@ -30,6 +30,8 @@ class TradingCycle:
         session: TradingSession,
         snapshot: MarketSnapshot,
         quantity: int = 1,
+        fx_rate_to_base: float = 1.0,
+        currency: str = "EUR",
     ) -> TradingCycleResult:
         symbol = snapshot.symbol.upper()
 
@@ -93,6 +95,8 @@ class TradingCycle:
             session=session,
             pipeline_output=pipeline_input,
             quantity=quantity,
+            fx_rate_to_base=fx_rate_to_base,
+            currency=currency,
         )
 
         return TradingCycleResult(

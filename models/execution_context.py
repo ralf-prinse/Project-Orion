@@ -28,7 +28,12 @@ class ExecutionContext:
 
     @property
     def requested_value(self) -> float:
-        return round(self.request.entry_price * self.request.quantity, 2)
+        return round(
+            self.request.entry_price
+            * self.request.quantity
+            * self.request.fx_rate_to_base,
+            2,
+        )
 
     @property
     def position_size_percent(self) -> float:

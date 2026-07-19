@@ -1,6 +1,6 @@
 # ORION MASTER ARCHITECTURE
 
-Laatste update: 17-07-2026
+Laatste update: 19-07-2026
 
 ---
 
@@ -68,6 +68,13 @@ Iedere laag communiceert uitsluitend via duidelijke interfaces en domeinmodellen
 - Universe
 - Market Data Providers
 - Indicator Builder
+
+De actuele IBKR Paper-datalaag gebruikt een gecureerd universum van 100
+EU/VS-symbolen. `LivePaperMarketScanner` filtert eerst op officiële beursuren en
+vraagt daarna historische data aan via de canonieke batchprovider. De provider
+werkt in batches van 25 met een cache-TTL van 15 minuten; broker- en
+positieprijzen blijven via de afzonderlijke gevalideerde actuele-prijsservice
+lopen.
 
 ---
 

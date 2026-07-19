@@ -4,6 +4,7 @@ from models.closed_trade_statistics import ClosedTradeStatistics
 from models.trade_journal_entry import TradeJournalEntry
 from services.dashboard_service import (
     DashboardPosition,
+    DashboardRiskDecision,
     DashboardSnapshot,
 )
 from ui.foundation.trading_dashboard_gui_presenter import (
@@ -47,6 +48,19 @@ def build_snapshot() -> DashboardSnapshot:
             largest_winner=10.0,
             largest_loser=0.0,
         ),
+        risk_decisions=[
+            DashboardRiskDecision(
+                timestamp="2026-07-09T19:00:00",
+                symbol="AMD",
+                allowed=False,
+                reason="Risk per trade limit exceeded.",
+                proposed_risk_ratio=0.02,
+                total_portfolio_risk=0.07,
+                drawdown=0.03,
+                cash_reserve_after_trade=0.40,
+                position_exposure=0.10,
+            )
+        ],
     )
 
 
@@ -83,7 +97,7 @@ def test_trading_dashboard_gui_presenter_creates_workspace():
     )
 
     assert workspace.title == "Trading Dashboard"
-    assert len(workspace.panels) == 5
+    assert len(workspace.panels) == 6
 
     panel_titles = [
         panel.title
@@ -94,7 +108,16 @@ def test_trading_dashboard_gui_presenter_creates_workspace():
     assert "Trading" in panel_titles
     assert "Closed Trade Analytics" in panel_titles
     assert "Open Positions" in panel_titles
+    assert "Risk Decisions" in panel_titles
     assert "Recent Trades" in panel_titles
+
+    risk_panel = next(
+        panel
+        for panel in workspace.panels
+        if panel.title == "Risk Decisions"
+    )
+    assert risk_panel.status == "warning"
+    assert any(item["label"] == "AMD" for item in risk_panel.items)
 
 
 def test_trading_dashboard_gui_presenter_filters_rejected_entries():

@@ -6,6 +6,7 @@ from ibapi.order import Order
 from services.ibkr.ibkr_order_transport import (
     IbkrOrderTransport,
 )
+from services.ibkr.ibkr_broker import IbkrBroker
 
 
 def create_contract() -> Contract:
@@ -40,6 +41,18 @@ def test_sell_validation():
     )
 
     assert quantity == 1
+
+
+def test_german_stock_contract_uses_xetra_primary_exchange():
+    broker = IbkrBroker(transport=object())
+    contract = broker._build_contract(
+        type("Order", (), {"symbol": "SAP.DE"})()
+    )
+
+    assert contract.symbol == "SAP"
+    assert contract.exchange == "SMART"
+    assert contract.currency == "EUR"
+    assert contract.primaryExchange == "IBIS"
 
 
 def run():

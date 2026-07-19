@@ -7,6 +7,7 @@ from models.broker_account import BrokerAccount
 from models.broker_position import BrokerPosition
 from models.paper_portfolio import PaperPortfolio
 from models.paper_position import PaperPosition
+from services.market.fx_rate_service import FxRateService
 
 
 class IbkrPortfolioMappingError(ValueError):
@@ -30,6 +31,20 @@ class IbkrPortfolioMapper:
     SUPPORTED_BROKER_NAME = "IBKR"
     SUPPORTED_SECURITY_TYPE = "STK"
     ACTIVE_STATUS = "ACTIVE"
+
+    def __init__(
+        self,
+        *,
+        base_currency: str = "EUR",
+        fx_rate_service: FxRateService | None = None,
+        require_live_fx: bool = False,
+    ) -> None:
+        self._base_currency = base_currency.strip().upper()
+        self._fx_rate_service = fx_rate_service or FxRateService()
+        self._require_live_fx = bool(require_live_fx)
+
+        if self._base_currency != "EUR":
+            raise ValueError("IBKR Paper base currency must be EUR.")
 
     def map(
         self,
@@ -66,6 +81,7 @@ class IbkrPortfolioMapper:
         return PaperPortfolio(
             cash=round(float(account.cash), 2),
             positions=mapped_positions,
+            base_currency=self._base_currency,
         )
 
     def _validate_account(
@@ -96,6 +112,12 @@ class IbkrPortfolioMapper:
         if not currency:
             raise IbkrPortfolioMappingError(
                 "IBKR account currency must not be empty."
+            )
+
+        if currency != self._base_currency:
+            raise IbkrPortfolioMappingError(
+                "IBKR Paper account base currency must be EUR. "
+                f"Received {currency}."
             )
 
         self._require_finite_non_negative(
@@ -192,12 +214,31 @@ class IbkrPortfolioMapper:
             )
 
         current_price = current_prices[symbol]
+        fx_rate = self._fx_rate_service.get_rate(
+            currency,
+            self._base_currency,
+        )
+
+        if self._require_live_fx and fx_rate.source == "fallback":
+            raise IbkrPortfolioMappingError(
+                f"Validated FX rate unavailable for {currency}/"
+                f"{self._base_currency}; portfolio sync failed closed."
+            )
+
+        rate = self._require_finite_positive(
+            value=fx_rate.rate,
+            field_name=(
+                f"FX rate for {currency}/{self._base_currency}"
+            ),
+        )
 
         return PaperPosition(
             symbol=symbol,
             quantity=quantity,
             entry_price=average_cost,
             current_price=current_price,
+            currency=currency,
+            fx_rate_to_base=rate,
         )
 
     def _require_whole_positive_quantity(

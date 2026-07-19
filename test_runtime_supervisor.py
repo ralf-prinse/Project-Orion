@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from types import SimpleNamespace
 
 from models.autonomous_paper_trading_result import AutonomousPaperTradingResult
 from models.paper_portfolio import PaperPortfolio
@@ -84,9 +85,34 @@ def test_supervisor_records_exception_failure():
     assert repository.events[-1].error == "RuntimeError('boom')"
 
 
+def test_supervisor_records_risk_monitoring_counts():
+    repository = InMemoryRuntimeEventRepository()
+    supervisor = RuntimeSupervisor(
+        event_repository=repository,
+        clock=Clock(),
+    )
+    session = TradingSession(
+        name="Risk monitoring test",
+        portfolio=PaperPortfolio(cash=500.0),
+    )
+    result = SimpleNamespace(
+        session=session,
+        risk_evaluations=3,
+        risk_rejections=2,
+    )
+
+    supervisor.iteration_completed(1, result, 0.25)
+
+    assert supervisor.health.risk_evaluations == 3
+    assert supervisor.health.risk_rejections == 2
+    assert repository.events[-1].risk_evaluations == 3
+    assert repository.events[-1].risk_rejections == 2
+
+
 def main():
     test_supervisor_records_successful_runtime()
     test_supervisor_records_exception_failure()
+    test_supervisor_records_risk_monitoring_counts()
     print("RUNTIME SUPERVISOR: PASS")
 
 

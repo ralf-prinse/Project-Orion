@@ -37,6 +37,7 @@ class TradingDashboardGuiPresenter:
                 self._trading_panel(snapshot),
                 self._closed_trade_analytics_panel(snapshot),
                 self._open_positions_panel(snapshot),
+                self._risk_decisions_panel(snapshot),
                 self._recent_trades_panel(
                     recent_trades=recent_trades or [],
                     max_recent_trades=max_recent_trades,
@@ -62,6 +63,67 @@ class TradingDashboardGuiPresenter:
                 {"label": "Return", "value": f"{snapshot.total_return_percent:.2f}%"},
             ],
             status="info",
+            metadata={},
+        )
+
+    def _risk_decisions_panel(
+        self,
+        snapshot: DashboardSnapshot,
+    ) -> GuiWorkspacePanel:
+        items = [
+            {
+                "label": "Risk Evaluations",
+                "value": str(snapshot.risk_evaluations),
+            },
+            {
+                "label": "Risk Rejections",
+                "value": str(snapshot.risk_rejections),
+            },
+        ]
+
+        for decision in reversed(snapshot.risk_decisions[-10:]):
+            status = "ALLOWED" if decision.allowed else "BLOCKED"
+            metrics = []
+
+            if decision.total_portfolio_risk is not None:
+                metrics.append(
+                    "portfolio risk "
+                    f"{decision.total_portfolio_risk:.4f}"
+                )
+
+            if decision.drawdown is not None:
+                metrics.append(
+                    f"drawdown {decision.drawdown:.4f}"
+                )
+
+            metric_text = (
+                " | " + ", ".join(metrics)
+                if metrics
+                else ""
+            )
+            items.append(
+                {
+                    "label": decision.symbol,
+                    "value": (
+                        f"{status}{metric_text} | "
+                        f"{decision.reason}"
+                    ),
+                }
+            )
+
+        return GuiWorkspacePanel(
+            panel_type="trading_dashboard_risk_decisions",
+            title="Risk Decisions",
+            subtitle=(
+                "Auditbare pre-order risk-gate-uitkomsten uit "
+                "het decision journal."
+            ),
+            items=items,
+            status=(
+                "warning"
+                if snapshot.risk_rejections
+                else "neutral"
+            ),
             metadata={},
         )
 

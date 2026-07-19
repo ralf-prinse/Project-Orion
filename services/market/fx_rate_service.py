@@ -25,6 +25,9 @@ class FxRateService:
         ("USD", "EUR"): 0.85,
     }
 
+    def __init__(self) -> None:
+        self._cache: dict[tuple[str, str], FxRate] = {}
+
     def get_rate(
         self,
         from_currency: str,
@@ -41,6 +44,10 @@ class FxRateService:
                 source="identity",
             )
 
+        cache_key = (from_currency, to_currency)
+        if cache_key in self._cache:
+            return self._cache[cache_key]
+
         try:
             response = requests.get(
                 (
@@ -56,12 +63,14 @@ class FxRateService:
 
             rate = float(data["rates"][to_currency])
 
-            return FxRate(
+            result = FxRate(
                 from_currency=from_currency,
                 to_currency=to_currency,
                 rate=rate,
                 source="frankfurter.app",
             )
+            self._cache[cache_key] = result
+            return result
 
         except Exception:
             rate = self.DEFAULT_RATES.get(

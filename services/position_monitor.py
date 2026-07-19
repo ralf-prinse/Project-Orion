@@ -8,6 +8,7 @@ from models.paper_position import PaperPosition
 from models.position_state import PositionState
 from models.risk_plan import RiskPlan
 from services.risk.time_stop_service import TimeStopService
+from services.trading_cost_estimator import TradingCostEstimator
 
 
 @dataclass(frozen=True)
@@ -19,6 +20,9 @@ class PositionMonitorResult:
     entry_price: float
     unrealized_profit_loss: float
     unrealized_return_percent: float
+    estimated_round_trip_costs: float = 0.0
+    estimated_net_profit_loss: float = 0.0
+    minimum_net_profit: float = 0.0
 
 
 class PositionMonitor:
@@ -29,9 +33,10 @@ class PositionMonitor:
     Managed-position exit priority:
 
     1. Dynamic stop loss
-    2. Final profit target
-    3. Maximum holding time
-    4. Hold
+    2. Cost-aware net profit/loss threshold when enabled
+    3. Final profit target
+    4. Maximum holding time
+    5. Hold
 
     This service makes an exit decision, but does not execute it.
     """
@@ -39,10 +44,15 @@ class PositionMonitor:
     def __init__(
         self,
         time_stop_service: TimeStopService | None = None,
+        trading_cost_estimator: TradingCostEstimator | None = None,
     ):
         self.time_stop_service = (
             time_stop_service
             or TimeStopService()
+        )
+        self.trading_cost_estimator = (
+            trading_cost_estimator
+            or TradingCostEstimator()
         )
 
     def evaluate(
@@ -59,6 +69,15 @@ class PositionMonitor:
             current_price=position.current_price,
             entry_price=position.entry_price,
         )
+
+        cost_aware_result = self._evaluate_cost_aware_exit(
+            position=position,
+            config=config,
+            unrealized_profit_loss=unrealized_profit_loss,
+            unrealized_return_percent=unrealized_return_percent,
+        )
+        if cost_aware_result is not None:
+            return cost_aware_result
 
         if (
             unrealized_return_percent
@@ -165,6 +184,15 @@ class PositionMonitor:
                 ),
             )
 
+        cost_aware_result = self._evaluate_cost_aware_exit(
+            position=position,
+            config=resolved_config,
+            unrealized_profit_loss=unrealized_profit_loss,
+            unrealized_return_percent=unrealized_return_percent,
+        )
+        if cost_aware_result is not None:
+            return cost_aware_result
+
         if position.current_price >= risk_plan.target_3:
             return self._result(
                 position=position,
@@ -204,6 +232,82 @@ class PositionMonitor:
                 unrealized_return_percent
             ),
         )
+
+    def _evaluate_cost_aware_exit(
+        self,
+        *,
+        position: PaperPosition,
+        config: LivePaperTradingConfig,
+        unrealized_profit_loss: float,
+        unrealized_return_percent: float,
+    ) -> PositionMonitorResult | None:
+        if (
+            config.exit_strategy
+            != LivePaperTradingConfig.COST_AWARE_SMALL_PROFIT
+        ):
+            return None
+
+        estimate = self.trading_cost_estimator.estimate_round_trip(
+            position=position,
+            config=config,
+        )
+        estimated_net = round(
+            unrealized_profit_loss - estimate.total_cost_eur,
+            2,
+        )
+        is_european = position.currency.strip().upper() == "EUR"
+        target = (
+            config.small_profit_target_eu_eur
+            if is_european
+            else config.small_profit_target_us_eur
+        )
+        maximum_loss = (
+            config.small_profit_max_loss_eu_eur
+            if is_european
+            else config.small_profit_max_loss_us_eur
+        )
+
+        if estimated_net >= target:
+            return self._result(
+                position=position,
+                action="TAKE_PROFIT",
+                reason=(
+                    "Cost-aware net profit target reached: "
+                    f"estimated net EUR {estimated_net:.2f}, "
+                    f"target EUR {target:.2f}, estimated "
+                    f"round-trip costs EUR "
+                    f"{estimate.total_cost_eur:.2f}."
+                ),
+                unrealized_profit_loss=unrealized_profit_loss,
+                unrealized_return_percent=unrealized_return_percent,
+                estimated_round_trip_costs=(
+                    estimate.total_cost_eur
+                ),
+                estimated_net_profit_loss=estimated_net,
+                minimum_net_profit=target,
+            )
+
+        if estimated_net <= -maximum_loss:
+            return self._result(
+                position=position,
+                action="STOP_LOSS",
+                reason=(
+                    "Cost-aware net loss limit reached: "
+                    f"estimated net EUR {estimated_net:.2f}, "
+                    f"limit EUR {-maximum_loss:.2f}, estimated "
+                    f"round-trip costs EUR "
+                    f"{estimate.total_cost_eur:.2f}."
+                ),
+                unrealized_profit_loss=unrealized_profit_loss,
+                unrealized_return_percent=unrealized_return_percent,
+                estimated_round_trip_costs=(
+                    estimate.total_cost_eur
+                ),
+                estimated_net_profit_loss=estimated_net,
+                minimum_net_profit=target,
+            )
+
+        return None
 
     def _validate_managed_inputs(
         self,
@@ -300,6 +404,9 @@ class PositionMonitor:
         reason: str,
         unrealized_profit_loss: float,
         unrealized_return_percent: float,
+        estimated_round_trip_costs: float = 0.0,
+        estimated_net_profit_loss: float = 0.0,
+        minimum_net_profit: float = 0.0,
     ) -> PositionMonitorResult:
         return PositionMonitorResult(
             symbol=self._normalize_symbol(
@@ -314,6 +421,18 @@ class PositionMonitor:
             ),
             unrealized_return_percent=(
                 unrealized_return_percent
+            ),
+            estimated_round_trip_costs=round(
+                estimated_round_trip_costs,
+                2,
+            ),
+            estimated_net_profit_loss=round(
+                estimated_net_profit_loss,
+                2,
+            ),
+            minimum_net_profit=round(
+                minimum_net_profit,
+                2,
             ),
         )
 

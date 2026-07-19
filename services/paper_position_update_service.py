@@ -139,6 +139,8 @@ class PaperPositionUpdateService:
                 quantity=position.quantity,
                 entry_price=position.entry_price,
                 current_price=validated_price,
+                currency=position.currency,
+                fx_rate_to_base=position.fx_rate_to_base,
             )
         )
 
@@ -154,12 +156,14 @@ class PaperPositionUpdateService:
             portfolio=PaperPortfolio(
                 cash=session.portfolio.cash,
                 positions=updated_positions,
+                base_currency=session.portfolio.base_currency,
             ),
             position_states=updated_states,
             risk_plans=dict(
                 session.risk_plans
             ),
             status=session.status,
+            peak_portfolio_value=session.peak_portfolio_value,
         )
 
         return PaperPositionUpdateResult(

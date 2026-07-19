@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from models.live_paper_trading_result import LivePaperCandidate
+from services.risk.models import RiskResult
 
 
 @dataclass(frozen=True)
@@ -18,6 +19,8 @@ class PortfolioAllocationDecision:
     quantity: int
     approved: bool
     reason: str
+    risk_result: RiskResult | None = None
+    fx_rate_to_base: float = 1.0
 
     @property
     def symbol(self) -> str:
@@ -26,7 +29,9 @@ class PortfolioAllocationDecision:
     @property
     def estimated_value(self) -> float:
         return round(
-            self.quantity * self.candidate.result.risk_plan.entry_price,
+            self.quantity
+            * self.candidate.result.risk_plan.entry_price
+            * self.fx_rate_to_base,
             2,
         )
 
@@ -64,3 +69,19 @@ class PortfolioAllocationResult:
     @property
     def rejected_count(self) -> int:
         return len(self.rejected)
+
+    @property
+    def risk_evaluated(self) -> list[PortfolioAllocationDecision]:
+        return [
+            decision
+            for decision in self.decisions
+            if decision.risk_result is not None
+        ]
+
+    @property
+    def risk_rejected(self) -> list[PortfolioAllocationDecision]:
+        return [
+            decision
+            for decision in self.risk_evaluated
+            if not decision.risk_result.risk_allowed
+        ]

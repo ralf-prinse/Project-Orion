@@ -63,6 +63,21 @@ class TradeJournalBuilder:
                     )
                 )
 
+                execution_rejection = (
+                    cycle.execution_rejections.get(
+                        decision.symbol.strip().upper()
+                    )
+                )
+                if execution_rejection is not None:
+                    entries.append(
+                        self.build_execution_rejection_entry(
+                            decision=decision,
+                            reason=execution_rejection,
+                            cycle_number=cycle_index,
+                            session_id=session_id,
+                        )
+                    )
+
         return entries
 
     def build_decision_entry(
@@ -99,6 +114,22 @@ class TradeJournalBuilder:
             session_id=session_id,
         )
 
+    def build_execution_rejection_entry(
+        self,
+        decision,
+        reason: str,
+        cycle_number: int,
+        session_id: str,
+    ) -> TradeJournalEntry:
+        return self._build_entry(
+            decision=decision,
+            position=None,
+            action="EXECUTION_REJECTED",
+            cycle_number=cycle_number,
+            session_id=session_id,
+            recommendation_reason=reason,
+        )
+
     def _build_entry(
         self,
         decision,
@@ -106,6 +137,7 @@ class TradeJournalBuilder:
         action: str,
         cycle_number: int,
         session_id: str,
+        recommendation_reason: str | None = None,
     ) -> TradeJournalEntry:
         candidate = decision.candidate
         pipeline_result = candidate.result
@@ -139,6 +171,12 @@ class TradeJournalBuilder:
             "UNKNOWN",
         )
 
+        risk_result = getattr(
+            decision,
+            "risk_result",
+            None,
+        )
+
         return TradeJournalEntry(
             timestamp=datetime.now(),
             symbol=decision.symbol,
@@ -156,7 +194,51 @@ class TradeJournalBuilder:
             regime=regime,
             volatility=volatility,
             ai_summary=str(pipeline_result.explanation),
-            recommendation_reason=decision.reason,
+            recommendation_reason=(
+                recommendation_reason
+                if recommendation_reason is not None
+                else decision.reason
+            ),
             cycle_number=cycle_number,
             session_id=session_id,
+            risk_allowed=(
+                risk_result.risk_allowed
+                if risk_result is not None
+                else None
+            ),
+            proposed_risk_ratio=(
+                risk_result.proposed_risk_ratio
+                if risk_result is not None
+                else None
+            ),
+            total_portfolio_risk=(
+                risk_result.total_portfolio_risk
+                if risk_result is not None
+                else None
+            ),
+            drawdown=(
+                risk_result.drawdown
+                if risk_result is not None
+                else None
+            ),
+            cash_reserve_after_trade=(
+                risk_result.cash_reserve_after_trade
+                if risk_result is not None
+                else None
+            ),
+            position_exposure=(
+                risk_result.position_exposure
+                if risk_result is not None
+                else None
+            ),
+            risk_reasons=(
+                tuple(risk_result.reasons)
+                if risk_result is not None
+                else ()
+            ),
+            risk_warnings=(
+                tuple(risk_result.warnings)
+                if risk_result is not None
+                else ()
+            ),
         )
