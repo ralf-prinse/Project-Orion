@@ -12,8 +12,10 @@ EU/US universe en beurskalender
   -> services.orchestration.TradingPipeline
   -> services.trading_decision
   -> canonieke RiskPlan en PortfolioAllocator/RiskManager
+  -> session-, earnings- en concentration gates
+  -> actuele IBKR bid/ask execution-quality gate
   -> ExecutionEngine en IbkrBroker
-  -> IBKR Paper fill en broker-truth synchronisatie
+  -> IBKR Paper bracket/OCA fill en broker-truth synchronisatie
   -> managed exits, journals en CompletedTradeRecord
 ```
 
@@ -27,6 +29,7 @@ autonome runtime verbonden.
 - `run_autonomous_ibkr_paper.py`: begrensde autonome IBKR Paper-cycli;
 - `test_ibkr_account_reader.py`: read-only account- en positiediagnose;
 - `run_dashboard.py`: optionele tekstuele rapportage zonder desktop-GUI.
+- `analyze_completed_trades.py`: offline netto-expectancy na geraamde kosten.
 
 ## Veilige observatiecyclus
 

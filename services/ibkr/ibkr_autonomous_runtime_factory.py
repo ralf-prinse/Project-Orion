@@ -42,6 +42,9 @@ from services.market_data.yahoo_historical_provider import (
 )
 from services.ibkr.ibkr_news_provider import IbkrNewsProvider
 from services.news.news_intelligence_service import NewsIntelligenceService
+from services.ibkr.ibkr_quote_provider import IbkrQuoteProvider
+from services.portfolio_concentration_gate import PortfolioConcentrationGate
+from services.earnings_calendar_service import EarningsCalendarService
 
 
 @dataclass(frozen=True)
@@ -85,6 +88,7 @@ class IbkrAutonomousRuntimeFactory:
     ACCOUNT_CLIENT_ID = 110
     ORDER_CLIENT_ID = 120
     NEWS_CLIENT_ID = 130
+    QUOTE_CLIENT_ID = 140
 
     def build(
         self,
@@ -169,6 +173,12 @@ class IbkrAutonomousRuntimeFactory:
         allocator = PortfolioAllocator(
             fx_rate_service=fx_rate_service,
             require_live_fx=True,
+            concentration_gate=PortfolioConcentrationGate(
+                runtime_config.live_config.instrument_metadata_path
+            ),
+            earnings_calendar_service=EarningsCalendarService(
+                runtime_config.live_config.earnings_calendar_path
+            ),
         )
 
         account_service = IbkrAccountService(
@@ -186,8 +196,29 @@ class IbkrAutonomousRuntimeFactory:
             allow_order_submission=allow_order_submission,
         )
 
+        quote_provider = None
+        if runtime_config.live_config.enable_execution_quality_gate:
+            quote_provider = IbkrQuoteProvider(
+                host=host,
+                port=port,
+                client_id=self.QUOTE_CLIENT_ID,
+            )
+
         broker = IbkrBroker(
             transport=transport,
+            enable_native_protective_orders=(
+                runtime_config.live_config.enable_native_protective_orders
+            ),
+            quote_provider=quote_provider,
+            max_bid_ask_spread_pct=(
+                runtime_config.live_config.max_bid_ask_spread_pct
+            ),
+            max_quote_age_seconds=(
+                runtime_config.live_config.max_quote_age_seconds
+            ),
+            max_entry_slippage_pct=(
+                runtime_config.live_config.max_entry_slippage_pct
+            ),
         )
 
         execution_engine = ExecutionEngine(
@@ -242,6 +273,7 @@ class IbkrAutonomousRuntimeFactory:
             position_adoption_service=position_adoption_service,
             news_intelligence_service=news_intelligence_service,
             completed_trade_repository=completed_trade_repository,
+            protective_execution_reconciler=transport,
         )
 
         return IbkrAutonomousRuntime(

@@ -1,5 +1,36 @@
 # CHANGELOG.md
 
+## 2026-07-19 - Execution-grade Paper safety controls
+
+Nieuwe IBKR BUY-orders gebruiken actuele live bid/ask- en top-of-bookdata als
+fail-closed execution gate. Verouderde, onvolledige, te brede of te dunne
+quotes blokkeren de order met een expliciete reden. Normale BUY- en
+winstnemingsorders worden als begrensde marketable limitorder verzonden;
+urgente stop- en time-exits blijven marktgericht om risico af te bouwen.
+
+Iedere Paper BUY wordt atomair als IBKR bracket verzonden met een parent,
+profit-taker en broker-native stop-loss. Parent en children gebruiken de
+voorgeschreven `Transmit`-volgorde. De children en iedere latere softwarematige
+SELL delen een persistente trade-ID gebaseerde OCA-groep, zodat slechts één
+exit kan vullen. IBKR-uitgevoerde protective children worden bij broker-sync
+via `orderRef` teruggevonden en met de oorspronkelijke `trade_id`, fillprijs en
+SELL-reden in trade memory opgeslagen. Een verdwenen positie zonder
+reconcilieerbare execution stopt fail-closed.
+
+De entryketen heeft daarnaast een sessiecircuitbreaker voor verlies,
+opeenvolgende verliestrades en brokerfouten. Markt-, sector- en gecureerde
+correlatieclusterlimieten beschermen tegen schijnspreiding. Alle 100 huidige
+EU/VS-symbolen hebben versiebeheerde risicometadata. Een earningsinterface
+blokkeert bekende events en verzint geen datum wanneer brondata ontbreekt.
+
+`analyze_completed_trades.py` rapporteert alleen offline nettowachting na
+geraamde kosten. Deze analyse heeft geen schrijfpad naar runtimeconfiguratie of
+orders. Live-moneyaccounts blijven geblokkeerd en nieuws blijft SHADOW-only.
+
+Tevens is hersteld dat de gegenereerde `trade_id` vóór het append-moment in de
+BUY-journalregel wordt geplaatst, zodat entry en exit betrouwbaar tot één
+completed trade worden samengevoegd.
+
 ## 2026-07-19 - Canonical runtime architecture cleanup
 
 De actieve adaptieve decisioncomponenten zijn zonder strategiewijziging

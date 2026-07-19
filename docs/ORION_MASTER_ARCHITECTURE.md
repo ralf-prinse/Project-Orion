@@ -51,7 +51,13 @@ Portfolio Management
 Execution Engine
       │
       ▼
+Execution Quality (IBKR bid/ask + bounded limit)
+      │
+      ▼
 Broker (Paper / IBKR)
+      │
+      ▼
+Native Protection (Bracket + OCA)
       │
       ▼
 Synchronization
@@ -114,6 +120,13 @@ IBKR-runtime. De oude root-`engines` en `ScannerService` bestaan niet meer.
 - Order Transport
 - Broker Synchronization
 
+De autonome IBKR Paper composition root koppelt vóór een normale order een
+fail-closed actuele top-of-bookgate. Nieuwe BUY's worden met parent-, stop- en
+profit-child verzonden. De persistente `trade_id` is tegelijk journalcorrelatie,
+`orderRef` en basis voor de OCA-groep. Hierdoor blijven broker-native en
+softwarematige exitpaden één lifecycle. Een native fill wordt via execution
+history teruggeleid naar `CompletedTradeRecord`.
+
 ---
 
 ## Portfolio
@@ -122,6 +135,12 @@ IBKR-runtime. De oude root-`engines` en `ScannerService` bestaan niet meer.
 - Cash Management
 - Equity Management
 - Portfolio Synchronization
+
+`PortfolioAllocator` combineert de canonieke `RiskManager` met een afzonderlijke
+concentratiegate. De gate begrenst markt, sector en een handmatig gecureerd
+correlatiecluster en telt reeds in dezelfde cyclus goedgekeurde posities mee.
+Bekende earnings-events kunnen entries deterministisch blokkeren. Onbekende
+eventdata wordt expliciet als onbekend behandeld en niet door nieuws geschat.
 
 ---
 

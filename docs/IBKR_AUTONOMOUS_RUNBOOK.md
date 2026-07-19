@@ -29,6 +29,23 @@ Actuele exitconfiguratie:
 - de bestaande dynamische stop-loss blijft altijd vóór de kleine-winstlogica
   gelden.
 
+Actuele orderbescherming:
+
+- iedere nieuwe BUY vereist actuele IBKR bid, ask en voldoende top-of-booksize;
+- een te oude quote, te brede spread of te grote prijsafwijking blokkeert BUY;
+- iedere BUY wordt als bracket met broker-native stop en profit-taker verstuurd;
+- native children en software-SELL delen één trade-ID gebaseerde OCA-groep;
+- native fills worden bij broker-sync met hun oorspronkelijke BUY-redenering
+  aan `CompletedTradeRecord` gekoppeld;
+- sessieverlies, drie opeenvolgende verliezen of drie brokerfouten blokkeren
+  nieuwe BUY's, maar niet het beheer van bestaande posities;
+- sector- en correlatieclustermetadata staat in
+  `data/instrument_metadata.csv`.
+
+Voor orderinzending moet het account actuele API-marktdata hebben voor de
+betreffende Amerikaanse en Europese noteringen. Delayed of ontbrekende
+bid/askdata is bewust niet voldoende en resulteert in een afwijzing.
+
 ## Eén veilige observatiecyclus
 
 ```powershell
@@ -122,3 +139,15 @@ $env:ORION_IBKR_NEWS_MODE="DISABLED"
 
 Gebruik `CompletedTradeRecord` voorlopig uitsluitend voor rapportage en offline
 onderzoek. Orion mag nog geen strategie- of risicolimieten zelfstandig wijzigen.
+
+Offline nettowachting bekijken:
+
+```powershell
+.\.venv\Scripts\python.exe analyze_completed_trades.py
+```
+
+Earnings-blackouts gebruiken uitsluitend expliciete regels met kolommen
+`symbol,earnings_date` in `data/earnings_calendar.csv`, waarbij de datum
+`YYYY-MM-DD` is. Vul dit bestand alleen uit een gecontroleerde kalenderbron.
+Ontbrekende data wordt als onbekend behandeld; Orion verzint geen datum uit
+headlines of AI-schattingen.

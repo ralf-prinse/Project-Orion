@@ -49,6 +49,23 @@ class OrderFactory:
             source="ExecutionEngine",
             currency=context.request.currency,
             fx_rate_to_base=context.request.fx_rate_to_base,
+            stop_loss_price=(
+                context.request.risk_plan.stop_loss
+                if side == "BUY"
+                else None
+            ),
+            take_profit_price=(
+                context.request.risk_plan.target_1
+                if side == "BUY"
+                else None
+            ),
+            client_order_id=context.request.trade_id,
+            oca_group=(
+                f"ORION-{context.request.trade_id}"
+                if context.request.trade_id
+                else ""
+            ),
+            execution_urgency=context.request.execution_urgency,
         )
 
     def _resolve_side(

@@ -22,10 +22,20 @@ brokerinterface. Nieuwsintelligentie is gekoppeld als IBKR `SHADOW`-
 observatielaag en heeft geen invloed op orders. Gesloten trades worden als één
 record bewaard voor latere offline analyse; autonoom self-learning staat uit.
 
+De Paper-uitvoeringslaag vereist actuele IBKR bid/askdata, begrenst normale
+orders met marketable limits en verzendt BUY's met broker-native stop/profit
+children. Een gedeelde trade-OCA-groep voorkomt dubbele SELL's tussen IBKR en
+Orions softwarematige lifecycle. Native fills worden teruggelezen naar dezelfde
+trade memory.
+
+Entryrisico omvat daarnaast een sessiecircuitbreaker, markt-/sector-/cluster-
+concentratie en bekende earnings-events. Nettowachting wordt alleen offline
+gerapporteerd en kan geen configuratie of order wijzigen.
+
 Architectuurgrens: de actieve `TradingPipeline` gebruikt uitsluitend
 `services.trading_decision`. `services/decisions` is research/explainability en
 wordt niet door de autonome runner geïmporteerd. De oude `engines`- en
-`ScannerService`-keten is verwijderd. De volledige suite telt 555 groene tests.
+`ScannerService`-keten is verwijderd. De volledige suite telt 569 groene tests.
 
 Werkend:
 

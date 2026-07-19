@@ -85,6 +85,36 @@ class LivePaperTradingConfig:
     news_max_articles_per_symbol: int = 10
     news_max_candidate_symbols_per_cycle: int = 20
 
+    # Execution-grade Paper controls. Native child orders and software exits
+    # share a persistent trade-based OCA group so only one exit can fill.
+    enable_native_protective_orders: bool = True
+    enable_execution_quality_gate: bool = True
+    max_bid_ask_spread_pct: float = 0.003
+    max_quote_age_seconds: float = 5.0
+    max_entry_slippage_pct: float = 0.0015
+
+    # Session-level circuit breaker. It blocks new BUY orders; managed exits
+    # remain active.
+    max_daily_loss_pct: float = 0.02
+    max_consecutive_losses: int = 3
+    circuit_breaker_cooldown_minutes: int = 60
+    max_consecutive_order_failures: int = 3
+
+    # Coarse concentration controls that work without unreliable third-party
+    # sector metadata. More detailed sector/correlation controls can be fed by
+    # the optional instrument metadata service.
+    max_positions_per_market: int = 12
+    max_market_exposure_pct: float = 0.70
+    max_positions_per_sector: int = 4
+    max_sector_exposure_pct: float = 0.25
+    max_positions_per_correlation_cluster: int = 4
+    instrument_metadata_path: Path = Path("data/instrument_metadata.csv")
+
+    # Known earnings events can block entries. Missing event data is reported
+    # but does not pretend that a date is known.
+    earnings_blackout_days: int = 1
+    earnings_calendar_path: Path = Path("data/earnings_calendar.csv")
+
     def __post_init__(self) -> None:
         normalized_strategy = self.exit_strategy.strip().upper()
         if normalized_strategy not in {
@@ -140,6 +170,40 @@ class LivePaperTradingConfig:
             raise ValueError(
                 "news_max_candidate_symbols_per_cycle must be at least 1."
             )
+
+        if self.max_consecutive_losses < 1:
+            raise ValueError("max_consecutive_losses must be at least 1.")
+        if self.circuit_breaker_cooldown_minutes < 1:
+            raise ValueError(
+                "circuit_breaker_cooldown_minutes must be at least 1."
+            )
+        if self.max_consecutive_order_failures < 1:
+            raise ValueError(
+                "max_consecutive_order_failures must be at least 1."
+            )
+        if self.max_positions_per_market < 1:
+            raise ValueError("max_positions_per_market must be at least 1.")
+        if self.max_positions_per_sector < 1:
+            raise ValueError("max_positions_per_sector must be at least 1.")
+        if self.max_positions_per_correlation_cluster < 1:
+            raise ValueError(
+                "max_positions_per_correlation_cluster must be at least 1."
+            )
+        if self.earnings_blackout_days < 0:
+            raise ValueError("earnings_blackout_days must not be negative.")
+
+        bounded_percentages = {
+            "max_bid_ask_spread_pct": self.max_bid_ask_spread_pct,
+            "max_entry_slippage_pct": self.max_entry_slippage_pct,
+            "max_daily_loss_pct": self.max_daily_loss_pct,
+            "max_market_exposure_pct": self.max_market_exposure_pct,
+            "max_sector_exposure_pct": self.max_sector_exposure_pct,
+        }
+        for name, value in bounded_percentages.items():
+            if not 0 < value < 1:
+                raise ValueError(f"{name} must be between zero and one.")
+        if self.max_quote_age_seconds <= 0:
+            raise ValueError("max_quote_age_seconds must be greater than zero.")
 
         positive_amounts = {
             "small_profit_target_us_eur": (

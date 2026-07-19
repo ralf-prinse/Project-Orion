@@ -17,6 +17,7 @@ from models.trade_journal_entry import TradeJournalEntry
 from models.trading_session import TradingSession
 from models.live_paper_trading_result import LivePaperTradingResult
 from models.portfolio_allocation_result import PortfolioAllocationResult
+from models.execution_result import ExecutionResult
 from providers.yahoo_provider import YahooProvider
 from services.exit_engine import ExitEngine
 from services.live_paper_market_scanner import (
@@ -29,7 +30,7 @@ from services.portfolio_allocator import PortfolioAllocator
 from services.portfolio_revaluation_service import (
     PortfolioRevaluationService,
 )
-from services.position_monitor import PositionMonitor
+from services.position_monitor import PositionMonitor, PositionMonitorResult
 from services.position_exit_execution_service import (
     PositionExitExecutionService,
 )
@@ -46,6 +47,9 @@ from services.trade_journal_builder import TradeJournalBuilder
 from services.trading_cycle import TradingCycle
 from services.market_session_service import MarketSessionService
 from services.completed_trade_record_builder import CompletedTradeRecordBuilder
+from services.session_risk_circuit_breaker import (
+    SessionRiskCircuitBreaker,
+)
 
 
 class AutonomousPaperTradingRunner:
@@ -72,6 +76,8 @@ class AutonomousPaperTradingRunner:
         news_intelligence_service=None,
         completed_trade_repository=None,
         completed_trade_record_builder=None,
+        session_risk_circuit_breaker=None,
+        protective_execution_reconciler=None,
         sleep_fn=None,
     ):
         self.config = config or AutonomousPaperTradingConfig()
@@ -124,7 +130,15 @@ class AutonomousPaperTradingRunner:
             completed_trade_record_builder
             or CompletedTradeRecordBuilder()
         )
+        self.session_risk_circuit_breaker = (
+            session_risk_circuit_breaker
+            or SessionRiskCircuitBreaker()
+        )
+        self.protective_execution_reconciler = (
+            protective_execution_reconciler
+        )
         self._news_assessments = {}
+        self._consecutive_order_failures = 0
         self.sleep_fn = sleep_fn or time.sleep
 
     def run(self):
@@ -144,9 +158,20 @@ class AutonomousPaperTradingRunner:
 
             try:
                 if self.trading_session_sync_service is not None:
+                    pre_sync_positions = dict(
+                        session.portfolio.positions
+                    )
+                    pre_sync_states = dict(session.position_states)
                     session = (
                         self.trading_session_sync_service
                         .synchronize(session)
+                    )
+                    self._reconcile_native_protective_exits(
+                        positions_before=pre_sync_positions,
+                        states_before=pre_sync_states,
+                        synchronized_session=session,
+                        cycle_number=cycle_number,
+                        session_id=session_id,
                     )
 
                 if self.position_adoption_service is not None:
@@ -192,6 +217,29 @@ class AutonomousPaperTradingRunner:
                             allocation=PortfolioAllocationResult(
                                 decisions=[]
                             ),
+                            executed_trades=0,
+                            rejected_trades=0,
+                            executed_exits=executed_exits,
+                        )
+                    )
+                    completed_cycles += 1
+                    self._save_session(session)
+                    self._sleep_between_cycles(cycle_index)
+                    continue
+
+                circuit_decision = self._evaluate_session_risk(session)
+                if not circuit_decision.entries_allowed:
+                    print(
+                        "New BUY orders blocked by session circuit breaker: "
+                        f"{circuit_decision.reason} "
+                        f"daily_net={circuit_decision.daily_net_profit_loss:.2f} "
+                        f"consecutive_losses="
+                        f"{circuit_decision.consecutive_losses}"
+                    )
+                    cycle_results.append(
+                        AutonomousPaperTradingCycleResult(
+                            scan=self._empty_scan_result(session),
+                            allocation=PortfolioAllocationResult(decisions=[]),
                             executed_trades=0,
                             rejected_trades=0,
                             executed_exits=executed_exits,
@@ -301,6 +349,13 @@ class AutonomousPaperTradingRunner:
                     peak_portfolio_value
                 )
 
+                if execution_rejections:
+                    self._consecutive_order_failures += len(
+                        execution_rejections
+                    )
+                elif executed_trades > 0 or executed_exits > 0:
+                    self._consecutive_order_failures = 0
+
                 cycle_results.append(
                     AutonomousPaperTradingCycleResult(
                         scan=scan_result,
@@ -344,6 +399,129 @@ class AutonomousPaperTradingRunner:
         )
 
         return result
+
+    def _evaluate_session_risk(self, session):
+        completed_trades = []
+        if (
+            self.completed_trade_repository is not None
+            and hasattr(self.completed_trade_repository, "load_all")
+        ):
+            completed_trades = self.completed_trade_repository.load_all()
+        live_config = self.config.live_config
+        return self.session_risk_circuit_breaker.evaluate(
+            session=session,
+            completed_trades=completed_trades,
+            max_daily_loss_pct=live_config.max_daily_loss_pct,
+            max_consecutive_losses=live_config.max_consecutive_losses,
+            cooldown_minutes=(
+                live_config.circuit_breaker_cooldown_minutes
+            ),
+            consecutive_order_failures=(
+                self._consecutive_order_failures
+            ),
+            max_consecutive_order_failures=(
+                live_config.max_consecutive_order_failures
+            ),
+        )
+
+    def _reconcile_native_protective_exits(
+        self,
+        *,
+        positions_before,
+        states_before,
+        synchronized_session,
+        cycle_number,
+        session_id,
+    ) -> None:
+        if self.protective_execution_reconciler is None:
+            return
+        if not self.config.live_config.enable_native_protective_orders:
+            return
+
+        synchronized_symbols = {
+            symbol.strip().upper()
+            for symbol in synchronized_session.portfolio.positions
+        }
+        for symbol, position in positions_before.items():
+            normalized_symbol = symbol.strip().upper()
+            if normalized_symbol in synchronized_symbols:
+                continue
+            state = states_before.get(symbol)
+            if state is None or not state.trade_id:
+                continue
+
+            execution = self.protective_execution_reconciler.find_protective_exit(
+                trade_id=state.trade_id,
+                symbol=symbol,
+            )
+            if execution is None:
+                raise RuntimeError(
+                    "Broker position disappeared without a reconcilable "
+                    f"Orion protective execution: {symbol}."
+                )
+            if execution.quantity != position.quantity:
+                raise RuntimeError(
+                    "Protective execution quantity does not match the "
+                    f"disappeared position for {symbol}: expected "
+                    f"{position.quantity}, received {execution.quantity}."
+                )
+
+            action = (
+                "TAKE_PROFIT"
+                if execution.order_reference.endswith(":TP")
+                else "STOP_LOSS"
+            )
+            filled_position = replace(
+                position,
+                current_price=execution.price,
+            )
+            cost_estimate = (
+                self.position_monitor
+                .trading_cost_estimator
+                .estimate_round_trip(
+                    position=filled_position,
+                    config=self.config.live_config,
+                )
+            )
+            gross_profit_loss = filled_position.unrealized_profit_loss
+            decision = PositionMonitorResult(
+                symbol=symbol,
+                action=action,
+                reason=(
+                    "Confirmed IBKR native protective "
+                    f"{action.lower().replace('_', ' ')} execution."
+                ),
+                current_price=execution.price,
+                entry_price=position.entry_price,
+                unrealized_profit_loss=gross_profit_loss,
+                unrealized_return_percent=(
+                    (execution.price - position.entry_price)
+                    / position.entry_price
+                    * 100.0
+                ),
+                estimated_round_trip_costs=cost_estimate.total_cost_eur,
+                estimated_net_profit_loss=round(
+                    gross_profit_loss - cost_estimate.total_cost_eur,
+                    2,
+                ),
+            )
+            self._append_broker_exit_journal_entry(
+                position=position,
+                decision=decision,
+                execution=ExecutionResult(
+                    accepted=True,
+                    status="FILLED",
+                    order=None,
+                    message=decision.reason,
+                    executed_price=execution.price,
+                    executed_quantity=execution.quantity,
+                    executed_at=execution.executed_at,
+                ),
+                cycle_number=cycle_number,
+                session_id=session_id,
+                trade_id=state.trade_id,
+                fully_closed=True,
+            )
 
     def _news_shadow_enabled(self) -> bool:
         return (
@@ -860,13 +1038,13 @@ class AutonomousPaperTradingRunner:
             )
         )
 
-        self.trade_journal_repository.append(
-            entry
-        )
-
         state = session.position_states.get(decision.symbol)
         if state is not None:
             entry = replace(entry, trade_id=state.trade_id)
+
+        self.trade_journal_repository.append(
+            entry
+        )
 
     def _append_adoption_journal_entries(
         self,

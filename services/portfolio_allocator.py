@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+from datetime import UTC, datetime
 
 from models.live_paper_trading_config import LivePaperTradingConfig
 from models.live_paper_trading_result import LivePaperCandidate
@@ -11,6 +12,8 @@ from models.portfolio_allocation_result import (
 from models.trading_session import TradingSession
 from services.risk import RiskContext, RiskManager, RiskProfile
 from services.market.fx_rate_service import FxRateService
+from services.earnings_calendar_service import EarningsCalendarService
+from services.portfolio_concentration_gate import PortfolioConcentrationGate
 
 
 class PortfolioAllocator:
@@ -39,10 +42,14 @@ class PortfolioAllocator:
         risk_manager: RiskManager | None = None,
         fx_rate_service: FxRateService | None = None,
         require_live_fx: bool = False,
+        concentration_gate: PortfolioConcentrationGate | None = None,
+        earnings_calendar_service: EarningsCalendarService | None = None,
     ) -> None:
         self.risk_manager = risk_manager or RiskManager()
         self.fx_rate_service = fx_rate_service
         self.require_live_fx = bool(require_live_fx)
+        self.concentration_gate = concentration_gate
+        self.earnings_calendar_service = earnings_calendar_service
 
     def allocate(
         self,
@@ -69,6 +76,7 @@ class PortfolioAllocator:
             )
         )
         approved_in_cycle = 0
+        pending_positions: list[tuple[str, float]] = []
 
         max_exposure_value = round(
             equity * config.max_portfolio_exposure,
@@ -183,6 +191,26 @@ class PortfolioAllocator:
                 )
                 continue
 
+            if self.earnings_calendar_service is not None:
+                event_decision = self.earnings_calendar_service.evaluate(
+                    symbol=candidate.symbol,
+                    evaluated_on=datetime.now(UTC).date(),
+                    blackout_days=config.earnings_blackout_days,
+                )
+                if not event_decision.allowed:
+                    decisions.append(
+                        PortfolioAllocationDecision(
+                            candidate=candidate,
+                            quantity=0,
+                            approved=False,
+                            reason=(
+                                "Earnings risk gate rejected allocation; "
+                                + event_decision.reason
+                            ),
+                        )
+                    )
+                    continue
+
             try:
                 fx_rate = self._candidate_fx_rate(
                     symbol=candidate.symbol,
@@ -238,6 +266,42 @@ class PortfolioAllocator:
                 quantity * entry_value_base,
                 2,
             )
+
+            if self.concentration_gate is not None:
+                concentration = self.concentration_gate.evaluate(
+                    session=session,
+                    symbol=candidate.symbol,
+                    proposed_value=estimated_value,
+                    max_positions_per_market=(
+                        config.max_positions_per_market
+                    ),
+                    max_market_exposure_pct=(
+                        config.max_market_exposure_pct
+                    ),
+                    max_positions_per_sector=(
+                        config.max_positions_per_sector
+                    ),
+                    max_sector_exposure_pct=(
+                        config.max_sector_exposure_pct
+                    ),
+                    max_positions_per_correlation_cluster=(
+                        config.max_positions_per_correlation_cluster
+                    ),
+                    pending_positions=pending_positions,
+                )
+                if not concentration.allowed:
+                    decisions.append(
+                        PortfolioAllocationDecision(
+                            candidate=candidate,
+                            quantity=0,
+                            approved=False,
+                            reason=(
+                                "Concentration gate rejected allocation; "
+                                + concentration.reason
+                            ),
+                        )
+                    )
+                    continue
 
             if portfolio_risk_error is not None:
                 decisions.append(
@@ -309,6 +373,9 @@ class PortfolioAllocator:
                 )
             )
             approved_in_cycle += 1
+            pending_positions.append(
+                (candidate.symbol, estimated_value)
+            )
 
             available_cash = round(
                 available_cash - estimated_value,

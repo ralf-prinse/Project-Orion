@@ -155,7 +155,21 @@ Voorkom dubbele implementaties.
 
 ✅ Legacy `engines`/`ScannerService` en lege placeholders verwijderd
 
-✅ Volledige testsuite hersteld naar 555 geslaagd en 0 mislukt
+✅ Volledige testsuite hersteld naar 569 geslaagd en 0 mislukt
+
+✅ IBKR live bid/ask-, spread-, freshness- en top-size execution gate
+
+✅ Broker-native Paper brackets met OCA-veilige software-exits
+
+✅ Native protective-fillreconciliatie naar trade memory
+
+✅ Sessieverlies-, loss-streak- en brokerfout-circuitbreaker
+
+✅ Markt-, sector- en correlatieclusterconcentratie voor 100 symbolen
+
+✅ Earnings-blackoutinterface zonder verzonnen kalenderdata
+
+✅ Offline cost-aware expectancyanalyse zonder runtimeconfiguraties te wijzigen
 
 ---
 
@@ -163,10 +177,11 @@ Voorkom dubbele implementaties.
 
 - Paper-observatie met 100 symbolen en orders uitgeschakeld;
 - ontbrekende/ambigue Yahoo- en IBKR-contracten uit het universum filteren;
-- liquiditeits-, spread- en volumevoorselectie toevoegen;
-- IBKR realtime marktdata voor open posities en topkandidaten koppelen;
+- execution-qualitymetingen tijdens Paper-cycli verzamelen en limieten op
+  werkelijke spread/fill/slippage kalibreren;
+- officiële earningskalender periodiek vullen en bron/auditdatum vastleggen;
 - pas na stabiele meetresultaten opschalen naar 250 symbolen;
-- broker-native beschermende stoporders toevoegen vóór live-moneyontwerp.
+- TWS execution-historyretentie en herstel na meerdaagse uitval valideren;
 - nieuwsproviderdekking en latency meten tijdens orderloze Paper-cycli;
 - classifier valideren op EU/VS-headlines en false positives;
 - pas daarna beslissen over een fail-closed nieuws-gate;

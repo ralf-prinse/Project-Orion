@@ -13,6 +13,10 @@ from models.order import Order
 from services.ibkr.ibkr_stock_contract_factory import (
     IbkrStockContractFactory,
 )
+from services.execution_quality_gate import (
+    ExecutionQualityGate,
+    ExecutionQuote,
+)
 
 
 class IbkrBrokerTransport(Protocol):
@@ -32,6 +36,22 @@ class IbkrBrokerTransport(Protocol):
     ) -> "IbkrOrderOutcome":
         ...
 
+    def submit_bracket_order(
+        self,
+        *,
+        contract: Contract,
+        parent_order: IbkrOrder,
+        take_profit_order: IbkrOrder,
+        stop_loss_order: IbkrOrder,
+        timeout_seconds: float,
+    ) -> "IbkrOrderOutcome":
+        ...
+
+
+class IbkrExecutionQuoteProvider(Protocol):
+    def get_quote(self, symbol: str) -> ExecutionQuote:
+        ...
+
 
 @dataclass(frozen=True)
 class IbkrOrderOutcome:
@@ -46,6 +66,9 @@ class IbkrOrderOutcome:
     average_fill_price: float = 0.0
     filled_at: datetime | None = None
     message: str = ""
+    order_id: int | None = None
+    permanent_id: int | None = None
+    child_order_ids: tuple[int, ...] = ()
 
 
 class IbkrBroker:
@@ -74,6 +97,12 @@ class IbkrBroker:
         exchange: str = "SMART",
         currency: str = "USD",
         contract_factory: IbkrStockContractFactory | None = None,
+        enable_native_protective_orders: bool = False,
+        quote_provider: IbkrExecutionQuoteProvider | None = None,
+        execution_quality_gate: ExecutionQualityGate | None = None,
+        max_bid_ask_spread_pct: float = 0.003,
+        max_quote_age_seconds: float = 5.0,
+        max_entry_slippage_pct: float = 0.0015,
     ) -> None:
         if timeout_seconds <= 0:
             raise ValueError(
@@ -93,6 +122,16 @@ class IbkrBroker:
         self.contract_factory = (
             contract_factory or IbkrStockContractFactory()
         )
+        self.enable_native_protective_orders = bool(
+            enable_native_protective_orders
+        )
+        self.quote_provider = quote_provider
+        self.execution_quality_gate = (
+            execution_quality_gate or ExecutionQualityGate()
+        )
+        self.max_bid_ask_spread_pct = float(max_bid_ask_spread_pct)
+        self.max_quote_age_seconds = float(max_quote_age_seconds)
+        self.max_entry_slippage_pct = float(max_entry_slippage_pct)
 
     def execute(self, order: Order) -> ExecutionResult:
         validation_error = self._validate_order(order)
@@ -105,15 +144,69 @@ class IbkrBroker:
                 message=validation_error,
             )
 
+        limit_price = None
+        if (
+            self.quote_provider is not None
+            and (
+                order.side.strip().upper() == "BUY"
+                or order.execution_urgency.strip().upper() == "NORMAL"
+            )
+        ):
+            try:
+                quote = self.quote_provider.get_quote(order.symbol)
+                quality = self.execution_quality_gate.evaluate(
+                    quote=quote,
+                    side=order.side,
+                    max_spread_pct=self.max_bid_ask_spread_pct,
+                    max_quote_age_seconds=self.max_quote_age_seconds,
+                    max_slippage_pct=self.max_entry_slippage_pct,
+                    required_quantity=order.quantity,
+                    planned_price=order.price,
+                )
+            except Exception as exc:
+                return ExecutionResult(
+                    accepted=False,
+                    status="EXECUTION_QUALITY_REJECTED",
+                    order=order,
+                    message=f"Live IBKR execution quote unavailable: {exc}",
+                )
+            if not quality.allowed:
+                return ExecutionResult(
+                    accepted=False,
+                    status="EXECUTION_QUALITY_REJECTED",
+                    order=order,
+                    message=quality.reason,
+                )
+            limit_price = quality.marketable_limit_price
+
         contract = self._build_contract(order)
-        ibkr_order = self._build_ibkr_order(order)
+        ibkr_order = self._build_ibkr_order(
+            order,
+            limit_price=limit_price,
+        )
 
         try:
-            outcome = self.transport.submit_order(
-                contract=contract,
-                order=ibkr_order,
-                timeout_seconds=self.timeout_seconds,
-            )
+            if (
+                self.enable_native_protective_orders
+                and order.side.strip().upper() == "BUY"
+            ):
+                ibkr_order.transmit = False
+                take_profit, stop_loss = (
+                    self._build_protective_orders(order)
+                )
+                outcome = self.transport.submit_bracket_order(
+                    contract=contract,
+                    parent_order=ibkr_order,
+                    take_profit_order=take_profit,
+                    stop_loss_order=stop_loss,
+                    timeout_seconds=self.timeout_seconds,
+                )
+            else:
+                outcome = self.transport.submit_order(
+                    contract=contract,
+                    order=ibkr_order,
+                    timeout_seconds=self.timeout_seconds,
+                )
         except TimeoutError as exc:
             return ExecutionResult(
                 accepted=False,
@@ -171,6 +264,25 @@ class IbkrBroker:
         if price <= 0:
             return "Order price must be greater than zero."
 
+        if self.enable_native_protective_orders and side == "BUY":
+            try:
+                stop_loss = float(order.stop_loss_price)
+                take_profit = float(order.take_profit_price)
+            except (TypeError, ValueError):
+                return (
+                    "Native protective BUY requires finite stop-loss "
+                    "and take-profit prices."
+                )
+            if not math.isfinite(stop_loss) or not math.isfinite(take_profit):
+                return (
+                    "Native protective BUY requires finite stop-loss "
+                    "and take-profit prices."
+                )
+            if stop_loss <= 0 or stop_loss >= price:
+                return "Protective stop-loss must be below the BUY price."
+            if take_profit <= price:
+                return "Protective take-profit must be above the BUY price."
+
         return None
 
     def _build_contract(self, order: Order) -> Contract:
@@ -180,11 +292,28 @@ class IbkrBroker:
             contract.currency = self.currency
         return contract
 
-    def _build_ibkr_order(self, order: Order) -> IbkrOrder:
+    def _build_ibkr_order(
+        self,
+        order: Order,
+        *,
+        limit_price: float | None = None,
+    ) -> IbkrOrder:
         ibkr_order = IbkrOrder()
         ibkr_order.action = order.side.strip().upper()
-        ibkr_order.orderType = "MKT"
+        if limit_price is None:
+            ibkr_order.orderType = "MKT"
+        else:
+            ibkr_order.orderType = "LMT"
+            ibkr_order.lmtPrice = float(limit_price)
         ibkr_order.totalQuantity = int(order.quantity)
+        if order.client_order_id.strip():
+            ibkr_order.orderRef = order.client_order_id.strip()
+        if (
+            order.side.strip().upper() == "SELL"
+            and order.oca_group.strip()
+        ):
+            ibkr_order.ocaGroup = order.oca_group.strip()
+            ibkr_order.ocaType = 1
 
         # Disable legacy attributes rejected by newer TWS versions
         # for normal SMART-routed stock orders.
@@ -193,6 +322,42 @@ class IbkrBroker:
 
         ibkr_order.transmit = True
         return ibkr_order
+
+    def _build_protective_orders(
+        self,
+        order: Order,
+    ) -> tuple[IbkrOrder, IbkrOrder]:
+        opposite_action = "SELL"
+
+        take_profit = IbkrOrder()
+        take_profit.action = opposite_action
+        take_profit.orderType = "LMT"
+        take_profit.totalQuantity = int(order.quantity)
+        take_profit.lmtPrice = float(order.take_profit_price)
+        take_profit.eTradeOnly = False
+        take_profit.firmQuoteOnly = False
+        take_profit.transmit = False
+
+        stop_loss = IbkrOrder()
+        stop_loss.action = opposite_action
+        stop_loss.orderType = "STP"
+        stop_loss.totalQuantity = int(order.quantity)
+        stop_loss.auxPrice = float(order.stop_loss_price)
+        stop_loss.eTradeOnly = False
+        stop_loss.firmQuoteOnly = False
+        stop_loss.transmit = True
+
+        if order.client_order_id.strip():
+            base_reference = order.client_order_id.strip()
+            take_profit.orderRef = base_reference + ":TP"
+            stop_loss.orderRef = base_reference + ":SL"
+        if order.oca_group.strip():
+            take_profit.ocaGroup = order.oca_group.strip()
+            take_profit.ocaType = 1
+            stop_loss.ocaGroup = order.oca_group.strip()
+            stop_loss.ocaType = 1
+
+        return take_profit, stop_loss
 
     def _map_outcome(
         self,

@@ -270,6 +270,33 @@ def print_runtime_mode(
         "News intelligence: "
         f"{config.live_config.news_mode} (never changes orders)"
     )
+    print(
+        "Execution quotes:  "
+        + (
+            "IBKR LIVE BID/ASK (fail-closed)"
+            if config.live_config.enable_execution_quality_gate
+            else "DISABLED"
+        )
+    )
+    print(
+        "Native protection: "
+        + (
+            "IBKR BRACKET + OCA"
+            if config.live_config.enable_native_protective_orders
+            else "DISABLED"
+        )
+    )
+    print(
+        "Session breaker:   "
+        f"{config.live_config.max_daily_loss_pct:.1%} loss / "
+        f"{config.live_config.max_consecutive_losses} losses / "
+        f"{config.live_config.max_consecutive_order_failures} order failures"
+    )
+    print(
+        "Concentration:     "
+        f"max {config.live_config.max_positions_per_sector} per sector / "
+        f"{config.live_config.max_sector_exposure_pct:.0%} exposure"
+    )
     if (
         config.live_config.exit_strategy
         == LivePaperTradingConfig.COST_AWARE_SMALL_PROFIT
