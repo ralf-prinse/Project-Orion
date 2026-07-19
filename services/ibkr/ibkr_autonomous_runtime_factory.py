@@ -35,6 +35,10 @@ from services.ibkr.ibkr_portfolio_mapper import IbkrPortfolioMapper
 from services.stores.repositories.trading_session_repository import (
     TradingSessionRepository,
 )
+from services.market_data.historical_cache import HistoricalCache
+from services.market_data.yahoo_historical_provider import (
+    YahooHistoricalDataProvider,
+)
 
 
 @dataclass(frozen=True)
@@ -57,6 +61,7 @@ class IbkrAutonomousRuntime:
     account_service: IbkrAccountService
     trading_session_sync_service: IbkrTradingSessionSyncService
     price_provider: YahooProvider
+    historical_provider: YahooHistoricalDataProvider
 
 
 class IbkrAutonomousRuntimeFactory:
@@ -114,10 +119,15 @@ class IbkrAutonomousRuntimeFactory:
         price_provider = YahooProvider()
         fx_rate_service = FxRateService()
         market_session_service = MarketSessionService()
+        historical_provider = YahooHistoricalDataProvider(
+            cache=HistoricalCache(ttl_minutes=15),
+            batch_size=25,
+        )
         scanner = LivePaperMarketScanner(
             config=runtime_config.live_config,
             provider=price_provider,
             market_session_service=market_session_service,
+            historical_provider=historical_provider,
         )
         allocator = PortfolioAllocator(
             fx_rate_service=fx_rate_service,
@@ -210,4 +220,5 @@ class IbkrAutonomousRuntimeFactory:
                 trading_session_sync_service
             ),
             price_provider=price_provider,
+            historical_provider=historical_provider,
         )

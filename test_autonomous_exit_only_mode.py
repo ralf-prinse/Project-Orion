@@ -11,6 +11,8 @@ from test_autonomous_broker_exit_lifecycle import (
     create_session,
 )
 from run_autonomous_ibkr_paper import build_config
+from models.paper_portfolio import PaperPortfolio
+from models.trading_session import TradingSession
 
 
 class ScannerMustNotRun:
@@ -101,9 +103,40 @@ def test_ibkr_entrypoint_defaults_to_exit_only_and_twenty_positions() -> None:
 
     assert config.execution_mode == AutonomousPaperTradingConfig.EXIT_ONLY
     assert config.live_config.max_open_positions == 20
+    assert config.live_config.max_new_positions_per_cycle == 3
     assert config.live_config.max_portfolio_exposure == 0.90
     assert config.live_config.max_portfolio_risk_pct == 0.06
     assert config.live_config.min_cash_reserve_pct == 0.10
+    assert config.live_config.max_symbols == 100
+    assert config.cycles == 1
+    assert config.sleep_seconds == 900.0
+
+
+def test_runner_sleeps_only_between_bounded_cycles() -> None:
+    session = TradingSession(
+        name="Bounded multi-cycle test",
+        portfolio=PaperPortfolio(cash=1_000.0),
+    )
+    repository = InMemorySessionRepository(session)
+    sleep_calls = []
+    runner = AutonomousPaperTradingRunner(
+        config=AutonomousPaperTradingConfig(
+            execution_mode=AutonomousPaperTradingConfig.EXIT_ONLY,
+            cycles=3,
+            sleep_seconds=900.0,
+            stop_on_exception=True,
+        ),
+        scanner=ScannerMustNotRun(),
+        trading_cycle=TradingCycleMustNotRun(),
+        trading_session_repository=repository,
+        price_provider=FixedPriceProvider(),
+        sleep_fn=sleep_calls.append,
+    )
+
+    result = runner.run()
+
+    assert result.completed_cycles == 3
+    assert sleep_calls == [900.0, 900.0]
 
 
 def test_invalid_execution_mode_is_rejected() -> None:

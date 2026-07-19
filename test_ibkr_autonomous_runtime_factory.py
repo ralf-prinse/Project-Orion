@@ -42,6 +42,7 @@ def test_builds_ibkr_autonomous_runtime() -> None:
     assert runtime.account_service is not None
     assert runtime.trading_session_sync_service is not None
     assert runtime.price_provider is not None
+    assert runtime.historical_provider is not None
 
 
 def test_execution_engine_uses_ibkr_broker() -> None:
@@ -135,6 +136,11 @@ def test_wires_market_hours_to_buy_and_sell_paths() -> None:
         runtime.runner.scanner.market_session_service
         is runtime.runner.market_session_service
     )
+    assert (
+        runtime.runner.scanner.historical_provider
+        is runtime.historical_provider
+    )
+    assert runtime.historical_provider.batch_size == 25
 
 
 def test_wires_explicit_position_adoption_service() -> None:

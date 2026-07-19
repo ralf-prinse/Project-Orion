@@ -27,6 +27,14 @@ from services.position_adoption_service import PositionAdoptionService
 ACCOUNT_ENVIRONMENT_VARIABLE = "ORION_IBKR_PAPER_ACCOUNT_ID"
 ORDER_PERMISSION_ENVIRONMENT_VARIABLE = "ORION_IBKR_ALLOW_ORDERS"
 EXECUTION_MODE_ENVIRONMENT_VARIABLE = "ORION_IBKR_EXECUTION_MODE"
+CYCLES_ENVIRONMENT_VARIABLE = "ORION_IBKR_CYCLES"
+SCAN_INTERVAL_ENVIRONMENT_VARIABLE = "ORION_IBKR_SCAN_INTERVAL_SECONDS"
+
+DEFAULT_CYCLES = 1
+DEFAULT_SCAN_INTERVAL_SECONDS = 900
+MAX_CYCLES = 96
+MIN_SCAN_INTERVAL_SECONDS = 60
+MAX_SCAN_INTERVAL_SECONDS = 3600
 
 EXIT_ONLY_CONFIRMATION = "START EXIT ONLY IBKR PAPER CYCLE"
 BUY_AND_SELL_CONFIRMATION = "START ONE AUTONOMOUS IBKR PAPER CYCLE"
@@ -81,13 +89,61 @@ def read_execution_mode() -> str:
     return value
 
 
+def _read_bounded_integer(
+    *,
+    environment_variable: str,
+    default: int,
+    minimum: int,
+    maximum: int,
+) -> int:
+    raw_value = os.getenv(
+        environment_variable,
+        str(default),
+    ).strip()
+
+    try:
+        value = int(raw_value)
+    except ValueError as exc:
+        raise RuntimeError(
+            f"{environment_variable} must be a whole number."
+        ) from exc
+
+    if not minimum <= value <= maximum:
+        raise RuntimeError(
+            f"{environment_variable} must be between "
+            f"{minimum} and {maximum}."
+        )
+
+    return value
+
+
+def read_cycle_count() -> int:
+    return _read_bounded_integer(
+        environment_variable=CYCLES_ENVIRONMENT_VARIABLE,
+        default=DEFAULT_CYCLES,
+        minimum=1,
+        maximum=MAX_CYCLES,
+    )
+
+
+def read_scan_interval_seconds() -> int:
+    return _read_bounded_integer(
+        environment_variable=SCAN_INTERVAL_ENVIRONMENT_VARIABLE,
+        default=DEFAULT_SCAN_INTERVAL_SECONDS,
+        minimum=MIN_SCAN_INTERVAL_SECONDS,
+        maximum=MAX_SCAN_INTERVAL_SECONDS,
+    )
+
+
 def build_config(
     execution_mode: str = AutonomousPaperTradingConfig.EXIT_ONLY,
+    cycles: int = DEFAULT_CYCLES,
+    scan_interval_seconds: int = DEFAULT_SCAN_INTERVAL_SECONDS,
 ) -> AutonomousPaperTradingConfig:
     live_config = LivePaperTradingConfig(
         watchlist_path="data/universes/ibkr_eu_us_validation.csv",
         initial_cash=10_000.0,
-        max_symbols=6,
+        max_symbols=100,
         max_open_positions=20,
         min_confidence=0.75,
         max_position_value=1000.0,
@@ -97,8 +153,8 @@ def build_config(
     return AutonomousPaperTradingConfig(
         live_config=live_config,
         execution_mode=execution_mode,
-        cycles=1,
-        sleep_seconds=0.0,
+        cycles=cycles,
+        sleep_seconds=float(scan_interval_seconds),
         stop_on_exception=True,
         print_cycle_summary=True,
     )
@@ -116,6 +172,7 @@ def print_runtime_mode(
     paper_account_id: str,
     allow_order_submission: bool,
     execution_mode: str,
+    config: AutonomousPaperTradingConfig,
 ) -> None:
     print()
     print("=========================================")
@@ -125,8 +182,12 @@ def print_runtime_mode(
     print("TWS host:          127.0.0.1")
     print("TWS Paper port:    7497")
     print("Base currency:     EUR (required)")
-    print("Cycles:            1")
-    print("Maximum symbols:   6 (EU + US)")
+    print(f"Cycles:            {config.cycles}")
+    print(
+        "Scan interval:     "
+        f"{config.sleep_seconds:g} seconds"
+    )
+    print("Maximum symbols:   100 (50 US + 50 EU)")
     print("Maximum positions: 20 (risk-limited ceiling)")
     print(f"Execution mode:    {execution_mode}")
     print(
@@ -170,12 +231,21 @@ def print_runtime_mode(
         print()
 
 
-def require_confirmation(execution_mode: str) -> bool:
-    confirmation = (
-        EXIT_ONLY_CONFIRMATION
-        if execution_mode == AutonomousPaperTradingConfig.EXIT_ONLY
-        else BUY_AND_SELL_CONFIRMATION
-    )
+def require_confirmation(execution_mode: str, cycles: int = 1) -> bool:
+    if cycles == 1:
+        confirmation = (
+            EXIT_ONLY_CONFIRMATION
+            if execution_mode == AutonomousPaperTradingConfig.EXIT_ONLY
+            else BUY_AND_SELL_CONFIRMATION
+        )
+    elif execution_mode == AutonomousPaperTradingConfig.EXIT_ONLY:
+        confirmation = (
+            f"START {cycles} EXIT ONLY IBKR PAPER CYCLES"
+        )
+    else:
+        confirmation = (
+            f"START {cycles} AUTONOMOUS IBKR PAPER CYCLES"
+        )
     typed = input(
         f"Type exactly '{confirmation}' to continue: "
     ).strip()
@@ -194,6 +264,9 @@ def print_result(result) -> None:
     print("=========================================")
     print(f"Completed cycles: {result.completed_cycles}")
     print(f"Failed cycles:    {result.failed_cycles}")
+    print(f"Scanned symbols:  {result.total_scanned_symbols}")
+    print(f"Analyzed symbols: {result.total_analyzed_symbols}")
+    print(f"Skipped/failed:   {result.total_failed_symbols}")
     print(f"Executed trades:  {result.total_executed_trades}")
     print(f"Executed exits:   {result.total_executed_exits}")
     print(f"Rejected trades:  {result.total_rejected_trades}")
@@ -218,19 +291,27 @@ def main() -> None:
     paper_account_id = read_required_paper_account_id()
     allow_order_submission = order_submission_is_enabled()
     execution_mode = read_execution_mode()
+    cycles = read_cycle_count()
+    scan_interval_seconds = read_scan_interval_seconds()
+    config = build_config(
+        execution_mode=execution_mode,
+        cycles=cycles,
+        scan_interval_seconds=scan_interval_seconds,
+    )
 
     print_runtime_mode(
         paper_account_id=paper_account_id,
         allow_order_submission=allow_order_submission,
         execution_mode=execution_mode,
+        config=config,
     )
 
-    if not require_confirmation(execution_mode):
+    if not require_confirmation(execution_mode, cycles):
         return
 
     runtime = IbkrAutonomousRuntimeFactory().build(
         paper_account_id=paper_account_id,
-        config=build_config(execution_mode),
+        config=config,
         trade_journal_repository=JsonlTradeJournalRepository(
             path="data/ibkr_autonomous_trade_journal.jsonl",
         ),

@@ -274,7 +274,7 @@ class IbkrTradingSessionSyncService:
         """Restore Yahoo/Orion suffixes removed by IBKR contracts.
 
         An IBKR stock contract reports ASML while Orion deliberately uses
-        ASML.AS for market data and market-session routing. A known local
+        ASML.AS or SAP.DE for market data and market-session routing. A known local
         symbol is reused only when it maps unambiguously to the broker
         symbol. Unknown broker positions remain untouched and unmanaged.
         """
@@ -320,6 +320,17 @@ class IbkrTradingSessionSyncService:
             ):
                 restored.append(
                     replace(position, symbol=f"{raw_symbol}.AS")
+                )
+                continue
+
+            if (
+                not candidates
+                and exchange in {"IBIS", "IBIS2"}
+                and currency == "EUR"
+                and not raw_symbol.endswith(".DE")
+            ):
+                restored.append(
+                    replace(position, symbol=f"{raw_symbol}.DE")
                 )
                 continue
 
@@ -406,7 +417,7 @@ class IbkrTradingSessionSyncService:
     def _comparison_symbol(self, symbol: str) -> str:
         normalized = str(symbol).strip().upper()
 
-        if normalized.endswith(".AS"):
+        if normalized.endswith((".AS", ".DE")):
             return normalized[:-3]
 
         return normalized

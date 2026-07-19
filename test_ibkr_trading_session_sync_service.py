@@ -227,6 +227,32 @@ def test_sync_maps_unknown_aeb_position_to_euronext_symbol() -> None:
     assert restored[0].symbol == "ASM.AS"
 
 
+def test_sync_maps_unknown_ibis_position_to_xetra_symbol() -> None:
+    service = IbkrTradingSessionSyncService(
+        account_service=FakeIbkrAccountService(),
+        price_provider=FakePriceProvider(),
+    )
+    broker_position = BrokerPosition(
+        account_id="DU123456",
+        symbol="SAP",
+        quantity=1.0,
+        average_cost=250.0,
+        currency="EUR",
+        security_type="STK",
+        exchange="IBIS",
+    )
+
+    restored = service._restore_orion_symbols(
+        broker_positions=(broker_position,),
+        session=TradingSession(
+            name="Empty session",
+            portfolio=PaperPortfolio(cash=1000.0),
+        ),
+    )
+
+    assert restored[0].symbol == "SAP.DE"
+
+
 def test_sync_updates_managed_state_price_atomically() -> None:
     service = IbkrTradingSessionSyncService(
         account_service=FakeIbkrAccountService(),

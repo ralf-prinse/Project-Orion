@@ -68,6 +68,7 @@ class PortfolioAllocator:
                 portfolio_equity=equity,
             )
         )
+        approved_in_cycle = 0
 
         max_exposure_value = round(
             equity * config.max_portfolio_exposure,
@@ -164,6 +165,19 @@ class PortfolioAllocator:
                             "Risk gate rejected allocation; "
                             "BUY stop-loss must be greater than zero "
                             "and below entry price."
+                        ),
+                    )
+                )
+                continue
+
+            if approved_in_cycle >= config.max_new_positions_per_cycle:
+                decisions.append(
+                    PortfolioAllocationDecision(
+                        candidate=candidate,
+                        quantity=0,
+                        approved=False,
+                        reason=(
+                            "Maximum new positions per cycle reached."
                         ),
                     )
                 )
@@ -294,6 +308,7 @@ class PortfolioAllocator:
                     fx_rate_to_base=fx_rate,
                 )
             )
+            approved_in_cycle += 1
 
             available_cash = round(
                 available_cash - estimated_value,

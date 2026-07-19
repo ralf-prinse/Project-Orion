@@ -20,10 +20,17 @@ class HistoricalCache:
     def __init__(
         self,
         cache_dir: str = "data/cache/historical",
-        ttl_hours: int = 24,
+        ttl_hours: float = 24,
+        ttl_minutes: float | None = None,
     ):
         self.cache_dir = Path(cache_dir)
-        self.ttl = timedelta(hours=ttl_hours)
+        self.ttl = (
+            timedelta(minutes=ttl_minutes)
+            if ttl_minutes is not None
+            else timedelta(hours=ttl_hours)
+        )
+        if self.ttl.total_seconds() <= 0:
+            raise ValueError("Historical cache TTL must be positive.")
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
     def get(

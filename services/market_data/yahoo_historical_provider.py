@@ -106,7 +106,7 @@ class YahooHistoricalDataProvider(HistoricalDataProvider):
                 period=period,
                 interval=interval,
                 group_by="ticker",
-                auto_adjust=False,
+                auto_adjust=True,
                 progress=False,
                 threads=True,
             )
@@ -161,4 +161,4 @@ class YahooHistoricalDataProvider(HistoricalDataProvider):
             yield items[index:index + size]
 
     def _to_yfinance_symbol(self, symbol: str) -> str:
-        return symbol.replace
+        return str(symbol).strip().upper()

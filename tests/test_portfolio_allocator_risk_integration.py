@@ -83,6 +83,34 @@ def _config(**overrides) -> LivePaperTradingConfig:
     return LivePaperTradingConfig(**values)
 
 
+def test_allocator_limits_new_positions_per_cycle() -> None:
+    session = TradingSession(
+        name="Per-cycle order burst gate",
+        portfolio=PaperPortfolio(cash=1_000.0),
+        peak_portfolio_value=1_000.0,
+    )
+
+    result = PortfolioAllocator().allocate(
+        session=session,
+        candidates=[
+            _candidate(f"TEST{index}", score=100.0 - index)
+            for index in range(5)
+        ],
+        config=_config(
+            max_new_positions_per_cycle=2,
+            max_position_value=100.0,
+            max_position_size_pct=0.10,
+            max_portfolio_risk_pct=0.50,
+        ),
+    )
+
+    assert result.approved_count == 2
+    assert result.rejected_count == 3
+    assert {
+        decision.reason for decision in result.rejected
+    } == {"Maximum new positions per cycle reached."}
+
+
 def test_allocator_blocks_risk_per_trade_limit() -> None:
     session = TradingSession(
         name="Trade risk gate",
@@ -472,3 +500,5 @@ def test_execution_rejection_is_journaled_after_approval() -> None:
     )
     assert result.total_allocation_rejections == 0
     assert result.total_execution_rejections == 1
+    assert result.total_scanned_symbols == 1
+    assert result.total_analyzed_symbols == 1

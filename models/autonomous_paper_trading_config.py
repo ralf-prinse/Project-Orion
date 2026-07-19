@@ -39,3 +39,9 @@ class AutonomousPaperTradingConfig:
             )
 
         object.__setattr__(self, "execution_mode", normalized)
+
+        if self.cycles < 1:
+            raise ValueError("cycles must be at least 1.")
+
+        if self.sleep_seconds < 0:
+            raise ValueError("sleep_seconds must not be negative.")

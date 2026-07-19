@@ -35,6 +35,16 @@ Werkend:
 
 De volledige autonome cyclus draait succesvol zonder crashes.
 
+Actuele IBKR Paper-schaalconfiguratie:
+
+- 100-symbolenvalidatie-universum: 50 VS, 25 Amsterdam, 25 Xetra;
+- officiële markturen bepalen welke subset per cyclus wordt verwerkt;
+- historische Yahoo-data: batches van 25, cache-TTL 15 minuten;
+- standaard één cyclus; begrensd configureerbaar tot 96 cycli;
+- standaard scaninterval 900 seconden bij meerdere cycli;
+- maximaal drie nieuwe posities per cyclus en twintig totaal;
+- live-moneyaccounts blijven technisch geblokkeerd; alleen `DU` Paper-accounts.
+
 ---
 
 # Laatste grote fixes

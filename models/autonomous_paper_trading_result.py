@@ -64,6 +64,20 @@ class AutonomousPaperTradingResult:
         )
 
     @property
+    def total_scanned_symbols(self) -> int:
+        return sum(
+            cycle.scan.scanned_symbols
+            for cycle in self.cycle_results
+        )
+
+    @property
+    def total_analyzed_symbols(self) -> int:
+        return sum(
+            cycle.scan.succeeded_symbols
+            for cycle in self.cycle_results
+        )
+
+    @property
     def total_allocation_rejections(self) -> int:
         return sum(
             cycle.allocation.rejected_count

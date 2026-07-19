@@ -22,6 +22,8 @@ class LivePaperTradingConfig:
 
     max_open_positions: int = 20
 
+    max_new_positions_per_cycle: int = 3
+
     min_confidence: float = 0.75
 
     max_position_value: float = 500.0
@@ -52,3 +54,9 @@ class LivePaperTradingConfig:
 
     enable_trailing_stop: bool = True
     enable_break_even: bool = True
+
+    def __post_init__(self) -> None:
+        if self.max_new_positions_per_cycle < 1:
+            raise ValueError(
+                "max_new_positions_per_cycle must be at least 1."
+            )

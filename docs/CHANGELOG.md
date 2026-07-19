@@ -1,5 +1,28 @@
 # CHANGELOG.md
 
+## 2026-07-19 - 100-symbol bounded IBKR Paper scanning
+
+De autonome IBKR Paper-runner gebruikt nu een gecureerd validatie-universum van
+100 liquide aandelen: 50 Verenigde Staten, 25 Euronext Amsterdam en 25 Xetra.
+Alleen symbolen waarvan de officiële beurs open is worden gedownload en door de
+pipeline verwerkt.
+
+De bestaande `YahooHistoricalDataProvider` is beoordeeld, gerepareerd en als
+canonieke batchlaag gekoppeld. Open symbolen worden in batches van 25 opgehaald
+en 15 minuten persistent gecachet. De positieprijs- en broker-syncpaden blijven
+ongewijzigd fail-closed werken.
+
+Een begrensde multi-cycle Paper-sessie kan expliciet worden ingesteld via
+`ORION_IBKR_CYCLES` (maximaal 96) en
+`ORION_IBKR_SCAN_INTERVAL_SECONDS` (60-3600; standaard 900). De runner wacht nu
+daadwerkelijk tussen cycli en vereist bij meerdere cycli een bevestiging met het
+exacte aantal. Per cyclus mogen maximaal drie nieuwe posities worden geopend;
+de bestaande cap van 20 en alle portefeuille-risicolimieten blijven gelden.
+
+Xetra-symbolen (`.DE`) worden voor IBKR SMART-routing vertaald naar een EUR
+contract met `IBIS` als primary exchange en na broker-sync weer eenduidig naar
+het Orion/Yahoo-symbool hersteld.
+
 ## 2026-07-17 - Explicit execution-rejection observability
 
 Een door risico goedgekeurde trade die later door de uitvoeringslaag wordt

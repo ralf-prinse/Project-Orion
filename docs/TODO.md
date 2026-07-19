@@ -2,7 +2,7 @@
 
 # Project Orion - TODO
 
-Laatste update: 17-07-2026
+Laatste update: 19-07-2026
 
 ---
 
@@ -132,6 +132,27 @@ Voorkom dubbele implementaties.
 ✅ Post-fill Synchronisatie
 
 ✅ Autonomous Runner stabiel
+
+✅ Eerste universumopschaling naar 100 EU/VS-aandelen
+
+✅ Historische Yahoo-batches van 25 met 15-minutencache
+
+✅ Begrensde multi-cycle runner met configureerbaar interval
+
+✅ Maximaal drie nieuwe posities per cyclus
+
+✅ Xetra-contract- en suffixsupport
+
+---
+
+# Volgende schaalstappen
+
+- Paper-observatie met 100 symbolen en orders uitgeschakeld;
+- ontbrekende/ambigue Yahoo- en IBKR-contracten uit het universum filteren;
+- liquiditeits-, spread- en volumevoorselectie toevoegen;
+- IBKR realtime marktdata voor open posities en topkandidaten koppelen;
+- pas na stabiele meetresultaten opschalen naar 250 symbolen;
+- broker-native beschermende stoporders toevoegen vóór live-moneyontwerp.
 
 ---
 

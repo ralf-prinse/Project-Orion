@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from datetime import datetime
 
 from models.autonomous_paper_trading_config import (
@@ -66,6 +67,7 @@ class AutonomousPaperTradingRunner:
         trading_session_sync_service=None,
         market_session_service: MarketSessionService | None = None,
         position_adoption_service=None,
+        sleep_fn=None,
     ):
         self.config = config or AutonomousPaperTradingConfig()
         self.scanner = scanner or LivePaperMarketScanner(
@@ -111,6 +113,7 @@ class AutonomousPaperTradingRunner:
         )
         self.market_session_service = market_session_service
         self.position_adoption_service = position_adoption_service
+        self.sleep_fn = sleep_fn or time.sleep
 
     def run(self):
         session_id = self._build_session_id()
@@ -182,6 +185,7 @@ class AutonomousPaperTradingRunner:
                     )
                     completed_cycles += 1
                     self._save_session(session)
+                    self._sleep_between_cycles(cycle_index)
                     continue
 
                 scan_result = self.scanner.run(
@@ -297,6 +301,7 @@ class AutonomousPaperTradingRunner:
 
                 completed_cycles += 1
                 self._save_session(session)
+                self._sleep_between_cycles(cycle_index)
 
             except Exception as exc:
                 failed_cycles += 1
@@ -324,6 +329,17 @@ class AutonomousPaperTradingRunner:
         )
 
         return result
+
+    def _sleep_between_cycles(self, cycle_index: int) -> None:
+        is_last_cycle = cycle_index >= self.config.cycles - 1
+        if is_last_cycle or self.config.sleep_seconds <= 0:
+            return
+
+        print(
+            "Next autonomous cycle in "
+            f"{self.config.sleep_seconds:g} seconds."
+        )
+        self.sleep_fn(self.config.sleep_seconds)
 
     def _is_exit_only(self) -> bool:
         return (
