@@ -10,13 +10,23 @@ from services.hypothesis_context_builder import (
 def build_performance() -> PerformanceAnalysisResult:
     return PerformanceAnalysisResult(
         total_trades=100,
-        win_rate=0.61,
-        average_profit=145.0,
-        average_loss=-82.0,
-        profit_factor=1.82,
-        expectancy=18.4,
-        max_drawdown=0.11,
-        total_return=0.27,
+        winning_trades=61,
+        losing_trades=39,
+        win_rate=61.0,
+        total_realized_profit_loss=1840.0,
+        total_unrealized_profit_loss=0.0,
+        average_realized_profit_loss=18.4,
+        average_return_percent=0.27,
+        best_trade_symbol="BEST",
+        best_trade_return_percent=8.0,
+        worst_trade_symbol="WORST",
+        worst_trade_return_percent=-4.0,
+        average_confidence=0.78,
+        average_expected_risk=0.11,
+        profitable_confidence_threshold=0.75,
+        dominant_regime="BULL",
+        dominant_volatility="LOW",
+        summary="Canonical hypothesis context fixture.",
     )
 
 
@@ -34,13 +44,13 @@ def test_build_context_from_performance():
     context = HypothesisContextBuilder().build(
         hypothesis=hypothesis,
         performance=build_performance(),
-        expected_value=0.55,
+        expected_value=55.0,
     )
 
     assert context.hypothesis is hypothesis
     assert context.sample_size == 100
-    assert context.metric_value == 0.61
-    assert context.expected_value == 0.55
+    assert context.metric_value == 61.0
+    assert context.expected_value == 55.0
 
 
 def test_unknown_metric_raises():

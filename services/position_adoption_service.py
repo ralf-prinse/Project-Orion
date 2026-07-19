@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from uuid import uuid4
 
 from models.live_paper_trading_config import LivePaperTradingConfig
 from models.position_adoption import (
@@ -55,6 +56,9 @@ class PositionAdoptionService:
             has_plan = symbol in session.risk_plans
 
             if has_state and has_plan:
+                state = session.position_states[symbol]
+                if not state.trade_id:
+                    state.trade_id = str(uuid4())
                 continue
 
             if has_state != has_plan:
@@ -71,6 +75,7 @@ class PositionAdoptionService:
             session.risk_plans[symbol] = risk_plan
             session.position_states[symbol] = PositionState(
                 symbol=symbol,
+                trade_id=str(uuid4()),
                 entry_price=position.entry_price,
                 current_stop_loss=risk_plan.stop_loss,
                 highest_price=max(

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+from dataclasses import replace
 from datetime import datetime
 
 from models.autonomous_paper_trading_config import (
@@ -44,6 +45,7 @@ from services.stores.repositories.trading_session_repository import (
 from services.trade_journal_builder import TradeJournalBuilder
 from services.trading_cycle import TradingCycle
 from services.market_session_service import MarketSessionService
+from services.completed_trade_record_builder import CompletedTradeRecordBuilder
 
 
 class AutonomousPaperTradingRunner:
@@ -67,6 +69,9 @@ class AutonomousPaperTradingRunner:
         trading_session_sync_service=None,
         market_session_service: MarketSessionService | None = None,
         position_adoption_service=None,
+        news_intelligence_service=None,
+        completed_trade_repository=None,
+        completed_trade_record_builder=None,
         sleep_fn=None,
     ):
         self.config = config or AutonomousPaperTradingConfig()
@@ -113,6 +118,13 @@ class AutonomousPaperTradingRunner:
         )
         self.market_session_service = market_session_service
         self.position_adoption_service = position_adoption_service
+        self.news_intelligence_service = news_intelligence_service
+        self.completed_trade_repository = completed_trade_repository
+        self.completed_trade_record_builder = (
+            completed_trade_record_builder
+            or CompletedTradeRecordBuilder()
+        )
+        self._news_assessments = {}
         self.sleep_fn = sleep_fn or time.sleep
 
     def run(self):
@@ -149,6 +161,8 @@ class AutonomousPaperTradingRunner:
                         cycle_number=cycle_number,
                         session_id=session_id,
                     )
+
+                self._refresh_open_position_news(session)
 
                 session = self._update_open_position_lifecycle(
                     session
@@ -191,6 +205,7 @@ class AutonomousPaperTradingRunner:
                 scan_result = self.scanner.run(
                     session=session
                 )
+                scan_result = self._enrich_scan_with_news(scan_result)
                 allocation_result = self.allocator.allocate(
                     session=session,
                     candidates=scan_result.candidates,
@@ -329,6 +344,75 @@ class AutonomousPaperTradingRunner:
         )
 
         return result
+
+    def _news_shadow_enabled(self) -> bool:
+        return (
+            self.news_intelligence_service is not None
+            and self.config.live_config.news_mode
+            == self.config.live_config.NEWS_SHADOW
+        )
+
+    def _refresh_open_position_news(self, session) -> None:
+        if not self._news_shadow_enabled():
+            self._news_assessments = {}
+            return
+        self._news_assessments = (
+            self.news_intelligence_service.assess_symbols(
+                tuple(session.portfolio.positions)
+            )
+        )
+
+    def _enrich_scan_with_news(self, scan_result):
+        if not self._news_shadow_enabled():
+            return scan_result
+
+        accepted = sorted(
+            (
+                candidate
+                for candidate in scan_result.candidates
+                if candidate.accepted
+            ),
+            key=lambda candidate: candidate.score,
+            reverse=True,
+        )
+        symbols = tuple(
+            candidate.symbol
+            for candidate in accepted[
+                : self.config.live_config.news_max_candidate_symbols_per_cycle
+            ]
+        )
+        assessments = self.news_intelligence_service.assess_symbols(symbols)
+        self._news_assessments.update(assessments)
+        return replace(
+            scan_result,
+            candidates=[
+                replace(
+                    candidate,
+                    news_assessment=assessments.get(candidate.symbol),
+                )
+                for candidate in scan_result.candidates
+            ],
+        )
+
+    def _news_journal_fields(self, symbol: str) -> dict:
+        assessment = self._news_assessments.get(
+            str(symbol).strip().upper()
+        )
+        if assessment is None:
+            return {}
+        return {
+            "news_mode": assessment.mode,
+            "news_status": assessment.status,
+            "news_risk_level": assessment.risk_level,
+            "news_sentiment_score": assessment.sentiment_score,
+            "news_blocking_recommended": (
+                assessment.blocking_recommended
+            ),
+            "news_event_ids": assessment.event_ids,
+            "news_headlines": assessment.headlines,
+            "news_reasons": assessment.reasons,
+            "news_provider": assessment.provider,
+        }
 
     def _sleep_between_cycles(self, cycle_index: int) -> None:
         is_last_cycle = cycle_index >= self.config.cycles - 1
@@ -672,6 +756,8 @@ class AutonomousPaperTradingRunner:
             execution=execution,
             cycle_number=cycle_number,
             session_id=session_id,
+            trade_id=self._trade_id_for(session, position.symbol),
+            fully_closed=expected_remaining_quantity == 0,
         )
 
         return synchronized_session
@@ -720,6 +806,7 @@ class AutonomousPaperTradingRunner:
             estimated_net_profit_loss=(
                 decision.estimated_net_profit_loss
             ),
+            trade_id=self._trade_id_for(session, position.symbol),
         )
 
         closed_symbol = (
@@ -777,6 +864,10 @@ class AutonomousPaperTradingRunner:
             entry
         )
 
+        state = session.position_states.get(decision.symbol)
+        if state is not None:
+            entry = replace(entry, trade_id=state.trade_id)
+
     def _append_adoption_journal_entries(
         self,
         *,
@@ -794,6 +885,7 @@ class AutonomousPaperTradingRunner:
 
             position = session.portfolio.positions[record.symbol]
             risk_plan = session.risk_plans[record.symbol]
+            state = session.position_states[record.symbol]
             self.trade_journal_repository.append(
                 TradeJournalEntry(
                     timestamp=datetime.now(),
@@ -817,6 +909,8 @@ class AutonomousPaperTradingRunner:
                     recommendation_reason=record.reason,
                     cycle_number=cycle_number,
                     session_id=session_id,
+                    trade_id=state.trade_id,
+                    strategy_name=record.strategy,
                 )
             )
 
@@ -828,6 +922,8 @@ class AutonomousPaperTradingRunner:
         execution,
         cycle_number,
         session_id,
+        trade_id,
+        fully_closed,
     ):
         """
         Journal a confirmed broker SELL using actual fill information.
@@ -885,6 +981,7 @@ class AutonomousPaperTradingRunner:
             recommendation_reason=decision.reason,
             cycle_number=cycle_number,
             session_id=session_id,
+            trade_id=trade_id,
             estimated_trading_costs=(
                 decision.estimated_round_trip_costs
             ),
@@ -892,11 +989,14 @@ class AutonomousPaperTradingRunner:
                 decision.estimated_net_profit_loss
             ),
             profit_calculation_currency="EUR",
+            **self._news_journal_fields(position.symbol),
         )
 
         self.trade_journal_repository.append(
             entry
         )
+        if fully_closed:
+            self._append_completed_trade(entry)
 
     def _append_exit_journal_entry(
         self,
@@ -907,6 +1007,7 @@ class AutonomousPaperTradingRunner:
         session_id,
         estimated_trading_costs=0.0,
         estimated_net_profit_loss=0.0,
+        trade_id="",
     ):
         if self.trade_journal_repository is None:
             return
@@ -940,6 +1041,7 @@ class AutonomousPaperTradingRunner:
             recommendation_reason=reason,
             cycle_number=cycle_number,
             session_id=session_id,
+            trade_id=trade_id,
             estimated_trading_costs=(
                 estimated_trading_costs
             ),
@@ -947,11 +1049,45 @@ class AutonomousPaperTradingRunner:
                 estimated_net_profit_loss
             ),
             profit_calculation_currency="EUR",
+            **self._news_journal_fields(position.symbol),
         )
 
         self.trade_journal_repository.append(
             entry
         )
+        self._append_completed_trade(entry)
+
+    def _trade_id_for(self, session, symbol: str) -> str:
+        state = session.position_states.get(symbol)
+        return state.trade_id if state is not None else ""
+
+    def _append_completed_trade(self, exit_entry) -> None:
+        if (
+            self.completed_trade_repository is None
+            or self.trade_journal_repository is None
+            or not exit_entry.trade_id
+        ):
+            return
+
+        entry = next(
+            (
+                item
+                for item in reversed(
+                    self.trade_journal_repository.load_all()
+                )
+                if item.trade_id == exit_entry.trade_id
+                and item.action in {"OPEN_POSITION", "ADOPT_POSITION"}
+            ),
+            None,
+        )
+        if entry is None:
+            return
+
+        record = self.completed_trade_record_builder.build(
+            entry=entry,
+            exit=exit_entry,
+        )
+        self.completed_trade_repository.append_unique(record)
 
     def _load_or_create_session(self):
         if (

@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from models.hypothesis_evaluation_report import HypothesisEvaluationReport
 from models.performance_analysis_result import PerformanceAnalysisResult
 from models.strategy_recommendation import StrategyRecommendationResult
-from models.strategy_variant_proposal import StrategyVariantProposal
+from models.strategy_variant import StrategyVariantProposal
 
 
 @dataclass(frozen=True)

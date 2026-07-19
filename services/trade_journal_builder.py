@@ -176,6 +176,11 @@ class TradeJournalBuilder:
             "risk_result",
             None,
         )
+        news_assessment = getattr(
+            candidate,
+            "news_assessment",
+            None,
+        )
 
         return TradeJournalEntry(
             timestamp=datetime.now(),
@@ -240,5 +245,50 @@ class TradeJournalBuilder:
                 tuple(risk_result.warnings)
                 if risk_result is not None
                 else ()
+            ),
+            news_mode=(
+                news_assessment.mode
+                if news_assessment is not None
+                else "DISABLED"
+            ),
+            news_status=(
+                news_assessment.status
+                if news_assessment is not None
+                else "NOT_EVALUATED"
+            ),
+            news_risk_level=(
+                news_assessment.risk_level
+                if news_assessment is not None
+                else "UNKNOWN"
+            ),
+            news_sentiment_score=(
+                news_assessment.sentiment_score
+                if news_assessment is not None
+                else 0.0
+            ),
+            news_blocking_recommended=(
+                news_assessment.blocking_recommended
+                if news_assessment is not None
+                else False
+            ),
+            news_event_ids=(
+                news_assessment.event_ids
+                if news_assessment is not None
+                else ()
+            ),
+            news_headlines=(
+                news_assessment.headlines
+                if news_assessment is not None
+                else ()
+            ),
+            news_reasons=(
+                news_assessment.reasons
+                if news_assessment is not None
+                else ()
+            ),
+            news_provider=(
+                news_assessment.provider
+                if news_assessment is not None
+                else "NONE"
             ),
         )

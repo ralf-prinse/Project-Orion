@@ -34,6 +34,22 @@ De eerste schaalfase voor autonoom Paper-traden is operationeel:
 - maximaal drie nieuwe posities per cyclus;
 - Xetra BUY-, suffix- en broker-syncsupport.
 
+Nieuwe observatie-infrastructuur:
+
+- eigen Qt-GUI verwijderd; TWS plus CLI-output vormen de interface;
+- IBKR-headlines beschikbaar in fail-open `SHADOW`-modus;
+- nieuws beïnvloedt nog geen handelsbesluit of order;
+- gesloten trades koppelen entry- en exitredenen via `trade_id`;
+- learning/AI-services mogen runtimeparameters nog niet aanpassen.
+
+Architectuuropschoning:
+
+- één canonieke actieve decisionnamespace: `services/trading_decision`;
+- oude directe decisionengine en dubbele `engines`/scannerketen verwijderd;
+- research/explainability blijft geïsoleerd in `services/decisions`;
+- lege placeholders en tests zonder assertions verwijderd;
+- volledige testsuite: 555 geslaagd, 0 mislukt.
+
 ---
 
 # Werkende onderdelen
@@ -148,6 +164,11 @@ Yahoo blijft in deze fase de analysebron. Voor handel met echt geld moet actuele
 IBKR-marktdata voor posities en topkandidaten nog de execution-grade bron worden.
 De runtime accepteert bewust uitsluitend IBKR Paper-accounts met `DU`-prefix.
 
+IBKR-nieuwsdekking hangt af van API-beschikbare providers en account-
+abonnementen. `UNAVAILABLE` is daarom een geldige observatiestatus. De eerste
+classifier is deterministisch en conservatief; hij is nog geen execution-grade
+nieuws-gate.
+
 ---
 
 # Eerste Repository Audit
@@ -167,7 +188,7 @@ Onder andere:
 - RiskPlan
 - Position Monitoring
 - Performance Analyse
-- Dashboard
+- CLI-dashboardservice (desktop-GUI verwijderd)
 - Trade Journal
 - Portfolio Management
 

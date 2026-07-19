@@ -31,6 +31,9 @@ No trade may exist without:
 
 Artificial Intelligence never participates in trade approval.
 
+News intelligence currently runs in `SHADOW` mode. It records context and a
+hypothetical risk indication, but cannot approve, reject, size or exit a trade.
+
 ---
 
 # Trading Pipeline
@@ -186,6 +189,14 @@ Trade Journal
 - opened positions;
 - closed positions.
 
+Completed Trade Store
+
+- one record per fully closed `trade_id`;
+- entry and exit rationale;
+- news context at entry and exit;
+- gross P&L, estimated costs and estimated net P&L;
+- explicit missing original rationale for adopted positions.
+
 Decision Journal
 
 - accepted allocations;
@@ -201,17 +212,16 @@ Runtime Events
 
 # Current Broker
 
-Current execution backend:
+Current autonomous execution backend:
 
 ```text
-PaperBroker
+IBKR Paper (`DU` accounts only)
 ```
 
-Interactive Brokers Paper integration is under development.
-
-The strategy itself must remain unchanged.
-
-Only the execution backend will be replaced.
+Live-money IBKR accounts remain technically blocked. The strategy and all
+learning experiments must remain isolated from live parameter changes until
+Paper evidence, broker-native protective orders and human approval controls are
+in place.
 
 ---
 

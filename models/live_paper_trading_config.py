@@ -19,6 +19,8 @@ class LivePaperTradingConfig:
     )
     FIXED_PRICING: ClassVar[str] = "FIXED"
     TIERED_PRICING: ClassVar[str] = "TIERED"
+    NEWS_DISABLED: ClassVar[str] = "DISABLED"
+    NEWS_SHADOW: ClassVar[str] = "SHADOW"
 
     watchlist_path: Path = Path("data/universes/swing.csv")
 
@@ -78,6 +80,11 @@ class LivePaperTradingConfig:
     include_auto_fx_conversion_buffer: bool = True
     auto_fx_conversion_pct_per_side: float = 0.0003
 
+    news_mode: str = NEWS_DISABLED
+    news_lookback_hours: int = 24
+    news_max_articles_per_symbol: int = 10
+    news_max_candidate_symbols_per_cycle: int = 20
+
     def __post_init__(self) -> None:
         normalized_strategy = self.exit_strategy.strip().upper()
         if normalized_strategy not in {
@@ -108,9 +115,30 @@ class LivePaperTradingConfig:
             normalized_pricing,
         )
 
+        normalized_news_mode = self.news_mode.strip().upper()
+        if normalized_news_mode not in {
+            self.NEWS_DISABLED,
+            self.NEWS_SHADOW,
+        }:
+            raise ValueError(
+                "news_mode must be DISABLED or SHADOW."
+            )
+        object.__setattr__(self, "news_mode", normalized_news_mode)
+
         if self.max_new_positions_per_cycle < 1:
             raise ValueError(
                 "max_new_positions_per_cycle must be at least 1."
+            )
+
+        if self.news_lookback_hours < 1:
+            raise ValueError("news_lookback_hours must be at least 1.")
+        if self.news_max_articles_per_symbol < 1:
+            raise ValueError(
+                "news_max_articles_per_symbol must be at least 1."
+            )
+        if self.news_max_candidate_symbols_per_cycle < 1:
+            raise ValueError(
+                "news_max_candidate_symbols_per_cycle must be at least 1."
             )
 
         positive_amounts = {

@@ -1,5 +1,4 @@
-from services.decision.adaptive_decision_engine import AdaptiveDecisionEngine
-from services.decision.decision_models import MarketSignal
+from services.trading_decision import AdaptiveDecisionEngine, MarketSignal
 
 
 def run():

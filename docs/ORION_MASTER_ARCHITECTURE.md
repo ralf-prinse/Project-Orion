@@ -30,6 +30,9 @@ Project Orion bestaat uit de volgende hoofdlagen:
 Market Data
       │
       ▼
+News Intelligence (SHADOW / audit only)
+      │
+      ▼
 Indicators
       │
       ▼
@@ -85,6 +88,11 @@ lopen.
 - Decision Engine
 - Position Allocator
 
+`services.orchestration.TradingPipeline` gebruikt één actieve decisionlaag:
+`services.trading_decision`. De afzonderlijke `services/decisions`-package is
+uitsluitend research/explainability en heeft geen importpad naar de autonome
+IBKR-runtime. De oude root-`engines` en `ScannerService` bestaan niet meer.
+
 ---
 
 ## Risk
@@ -121,10 +129,21 @@ lopen.
 
 - Position Monitoring
 - Trade Journal
-- Dashboard
+- CLI-presentatie en TWS
 - Performance Analytics
 - Logging
 - Reporting
+
+De Orion-desktop-GUI is verwijderd. Nieuws gebruikt een providerinterface; de
+eerste adapter leest IBKR-headlines met een afzonderlijk client-ID.
+Normalisatie, deduplicatie, beoordeling en opslag zijn broker-onafhankelijk.
+`SHADOW` is een harde grens: nieuws wordt alleen aan kandidaat- en journaldata
+toegevoegd en verandert geen handelsbesluit.
+
+Na een volledig gesloten positie koppelt `trade_id` de entry- of
+adoptiejournalregel aan de exit. Het `CompletedTradeRecord` is de canonieke
+toekomstige input voor offline performance- en learninganalyse. Learning heeft
+geen schrijfpad naar live configuratie of orders.
 
 ---
 

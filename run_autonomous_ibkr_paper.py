@@ -22,6 +22,15 @@ from services.stores.json_trading_session_repository import (
 )
 from models.position_adoption import PositionAdoptionConfig
 from services.position_adoption_service import PositionAdoptionService
+from services.stores.jsonl_news_event_repository import (
+    JsonlNewsEventRepository,
+)
+from services.stores.jsonl_news_assessment_repository import (
+    JsonlNewsAssessmentRepository,
+)
+from services.stores.jsonl_completed_trade_repository import (
+    JsonlCompletedTradeRepository,
+)
 
 
 ACCOUNT_ENVIRONMENT_VARIABLE = "ORION_IBKR_PAPER_ACCOUNT_ID"
@@ -31,6 +40,7 @@ CYCLES_ENVIRONMENT_VARIABLE = "ORION_IBKR_CYCLES"
 SCAN_INTERVAL_ENVIRONMENT_VARIABLE = "ORION_IBKR_SCAN_INTERVAL_SECONDS"
 EXIT_STRATEGY_ENVIRONMENT_VARIABLE = "ORION_IBKR_EXIT_STRATEGY"
 PRICING_PLAN_ENVIRONMENT_VARIABLE = "ORION_IBKR_PRICING_PLAN"
+NEWS_MODE_ENVIRONMENT_VARIABLE = "ORION_IBKR_NEWS_MODE"
 
 DEFAULT_CYCLES = 1
 DEFAULT_SCAN_INTERVAL_SECONDS = 900
@@ -169,6 +179,22 @@ def read_pricing_plan() -> str:
     return value
 
 
+def read_news_mode() -> str:
+    value = os.getenv(
+        NEWS_MODE_ENVIRONMENT_VARIABLE,
+        LivePaperTradingConfig.NEWS_SHADOW,
+    ).strip().upper()
+    if value not in {
+        LivePaperTradingConfig.NEWS_DISABLED,
+        LivePaperTradingConfig.NEWS_SHADOW,
+    }:
+        raise RuntimeError(
+            f"{NEWS_MODE_ENVIRONMENT_VARIABLE} must be "
+            "DISABLED or SHADOW."
+        )
+    return value
+
+
 def build_config(
     execution_mode: str = AutonomousPaperTradingConfig.EXIT_ONLY,
     cycles: int = DEFAULT_CYCLES,
@@ -177,6 +203,7 @@ def build_config(
         LivePaperTradingConfig.COST_AWARE_SMALL_PROFIT
     ),
     pricing_plan: str = LivePaperTradingConfig.FIXED_PRICING,
+    news_mode: str = LivePaperTradingConfig.NEWS_SHADOW,
 ) -> AutonomousPaperTradingConfig:
     live_config = LivePaperTradingConfig(
         watchlist_path="data/universes/ibkr_eu_us_validation.csv",
@@ -188,6 +215,7 @@ def build_config(
         max_position_size_pct=0.10,
         exit_strategy=exit_strategy,
         ibkr_pricing_plan=pricing_plan,
+        news_mode=news_mode,
     )
 
     return AutonomousPaperTradingConfig(
@@ -237,6 +265,10 @@ def print_runtime_mode(
     print(
         "IBKR pricing:      "
         f"{config.live_config.ibkr_pricing_plan}"
+    )
+    print(
+        "News intelligence: "
+        f"{config.live_config.news_mode} (never changes orders)"
     )
     if (
         config.live_config.exit_strategy
@@ -359,12 +391,14 @@ def main() -> None:
     scan_interval_seconds = read_scan_interval_seconds()
     exit_strategy = read_exit_strategy()
     pricing_plan = read_pricing_plan()
+    news_mode = read_news_mode()
     config = build_config(
         execution_mode=execution_mode,
         cycles=cycles,
         scan_interval_seconds=scan_interval_seconds,
         exit_strategy=exit_strategy,
         pricing_plan=pricing_plan,
+        news_mode=news_mode,
     )
 
     print_runtime_mode(
@@ -401,6 +435,15 @@ def main() -> None:
                     "ASM.AS",
                 ),
             )
+        ),
+        news_event_repository=JsonlNewsEventRepository(
+            path="data/ibkr_news_events.jsonl",
+        ),
+        news_assessment_repository=JsonlNewsAssessmentRepository(
+            path="data/ibkr_news_assessments.jsonl",
+        ),
+        completed_trade_repository=JsonlCompletedTradeRepository(
+            path="data/ibkr_completed_trades.jsonl",
         ),
         allow_order_submission=allow_order_submission,
     )

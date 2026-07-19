@@ -39,6 +39,7 @@ $env:ORION_IBKR_CYCLES="1"
 $env:ORION_IBKR_SCAN_INTERVAL_SECONDS="900"
 $env:ORION_IBKR_EXIT_STRATEGY="COST_AWARE_SMALL_PROFIT"
 $env:ORION_IBKR_PRICING_PLAN="FIXED"
+$env:ORION_IBKR_NEWS_MODE="SHADOW"
 
 .\.venv\Scripts\python.exe run_autonomous_ibkr_paper.py
 ```
@@ -96,3 +97,28 @@ De netto-P&L is in deze fase een kostenraming en geen definitief IBKR-
 commission report. Gebruik de strategie daarom eerst met orders uitgeschakeld
 en daarna uitsluitend op het `DU` Paper-account. Activeer haar niet op een
 live-moneyaccount.
+
+## Nieuws-shadowmodus
+
+`ORION_IBKR_NEWS_MODE="SHADOW"` vraagt via een afzonderlijke read-only TWS-
+client recente headlines op voor open posities en maximaal twintig van de
+hoogst gerangschikte kandidaten. Beschikbaarheid vereist minstens één door de
+IBKR API geretourneerde nieuwsprovider; abonnementen en dekking verschillen per
+account. Controleer na een observatiecyclus:
+
+- `data/ibkr_news_events.jsonl`: unieke genormaliseerde gebeurtenissen;
+- `data/ibkr_news_assessments.jsonl`: beoordeling per symbool en cyclus;
+- `data/ibkr_autonomous_trade_journal.jsonl`: nieuwscontext bij entry/exit;
+- `data/ibkr_completed_trades.jsonl`: gekoppelde volledig gesloten trades.
+
+`blocking_recommended=true` is alleen een meetwaarde. In SHADOW-modus blijft de
+oorspronkelijke technische/riskbeslissing exact ongewijzigd. Een lege provider-
+lijst, timeout of ontbrekend abonnement wordt als `UNAVAILABLE` gejournaliseerd
+en stopt BUY/SELL niet. Uitschakelen kan expliciet met:
+
+```powershell
+$env:ORION_IBKR_NEWS_MODE="DISABLED"
+```
+
+Gebruik `CompletedTradeRecord` voorlopig uitsluitend voor rapportage en offline
+onderzoek. Orion mag nog geen strategie- of risicolimieten zelfstandig wijzigen.

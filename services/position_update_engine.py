@@ -61,6 +61,7 @@ class PositionUpdateEngine:
 
         updated_state = PositionState(
             symbol=state.symbol,
+            trade_id=state.trade_id,
             entry_price=state.entry_price,
             current_stop_loss=management.stop_loss,
             highest_price=max(

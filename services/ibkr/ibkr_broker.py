@@ -10,6 +10,9 @@ from ibapi.order import Order as IbkrOrder
 
 from models.execution_result import ExecutionResult
 from models.order import Order
+from services.ibkr.ibkr_stock_contract_factory import (
+    IbkrStockContractFactory,
+)
 
 
 class IbkrBrokerTransport(Protocol):
@@ -70,6 +73,7 @@ class IbkrBroker:
         timeout_seconds: float = 30.0,
         exchange: str = "SMART",
         currency: str = "USD",
+        contract_factory: IbkrStockContractFactory | None = None,
     ) -> None:
         if timeout_seconds <= 0:
             raise ValueError(
@@ -86,6 +90,9 @@ class IbkrBroker:
         self.timeout_seconds = float(timeout_seconds)
         self.exchange = exchange.strip().upper()
         self.currency = currency.strip().upper()
+        self.contract_factory = (
+            contract_factory or IbkrStockContractFactory()
+        )
 
     def execute(self, order: Order) -> ExecutionResult:
         validation_error = self._validate_order(order)
@@ -167,24 +174,10 @@ class IbkrBroker:
         return None
 
     def _build_contract(self, order: Order) -> Contract:
-        raw_symbol = order.symbol.strip().upper()
-
-        contract = Contract()
-        contract.secType = "STK"
+        contract = self.contract_factory.build(order.symbol)
         contract.exchange = self.exchange
-
-        if raw_symbol.endswith(".AS"):
-            contract.symbol = raw_symbol.removesuffix(".AS")
-            contract.currency = "EUR"
-            contract.primaryExchange = "AEB"
-        elif raw_symbol.endswith(".DE"):
-            contract.symbol = raw_symbol.removesuffix(".DE")
-            contract.currency = "EUR"
-            contract.primaryExchange = "IBIS"
-        else:
-            contract.symbol = raw_symbol
+        if not order.symbol.strip().upper().endswith((".AS", ".DE")):
             contract.currency = self.currency
-
         return contract
 
     def _build_ibkr_order(self, order: Order) -> IbkrOrder:

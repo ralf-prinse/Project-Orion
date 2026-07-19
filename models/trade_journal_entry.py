@@ -51,6 +51,10 @@ class TradeJournalEntry:
 
     session_id: str
 
+    trade_id: str = ""
+
+    strategy_name: str = "ORION_CANONICAL"
+
     risk_allowed: bool | None = None
 
     proposed_risk_ratio: float | None = None
@@ -72,6 +76,16 @@ class TradeJournalEntry:
     estimated_net_profit_loss: float = 0.0
 
     profit_calculation_currency: str = "EUR"
+
+    news_mode: str = "DISABLED"
+    news_status: str = "NOT_EVALUATED"
+    news_risk_level: str = "UNKNOWN"
+    news_sentiment_score: float = 0.0
+    news_blocking_recommended: bool = False
+    news_event_ids: tuple[str, ...] = ()
+    news_headlines: tuple[str, ...] = ()
+    news_reasons: tuple[str, ...] = ()
+    news_provider: str = "NONE"
 
     @property
     def total_return_percent(self) -> float:

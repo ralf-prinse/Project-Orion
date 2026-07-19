@@ -10,13 +10,23 @@ from services.hypothesis_evaluation_service import (
 def build_performance() -> PerformanceAnalysisResult:
     return PerformanceAnalysisResult(
         total_trades=100,
-        win_rate=0.61,
-        average_profit=145.0,
-        average_loss=-82.0,
-        profit_factor=1.82,
-        expectancy=18.4,
-        max_drawdown=0.11,
-        total_return=0.27,
+        winning_trades=61,
+        losing_trades=39,
+        win_rate=61.0,
+        total_realized_profit_loss=1840.0,
+        total_unrealized_profit_loss=0.0,
+        average_realized_profit_loss=18.4,
+        average_return_percent=0.27,
+        best_trade_symbol="BEST",
+        best_trade_return_percent=8.0,
+        worst_trade_symbol="WORST",
+        worst_trade_return_percent=-4.0,
+        average_confidence=0.78,
+        average_expected_risk=0.11,
+        profitable_confidence_threshold=0.75,
+        dominant_regime="BULL",
+        dominant_volatility="LOW",
+        summary="Canonical hypothesis evaluation fixture.",
     )
 
 
@@ -32,10 +42,10 @@ def build_hypotheses() -> list[StrategyHypothesis]:
             created_at=datetime(2026, 7, 7),
         ),
         StrategyHypothesis(
-            hypothesis_id="DRAWDOWN",
-            title="Reduce drawdown",
-            description="Drawdown should decrease.",
-            metric_name="max_drawdown",
+            hypothesis_id="EXPECTED_RISK",
+            title="Reduce expected risk",
+            description="Average expected risk should decrease.",
+            metric_name="average_expected_risk",
             expected_direction="DECREASE",
             minimum_sample_size=50,
             created_at=datetime(2026, 7, 7),
@@ -50,8 +60,8 @@ def test_evaluate_multiple_hypotheses():
         hypotheses=build_hypotheses(),
         performance=build_performance(),
         expected_values={
-            "WIN_RATE": 0.55,
-            "DRAWDOWN": 0.15,
+            "WIN_RATE": 55.0,
+            "EXPECTED_RISK": 0.15,
         },
     )
 
@@ -72,10 +82,10 @@ def test_missing_expected_value():
             hypotheses=build_hypotheses(),
             performance=build_performance(),
             expected_values={
-                "WIN_RATE": 0.55,
+                "WIN_RATE": 55.0,
             },
         )
     except ValueError as exc:
-        assert "DRAWDOWN" in str(exc)
+        assert "EXPECTED_RISK" in str(exc)
     else:
         raise AssertionError("Expected ValueError")

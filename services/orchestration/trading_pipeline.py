@@ -14,9 +14,11 @@ from services.intelligence.market_intelligence_engine import (
 from services.intelligence.ai_context_builder import AIContextBuilder
 from services.intelligence.ai_explainer import AIExplainer
 from services.risk.risk_plan_validator import RiskPlanValidator
-from services.decision.adaptive_decision_engine import AdaptiveDecisionEngine
-from services.decision.position_sizing import PositionSizer
-from services.decision.decision_models import (
+from services.trading_decision.adaptive_decision_engine import (
+    AdaptiveDecisionEngine,
+)
+from services.trading_decision.position_sizing import PositionSizer
+from services.trading_decision.decision_models import (
     MarketSignal,
     PositionContext,
     DecisionInput,
