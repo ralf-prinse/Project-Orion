@@ -25,3 +25,6 @@ data/validation_*.json
 data/validation_*.jsonl
 data/ibkr_autonomous_trading_session.json
 data/ibkr_autonomous_paper_portfolio.json
+data/ibkr_news_events.jsonl
+data/ibkr_news_assessments.jsonl
+data/ibkr_completed_trades.jsonl

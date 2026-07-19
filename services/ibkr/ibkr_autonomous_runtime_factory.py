@@ -31,6 +31,7 @@ from services.portfolio_allocator import PortfolioAllocator
 from services.stores.repositories.paper_portfolio_repository import (
     PaperPortfolioRepository,
 )
+from models.live_paper_trading_config import LivePaperTradingConfig
 from services.ibkr.ibkr_portfolio_mapper import IbkrPortfolioMapper
 from services.stores.repositories.trading_session_repository import (
     TradingSessionRepository,
@@ -39,6 +40,8 @@ from services.market_data.historical_cache import HistoricalCache
 from services.market_data.yahoo_historical_provider import (
     YahooHistoricalDataProvider,
 )
+from services.ibkr.ibkr_news_provider import IbkrNewsProvider
+from services.news.news_intelligence_service import NewsIntelligenceService
 
 
 @dataclass(frozen=True)
@@ -62,6 +65,8 @@ class IbkrAutonomousRuntime:
     trading_session_sync_service: IbkrTradingSessionSyncService
     price_provider: YahooProvider
     historical_provider: YahooHistoricalDataProvider
+    news_provider: object | None
+    news_intelligence_service: NewsIntelligenceService | None
 
 
 class IbkrAutonomousRuntimeFactory:
@@ -79,6 +84,7 @@ class IbkrAutonomousRuntimeFactory:
     PAPER_PORT = 7497
     ACCOUNT_CLIENT_ID = 110
     ORDER_CLIENT_ID = 120
+    NEWS_CLIENT_ID = 130
 
     def build(
         self,
@@ -92,6 +98,10 @@ class IbkrAutonomousRuntimeFactory:
         portfolio_repository: PaperPortfolioRepository | None = None,
         trading_session_repository: TradingSessionRepository | None = None,
         position_adoption_service=None,
+        news_event_repository=None,
+        news_assessment_repository=None,
+        news_provider=None,
+        completed_trade_repository=None,
         allow_order_submission: bool = False,
         host: str = DEFAULT_HOST,
         port: int = PAPER_PORT,
@@ -123,6 +133,33 @@ class IbkrAutonomousRuntimeFactory:
             cache=HistoricalCache(ttl_minutes=15),
             batch_size=25,
         )
+        resolved_news_provider = None
+        news_intelligence_service = None
+        if (
+            runtime_config.live_config.news_mode
+            == LivePaperTradingConfig.NEWS_SHADOW
+        ):
+            resolved_news_provider = (
+                news_provider
+                or IbkrNewsProvider(
+                    host=host,
+                    port=port,
+                    client_id=self.NEWS_CLIENT_ID,
+                )
+            )
+            news_intelligence_service = NewsIntelligenceService(
+                provider=resolved_news_provider,
+                event_repository=news_event_repository,
+                assessment_repository=news_assessment_repository,
+                lookback_hours=(
+                    runtime_config.live_config.news_lookback_hours
+                ),
+                max_articles_per_symbol=(
+                    runtime_config
+                    .live_config
+                    .news_max_articles_per_symbol
+                ),
+            )
         scanner = LivePaperMarketScanner(
             config=runtime_config.live_config,
             provider=price_provider,
@@ -203,6 +240,8 @@ class IbkrAutonomousRuntimeFactory:
             ),
             market_session_service=market_session_service,
             position_adoption_service=position_adoption_service,
+            news_intelligence_service=news_intelligence_service,
+            completed_trade_repository=completed_trade_repository,
         )
 
         return IbkrAutonomousRuntime(
@@ -221,4 +260,6 @@ class IbkrAutonomousRuntimeFactory:
             ),
             price_provider=price_provider,
             historical_provider=historical_provider,
+            news_provider=resolved_news_provider,
+            news_intelligence_service=news_intelligence_service,
         )

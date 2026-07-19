@@ -27,6 +27,8 @@ class PositionState:
 
     current_price: float
 
+    trade_id: str = ""
+
     break_even_active: bool = False
 
     trailing_stop_active: bool = False

@@ -1,5 +1,25 @@
 # CHANGELOG.md
 
+## 2026-07-19 - Headless runtime, IBKR news shadow mode and trade memory
+
+De ongebruikte Qt-desktop-GUI, bijbehorende tests en `PySide6`-dependency zijn
+verwijderd. De tekstuele dashboardpresenter blijft beschikbaar onder de
+neutrale `presentation`-laag. TWS blijft de operationele broker-GUI.
+
+Een provider-onafhankelijke nieuwslaag kan via de IBKR API recente headlines
+voor open posities en de hoogst gerangschikte BUY-kandidaten ophalen,
+normaliseren, dedupliceren en persistent beoordelen. De eerste modus is alleen
+`SHADOW`: nieuwscontext en een hypothetische blokkeerindicatie worden
+gejournaliseerd, maar veranderen geen BUY, SELL, quantity, RiskPlan of order.
+Providerfouten leveren `UNAVAILABLE` op en onderbreken de handelsketen niet.
+
+Iedere geopende of geadopteerde positie krijgt een persistente `trade_id`. Na
+een volledig bevestigde exit wordt één idempotent `CompletedTradeRecord`
+opgeslagen met entryreden, exitreden, regime, confidence, nieuwscontext,
+holdingduur, bruto P&L, geraamde kosten en netto-P&L. Bij adoptie blijft
+expliciet dat de oorspronkelijke BUY-redenering onbekend is. Dit bereidt latere
+offline learning voor; learningservices wijzigen nog geen handelsparameters.
+
 ## 2026-07-19 - Cost-aware small-profit Paper exits
 
 De autonome IBKR Paper-runner kan beheerde posities nu sluiten op een geschatte

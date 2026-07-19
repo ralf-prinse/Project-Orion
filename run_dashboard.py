@@ -8,7 +8,7 @@ from services.stores.json_paper_portfolio_repository import (
 from services.stores.jsonl_trade_journal_repository import (
     JsonlTradeJournalRepository,
 )
-from ui.foundation.trading_dashboard_cli_presenter import (
+from presentation.trading_dashboard_cli_presenter import (
     TradingDashboardCliPresenter,
 )
 

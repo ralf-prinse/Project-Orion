@@ -4,7 +4,7 @@ from services.dashboard_service import (
     DashboardSnapshot,
 )
 from models.closed_trade_statistics import ClosedTradeStatistics
-from ui.foundation.trading_dashboard_cli_presenter import (
+from presentation.trading_dashboard_cli_presenter import (
     TradingDashboardCliPresenter,
 )
 

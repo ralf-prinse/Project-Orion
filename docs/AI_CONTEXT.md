@@ -17,6 +17,11 @@ Architectuur is modulair en production-ready. Nieuwe functionaliteit wordt uitsl
 
 Project Orion heeft nu een volledig werkende end-to-end IBKR Paper Trading pipeline.
 
+De runtime is headless: de eigen Qt-GUI is verwijderd en TWS is de operationele
+brokerinterface. Nieuwsintelligentie is gekoppeld als IBKR `SHADOW`-
+observatielaag en heeft geen invloed op orders. Gesloten trades worden als één
+record bewaard voor latere offline analyse; autonoom self-learning staat uit.
+
 Werkend:
 
 - Universe loading
@@ -146,7 +151,7 @@ Onder andere gevonden:
 - Exit Engine
 - RiskPlan
 - Position Monitoring
-- Dashboard
+- CLI-dashboardpresentatie
 - Performance analyzers
 - Trade Journal
 - Portfolio Management

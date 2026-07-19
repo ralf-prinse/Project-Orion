@@ -92,7 +92,7 @@ Controleer:
 
 Inventariseer bestaande modules voor:
 
-- Dashboard
+- CLI-dashboard en headless rapportage
 - Performance
 - Trade Journal
 - Logging
@@ -143,6 +143,14 @@ Voorkom dubbele implementaties.
 
 ✅ Xetra-contract- en suffixsupport
 
+✅ Qt-GUI verwijderd; CLI-presentatie behouden
+
+✅ Provider-onafhankelijke IBKR-nieuwslaag in SHADOW-modus
+
+✅ Nieuwsnormalisatie, deduplicatie en JSONL-audittrail
+
+✅ Gesloten trade-records met BUY/SELL-redenen en geraamde netto-P&L
+
 ---
 
 # Volgende schaalstappen
@@ -153,6 +161,11 @@ Voorkom dubbele implementaties.
 - IBKR realtime marktdata voor open posities en topkandidaten koppelen;
 - pas na stabiele meetresultaten opschalen naar 250 symbolen;
 - broker-native beschermende stoporders toevoegen vóór live-moneyontwerp.
+- nieuwsproviderdekking en latency meten tijdens orderloze Paper-cycli;
+- classifier valideren op EU/VS-headlines en false positives;
+- pas daarna beslissen over een fail-closed nieuws-gate;
+- offline learning uitsluitend op `CompletedTradeRecord` ontwerpen, met
+  menselijke goedkeuring en versiebeheer van parameterwijzigingen.
 
 ---
 

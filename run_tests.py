@@ -33,7 +33,6 @@ class OrionTestRunner:
             TestCommand("Decision Smoke", [sys.executable, "test_decision_smoke.py"]),
             TestCommand("Intelligence Layer", [sys.executable, "test_intelligence_layer.py"]),
             TestCommand("AI Market Scanner", [sys.executable, "test_ai_market_scanner.py"]),
-            TestCommand("AI Scanner Presenter", [sys.executable, "test_ai_scanner_presenter.py"]),
             TestCommand("Backtest Visualizer", [sys.executable, "test_backtest_visualizer.py"]),
             TestCommand("Trading Config", [sys.executable, "test_trading_config.py"]),
             TestCommand("Live Paper Market Scanner", [sys.executable, "test_live_paper_market_scanner.py"]),
@@ -116,10 +115,6 @@ TestCommand(
     [sys.executable, "test_closed_trade_analytics_service.py"],
 ),
 TestCommand(
-    "Desktop Bootstrap",
-    [sys.executable, "test_desktop_bootstrap.py"],
-),
-TestCommand(
     "JSON Trading Session Repository",
     [sys.executable, "test_json_trading_session_repository.py"],
 ),
@@ -164,6 +159,37 @@ TestCommand(
             TestCommand(
                 "IBKR Broker",
                 [sys.executable, "test_ibkr_broker.py"],
+            ),
+            TestCommand(
+                "IBKR News Shadow Intelligence",
+                [
+                    sys.executable,
+                    "-m",
+                    "pytest",
+                    "-q",
+                    "tests/test_news_intelligence.py",
+                    "tests/test_ibkr_news_runtime.py",
+                ],
+            ),
+            TestCommand(
+                "Completed Trade Memory",
+                [
+                    sys.executable,
+                    "-m",
+                    "pytest",
+                    "-q",
+                    "tests/test_completed_trade_records.py",
+                ],
+            ),
+            TestCommand(
+                "Headless Runtime",
+                [
+                    sys.executable,
+                    "-m",
+                    "pytest",
+                    "-q",
+                    "tests/test_headless_runtime.py",
+                ],
             ),
             TestCommand(
                 "Execution Engine IBKR",
@@ -262,7 +288,6 @@ TestCommand(
             TestCommand("Open Trade Store", [sys.executable, "test_open_trade_store.py"]),
             TestCommand("Trade Lifecycle Service", [sys.executable, "test_trade_lifecycle_service.py"]),
             TestCommand("Trade Monitor Service", [sys.executable, "test_trade_monitor_service.py"]),
-            TestCommand("Trade Monitor Presenter", [sys.executable, "test_trade_monitor_presenter.py"]),
 
             TestCommand("Market Pipeline Scanner Service", [sys.executable, "test_market_pipeline_scanner_service.py"]),
             TestCommand("Opportunity Ranking Engine", [sys.executable, "test_opportunity_ranking_engine.py"]),
