@@ -67,6 +67,12 @@ class TradeJournalEntry:
 
     risk_warnings: tuple[str, ...] = ()
 
+    estimated_trading_costs: float = 0.0
+
+    estimated_net_profit_loss: float = 0.0
+
+    profit_calculation_currency: str = "EUR"
+
     @property
     def total_return_percent(self) -> float:
         if self.invested_amount <= 0:

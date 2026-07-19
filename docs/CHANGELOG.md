@@ -1,5 +1,27 @@
 # CHANGELOG.md
 
+## 2026-07-19 - Cost-aware small-profit Paper exits
+
+De autonome IBKR Paper-runner kan beheerde posities nu sluiten op een geschatte
+netto-opbrengst in EUR in plaats van uitsluitend op het laatste procentuele
+winstdoel. De nieuwe `COST_AWARE_SMALL_PROFIT`-modus raamt de volledige
+round-tripkosten uit het gekozen IBKR-prijsmodel, commissie-minima, een
+configureerbare slippagebuffer, externe kosten en optionele EUR/USD-conversie.
+
+De conservatieve Paper-defaults zijn EUR 5 netto winst / EUR 8 netto verlies
+voor Amerikaanse aandelen en EUR 10 netto winst / EUR 15 netto verlies voor
+Europese aandelen. De oorspronkelijke dynamische lifecycle-stop blijft de
+hoogste-prioriteit veiligheidsgrens. `SWING` blijft beschikbaar als expliciete
+fallback. De IBKR-runner start kostengevoelig met prijsmodel `FIXED`; beide zijn
+overschrijfbaar via `ORION_IBKR_EXIT_STRATEGY` en
+`ORION_IBKR_PRICING_PLAN`.
+
+Exitredenen en journalregels bevatten de geschatte round-tripkosten en netto
+P&L. Dit zijn bewust conservatieve ramingen: de IBKR-transportlaag ontvangt nog
+geen definitief commission report en Yahoo levert geen executeerbare bid/ask.
+Daarom blijft deze functie uitsluitend onderdeel van gecontroleerde Paper-
+validatie.
+
 ## 2026-07-19 - 100-symbol bounded IBKR Paper scanning
 
 De autonome IBKR Paper-runner gebruikt nu een gecureerd validatie-universum van

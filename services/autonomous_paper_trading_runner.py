@@ -714,6 +714,12 @@ class AutonomousPaperTradingRunner:
             decision.reason,
             cycle_number,
             session_id,
+            estimated_trading_costs=(
+                decision.estimated_round_trip_costs
+            ),
+            estimated_net_profit_loss=(
+                decision.estimated_net_profit_loss
+            ),
         )
 
         closed_symbol = (
@@ -879,6 +885,13 @@ class AutonomousPaperTradingRunner:
             recommendation_reason=decision.reason,
             cycle_number=cycle_number,
             session_id=session_id,
+            estimated_trading_costs=(
+                decision.estimated_round_trip_costs
+            ),
+            estimated_net_profit_loss=(
+                decision.estimated_net_profit_loss
+            ),
+            profit_calculation_currency="EUR",
         )
 
         self.trade_journal_repository.append(
@@ -892,6 +905,8 @@ class AutonomousPaperTradingRunner:
         reason,
         cycle_number,
         session_id,
+        estimated_trading_costs=0.0,
+        estimated_net_profit_loss=0.0,
     ):
         if self.trade_journal_repository is None:
             return
@@ -925,6 +940,13 @@ class AutonomousPaperTradingRunner:
             recommendation_reason=reason,
             cycle_number=cycle_number,
             session_id=session_id,
+            estimated_trading_costs=(
+                estimated_trading_costs
+            ),
+            estimated_net_profit_loss=(
+                estimated_net_profit_loss
+            ),
+            profit_calculation_currency="EUR",
         )
 
         self.trade_journal_repository.append(

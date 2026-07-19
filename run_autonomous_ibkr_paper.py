@@ -29,6 +29,8 @@ ORDER_PERMISSION_ENVIRONMENT_VARIABLE = "ORION_IBKR_ALLOW_ORDERS"
 EXECUTION_MODE_ENVIRONMENT_VARIABLE = "ORION_IBKR_EXECUTION_MODE"
 CYCLES_ENVIRONMENT_VARIABLE = "ORION_IBKR_CYCLES"
 SCAN_INTERVAL_ENVIRONMENT_VARIABLE = "ORION_IBKR_SCAN_INTERVAL_SECONDS"
+EXIT_STRATEGY_ENVIRONMENT_VARIABLE = "ORION_IBKR_EXIT_STRATEGY"
+PRICING_PLAN_ENVIRONMENT_VARIABLE = "ORION_IBKR_PRICING_PLAN"
 
 DEFAULT_CYCLES = 1
 DEFAULT_SCAN_INTERVAL_SECONDS = 900
@@ -135,10 +137,46 @@ def read_scan_interval_seconds() -> int:
     )
 
 
+def read_exit_strategy() -> str:
+    value = os.getenv(
+        EXIT_STRATEGY_ENVIRONMENT_VARIABLE,
+        LivePaperTradingConfig.COST_AWARE_SMALL_PROFIT,
+    ).strip().upper()
+    if value not in {
+        LivePaperTradingConfig.SWING,
+        LivePaperTradingConfig.COST_AWARE_SMALL_PROFIT,
+    }:
+        raise RuntimeError(
+            f"{EXIT_STRATEGY_ENVIRONMENT_VARIABLE} must be "
+            "SWING or COST_AWARE_SMALL_PROFIT."
+        )
+    return value
+
+
+def read_pricing_plan() -> str:
+    value = os.getenv(
+        PRICING_PLAN_ENVIRONMENT_VARIABLE,
+        LivePaperTradingConfig.FIXED_PRICING,
+    ).strip().upper()
+    if value not in {
+        LivePaperTradingConfig.FIXED_PRICING,
+        LivePaperTradingConfig.TIERED_PRICING,
+    }:
+        raise RuntimeError(
+            f"{PRICING_PLAN_ENVIRONMENT_VARIABLE} must be "
+            "FIXED or TIERED."
+        )
+    return value
+
+
 def build_config(
     execution_mode: str = AutonomousPaperTradingConfig.EXIT_ONLY,
     cycles: int = DEFAULT_CYCLES,
     scan_interval_seconds: int = DEFAULT_SCAN_INTERVAL_SECONDS,
+    exit_strategy: str = (
+        LivePaperTradingConfig.COST_AWARE_SMALL_PROFIT
+    ),
+    pricing_plan: str = LivePaperTradingConfig.FIXED_PRICING,
 ) -> AutonomousPaperTradingConfig:
     live_config = LivePaperTradingConfig(
         watchlist_path="data/universes/ibkr_eu_us_validation.csv",
@@ -148,6 +186,8 @@ def build_config(
         min_confidence=0.75,
         max_position_value=1000.0,
         max_position_size_pct=0.10,
+        exit_strategy=exit_strategy,
+        ibkr_pricing_plan=pricing_plan,
     )
 
     return AutonomousPaperTradingConfig(
@@ -190,6 +230,30 @@ def print_runtime_mode(
     print("Maximum symbols:   100 (50 US + 50 EU)")
     print("Maximum positions: 20 (risk-limited ceiling)")
     print(f"Execution mode:    {execution_mode}")
+    print(
+        "Exit strategy:     "
+        f"{config.live_config.exit_strategy}"
+    )
+    print(
+        "IBKR pricing:      "
+        f"{config.live_config.ibkr_pricing_plan}"
+    )
+    if (
+        config.live_config.exit_strategy
+        == LivePaperTradingConfig.COST_AWARE_SMALL_PROFIT
+    ):
+        print(
+            "Net profit goals: US EUR "
+            f"{config.live_config.small_profit_target_us_eur:.2f}"
+            " / EU EUR "
+            f"{config.live_config.small_profit_target_eu_eur:.2f}"
+        )
+        print(
+            "Net loss limits:  US EUR -"
+            f"{config.live_config.small_profit_max_loss_us_eur:.2f}"
+            " / EU EUR -"
+            f"{config.live_config.small_profit_max_loss_eu_eur:.2f}"
+        )
     print(
         "Order submission: "
         + (
@@ -293,10 +357,14 @@ def main() -> None:
     execution_mode = read_execution_mode()
     cycles = read_cycle_count()
     scan_interval_seconds = read_scan_interval_seconds()
+    exit_strategy = read_exit_strategy()
+    pricing_plan = read_pricing_plan()
     config = build_config(
         execution_mode=execution_mode,
         cycles=cycles,
         scan_interval_seconds=scan_interval_seconds,
+        exit_strategy=exit_strategy,
+        pricing_plan=pricing_plan,
     )
 
     print_runtime_mode(
