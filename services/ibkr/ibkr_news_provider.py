@@ -260,6 +260,7 @@ class IbkrNewsProvider:
         except (TypeError, ValueError, OSError):
             pass
         for pattern in (
+            "%Y-%m-%d %H:%M:%S.%f",
             "%Y-%m-%d %H:%M:%S",
             "%Y%m%d %H:%M:%S.%f",
             "%Y%m%d %H:%M:%S",

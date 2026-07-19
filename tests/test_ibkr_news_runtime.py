@@ -71,3 +71,11 @@ def test_news_provider_parses_epoch_seconds_and_milliseconds():
     milliseconds = provider._parse_news_time("1721383200000")
 
     assert seconds == milliseconds
+
+
+def test_news_provider_parses_fractional_ibkr_datetime():
+    provider = IbkrNewsProvider()
+
+    parsed = provider._parse_news_time("2026-05-01 14:27:06.0")
+
+    assert parsed.isoformat() == "2026-05-01T14:27:06+00:00"
