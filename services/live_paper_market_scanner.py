@@ -198,6 +198,23 @@ class LivePaperMarketScanner:
                 opportunity_ranking=opportunity_ranking,
             )
 
+        selectivity_reasons = self._selectivity_rejections(
+            result=result,
+            opportunity_score=score,
+        )
+        if selectivity_reasons:
+            return LivePaperCandidate(
+                symbol=symbol,
+                result=result,
+                score=score,
+                accepted=False,
+                reason=(
+                    "Selectivity gate rejected candidate; "
+                    + " ".join(selectivity_reasons)
+                ),
+                opportunity_ranking=opportunity_ranking,
+            )
+
         if result.risk_plan.entry_price > self.config.max_position_value:
             return LivePaperCandidate(
                 symbol=symbol,
@@ -216,6 +233,64 @@ class LivePaperMarketScanner:
             reason="Accepted candidate.",
             opportunity_ranking=opportunity_ranking,
         )
+
+    def _selectivity_rejections(
+        self,
+        *,
+        result,
+        opportunity_score: float,
+    ) -> list[str]:
+        reasons: list[str] = []
+        thesis = result.investment_thesis
+
+        if opportunity_score < self.config.min_opportunity_score:
+            reasons.append(
+                "opportunity score "
+                f"{opportunity_score:.2f} is below "
+                f"{self.config.min_opportunity_score:.2f}."
+            )
+
+        if thesis is None:
+            reasons.append("investment thesis is unavailable.")
+            return reasons
+
+        if (
+            self.config.require_buy_thesis
+            and str(thesis.stance).strip().upper() != "BUY"
+        ):
+            reasons.append(
+                f"thesis stance is {thesis.stance}, not BUY."
+            )
+
+        if thesis.conviction < self.config.min_thesis_conviction:
+            reasons.append(
+                "thesis conviction "
+                f"{thesis.conviction:.2f} is below "
+                f"{self.config.min_thesis_conviction:.2f}."
+            )
+
+        factor_map = {
+            factor.name: factor.score
+            for factor in thesis.factors
+        }
+        thresholds = {
+            "trend": self.config.min_trend_factor,
+            "momentum": self.config.min_momentum_factor,
+            "pressure_confirmation": (
+                self.config.min_pressure_confirmation_factor
+            ),
+        }
+        for name, minimum in thresholds.items():
+            actual = factor_map.get(name)
+            if actual is None:
+                reasons.append(f"{name} factor is unavailable.")
+            elif actual < minimum:
+                reasons.append(
+                    f"{name} factor {actual:.2f} is below "
+                    f"{minimum:.2f}."
+                )
+
+        return reasons
 
     def _score_result(self, result) -> float:
         return round(

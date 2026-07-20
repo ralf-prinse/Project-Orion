@@ -609,6 +609,15 @@ class AutonomousPaperTradingRunner:
             == AutonomousPaperTradingConfig.EXIT_ONLY
         )
 
+    def _is_shadow(self) -> bool:
+        return (
+            self.config.execution_mode
+            == AutonomousPaperTradingConfig.SHADOW
+        )
+
+    def _strategy_name(self) -> str:
+        return "ORION_SHADOW" if self._is_shadow() else "ORION_CANONICAL"
+
     def _empty_scan_result(
         self,
         session: TradingSession,
@@ -1042,6 +1051,27 @@ class AutonomousPaperTradingRunner:
         if state is not None:
             entry = replace(entry, trade_id=state.trade_id)
 
+        if self._is_shadow():
+            estimate = (
+                self.position_monitor
+                .trading_cost_estimator
+                .estimate_round_trip(
+                    position=position,
+                    config=self.config.live_config,
+                )
+            )
+            entry = replace(
+                entry,
+                strategy_name=self._strategy_name(),
+                entry_price=position.entry_price,
+                invested_amount=position.cost_basis,
+                estimated_trading_costs=estimate.total_cost_eur,
+                recommendation_reason=(
+                    entry.recommendation_reason
+                    + " Shadow fill only; no broker order submitted."
+                ),
+            )
+
         self.trade_journal_repository.append(
             entry
         )
@@ -1131,6 +1161,26 @@ class AutonomousPaperTradingRunner:
             * position.fx_rate_to_base,
             2,
         )
+        estimated_trading_costs = decision.estimated_round_trip_costs
+        estimated_net_profit_loss = decision.estimated_net_profit_loss
+        if self._is_shadow():
+            cost_position = replace(
+                position,
+                current_price=executed_price,
+            )
+            estimate = (
+                self.position_monitor
+                .trading_cost_estimator
+                .estimate_round_trip(
+                    position=cost_position,
+                    config=self.config.live_config,
+                )
+            )
+            estimated_trading_costs = estimate.total_cost_eur
+            estimated_net_profit_loss = round(
+                realized_profit_loss - estimate.total_cost_eur,
+                2,
+            )
 
         entry = TradeJournalEntry(
             timestamp=(
@@ -1160,11 +1210,12 @@ class AutonomousPaperTradingRunner:
             cycle_number=cycle_number,
             session_id=session_id,
             trade_id=trade_id,
+            strategy_name=self._strategy_name(),
             estimated_trading_costs=(
-                decision.estimated_round_trip_costs
+                estimated_trading_costs
             ),
             estimated_net_profit_loss=(
-                decision.estimated_net_profit_loss
+                estimated_net_profit_loss
             ),
             profit_calculation_currency="EUR",
             **self._news_journal_fields(position.symbol),
@@ -1220,6 +1271,7 @@ class AutonomousPaperTradingRunner:
             cycle_number=cycle_number,
             session_id=session_id,
             trade_id=trade_id,
+            strategy_name=self._strategy_name(),
             estimated_trading_costs=(
                 estimated_trading_costs
             ),
@@ -1277,7 +1329,11 @@ class AutonomousPaperTradingRunner:
             )
 
         return TradingSession(
-            name="Orion Autonomous Paper Trading",
+            name=(
+                "Orion Autonomous Shadow Trading"
+                if self._is_shadow()
+                else "Orion Autonomous Paper Trading"
+            ),
             portfolio=self._load_or_create_portfolio(),
         )
 
@@ -1320,13 +1376,18 @@ class AutonomousPaperTradingRunner:
         )
 
         for entry in entries:
+            if self._is_shadow():
+                entry = replace(
+                    entry,
+                    strategy_name=self._strategy_name(),
+                )
             self.decision_journal_repository.append(
                 entry
             )
 
     def _build_session_id(self):
         return (
-            "autonomous-"
+            ("shadow-" if self._is_shadow() else "autonomous-")
             + datetime.now().strftime(
                 "%Y%m%d-%H%M%S"
             )

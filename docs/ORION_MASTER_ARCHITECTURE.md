@@ -1,6 +1,6 @@
 # ORION MASTER ARCHITECTURE
 
-Laatste update: 19-07-2026
+Laatste update: 20-07-2026
 
 ---
 
@@ -126,6 +126,12 @@ profit-child verzonden. De persistente `trade_id` is tegelijk journalcorrelatie,
 `orderRef` en basis voor de OCA-groep. Hierdoor blijven broker-native en
 softwarematige exitpaden één lifecycle. Een native fill wordt via execution
 history teruggeleid naar `CompletedTradeRecord`.
+
+Dezelfde composition root kent daarnaast execution mode `SHADOW`. In deze
+modus wordt `ShadowBroker` in `ExecutionEngine` geïnjecteerd en worden broker-
+sync, positieadoptie, IBKR quote provider, ordertransport en native protective
+reconciliation niet aan de runner gekoppeld. De shadowruntime gebruikt eigen
+persistentiebestanden en kan niet met ordertoestemming worden gecombineerd.
 
 ---
 

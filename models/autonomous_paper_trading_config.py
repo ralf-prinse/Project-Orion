@@ -17,6 +17,7 @@ class AutonomousPaperTradingConfig:
 
     EXIT_ONLY: ClassVar[str] = "EXIT_ONLY"
     BUY_AND_SELL: ClassVar[str] = "BUY_AND_SELL"
+    SHADOW: ClassVar[str] = "SHADOW"
 
     live_config: LivePaperTradingConfig = LivePaperTradingConfig()
 
@@ -33,9 +34,14 @@ class AutonomousPaperTradingConfig:
     def __post_init__(self) -> None:
         normalized = self.execution_mode.strip().upper()
 
-        if normalized not in {self.EXIT_ONLY, self.BUY_AND_SELL}:
+        if normalized not in {
+            self.EXIT_ONLY,
+            self.BUY_AND_SELL,
+            self.SHADOW,
+        }:
             raise ValueError(
-                "execution_mode must be EXIT_ONLY or BUY_AND_SELL."
+                "execution_mode must be EXIT_ONLY or BUY_AND_SELL, "
+                "or SHADOW."
             )
 
         object.__setattr__(self, "execution_mode", normalized)

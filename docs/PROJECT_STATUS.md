@@ -2,7 +2,7 @@
 
 # Project Orion - Status
 
-Laatste update: 19-07-2026
+Laatste update: 20-07-2026
 
 ---
 
@@ -26,6 +26,10 @@ De complete end-to-end handelsketen is operationeel:
 
 De autonome runner voltooit een volledige cyclus zonder fouten.
 
+Een afzonderlijke `SHADOW`-modus kan zonder IBKR-marktdata-abonnement fictieve
+trades volgen. Deze modus is technisch geïsoleerd van broker-sync, adoptie,
+IBKR-quotes en ordertransport en weigert ordertoestemming fail-closed.
+
 De eerste schaalfase voor autonoom Paper-traden is operationeel:
 
 - 100 gecureerde EU/VS-symbolen;
@@ -48,7 +52,7 @@ Architectuuropschoning:
 - oude directe decisionengine en dubbele `engines`/scannerketen verwijderd;
 - research/explainability blijft geïsoleerd in `services/decisions`;
 - lege placeholders en tests zonder assertions verwijderd;
-- volledige testsuite: 569 geslaagd, 0 mislukt.
+- volledige testsuite: 581 geslaagd, 0 mislukt.
 
 ---
 
@@ -73,6 +77,12 @@ Architectuuropschoning:
 ✅ Geverifieerde earnings-blackoutinterface
 
 ✅ Offline netto-expectancyrapportage zonder autonome configuratiewijzigingen
+
+✅ Getekende trend- en correct geschaalde volatiliteitsindicatoren
+
+✅ Thesis- en opportunity-gebaseerde selectiviteitsgate
+
+✅ Geïsoleerde kostenbewuste shadowportfolio zonder IBKR-orderpad
 
 ## Data
 
@@ -181,7 +191,9 @@ Wanneer het maximum aantal open posities is bereikt worden nieuwe BUY-signalen c
 Dit is verwacht gedrag.
 
 Yahoo blijft in deze fase de brede analysebron. Actuele IBKR bid/askdata is nu
-wel verplicht voor iedere daadwerkelijke entry en normale winstexit.
+wel verplicht voor iedere daadwerkelijke IBKR-entry en normale winstexit.
+`SHADOW` gebruikt bewust niet-uitvoerbare referentieprijzen en mag daarom niet
+als bewijs van haalbare brokerfills worden geïnterpreteerd.
 De runtime accepteert bewust uitsluitend IBKR Paper-accounts met `DU`-prefix.
 
 IBKR top-of-bookdata vereist passende marktdata-abonnementen. Ontbrekende

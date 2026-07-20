@@ -1,5 +1,29 @@
 # CHANGELOG.md
 
+## 2026-07-20 - Isolated shadow trading and signal normalization
+
+De autonome runtime kent nu een expliciete `SHADOW`-uitvoeringsmodus. Deze
+modus weigert fail-closed te starten wanneer ordertoestemming aanstaat, bouwt
+geen IBKR quote- of orderpad, synchroniseert of adopteert geen brokerposities en
+gebruikt een afzonderlijke lokale portefeuille, sessie, decision journal, trade
+journal en completed-trade store. Fictieve fills bewaren de auditeerbare Yahoo-
+referentieprijs; adverse slippage, round-tripcommissies, externe kosten en FX-
+buffers blijven expliciet in journal en completed-trade-resultaten staan.
+
+De oorzaak van de onrealistische 50-uit-50 BUY-uitkomst is hersteld. De
+trendindicator gebruikte `laatste prijs / gemiddelde`, waardoor vrijwel ieder
+aandeel na begrenzing een trend van `+1` kreeg en een dalende trend niet kon
+bestaan. Trend is nu de geschaalde, getekende afwijking van het 20-daags
+gemiddelde. Volatiliteit wordt voortaan als geannualiseerd percentage aan de
+downstream 0..100-normalisatie geleverd in plaats van als vrijwel nul gelezen
+dagdecimaal.
+
+Een configureerbare selectiviteitsgate vereist naast het actieve BUY-besluit
+ook bevestiging door de onafhankelijke investment thesis, minimale conviction,
+opportunity score, trend, momentum en pressure confirmation. Iedere afwijzing
+wordt met de gemeten waarde en grens gejournaliseerd. De volledige testsuite
+eindigt op 581 geslaagde tests en nul failures.
+
 ## 2026-07-19 - Execution-grade Paper safety controls
 
 Nieuwe IBKR BUY-orders gebruiken actuele live bid/ask- en top-of-bookdata als

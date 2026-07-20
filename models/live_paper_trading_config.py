@@ -36,6 +36,16 @@ class LivePaperTradingConfig:
 
     min_confidence: float = 0.75
 
+    # Entry selectivity. The legacy decision remains visible in journals,
+    # but a BUY may only reach allocation when the independently built
+    # investment thesis and opportunity ranking confirm it.
+    require_buy_thesis: bool = True
+    min_thesis_conviction: float = 68.0
+    min_opportunity_score: float = 70.0
+    min_trend_factor: float = 0.40
+    min_momentum_factor: float = 0.50
+    min_pressure_confirmation_factor: float = 0.55
+
     max_position_value: float = 500.0
 
     max_position_size_pct: float = 0.05
@@ -159,6 +169,25 @@ class LivePaperTradingConfig:
             raise ValueError(
                 "max_new_positions_per_cycle must be at least 1."
             )
+
+        bounded_scores = {
+            "min_thesis_conviction": self.min_thesis_conviction,
+            "min_opportunity_score": self.min_opportunity_score,
+        }
+        for name, value in bounded_scores.items():
+            if not 0 <= value <= 100:
+                raise ValueError(f"{name} must be between 0 and 100.")
+
+        bounded_factors = {
+            "min_trend_factor": self.min_trend_factor,
+            "min_momentum_factor": self.min_momentum_factor,
+            "min_pressure_confirmation_factor": (
+                self.min_pressure_confirmation_factor
+            ),
+        }
+        for name, value in bounded_factors.items():
+            if not 0 <= value <= 1:
+                raise ValueError(f"{name} must be between 0 and 1.")
 
         if self.news_lookback_hours < 1:
             raise ValueError("news_lookback_hours must be at least 1.")

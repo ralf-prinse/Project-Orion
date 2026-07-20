@@ -2,15 +2,15 @@
 
 # Project Orion - TODO
 
-Laatste update: 19-07-2026
+Laatste update: 20-07-2026
 
 ---
 
 # Huidige prioriteit
 
-Geen nieuwe functionaliteit ontwikkelen voordat de bestaande codebase volledig is geïnventariseerd.
-
-De focus verschuift van **bouwen** naar **integreren**.
+Verzamel eerst voldoende geïsoleerde shadowresultaten voordat IBKR-orderrechten
+of betaalde realtime marktdata worden overwogen. Kalibreer de nieuwe
+selectiviteitsgrenzen uitsluitend offline en nooit automatisch vanuit learning.
 
 ---
 
@@ -155,7 +155,7 @@ Voorkom dubbele implementaties.
 
 ✅ Legacy `engines`/`ScannerService` en lege placeholders verwijderd
 
-✅ Volledige testsuite hersteld naar 569 geslaagd en 0 mislukt
+✅ Volledige testsuite uitgebreid naar 581 geslaagd en 0 mislukt
 
 ✅ IBKR live bid/ask-, spread-, freshness- en top-size execution gate
 
@@ -171,11 +171,21 @@ Voorkom dubbele implementaties.
 
 ✅ Offline cost-aware expectancyanalyse zonder runtimeconfiguraties te wijzigen
 
+✅ Getekende trendnormalisatie en geannualiseerde volatiliteitsschaal
+
+✅ Onafhankelijke thesis-/ranking-/factorselectiviteitsgate
+
+✅ Geïsoleerde SHADOW-modus met aparte portefeuille en trade memory
+
 ---
 
 # Volgende schaalstappen
 
 - Paper-observatie met 100 symbolen en orders uitgeschakeld;
+- minimaal meerdere weken shadowtrades verzamelen en nettoresultaten per markt,
+  regime en afwijzingsreden beoordelen;
+- false positives/negatives van de selectiviteitsgate handmatig auditen voordat
+  grenzen worden aangepast;
 - ontbrekende/ambigue Yahoo- en IBKR-contracten uit het universum filteren;
 - execution-qualitymetingen tijdens Paper-cycli verzamelen en limieten op
   werkelijke spread/fill/slippage kalibreren;

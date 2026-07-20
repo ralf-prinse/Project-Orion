@@ -1,3 +1,5 @@
+import math
+
 import pandas as pd
 
 from config.trading_config import DEFAULT_TRADING_CONFIG, TradingConfig
@@ -166,11 +168,16 @@ class IndicatorBuilder:
         average = float(sma.iloc[-1])
 
         if average == 0:
-            return 0.5
+            return 0.0
 
-        score = latest / average
+        # Express the distance from the moving average as a signed score.
+        # The former latest/average ratio was almost always close to +1 and
+        # could not represent a downtrend after clamping. A five-percent
+        # deviation now maps to the full +/-1 range.
+        deviation = (latest - average) / average
+        score = deviation / 0.05
 
-        return max(0.0, min(1.0, score))
+        return max(-1.0, min(1.0, score))
 
     def _calculate_momentum(
         self,
@@ -210,4 +217,9 @@ class IndicatorBuilder:
             .iloc[-1]
         )
 
-        return float(volatility)
+        # Downstream intelligence normalizes percentage values on a 0..100
+        # scale. Return annualized realized volatility in percentage points
+        # instead of a raw daily decimal (for example 22.0, not 0.014).
+        annualized_percent = float(volatility) * math.sqrt(252.0) * 100.0
+
+        return max(0.0, min(100.0, annualized_percent))

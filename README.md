@@ -24,6 +24,11 @@ en gejournaliseerd, maar kan geen BUY, SELL, quantity, riskplan of order
 wijzigen. Learning- en recommendationservices zijn eveneens niet met de
 autonome runtime verbonden.
 
+Execution mode `SHADOW` is een afzonderlijke veiligheidsgrens voor fictieve
+trades zonder betaald IBKR-marktdata-abonnement. De modus gebruikt een lokale
+shadowbroker, aparte persistentie en Yahoo-referentieprijzen; IBKR-quotes,
+orders, broker-sync en positieadoptie zijn niet bereikbaar.
+
 ## Belangrijkste entrypoints
 
 - `run_autonomous_ibkr_paper.py`: begrensde autonome IBKR Paper-cycli;
@@ -45,6 +50,22 @@ $env:ORION_IBKR_CYCLES="1"
 
 Ordertoestemming moet expliciet worden aangezet en blijft beperkt tot Paper
 Trading. Activeer dit project niet op een live-moneyaccount.
+
+## Geïsoleerde shadowcyclus zonder IBKR-marktdata
+
+```powershell
+$env:ORION_IBKR_PAPER_ACCOUNT_ID="<DU_PAPER_ACCOUNT>"
+$env:ORION_IBKR_EXECUTION_MODE="SHADOW"
+$env:ORION_IBKR_ALLOW_ORDERS="false"
+$env:ORION_IBKR_NEWS_MODE="DISABLED"
+$env:ORION_IBKR_CYCLES="1"
+
+.\.venv\Scripts\python.exe run_autonomous_ibkr_paper.py
+```
+
+Bevestig met `START ONE ORION SHADOW CYCLE`. Resultaten worden uitsluitend
+geschreven naar bestanden met prefix `data/orion_shadow`; deze portefeuille
+wordt nooit gemengd met de echte IBKR Paper-portefeuille.
 
 ## Architectuurgrenzen
 

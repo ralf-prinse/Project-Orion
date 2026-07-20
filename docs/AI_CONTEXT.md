@@ -22,11 +22,21 @@ brokerinterface. Nieuwsintelligentie is gekoppeld als IBKR `SHADOW`-
 observatielaag en heeft geen invloed op orders. Gesloten trades worden als één
 record bewaard voor latere offline analyse; autonoom self-learning staat uit.
 
-De Paper-uitvoeringslaag vereist actuele IBKR bid/askdata, begrenst normale
+De echte Paper-uitvoeringslaag vereist actuele IBKR bid/askdata, begrenst normale
 orders met marketable limits en verzendt BUY's met broker-native stop/profit
 children. Een gedeelde trade-OCA-groep voorkomt dubbele SELL's tussen IBKR en
 Orions softwarematige lifecycle. Native fills worden teruggelezen naar dezelfde
 trade memory.
+
+Zonder betaald realtime-abonnement kan Orion via execution mode `SHADOW` een
+volledig geïsoleerde fictieve portefeuille beheren. Deze modus kan geen IBKR-
+quote of orderpad activeren, gebruikt aparte persistentie en verwerkt Yahoo-
+referentieprijzen met conservatieve slippage en geraamde round-tripkosten.
+
+De vroegere structurele BUY-bias is gecorrigeerd: trend is nu een getekende
+afwijking van het voortschrijdend gemiddelde en volatiliteit heeft de juiste
+percentageschaal. Een tweede selectiviteitsgate vereist thesis-, ranking-,
+trend-, momentum- en pressurebevestiging voordat allocatie mogelijk is.
 
 Entryrisico omvat daarnaast een sessiecircuitbreaker, markt-/sector-/cluster-
 concentratie en bekende earnings-events. Nettowachting wordt alleen offline
@@ -35,7 +45,7 @@ gerapporteerd en kan geen configuratie of order wijzigen.
 Architectuurgrens: de actieve `TradingPipeline` gebruikt uitsluitend
 `services.trading_decision`. `services/decisions` is research/explainability en
 wordt niet door de autonome runner geïmporteerd. De oude `engines`- en
-`ScannerService`-keten is verwijderd. De volledige suite telt 569 groene tests.
+`ScannerService`-keten is verwijderd. De volledige suite telt 581 groene tests.
 
 Werkend:
 

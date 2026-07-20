@@ -1,6 +1,6 @@
 # Orion IBKR Autonomous Paper Runbook
 
-Laatste update: 19-07-2026
+Laatste update: 20-07-2026
 
 ## Veiligheidsgrens
 
@@ -45,6 +45,44 @@ Actuele orderbescherming:
 Voor orderinzending moet het account actuele API-marktdata hebben voor de
 betreffende Amerikaanse en Europese noteringen. Delayed of ontbrekende
 bid/askdata is bewust niet voldoende en resulteert in een afwijzing.
+
+## Geïsoleerde shadowmodus zonder betaald marktdata-abonnement
+
+Gebruik deze modus om signalen, allocatie, lifecycle, kostenraming en trade
+memory te observeren zonder een IBKR-quote of order aan te vragen:
+
+```powershell
+$env:ORION_IBKR_PAPER_ACCOUNT_ID="<YOUR_DU_PAPER_ACCOUNT_ID>"
+$env:ORION_IBKR_EXECUTION_MODE="SHADOW"
+$env:ORION_IBKR_ALLOW_ORDERS="false"
+$env:ORION_IBKR_NEWS_MODE="DISABLED"
+$env:ORION_IBKR_CYCLES="1"
+$env:ORION_IBKR_SCAN_INTERVAL_SECONDS="300"
+$env:ORION_IBKR_EXIT_STRATEGY="COST_AWARE_SMALL_PROFIT"
+$env:ORION_IBKR_PRICING_PLAN="FIXED"
+
+.\.venv\Scripts\python.exe run_autonomous_ibkr_paper.py
+```
+
+Bevestiging:
+
+```text
+START ONE ORION SHADOW CYCLE
+```
+
+`SHADOW` weigert te starten als `ORION_IBKR_ALLOW_ORDERS=true`. Broker-sync,
+adoptie van IBKR-posities, live bid/ask, native orders en protective-fill-
+reconciliatie zijn uitgeschakeld. De geïsoleerde resultaten staan in:
+
+- `data/orion_shadow_trading_session.json`;
+- `data/orion_shadow_paper_portfolio.json`;
+- `data/orion_shadow_decision_journal.jsonl`;
+- `data/orion_shadow_trade_journal.jsonl`;
+- `data/orion_shadow_completed_trades.jsonl`.
+
+Shadowfills bewaren de Yahoo-referentieprijs. De journal neemt adverse slippage
+en de bestaande conservatieve IBKR round-tripkostenraming apart mee. Dit bewijst
+niet dat dezelfde fill bij IBKR haalbaar zou zijn.
 
 ## Eén veilige observatiecyclus
 

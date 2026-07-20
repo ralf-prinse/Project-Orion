@@ -50,6 +50,7 @@ MAX_SCAN_INTERVAL_SECONDS = 3600
 
 EXIT_ONLY_CONFIRMATION = "START EXIT ONLY IBKR PAPER CYCLE"
 BUY_AND_SELL_CONFIRMATION = "START ONE AUTONOMOUS IBKR PAPER CYCLE"
+SHADOW_CONFIRMATION = "START ONE ORION SHADOW CYCLE"
 
 
 def read_required_paper_account_id() -> str:
@@ -92,10 +93,11 @@ def read_execution_mode() -> str:
     if value not in {
         AutonomousPaperTradingConfig.EXIT_ONLY,
         AutonomousPaperTradingConfig.BUY_AND_SELL,
+        AutonomousPaperTradingConfig.SHADOW,
     }:
         raise RuntimeError(
             f"{EXECUTION_MODE_ENVIRONMENT_VARIABLE} must be "
-            "EXIT_ONLY or BUY_AND_SELL."
+            "EXIT_ONLY, BUY_AND_SELL, or SHADOW."
         )
 
     return value
@@ -216,6 +218,12 @@ def build_config(
         exit_strategy=exit_strategy,
         ibkr_pricing_plan=pricing_plan,
         news_mode=news_mode,
+        enable_execution_quality_gate=(
+            execution_mode != AutonomousPaperTradingConfig.SHADOW
+        ),
+        enable_native_protective_orders=(
+            execution_mode != AutonomousPaperTradingConfig.SHADOW
+        ),
     )
 
     return AutonomousPaperTradingConfig(
@@ -273,17 +281,25 @@ def print_runtime_mode(
     print(
         "Execution quotes:  "
         + (
-            "IBKR LIVE BID/ASK (fail-closed)"
-            if config.live_config.enable_execution_quality_gate
-            else "DISABLED"
+            "YAHOO REFERENCE + COST/SLIPPAGE BUFFER"
+            if execution_mode == AutonomousPaperTradingConfig.SHADOW
+            else (
+                "IBKR LIVE BID/ASK (fail-closed)"
+                if config.live_config.enable_execution_quality_gate
+                else "DISABLED"
+            )
         )
     )
     print(
         "Native protection: "
         + (
-            "IBKR BRACKET + OCA"
-            if config.live_config.enable_native_protective_orders
-            else "DISABLED"
+            "SIMULATED POSITION LIFECYCLE"
+            if execution_mode == AutonomousPaperTradingConfig.SHADOW
+            else (
+                "IBKR BRACKET + OCA"
+                if config.live_config.enable_native_protective_orders
+                else "DISABLED"
+            )
         )
     )
     print(
@@ -316,37 +332,51 @@ def print_runtime_mode(
     print(
         "Order submission: "
         + (
-            "ENABLED"
-            if allow_order_submission
-            else "DISABLED"
+            "PERMANENTLY BLOCKED BY SHADOW"
+            if execution_mode == AutonomousPaperTradingConfig.SHADOW
+            else ("ENABLED" if allow_order_submission else "DISABLED")
         )
     )
     print(
         "BUY execution:     "
         + (
-            "DISABLED"
-            if not allow_order_submission
+            "SHADOW SIMULATION"
+            if execution_mode == AutonomousPaperTradingConfig.SHADOW
             else (
+                "DISABLED"
+                if not allow_order_submission
+                else (
                 "BLOCKED BY EXIT_ONLY"
                 if execution_mode == AutonomousPaperTradingConfig.EXIT_ONLY
                 else "IBKR"
+                )
             )
         )
     )
     print(
         "SELL execution:    "
         + (
-            "IBKR"
-            if allow_order_submission
-            else "DISABLED"
+            "SHADOW SIMULATION"
+            if execution_mode == AutonomousPaperTradingConfig.SHADOW
+            else ("IBKR" if allow_order_submission else "DISABLED")
         )
     )
-    print("Broker sync:       ENABLED")
-    print("Adopt positions:   AAPL, AAL, ASML.AS, ASM.AS")
+    if execution_mode == AutonomousPaperTradingConfig.SHADOW:
+        print("Broker sync:       DISABLED (isolated shadow portfolio)")
+        print("Adopt positions:   DISABLED")
+    else:
+        print("Broker sync:       ENABLED")
+        print("Adopt positions:   AAPL, AAL, ASML.AS, ASM.AS")
     print("=========================================")
     print()
 
-    if not allow_order_submission:
+    if execution_mode == AutonomousPaperTradingConfig.SHADOW:
+        print(
+            "SHADOW MODE: Orion uses an isolated simulated portfolio. "
+            "No IBKR quote request or order submission path is active."
+        )
+        print()
+    elif not allow_order_submission:
         print(
             "SAFE MODE: Orion can connect to TWS and synchronize "
             "the Paper account, but IBKR order submission is disabled."
@@ -356,11 +386,14 @@ def print_runtime_mode(
 
 def require_confirmation(execution_mode: str, cycles: int = 1) -> bool:
     if cycles == 1:
-        confirmation = (
-            EXIT_ONLY_CONFIRMATION
-            if execution_mode == AutonomousPaperTradingConfig.EXIT_ONLY
-            else BUY_AND_SELL_CONFIRMATION
-        )
+        if execution_mode == AutonomousPaperTradingConfig.SHADOW:
+            confirmation = SHADOW_CONFIRMATION
+        elif execution_mode == AutonomousPaperTradingConfig.EXIT_ONLY:
+            confirmation = EXIT_ONLY_CONFIRMATION
+        else:
+            confirmation = BUY_AND_SELL_CONFIRMATION
+    elif execution_mode == AutonomousPaperTradingConfig.SHADOW:
+        confirmation = f"START {cycles} ORION SHADOW CYCLES"
     elif execution_mode == AutonomousPaperTradingConfig.EXIT_ONLY:
         confirmation = (
             f"START {cycles} EXIT ONLY IBKR PAPER CYCLES"
@@ -381,17 +414,28 @@ def require_confirmation(execution_mode: str, cycles: int = 1) -> bool:
 
 
 def print_result(result) -> None:
+    shadow = "Shadow" in result.session.name
     print()
     print("=========================================")
-    print("AUTONOMOUS IBKR PAPER RESULT")
+    print(
+        "ORION SHADOW RESULT"
+        if shadow
+        else "AUTONOMOUS IBKR PAPER RESULT"
+    )
     print("=========================================")
     print(f"Completed cycles: {result.completed_cycles}")
     print(f"Failed cycles:    {result.failed_cycles}")
     print(f"Scanned symbols:  {result.total_scanned_symbols}")
     print(f"Analyzed symbols: {result.total_analyzed_symbols}")
     print(f"Skipped/failed:   {result.total_failed_symbols}")
-    print(f"Executed trades:  {result.total_executed_trades}")
-    print(f"Executed exits:   {result.total_executed_exits}")
+    print(
+        ("Shadow entries:   " if shadow else "Executed trades:  ")
+        + str(result.total_executed_trades)
+    )
+    print(
+        ("Shadow exits:     " if shadow else "Executed exits:   ")
+        + str(result.total_executed_exits)
+    )
     print(f"Rejected trades:  {result.total_rejected_trades}")
     print(
         "Allocation rejects: "
@@ -414,6 +458,13 @@ def main() -> None:
     paper_account_id = read_required_paper_account_id()
     allow_order_submission = order_submission_is_enabled()
     execution_mode = read_execution_mode()
+    if (
+        execution_mode == AutonomousPaperTradingConfig.SHADOW
+        and allow_order_submission
+    ):
+        raise RuntimeError(
+            "SHADOW mode requires ORION_IBKR_ALLOW_ORDERS=false."
+        )
     cycles = read_cycle_count()
     scan_interval_seconds = read_scan_interval_seconds()
     exit_strategy = read_exit_strategy()
@@ -438,20 +489,23 @@ def main() -> None:
     if not require_confirmation(execution_mode, cycles):
         return
 
+    shadow_mode = execution_mode == AutonomousPaperTradingConfig.SHADOW
+    prefix = "data/orion_shadow" if shadow_mode else "data/ibkr_autonomous"
+
     runtime = IbkrAutonomousRuntimeFactory().build(
         paper_account_id=paper_account_id,
         config=config,
         trade_journal_repository=JsonlTradeJournalRepository(
-            path="data/ibkr_autonomous_trade_journal.jsonl",
+            path=f"{prefix}_trade_journal.jsonl",
         ),
         decision_journal_repository=JsonlTradeJournalRepository(
-            path="data/ibkr_autonomous_decision_journal.jsonl",
+            path=f"{prefix}_decision_journal.jsonl",
         ),
         trading_session_repository=JsonTradingSessionRepository(
-            path="data/ibkr_autonomous_trading_session.json",
+            path=f"{prefix}_trading_session.json",
         ),
         portfolio_repository=JsonPaperPortfolioRepository(
-            path="data/ibkr_autonomous_paper_portfolio.json",
+            path=f"{prefix}_paper_portfolio.json",
         ),
         position_adoption_service=PositionAdoptionService(
             PositionAdoptionConfig(
@@ -470,7 +524,11 @@ def main() -> None:
             path="data/ibkr_news_assessments.jsonl",
         ),
         completed_trade_repository=JsonlCompletedTradeRepository(
-            path="data/ibkr_completed_trades.jsonl",
+            path=(
+                "data/orion_shadow_completed_trades.jsonl"
+                if shadow_mode
+                else "data/ibkr_completed_trades.jsonl"
+            ),
         ),
         allow_order_submission=allow_order_submission,
     )

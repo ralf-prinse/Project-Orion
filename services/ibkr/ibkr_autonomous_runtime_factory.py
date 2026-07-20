@@ -45,6 +45,7 @@ from services.news.news_intelligence_service import NewsIntelligenceService
 from services.ibkr.ibkr_quote_provider import IbkrQuoteProvider
 from services.portfolio_concentration_gate import PortfolioConcentrationGate
 from services.earnings_calendar_service import EarningsCalendarService
+from services.shadow_broker import ShadowBroker
 
 
 @dataclass(frozen=True)
@@ -59,13 +60,13 @@ class IbkrAutonomousRuntime:
 
     runner: AutonomousPaperTradingRunner
     transport: IbkrOrderTransport
-    broker: IbkrBroker
+    broker: object
     execution_engine: ExecutionEngine
     paper_trading_service: PaperTradingService
     trading_cycle: TradingCycle
     position_exit_execution_service: PositionExitExecutionService
     account_service: IbkrAccountService
-    trading_session_sync_service: IbkrTradingSessionSyncService
+    trading_session_sync_service: IbkrTradingSessionSyncService | None
     price_provider: YahooProvider
     historical_provider: YahooHistoricalDataProvider
     news_provider: object | None
@@ -126,6 +127,14 @@ class IbkrAutonomousRuntimeFactory:
             )
 
         runtime_config = config or AutonomousPaperTradingConfig()
+        shadow_mode = (
+            runtime_config.execution_mode
+            == AutonomousPaperTradingConfig.SHADOW
+        )
+        if shadow_mode and allow_order_submission:
+            raise ValueError(
+                "SHADOW mode cannot be combined with order submission."
+            )
         if runtime_config.live_config.base_currency.strip().upper() != "EUR":
             raise ValueError(
                 "Autonomous IBKR Paper base currency must be EUR."
@@ -197,29 +206,43 @@ class IbkrAutonomousRuntimeFactory:
         )
 
         quote_provider = None
-        if runtime_config.live_config.enable_execution_quality_gate:
+        if (
+            not shadow_mode
+            and runtime_config.live_config.enable_execution_quality_gate
+        ):
             quote_provider = IbkrQuoteProvider(
                 host=host,
                 port=port,
                 client_id=self.QUOTE_CLIENT_ID,
             )
 
-        broker = IbkrBroker(
-            transport=transport,
-            enable_native_protective_orders=(
-                runtime_config.live_config.enable_native_protective_orders
-            ),
-            quote_provider=quote_provider,
-            max_bid_ask_spread_pct=(
-                runtime_config.live_config.max_bid_ask_spread_pct
-            ),
-            max_quote_age_seconds=(
-                runtime_config.live_config.max_quote_age_seconds
-            ),
-            max_entry_slippage_pct=(
-                runtime_config.live_config.max_entry_slippage_pct
-            ),
-        )
+        if shadow_mode:
+            broker = ShadowBroker(
+                slippage_pct_per_side=(
+                    runtime_config
+                    .live_config
+                    .estimated_slippage_pct_per_side
+                )
+            )
+        else:
+            broker = IbkrBroker(
+                transport=transport,
+                enable_native_protective_orders=(
+                    runtime_config
+                    .live_config
+                    .enable_native_protective_orders
+                ),
+                quote_provider=quote_provider,
+                max_bid_ask_spread_pct=(
+                    runtime_config.live_config.max_bid_ask_spread_pct
+                ),
+                max_quote_age_seconds=(
+                    runtime_config.live_config.max_quote_age_seconds
+                ),
+                max_entry_slippage_pct=(
+                    runtime_config.live_config.max_entry_slippage_pct
+                ),
+            )
 
         execution_engine = ExecutionEngine(
             broker=broker,
@@ -263,17 +286,19 @@ class IbkrAutonomousRuntimeFactory:
                 decision_journal_repository
             ),
             price_provider=price_provider,
-            position_exit_execution_service=(
-                position_exit_execution_service
-            ),
+            position_exit_execution_service=position_exit_execution_service,
             trading_session_sync_service=(
-                trading_session_sync_service
+                None if shadow_mode else trading_session_sync_service
             ),
             market_session_service=market_session_service,
-            position_adoption_service=position_adoption_service,
+            position_adoption_service=(
+                None if shadow_mode else position_adoption_service
+            ),
             news_intelligence_service=news_intelligence_service,
             completed_trade_repository=completed_trade_repository,
-            protective_execution_reconciler=transport,
+            protective_execution_reconciler=(
+                None if shadow_mode else transport
+            ),
         )
 
         return IbkrAutonomousRuntime(
@@ -288,7 +313,7 @@ class IbkrAutonomousRuntimeFactory:
             ),
             account_service=account_service,
             trading_session_sync_service=(
-                trading_session_sync_service
+                None if shadow_mode else trading_session_sync_service
             ),
             price_provider=price_provider,
             historical_provider=historical_provider,
