@@ -19,6 +19,11 @@ meestal terecht economisch geblokkeerd. Er is geen openingsbuffer toegevoegd:
 de gemeten openingsvensters waren juist sterker dan latere vensters. De
 verlieslimieten en tijdstop zijn na slechts twee trades bewust niet geoptimaliseerd.
 
+Een vaste `start_orion_micro_shadow_full_day.ps1` voorkomt configuratiefouten
+voor een volledige gezamenlijke EU/VS-shadowdag. De starter gebruikt 160 cycli
+van 300 seconden, blijft hard op `MICRO_500`/`SHADOW` zonder ordertoestemming en
+neemt het Paper-account uitsluitend als niet-gecommit parameter aan.
+
 ## 2026-07-21 - Isolated MICRO_500 capital profile
 
 Een afzonderlijk `MICRO_500`-profiel simuleert voortaan het beoogde

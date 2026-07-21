@@ -89,13 +89,23 @@ Bevestig met `START ONE ORION MICRO 500 SHADOW CYCLE`. Dit profiel start met
 €500, houdt minimaal 30% cash aan, staat maximaal twee posities en twee nieuwe
 entries per dag toe, gebruikt een 60-minuten herinstappauze en een 90-minuten
 tijdstop. Entries gebruiken vijf handelsdagen aan uitsluitend afgeronde
-5-minutencandles. Een nog lopende candle wordt verwijderd en data ouder dan tien
-minuten wordt fail-closed geweigerd. Een economische gate weigert een entry wanneer geraamde retourkosten
+5-minutencandles. Een nog lopende candle wordt verwijderd en data ouder dan
+vijftien minuten na completion wordt fail-closed geweigerd. Een economische
+gate weigert een entry wanneer geraamde retourkosten
 meer dan 2% van de positie vragen of kosten plus nettodoel en buffer een
 brutobeweging boven 1,6% vereisen. Het netto microdoel is EUR 0,50; hoge
 Europese minimumcommissies blijven daardoor via de economische gate
 fail-closed. De eigen state gebruikt prefix
 `data/orion_shadow_micro_500`.
+
+Voor een volledige Europese en Amerikaanse shadowdag start je rond 08:55:
+
+```powershell
+.\start_orion_micro_shadow_full_day.ps1 -PaperAccountId "DU..."
+```
+
+De starter gebruikt 160 begrensde cycli van 300 seconden, dekt daarmee tot
+ongeveer 22:10 Nederlandse tijd en kan geen IBKR-orderpad activeren.
 
 ## Architectuurgrenzen
 

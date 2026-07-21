@@ -142,6 +142,33 @@ Bestanden:
 - `data/orion_shadow_micro_500_trade_journal.jsonl`;
 - `data/orion_shadow_micro_500_completed_trades.jsonl`.
 
+### Volledige Europese en Amerikaanse shadowdag
+
+Gebruik op een normale gezamenlijke handelsdag rond 08:55 Nederlandse tijd:
+
+```powershell
+.\start_orion_micro_shadow_full_day.ps1 -PaperAccountId "DU..."
+```
+
+De starter stelt uitsluitend het gecontroleerde profiel in:
+
+- `SHADOW`, ordertoestemming `false` en nieuws `DISABLED`;
+- `MICRO_500`, `TIERED` en EUR 3 maandelijkse marktdata-overhead;
+- 160 cycli met exact 300 seconden interval;
+- `COST_AWARE_SMALL_PROFIT` met de actuele profielgrenzen.
+
+Bevestig exact met:
+
+```text
+START 160 ORION MICRO 500 SHADOW CYCLES
+```
+
+Bij starten rond 08:55 loopt de sessie ongeveer tot 22:10. Amsterdam en Xetra
+worden vanaf de eerste volledige candle rond 09:05 geanalyseerd; de Verenigde
+Staten vanaf de eerste volledige candle rond 15:35. Na 17:30 blijft alleen de
+VS-subset actief. Gesloten markten worden fail-closed overgeslagen. TWS is voor
+deze geïsoleerde shadowrun niet nodig.
+
 Verander `ORION_MONTHLY_MARKET_DATA_COST_EUR` later naar het werkelijk betaalde
 maandbedrag. Een lage of nulwaarde is geen toestemming om ontbrekende realtime
 bid/askdata als betrouwbaar te behandelen.
