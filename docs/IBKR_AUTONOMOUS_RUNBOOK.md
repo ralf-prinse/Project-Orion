@@ -1,6 +1,6 @@
 # Orion IBKR Autonomous Paper Runbook
 
-Laatste update: 20-07-2026
+Laatste update: 21-07-2026
 
 ## Veiligheidsgrens
 
@@ -83,6 +83,59 @@ reconciliatie zijn uitgeschakeld. De geïsoleerde resultaten staan in:
 Shadowfills bewaren de Yahoo-referentieprijs. De journal neemt adverse slippage
 en de bestaande conservatieve IBKR round-tripkostenraming apart mee. Dit bewijst
 niet dat dezelfde fill bij IBKR haalbaar zou zijn.
+
+## Afzonderlijk MICRO_500-shadowprofiel
+
+Gebruik dit profiel voor een realistische EUR 500-kapitaalproef. Het is
+technisch beperkt tot `SHADOW` en gebruikt geen bestanden van de standaard
+EUR 10.000-shadowrun:
+
+```powershell
+$env:ORION_IBKR_PAPER_ACCOUNT_ID="<YOUR_DU_PAPER_ACCOUNT_ID>"
+$env:ORION_IBKR_EXECUTION_MODE="SHADOW"
+$env:ORION_IBKR_ALLOW_ORDERS="false"
+$env:ORION_CAPITAL_PROFILE="MICRO_500"
+$env:ORION_IBKR_PRICING_PLAN="TIERED"
+$env:ORION_MONTHLY_MARKET_DATA_COST_EUR="3.00"
+$env:ORION_IBKR_NEWS_MODE="DISABLED"
+$env:ORION_IBKR_CYCLES="1"
+$env:ORION_IBKR_SCAN_INTERVAL_SECONDS="300"
+$env:ORION_IBKR_EXIT_STRATEGY="COST_AWARE_SMALL_PROFIT"
+
+.\.venv\Scripts\python.exe run_autonomous_ibkr_paper.py
+```
+
+Bevestiging:
+
+```text
+START ONE ORION MICRO 500 SHADOW CYCLE
+```
+
+Profielgrenzen:
+
+- EUR 500 startkapitaal en EUR 175 maximale positie;
+- maximaal twee open posities en één nieuwe positie per cyclus;
+- maximaal twee entries per UTC-dag en 60 minuten cooldown na een exit;
+- minimaal 30% cashreserve en maximaal 70% totale exposure;
+- TIERED-kostenmodel, plus EUR 3 maandelijkse marktdata verdeeld over veertig
+  verwachte round-trips;
+- maximaal 2% geschatte round-tripkosten ten opzichte van positiewaarde;
+- maximaal 3% vereiste brutobeweging inclusief kosten, nettodoel en EUR 0,50
+  onzekerheidsbuffer;
+- nettodoelen VS/EU EUR 2,50/EUR 3,50 en nettoverlieslimieten EUR 3/EUR 4;
+- 90 minuten maximale houdtijd en 1,5% dagelijkse verliescircuitbreaker.
+
+Bestanden:
+
+- `data/orion_shadow_micro_500_trading_session.json`;
+- `data/orion_shadow_micro_500_paper_portfolio.json`;
+- `data/orion_shadow_micro_500_decision_journal.jsonl`;
+- `data/orion_shadow_micro_500_trade_journal.jsonl`;
+- `data/orion_shadow_micro_500_completed_trades.jsonl`.
+
+Verander `ORION_MONTHLY_MARKET_DATA_COST_EUR` later naar het werkelijk betaalde
+maandbedrag. Een lage of nulwaarde is geen toestemming om ontbrekende realtime
+bid/askdata als betrouwbaar te behandelen.
 
 ## Eén veilige observatiecyclus
 

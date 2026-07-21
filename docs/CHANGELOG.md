@@ -1,5 +1,27 @@
 # CHANGELOG.md
 
+## 2026-07-21 - Isolated MICRO_500 capital profile
+
+Een afzonderlijk `MICRO_500`-profiel simuleert voortaan het beoogde
+startkapitaal van EUR 500 zonder de bestaande EUR 10.000-shadowportefeuille te
+overschrijven. Het profiel is voorlopig uitsluitend toegestaan in `SHADOW`,
+gebruikt eigen persistentiebestanden, maximaal twee posities, één nieuwe positie
+per cyclus, twee entries per UTC-dag, 30% cashreserve en maximaal EUR 175 per
+positie.
+
+Kostenhaalbaarheid is nu een harde pre-ordergate. Round-tripkosten omvatten ook
+een configureerbaar aandeel van toekomstige maandelijkse marktdata-abonnementen.
+Het microprofiel weigert posities boven 2% geraamde retourkosten of wanneer
+kosten, nettowinstdoel en onzekerheidsbuffer meer dan 3% brutobeweging vereisen.
+TIERED is de profieldefault; daadwerkelijke IBKR commission reports blijven
+vereist vóór Paper-orders of live-moneyontwerp.
+
+De lifecycle kent daarnaast een algemene dagelijkse entrylimiet, symbol-based
+herinstap-cooldown en een optionele minutennauwkeurige tijdstop. `MICRO_500`
+gebruikt EUR 2,50/3,50 netto winstdoelen voor VS/EU, EUR 3/4 netto verlieslimiet,
+60 minuten cooldown, 90 minuten maximale houdtijd en 1,5% dagelijks verlies.
+Een eerder netwerkafhankelijke FX-test gebruikt nu een vaste testfixture.
+
 ## 2026-07-20 - Isolated shadow trading and signal normalization
 
 De autonome runtime kent nu een expliciete `SHADOW`-uitvoeringsmodus. Deze

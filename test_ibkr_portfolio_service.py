@@ -6,6 +6,7 @@ from services.ibkr.ibkr_portfolio_mapper import IbkrPortfolioMapper
 from services.ibkr.ibkr_portfolio_service import (
     IbkrPortfolioService,
 )
+from services.market.fx_rate_service import FxRate
 
 
 class FakeAccountService:
@@ -41,12 +42,24 @@ class FakeAccountService:
         ]
 
 
+class FixedFxRateService:
+    def get_rate(self, from_currency: str, to_currency: str) -> FxRate:
+        return FxRate(
+            from_currency=from_currency,
+            to_currency=to_currency,
+            rate=0.874501,
+            source="test-fixture",
+        )
+
+
 def create_service() -> tuple[IbkrPortfolioService, FakeAccountService]:
     account_service = FakeAccountService()
 
     service = IbkrPortfolioService(
         account_service=account_service,
-        mapper=IbkrPortfolioMapper(),
+        mapper=IbkrPortfolioMapper(
+            fx_rate_service=FixedFxRateService(),
+        ),
     )
 
     return service, account_service

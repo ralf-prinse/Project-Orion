@@ -21,6 +21,10 @@ class LivePaperTradingConfig:
     TIERED_PRICING: ClassVar[str] = "TIERED"
     NEWS_DISABLED: ClassVar[str] = "DISABLED"
     NEWS_SHADOW: ClassVar[str] = "SHADOW"
+    STANDARD_10000: ClassVar[str] = "STANDARD_10000"
+    MICRO_500: ClassVar[str] = "MICRO_500"
+
+    capital_profile: str = STANDARD_10000
 
     watchlist_path: Path = Path("data/universes/swing.csv")
 
@@ -33,6 +37,10 @@ class LivePaperTradingConfig:
     max_open_positions: int = 20
 
     max_new_positions_per_cycle: int = 3
+
+    max_new_positions_per_day: int = 20
+
+    reentry_cooldown_minutes: int = 0
 
     min_confidence: float = 0.75
 
@@ -72,6 +80,8 @@ class LivePaperTradingConfig:
 
     max_holding_days: int = 2
 
+    max_holding_minutes: int | None = None
+
     enable_trailing_stop: bool = True
     enable_break_even: bool = True
 
@@ -87,8 +97,17 @@ class LivePaperTradingConfig:
 
     estimated_slippage_pct_per_side: float = 0.0005
     estimated_external_fees_eur: float = 0.25
+    estimated_monthly_market_data_cost_eur: float = 0.0
+    expected_monthly_round_trips: int = 1
     include_auto_fx_conversion_buffer: bool = True
     auto_fx_conversion_pct_per_side: float = 0.0003
+
+    # Entry economics gate. Defaults preserve the standard profile; the
+    # MICRO_500 profile uses strict values so minimum commissions cannot
+    # consume an unreasonable share of a small position.
+    max_round_trip_cost_pct: float = 1.0
+    max_required_gross_move_pct: float = 1.0
+    entry_cost_uncertainty_buffer_eur: float = 0.0
 
     news_mode: str = NEWS_DISABLED
     news_lookback_hours: int = 24
@@ -126,6 +145,16 @@ class LivePaperTradingConfig:
     earnings_calendar_path: Path = Path("data/earnings_calendar.csv")
 
     def __post_init__(self) -> None:
+        normalized_profile = self.capital_profile.strip().upper()
+        if normalized_profile not in {
+            self.STANDARD_10000,
+            self.MICRO_500,
+        }:
+            raise ValueError(
+                "capital_profile must be STANDARD_10000 or MICRO_500."
+            )
+        object.__setattr__(self, "capital_profile", normalized_profile)
+
         normalized_strategy = self.exit_strategy.strip().upper()
         if normalized_strategy not in {
             self.SWING,
@@ -169,6 +198,19 @@ class LivePaperTradingConfig:
             raise ValueError(
                 "max_new_positions_per_cycle must be at least 1."
             )
+        if self.max_new_positions_per_day < 1:
+            raise ValueError(
+                "max_new_positions_per_day must be at least 1."
+            )
+        if self.reentry_cooldown_minutes < 0:
+            raise ValueError(
+                "reentry_cooldown_minutes must not be negative."
+            )
+        if self.max_holding_minutes is not None:
+            if self.max_holding_minutes < 1:
+                raise ValueError(
+                    "max_holding_minutes must be at least 1 when set."
+                )
 
         bounded_scores = {
             "min_thesis_conviction": self.min_thesis_conviction,
@@ -231,6 +273,17 @@ class LivePaperTradingConfig:
         for name, value in bounded_percentages.items():
             if not 0 < value < 1:
                 raise ValueError(f"{name} must be between zero and one.")
+        inclusive_percentages = {
+            "max_round_trip_cost_pct": self.max_round_trip_cost_pct,
+            "max_required_gross_move_pct": (
+                self.max_required_gross_move_pct
+            ),
+        }
+        for name, value in inclusive_percentages.items():
+            if not 0 < value <= 1:
+                raise ValueError(
+                    f"{name} must be greater than zero and at most one."
+                )
         if self.max_quote_age_seconds <= 0:
             raise ValueError("max_quote_age_seconds must be greater than zero.")
 
@@ -262,7 +315,18 @@ class LivePaperTradingConfig:
             "auto_fx_conversion_pct_per_side": (
                 self.auto_fx_conversion_pct_per_side
             ),
+            "estimated_monthly_market_data_cost_eur": (
+                self.estimated_monthly_market_data_cost_eur
+            ),
+            "entry_cost_uncertainty_buffer_eur": (
+                self.entry_cost_uncertainty_buffer_eur
+            ),
         }
         for name, value in non_negative_amounts.items():
             if value < 0:
                 raise ValueError(f"{name} must not be negative.")
+
+        if self.expected_monthly_round_trips < 1:
+            raise ValueError(
+                "expected_monthly_round_trips must be at least 1."
+            )

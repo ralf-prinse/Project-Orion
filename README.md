@@ -67,6 +67,32 @@ Bevestig met `START ONE ORION SHADOW CYCLE`. Resultaten worden uitsluitend
 geschreven naar bestanden met prefix `data/orion_shadow`; deze portefeuille
 wordt nooit gemengd met de echte IBKR Paper-portefeuille.
 
+## Realistische €500-shadowcyclus
+
+Gebruik `MICRO_500` om strategiegedrag met het beoogde startkapitaal te meten
+zonder de bestaande €10.000-shadowportefeuille te wijzigen:
+
+```powershell
+$env:ORION_IBKR_PAPER_ACCOUNT_ID="<DU_PAPER_ACCOUNT>"
+$env:ORION_IBKR_EXECUTION_MODE="SHADOW"
+$env:ORION_IBKR_ALLOW_ORDERS="false"
+$env:ORION_CAPITAL_PROFILE="MICRO_500"
+$env:ORION_IBKR_PRICING_PLAN="TIERED"
+$env:ORION_MONTHLY_MARKET_DATA_COST_EUR="3.00"
+$env:ORION_IBKR_NEWS_MODE="DISABLED"
+$env:ORION_IBKR_CYCLES="1"
+
+.\.venv\Scripts\python.exe run_autonomous_ibkr_paper.py
+```
+
+Bevestig met `START ONE ORION MICRO 500 SHADOW CYCLE`. Dit profiel start met
+€500, houdt minimaal 30% cash aan, staat maximaal twee posities en twee nieuwe
+entries per dag toe, gebruikt een 60-minuten herinstappauze en een 90-minuten
+tijdstop. Een economische gate weigert een entry wanneer geraamde retourkosten
+meer dan 2% van de positie vragen of kosten plus nettodoel en buffer een
+brutobeweging boven 3% vereisen. De eigen state gebruikt prefix
+`data/orion_shadow_micro_500`.
+
 ## Architectuurgrenzen
 
 - `services/trading_decision`: enige decisionimplementatie van de actieve

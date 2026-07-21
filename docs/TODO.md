@@ -155,7 +155,7 @@ Voorkom dubbele implementaties.
 
 ✅ Legacy `engines`/`ScannerService` en lege placeholders verwijderd
 
-✅ Volledige testsuite uitgebreid naar 581 geslaagd en 0 mislukt
+✅ Volledige testsuite uitgebreid naar 592 geslaagd en 0 mislukt
 
 ✅ IBKR live bid/ask-, spread-, freshness- en top-size execution gate
 
@@ -177,6 +177,12 @@ Voorkom dubbele implementaties.
 
 ✅ Geïsoleerde SHADOW-modus met aparte portefeuille en trade memory
 
+✅ Afzonderlijk MICRO_500-shadowprofiel met EUR 500 startkapitaal
+
+✅ Economische entrygate inclusief geamortiseerde marktdata-overhead
+
+✅ Twee entries per dag, 60-minuten herinstappauze en 90-minuten tijdstop
+
 ---
 
 # Volgende schaalstappen
@@ -184,6 +190,8 @@ Voorkom dubbele implementaties.
 - Paper-observatie met 100 symbolen en orders uitgeschakeld;
 - minimaal meerdere weken shadowtrades verzamelen en nettoresultaten per markt,
   regime en afwijzingsreden beoordelen;
+- MICRO_500 afzonderlijk meten; niet vergelijken op bruto P&L maar op netto
+  expectancy na commissie, spread, slippage, FX en marktdata-overhead;
 - false positives/negatives van de selectiviteitsgate handmatig auditen voordat
   grenzen worden aangepast;
 - ontbrekende/ambigue Yahoo- en IBKR-contracten uit het universum filteren;

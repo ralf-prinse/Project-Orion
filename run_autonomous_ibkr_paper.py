@@ -41,6 +41,10 @@ SCAN_INTERVAL_ENVIRONMENT_VARIABLE = "ORION_IBKR_SCAN_INTERVAL_SECONDS"
 EXIT_STRATEGY_ENVIRONMENT_VARIABLE = "ORION_IBKR_EXIT_STRATEGY"
 PRICING_PLAN_ENVIRONMENT_VARIABLE = "ORION_IBKR_PRICING_PLAN"
 NEWS_MODE_ENVIRONMENT_VARIABLE = "ORION_IBKR_NEWS_MODE"
+CAPITAL_PROFILE_ENVIRONMENT_VARIABLE = "ORION_CAPITAL_PROFILE"
+MARKET_DATA_COST_ENVIRONMENT_VARIABLE = (
+    "ORION_MONTHLY_MARKET_DATA_COST_EUR"
+)
 
 DEFAULT_CYCLES = 1
 DEFAULT_SCAN_INTERVAL_SECONDS = 900
@@ -51,6 +55,9 @@ MAX_SCAN_INTERVAL_SECONDS = 3600
 EXIT_ONLY_CONFIRMATION = "START EXIT ONLY IBKR PAPER CYCLE"
 BUY_AND_SELL_CONFIRMATION = "START ONE AUTONOMOUS IBKR PAPER CYCLE"
 SHADOW_CONFIRMATION = "START ONE ORION SHADOW CYCLE"
+MICRO_500_SHADOW_CONFIRMATION = (
+    "START ONE ORION MICRO 500 SHADOW CYCLE"
+)
 
 
 def read_required_paper_account_id() -> str:
@@ -165,10 +172,12 @@ def read_exit_strategy() -> str:
     return value
 
 
-def read_pricing_plan() -> str:
+def read_pricing_plan(
+    default: str = LivePaperTradingConfig.FIXED_PRICING,
+) -> str:
     value = os.getenv(
         PRICING_PLAN_ENVIRONMENT_VARIABLE,
-        LivePaperTradingConfig.FIXED_PRICING,
+        default,
     ).strip().upper()
     if value not in {
         LivePaperTradingConfig.FIXED_PRICING,
@@ -177,6 +186,41 @@ def read_pricing_plan() -> str:
         raise RuntimeError(
             f"{PRICING_PLAN_ENVIRONMENT_VARIABLE} must be "
             "FIXED or TIERED."
+        )
+    return value
+
+
+def read_capital_profile() -> str:
+    value = os.getenv(
+        CAPITAL_PROFILE_ENVIRONMENT_VARIABLE,
+        LivePaperTradingConfig.STANDARD_10000,
+    ).strip().upper()
+    if value not in {
+        LivePaperTradingConfig.STANDARD_10000,
+        LivePaperTradingConfig.MICRO_500,
+    }:
+        raise RuntimeError(
+            f"{CAPITAL_PROFILE_ENVIRONMENT_VARIABLE} must be "
+            "STANDARD_10000 or MICRO_500."
+        )
+    return value
+
+
+def read_monthly_market_data_cost_eur(*, default: float) -> float:
+    raw_value = os.getenv(
+        MARKET_DATA_COST_ENVIRONMENT_VARIABLE,
+        str(default),
+    ).strip()
+    try:
+        value = float(raw_value)
+    except ValueError as exc:
+        raise RuntimeError(
+            f"{MARKET_DATA_COST_ENVIRONMENT_VARIABLE} must be a number."
+        ) from exc
+    if value < 0 or value > 1000:
+        raise RuntimeError(
+            f"{MARKET_DATA_COST_ENVIRONMENT_VARIABLE} must be between "
+            "zero and 1000."
         )
     return value
 
@@ -206,15 +250,14 @@ def build_config(
     ),
     pricing_plan: str = LivePaperTradingConfig.FIXED_PRICING,
     news_mode: str = LivePaperTradingConfig.NEWS_SHADOW,
+    capital_profile: str = LivePaperTradingConfig.STANDARD_10000,
+    monthly_market_data_cost_eur: float = 0.0,
 ) -> AutonomousPaperTradingConfig:
-    live_config = LivePaperTradingConfig(
+    capital_profile = capital_profile.strip().upper()
+    shared = dict(
         watchlist_path="data/universes/ibkr_eu_us_validation.csv",
-        initial_cash=10_000.0,
         max_symbols=100,
-        max_open_positions=20,
         min_confidence=0.75,
-        max_position_value=1000.0,
-        max_position_size_pct=0.10,
         exit_strategy=exit_strategy,
         ibkr_pricing_plan=pricing_plan,
         news_mode=news_mode,
@@ -225,6 +268,53 @@ def build_config(
             execution_mode != AutonomousPaperTradingConfig.SHADOW
         ),
     )
+    if capital_profile == LivePaperTradingConfig.MICRO_500:
+        live_config = LivePaperTradingConfig(
+            **shared,
+            capital_profile=capital_profile,
+            initial_cash=500.0,
+            max_open_positions=2,
+            max_new_positions_per_cycle=1,
+            max_new_positions_per_day=2,
+            reentry_cooldown_minutes=60,
+            max_position_value=175.0,
+            max_position_size_pct=0.35,
+            max_portfolio_exposure=0.70,
+            min_cash_reserve_pct=0.30,
+            max_risk_per_trade_pct=0.01,
+            max_portfolio_risk_pct=0.02,
+            max_drawdown_pct=0.05,
+            max_holding_minutes=90,
+            small_profit_target_us_eur=2.5,
+            small_profit_target_eu_eur=3.5,
+            small_profit_max_loss_us_eur=3.0,
+            small_profit_max_loss_eu_eur=4.0,
+            estimated_monthly_market_data_cost_eur=(
+                monthly_market_data_cost_eur
+            ),
+            expected_monthly_round_trips=40,
+            max_round_trip_cost_pct=0.02,
+            max_required_gross_move_pct=0.03,
+            entry_cost_uncertainty_buffer_eur=0.50,
+            max_daily_loss_pct=0.015,
+            max_positions_per_market=2,
+            max_market_exposure_pct=0.70,
+            max_positions_per_sector=1,
+            max_sector_exposure_pct=0.35,
+            max_positions_per_correlation_cluster=1,
+        )
+    else:
+        live_config = LivePaperTradingConfig(
+            **shared,
+            capital_profile=capital_profile,
+            initial_cash=10_000.0,
+            max_open_positions=20,
+            max_position_value=1000.0,
+            max_position_size_pct=0.10,
+            estimated_monthly_market_data_cost_eur=(
+                monthly_market_data_cost_eur
+            ),
+        )
 
     return AutonomousPaperTradingConfig(
         live_config=live_config,
@@ -243,6 +333,19 @@ def mask_account_id(account_id: str) -> str:
     return f"{account_id[:2]}*****{account_id[-2:]}"
 
 
+def build_storage_prefix(
+    *,
+    execution_mode: str,
+    capital_profile: str,
+) -> str:
+    capital_profile = capital_profile.strip().upper()
+    if execution_mode != AutonomousPaperTradingConfig.SHADOW:
+        return "data/ibkr_autonomous"
+    if capital_profile == LivePaperTradingConfig.MICRO_500:
+        return "data/orion_shadow_micro_500"
+    return "data/orion_shadow"
+
+
 def print_runtime_mode(
     *,
     paper_account_id: str,
@@ -258,13 +361,33 @@ def print_runtime_mode(
     print("TWS host:          127.0.0.1")
     print("TWS Paper port:    7497")
     print("Base currency:     EUR (required)")
+    print(
+        "Capital profile:   "
+        f"{config.live_config.capital_profile}"
+    )
+    print(
+        "Starting capital:  EUR "
+        f"{config.live_config.initial_cash:.2f}"
+    )
     print(f"Cycles:            {config.cycles}")
     print(
         "Scan interval:     "
         f"{config.sleep_seconds:g} seconds"
     )
     print("Maximum symbols:   100 (50 US + 50 EU)")
-    print("Maximum positions: 20 (risk-limited ceiling)")
+    print(
+        "Maximum positions: "
+        f"{config.live_config.max_open_positions} "
+        "(risk-limited ceiling)"
+    )
+    print(
+        "Daily entry limit: "
+        f"{config.live_config.max_new_positions_per_day}"
+    )
+    print(
+        "Maximum position:  EUR "
+        f"{config.live_config.max_position_value:.2f}"
+    )
     print(f"Execution mode:    {execution_mode}")
     print(
         "Exit strategy:     "
@@ -273,6 +396,11 @@ def print_runtime_mode(
     print(
         "IBKR pricing:      "
         f"{config.live_config.ibkr_pricing_plan}"
+    )
+    print(
+        "Market data budget: EUR "
+        f"{config.live_config.estimated_monthly_market_data_cost_eur:.2f}"
+        "/month"
     )
     print(
         "News intelligence: "
@@ -329,6 +457,17 @@ def print_runtime_mode(
             " / EU EUR -"
             f"{config.live_config.small_profit_max_loss_eu_eur:.2f}"
         )
+        if config.live_config.max_holding_minutes is not None:
+            print(
+                "Maximum hold:      "
+                f"{config.live_config.max_holding_minutes} minutes"
+            )
+        print(
+            "Economic entry:   max costs "
+            f"{config.live_config.max_round_trip_cost_pct:.1%} / "
+            "required move "
+            f"{config.live_config.max_required_gross_move_pct:.1%}"
+        )
     print(
         "Order submission: "
         + (
@@ -384,14 +523,26 @@ def print_runtime_mode(
         print()
 
 
-def require_confirmation(execution_mode: str, cycles: int = 1) -> bool:
+def require_confirmation(
+    execution_mode: str,
+    cycles: int = 1,
+    capital_profile: str = LivePaperTradingConfig.STANDARD_10000,
+) -> bool:
+    micro_shadow = (
+        execution_mode == AutonomousPaperTradingConfig.SHADOW
+        and capital_profile == LivePaperTradingConfig.MICRO_500
+    )
     if cycles == 1:
-        if execution_mode == AutonomousPaperTradingConfig.SHADOW:
+        if micro_shadow:
+            confirmation = MICRO_500_SHADOW_CONFIRMATION
+        elif execution_mode == AutonomousPaperTradingConfig.SHADOW:
             confirmation = SHADOW_CONFIRMATION
         elif execution_mode == AutonomousPaperTradingConfig.EXIT_ONLY:
             confirmation = EXIT_ONLY_CONFIRMATION
         else:
             confirmation = BUY_AND_SELL_CONFIRMATION
+    elif micro_shadow:
+        confirmation = f"START {cycles} ORION MICRO 500 SHADOW CYCLES"
     elif execution_mode == AutonomousPaperTradingConfig.SHADOW:
         confirmation = f"START {cycles} ORION SHADOW CYCLES"
     elif execution_mode == AutonomousPaperTradingConfig.EXIT_ONLY:
@@ -458,6 +609,14 @@ def main() -> None:
     paper_account_id = read_required_paper_account_id()
     allow_order_submission = order_submission_is_enabled()
     execution_mode = read_execution_mode()
+    capital_profile = read_capital_profile()
+    if (
+        capital_profile == LivePaperTradingConfig.MICRO_500
+        and execution_mode != AutonomousPaperTradingConfig.SHADOW
+    ):
+        raise RuntimeError(
+            "MICRO_500 is currently restricted to SHADOW mode."
+        )
     if (
         execution_mode == AutonomousPaperTradingConfig.SHADOW
         and allow_order_submission
@@ -468,8 +627,21 @@ def main() -> None:
     cycles = read_cycle_count()
     scan_interval_seconds = read_scan_interval_seconds()
     exit_strategy = read_exit_strategy()
-    pricing_plan = read_pricing_plan()
+    pricing_plan = read_pricing_plan(
+        default=(
+            LivePaperTradingConfig.TIERED_PRICING
+            if capital_profile == LivePaperTradingConfig.MICRO_500
+            else LivePaperTradingConfig.FIXED_PRICING
+        )
+    )
     news_mode = read_news_mode()
+    monthly_market_data_cost_eur = read_monthly_market_data_cost_eur(
+        default=(
+            3.0
+            if capital_profile == LivePaperTradingConfig.MICRO_500
+            else 0.0
+        )
+    )
     config = build_config(
         execution_mode=execution_mode,
         cycles=cycles,
@@ -477,6 +649,8 @@ def main() -> None:
         exit_strategy=exit_strategy,
         pricing_plan=pricing_plan,
         news_mode=news_mode,
+        capital_profile=capital_profile,
+        monthly_market_data_cost_eur=monthly_market_data_cost_eur,
     )
 
     print_runtime_mode(
@@ -486,11 +660,18 @@ def main() -> None:
         config=config,
     )
 
-    if not require_confirmation(execution_mode, cycles):
+    if not require_confirmation(
+        execution_mode,
+        cycles,
+        capital_profile,
+    ):
         return
 
     shadow_mode = execution_mode == AutonomousPaperTradingConfig.SHADOW
-    prefix = "data/orion_shadow" if shadow_mode else "data/ibkr_autonomous"
+    prefix = build_storage_prefix(
+        execution_mode=execution_mode,
+        capital_profile=capital_profile,
+    )
 
     runtime = IbkrAutonomousRuntimeFactory().build(
         paper_account_id=paper_account_id,
@@ -525,7 +706,7 @@ def main() -> None:
         ),
         completed_trade_repository=JsonlCompletedTradeRepository(
             path=(
-                "data/orion_shadow_completed_trades.jsonl"
+                f"{prefix}_completed_trades.jsonl"
                 if shadow_mode
                 else "data/ibkr_completed_trades.jsonl"
             ),

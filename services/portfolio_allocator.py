@@ -5,6 +5,7 @@ from datetime import UTC, datetime
 
 from models.live_paper_trading_config import LivePaperTradingConfig
 from models.live_paper_trading_result import LivePaperCandidate
+from models.paper_position import PaperPosition
 from models.portfolio_allocation_result import (
     PortfolioAllocationDecision,
     PortfolioAllocationResult,
@@ -14,6 +15,7 @@ from services.risk import RiskContext, RiskManager, RiskProfile
 from services.market.fx_rate_service import FxRateService
 from services.earnings_calendar_service import EarningsCalendarService
 from services.portfolio_concentration_gate import PortfolioConcentrationGate
+from services.trading_cost_estimator import TradingCostEstimator
 
 
 class PortfolioAllocator:
@@ -44,12 +46,16 @@ class PortfolioAllocator:
         require_live_fx: bool = False,
         concentration_gate: PortfolioConcentrationGate | None = None,
         earnings_calendar_service: EarningsCalendarService | None = None,
+        trading_cost_estimator: TradingCostEstimator | None = None,
     ) -> None:
         self.risk_manager = risk_manager or RiskManager()
         self.fx_rate_service = fx_rate_service
         self.require_live_fx = bool(require_live_fx)
         self.concentration_gate = concentration_gate
         self.earnings_calendar_service = earnings_calendar_service
+        self.trading_cost_estimator = (
+            trading_cost_estimator or TradingCostEstimator()
+        )
 
     def allocate(
         self,
@@ -267,6 +273,25 @@ class PortfolioAllocator:
                 2,
             )
 
+            economic_rejection = self._economic_rejection_reason(
+                symbol=candidate.symbol,
+                quantity=quantity,
+                entry_price=entry_price,
+                fx_rate=fx_rate,
+                estimated_value=estimated_value,
+                config=config,
+            )
+            if economic_rejection is not None:
+                decisions.append(
+                    PortfolioAllocationDecision(
+                        candidate=candidate,
+                        quantity=0,
+                        approved=False,
+                        reason=economic_rejection,
+                    )
+                )
+                continue
+
             if self.concentration_gate is not None:
                 concentration = self.concentration_gate.evaluate(
                     session=session,
@@ -395,6 +420,66 @@ class PortfolioAllocator:
         return PortfolioAllocationResult(
             decisions=decisions,
         )
+
+    def _economic_rejection_reason(
+        self,
+        *,
+        symbol: str,
+        quantity: int,
+        entry_price: float,
+        fx_rate: float,
+        estimated_value: float,
+        config: LivePaperTradingConfig,
+    ) -> str | None:
+        currency = (
+            "EUR"
+            if str(symbol).strip().upper().endswith((".AS", ".DE"))
+            else "USD"
+        )
+        position = PaperPosition(
+            symbol=symbol,
+            quantity=quantity,
+            entry_price=entry_price,
+            current_price=entry_price,
+            currency=currency,
+            fx_rate_to_base=fx_rate,
+        )
+        estimate = self.trading_cost_estimator.estimate_round_trip(
+            position=position,
+            config=config,
+        )
+        if estimated_value <= 0:
+            return "Economic gate rejected allocation; position value is zero."
+
+        cost_ratio = estimate.total_cost_eur / estimated_value
+        if cost_ratio > config.max_round_trip_cost_pct:
+            return (
+                "Economic gate rejected allocation; estimated round-trip "
+                f"costs EUR {estimate.total_cost_eur:.2f} are "
+                f"{cost_ratio:.2%} of position value, above "
+                f"{config.max_round_trip_cost_pct:.2%}."
+            )
+
+        target = (
+            config.small_profit_target_eu_eur
+            if currency == "EUR"
+            else config.small_profit_target_us_eur
+        )
+        required_gross_profit = (
+            estimate.total_cost_eur
+            + target
+            + config.entry_cost_uncertainty_buffer_eur
+        )
+        required_move_ratio = required_gross_profit / estimated_value
+        if required_move_ratio > config.max_required_gross_move_pct:
+            return (
+                "Economic gate rejected allocation; costs, target and "
+                "uncertainty buffer require a gross move of "
+                f"{required_move_ratio:.2%}, above "
+                f"{config.max_required_gross_move_pct:.2%}."
+            )
+
+        return None
 
     def _calculate_current_portfolio_risk(
         self,

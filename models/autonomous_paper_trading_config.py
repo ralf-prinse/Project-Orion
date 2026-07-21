@@ -46,6 +46,15 @@ class AutonomousPaperTradingConfig:
 
         object.__setattr__(self, "execution_mode", normalized)
 
+        if (
+            self.live_config.capital_profile
+            == LivePaperTradingConfig.MICRO_500
+            and normalized != self.SHADOW
+        ):
+            raise ValueError(
+                "MICRO_500 capital profile is restricted to SHADOW mode."
+            )
+
         if self.cycles < 1:
             raise ValueError("cycles must be at least 1.")
 

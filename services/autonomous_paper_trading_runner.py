@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import time
-from dataclasses import replace
+from copy import copy
+from dataclasses import is_dataclass, replace
 from datetime import datetime
 
 from models.autonomous_paper_trading_config import (
@@ -16,6 +17,7 @@ from models.paper_portfolio import PaperPortfolio
 from models.trade_journal_entry import TradeJournalEntry
 from models.trading_session import TradingSession
 from models.live_paper_trading_result import LivePaperTradingResult
+from models.live_paper_trading_config import LivePaperTradingConfig
 from models.portfolio_allocation_result import PortfolioAllocationResult
 from models.execution_result import ExecutionResult
 from providers.yahoo_provider import YahooProvider
@@ -50,6 +52,7 @@ from services.completed_trade_record_builder import CompletedTradeRecordBuilder
 from services.session_risk_circuit_breaker import (
     SessionRiskCircuitBreaker,
 )
+from services.entry_frequency_gate import EntryFrequencyGate
 
 
 class AutonomousPaperTradingRunner:
@@ -77,6 +80,7 @@ class AutonomousPaperTradingRunner:
         completed_trade_repository=None,
         completed_trade_record_builder=None,
         session_risk_circuit_breaker=None,
+        entry_frequency_gate=None,
         protective_execution_reconciler=None,
         sleep_fn=None,
     ):
@@ -133,6 +137,9 @@ class AutonomousPaperTradingRunner:
         self.session_risk_circuit_breaker = (
             session_risk_circuit_breaker
             or SessionRiskCircuitBreaker()
+        )
+        self.entry_frequency_gate = (
+            entry_frequency_gate or EntryFrequencyGate()
         )
         self.protective_execution_reconciler = (
             protective_execution_reconciler
@@ -254,6 +261,10 @@ class AutonomousPaperTradingRunner:
                     session=session
                 )
                 scan_result = self._enrich_scan_with_news(scan_result)
+                scan_result = self._apply_entry_frequency_limits(
+                    scan_result=scan_result,
+                    session=session,
+                )
                 allocation_result = self.allocator.allocate(
                     session=session,
                     candidates=scan_result.candidates,
@@ -401,12 +412,7 @@ class AutonomousPaperTradingRunner:
         return result
 
     def _evaluate_session_risk(self, session):
-        completed_trades = []
-        if (
-            self.completed_trade_repository is not None
-            and hasattr(self.completed_trade_repository, "load_all")
-        ):
-            completed_trades = self.completed_trade_repository.load_all()
+        completed_trades = self._load_completed_trades()
         live_config = self.config.live_config
         return self.session_risk_circuit_breaker.evaluate(
             session=session,
@@ -423,6 +429,63 @@ class AutonomousPaperTradingRunner:
                 live_config.max_consecutive_order_failures
             ),
         )
+
+    def _apply_entry_frequency_limits(self, *, scan_result, session):
+        original_candidates = getattr(scan_result, "candidates", [])
+        if not original_candidates:
+            return scan_result
+
+        completed_trades = self._load_completed_trades()
+        config = self.config.live_config
+        candidates = []
+
+        for candidate in original_candidates:
+            if not candidate.accepted:
+                candidates.append(candidate)
+                continue
+
+            decision = self.entry_frequency_gate.evaluate(
+                symbol=candidate.symbol,
+                session=session,
+                completed_trades=completed_trades,
+                max_new_positions_per_day=(
+                    config.max_new_positions_per_day
+                ),
+                reentry_cooldown_minutes=(
+                    config.reentry_cooldown_minutes
+                ),
+            )
+            if decision.allowed:
+                candidates.append(candidate)
+                continue
+
+            candidates.append(
+                replace(
+                    candidate,
+                    accepted=False,
+                    reason=(
+                        "Entry frequency gate rejected candidate; "
+                        + decision.reason
+                    ),
+                )
+            )
+
+        if candidates == original_candidates:
+            return scan_result
+        if is_dataclass(scan_result):
+            return replace(scan_result, candidates=candidates)
+
+        updated_result = copy(scan_result)
+        updated_result.candidates = candidates
+        return updated_result
+
+    def _load_completed_trades(self):
+        if (
+            self.completed_trade_repository is not None
+            and hasattr(self.completed_trade_repository, "load_all")
+        ):
+            return self.completed_trade_repository.load_all()
+        return []
 
     def _reconcile_native_protective_exits(
         self,
@@ -616,7 +679,14 @@ class AutonomousPaperTradingRunner:
         )
 
     def _strategy_name(self) -> str:
-        return "ORION_SHADOW" if self._is_shadow() else "ORION_CANONICAL"
+        if self._is_shadow():
+            if (
+                self.config.live_config.capital_profile
+                == LivePaperTradingConfig.MICRO_500
+            ):
+                return "ORION_SHADOW_MICRO_500"
+            return "ORION_SHADOW"
+        return "ORION_CANONICAL"
 
     def _empty_scan_result(
         self,
@@ -1330,7 +1400,13 @@ class AutonomousPaperTradingRunner:
 
         return TradingSession(
             name=(
-                "Orion Autonomous Shadow Trading"
+                "Orion Autonomous Micro 500 Shadow Trading"
+                if (
+                    self._is_shadow()
+                    and self.config.live_config.capital_profile
+                    == LivePaperTradingConfig.MICRO_500
+                )
+                else "Orion Autonomous Shadow Trading"
                 if self._is_shadow()
                 else "Orion Autonomous Paper Trading"
             ),

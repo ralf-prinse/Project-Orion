@@ -2,7 +2,7 @@
 
 # Project Orion - Status
 
-Laatste update: 20-07-2026
+Laatste update: 21-07-2026
 
 ---
 
@@ -30,6 +30,12 @@ Een afzonderlijke `SHADOW`-modus kan zonder IBKR-marktdata-abonnement fictieve
 trades volgen. Deze modus is technisch geïsoleerd van broker-sync, adoptie,
 IBKR-quotes en ordertransport en weigert ordertoestemming fail-closed.
 
+Binnen `SHADOW` bestaat tevens een volledig gescheiden `MICRO_500`-
+kapitaalprofiel. Dit modelleert EUR 500 startkapitaal, twee posities, 30%
+cashreserve, dagelijkse entry- en herinstaplimieten, minutennauwkeurige exits en
+een economische gate die minimumcommissies en marktdata-overhead vóór allocatie
+toetst. Het profiel deelt geen state met de standaardshadowportefeuille.
+
 De eerste schaalfase voor autonoom Paper-traden is operationeel:
 
 - 100 gecureerde EU/VS-symbolen;
@@ -52,7 +58,7 @@ Architectuuropschoning:
 - oude directe decisionengine en dubbele `engines`/scannerketen verwijderd;
 - research/explainability blijft geïsoleerd in `services/decisions`;
 - lege placeholders en tests zonder assertions verwijderd;
-- volledige testsuite: 581 geslaagd, 0 mislukt.
+- volledige testsuite: 592 geslaagd, 0 mislukt.
 
 ---
 
@@ -83,6 +89,12 @@ Architectuuropschoning:
 ✅ Thesis- en opportunity-gebaseerde selectiviteitsgate
 
 ✅ Geïsoleerde kostenbewuste shadowportfolio zonder IBKR-orderpad
+
+✅ Afzonderlijk MICRO_500-profiel met eigen state en fail-closed profielgrens
+
+✅ Entry-economie op kostenratio, benodigde brutobeweging en marktdata-overhead
+
+✅ Dagelijkse entrylimiet, herinstap-cooldown en 90-minuten microtijdstop
 
 ## Data
 

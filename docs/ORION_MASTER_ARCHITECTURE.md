@@ -132,6 +132,9 @@ modus wordt `ShadowBroker` in `ExecutionEngine` geïnjecteerd en worden broker-
 sync, positieadoptie, IBKR quote provider, ordertransport en native protective
 reconciliation niet aan de runner gekoppeld. De shadowruntime gebruikt eigen
 persistentiebestanden en kan niet met ordertoestemming worden gecombineerd.
+Kapitaalprofiel `MICRO_500` is een extra fail-closed grens binnen `SHADOW` en
+heeft een eigen composition-configuratie en opslagprefix. Hierdoor kan een EUR
+500-experiment nooit de standaard EUR 10.000-shadowstate laden of overschrijven.
 
 ---
 
@@ -147,6 +150,10 @@ concentratiegate. De gate begrenst markt, sector en een handmatig gecureerd
 correlatiecluster en telt reeds in dezelfde cyclus goedgekeurde posities mee.
 Bekende earnings-events kunnen entries deterministisch blokkeren. Onbekende
 eventdata wordt expliciet als onbekend behandeld en niet door nieuws geschat.
+Voor kleine kapitaalprofielen volgt na quantityberekening een economische gate:
+geraamde commissie, slippage, FX, externe kosten en geamortiseerde marktdata-
+overhead worden afgezet tegen positiewaarde en benodigde brutobeweging. Een
+entry-frequencygate begrenst daarnaast entries per dag en herinstap per symbool.
 
 ---
 
