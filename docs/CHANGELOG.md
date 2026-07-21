@@ -22,6 +22,14 @@ gebruikt EUR 2,50/3,50 netto winstdoelen voor VS/EU, EUR 3/4 netto verlieslimiet
 60 minuten cooldown, 90 minuten maximale houdtijd en 1,5% dagelijks verlies.
 Een eerder netwerkafhankelijke FX-test gebruikt nu een vaste testfixture.
 
+`MICRO_500` gebruikt nu daadwerkelijk `5d/5m`-historie in plaats van de
+standaard `3mo/1d`-swingdata. De intradayketen verwijdert de nog niet afgesloten
+5-minutencandle, weigert een laatste volledige candle ouder dan tien minuten en
+gebruikt een cache-TTL van twee minuten. Trend en momentum hebben een
+5-minutenschaal; volatiliteit wordt geannualiseerd met 78 vijfminutenperioden
+per Amerikaanse handelsdag. Minder dan 21 volledige candles stopt fail-closed.
+De standaard EUR 10.000-strategie behoudt dagcandles en dagelijkse schaling.
+
 ## 2026-07-20 - Isolated shadow trading and signal normalization
 
 De autonome runtime kent nu een expliciete `SHADOW`-uitvoeringsmodus. Deze

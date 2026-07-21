@@ -154,6 +154,10 @@ Voor kleine kapitaalprofielen volgt na quantityberekening een economische gate:
 geraamde commissie, slippage, FX, externe kosten en geamortiseerde marktdata-
 overhead worden afgezet tegen positiewaarde en benodigde brutobeweging. Een
 entry-frequencygate begrenst daarnaast entries per dag en herinstap per symbool.
+De microdata-adapter levert `5d/5m` aan dezelfde canonieke pipeline, maar pas na
+het verwijderen van een lopende candle en een freshnesscontrole. Indicatoren
+lezen intervalmetadata en schalen trend, momentum en annualisatie passend voor
+5-minutenbars. De standaard dagpipeline behoudt zijn bestaande schaal.
 
 ---
 

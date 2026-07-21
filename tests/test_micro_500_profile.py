@@ -2,6 +2,7 @@ from datetime import UTC, datetime, timedelta
 from types import SimpleNamespace
 
 import pytest
+import pandas as pd
 
 from models.autonomous_paper_trading_config import AutonomousPaperTradingConfig
 from models.live_paper_trading_config import LivePaperTradingConfig
@@ -21,6 +22,11 @@ from services.autonomous_paper_trading_runner import (
     AutonomousPaperTradingRunner,
 )
 from services.entry_frequency_gate import EntryFrequencyGate
+from services.ibkr.ibkr_autonomous_runtime_factory import (
+    IbkrAutonomousRuntimeFactory,
+)
+from services.intelligence.indicator_builder import IndicatorBuilder
+from services.live_paper_market_scanner import LivePaperMarketScanner
 from services.portfolio_allocator import PortfolioAllocator
 from services.risk.time_stop_service import TimeStopService
 from services.trading_cost_estimator import TradingCostEstimator
@@ -81,6 +87,9 @@ def test_micro_profile_has_isolated_realistic_capital_limits() -> None:
     assert config.min_cash_reserve_pct == 0.30
     assert config.max_holding_minutes == 90
     assert config.reentry_cooldown_minutes == 60
+    assert config.history_period == "5d"
+    assert config.history_interval == "5m"
+    assert config.max_history_age_minutes == 10
 
 
 def test_micro_profile_is_restricted_to_shadow_mode() -> None:
@@ -91,6 +100,22 @@ def test_micro_profile_is_restricted_to_shadow_mode() -> None:
                 capital_profile=LivePaperTradingConfig.MICRO_500,
             ),
         )
+
+
+def test_micro_runtime_uses_two_minute_intraday_cache() -> None:
+    runtime = IbkrAutonomousRuntimeFactory().build(
+        paper_account_id="DU1234567",
+        config=build_config(
+            execution_mode=AutonomousPaperTradingConfig.SHADOW,
+            pricing_plan=LivePaperTradingConfig.TIERED_PRICING,
+            news_mode=LivePaperTradingConfig.NEWS_DISABLED,
+            capital_profile=LivePaperTradingConfig.MICRO_500,
+            monthly_market_data_cost_eur=3.0,
+        ),
+        allow_order_submission=False,
+    )
+
+    assert runtime.historical_provider.cache.ttl.total_seconds() == 120
 
 
 def test_micro_profile_uses_separate_shadow_storage_prefix() -> None:
@@ -288,3 +313,86 @@ def test_micro_time_stop_activates_after_ninety_minutes() -> None:
     assert result.activated is True
     assert result.maximum_hours == 1.5
     assert "intraday" in result.reason
+
+
+def test_intraday_history_drops_unfinished_candle() -> None:
+    now = datetime(2026, 7, 21, 10, 2, tzinfo=UTC)
+    scanner = LivePaperMarketScanner(
+        config=micro_config(),
+        clock=lambda: now,
+    )
+    history = intraday_history(now=now, last_offset_minutes=-2)
+
+    prepared = scanner._prepare_history(
+        symbol="F",
+        history=history,
+        evaluated_at=now,
+    )
+
+    assert len(prepared) == len(history) - 1
+    assert prepared.index[-1] == now - timedelta(minutes=7)
+    assert prepared.attrs["interval"] == "5m"
+
+
+def test_intraday_history_rejects_stale_completed_candle() -> None:
+    now = datetime(2026, 7, 21, 10, 0, tzinfo=UTC)
+    scanner = LivePaperMarketScanner(
+        config=micro_config(),
+        clock=lambda: now,
+    )
+    history = intraday_history(now=now, last_offset_minutes=-30)
+
+    with pytest.raises(ValueError, match="minutes old"):
+        scanner._prepare_history(
+            symbol="F",
+            history=history,
+            evaluated_at=now,
+        )
+
+
+def test_five_minute_indicators_use_intraday_scaling() -> None:
+    close = pd.Series([100.0 + (index * 0.02) for index in range(40)])
+    builder = IndicatorBuilder()
+
+    assert builder._calculate_trend(
+        close,
+        interval="5m",
+    ) > builder._calculate_trend(close, interval="1d")
+    assert builder._calculate_momentum(
+        close,
+        interval="5m",
+    ) > builder._calculate_momentum(close, interval="1d")
+
+    volatile = pd.Series(
+        [100.0, 100.2, 99.9, 100.3, 99.8] * 10,
+        dtype=float,
+    )
+    assert builder._calculate_volatility(
+        volatile,
+        interval="5m",
+    ) > builder._calculate_volatility(volatile, interval="1d")
+
+
+def intraday_history(
+    *,
+    now: datetime,
+    last_offset_minutes: int,
+) -> pd.DataFrame:
+    last = now + timedelta(minutes=last_offset_minutes)
+    index = pd.date_range(
+        end=last,
+        periods=30,
+        freq="5min",
+        tz="UTC",
+    )
+    closes = [100.0 + (item * 0.02) for item in range(len(index))]
+    return pd.DataFrame(
+        {
+            "Open": [value - 0.01 for value in closes],
+            "High": [value + 0.05 for value in closes],
+            "Low": [value - 0.05 for value in closes],
+            "Close": closes,
+            "Volume": [100_000.0] * len(index),
+        },
+        index=index,
+    )

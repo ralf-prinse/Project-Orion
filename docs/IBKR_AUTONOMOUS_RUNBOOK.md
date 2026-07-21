@@ -124,6 +124,11 @@ Profielgrenzen:
   onzekerheidsbuffer;
 - nettodoelen VS/EU EUR 2,50/EUR 3,50 en nettoverlieslimieten EUR 3/EUR 4;
 - 90 minuten maximale houdtijd en 1,5% dagelijkse verliescircuitbreaker.
+- vijf handelsdagen aan 5-minutencandles met twee minuten cache;
+- de lopende candle wordt nooit geanalyseerd en de nieuwste volledige candle
+  mag maximaal tien minuten oud zijn;
+- bij starten om 09:00 wacht Orion fail-closed tot de eerste volledige candle
+  rond 09:05 beschikbaar is.
 
 Bestanden:
 

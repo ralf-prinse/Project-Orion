@@ -41,6 +41,11 @@ EUR 175 per positie, twee entries per dag, 60 minuten re-entrycooldown en een
 retourkosten boven 2% liggen of kosten plus doel en buffer meer dan 3%
 brutobeweging vragen. Maandelijkse marktdata-overhead wordt per verwachte
 round-trip aan de kostenraming toegevoegd.
+De entryanalyse van dit profiel gebruikt vijf handelsdagen 5-minutencandles.
+Een lopende candle wordt uitgesloten; de nieuwste volledige candle mag tijdens
+een open sessie maximaal tien minuten oud zijn. Trend/momentum en
+volatiliteitsannualisatie zijn intervalbewust. De standaardconfiguratie blijft
+op `3mo/1d` en wordt niet door intradayschaling beïnvloed.
 
 De vroegere structurele BUY-bias is gecorrigeerd: trend is nu een getekende
 afwijking van het voortschrijdend gemiddelde en volatiliteit heeft de juiste
@@ -54,7 +59,7 @@ gerapporteerd en kan geen configuratie of order wijzigen.
 Architectuurgrens: de actieve `TradingPipeline` gebruikt uitsluitend
 `services.trading_decision`. `services/decisions` is research/explainability en
 wordt niet door de autonome runner geïmporteerd. De oude `engines`- en
-`ScannerService`-keten is verwijderd. De volledige suite telt 592 groene tests.
+`ScannerService`-keten is verwijderd. De volledige suite telt 596 groene tests.
 
 Werkend:
 

@@ -142,8 +142,15 @@ class IbkrAutonomousRuntimeFactory:
         price_provider = YahooProvider()
         fx_rate_service = FxRateService()
         market_session_service = MarketSessionService()
+        intraday_micro_profile = (
+            shadow_mode
+            and runtime_config.live_config.capital_profile
+            == LivePaperTradingConfig.MICRO_500
+        )
         historical_provider = YahooHistoricalDataProvider(
-            cache=HistoricalCache(ttl_minutes=15),
+            cache=HistoricalCache(
+                ttl_minutes=(2 if intraday_micro_profile else 15)
+            ),
             batch_size=25,
         )
         resolved_news_provider = None

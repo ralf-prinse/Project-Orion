@@ -70,6 +70,7 @@ class LivePaperTradingConfig:
 
     history_period: str = "3mo"
     history_interval: str = "1d"
+    max_history_age_minutes: int | None = None
 
     allow_fractional_shares: bool = False
 
@@ -210,6 +211,11 @@ class LivePaperTradingConfig:
             if self.max_holding_minutes < 1:
                 raise ValueError(
                     "max_holding_minutes must be at least 1 when set."
+                )
+        if self.max_history_age_minutes is not None:
+            if self.max_history_age_minutes < 1:
+                raise ValueError(
+                    "max_history_age_minutes must be at least 1 when set."
                 )
 
         bounded_scores = {

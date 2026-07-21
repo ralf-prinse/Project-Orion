@@ -155,7 +155,7 @@ Voorkom dubbele implementaties.
 
 ✅ Legacy `engines`/`ScannerService` en lege placeholders verwijderd
 
-✅ Volledige testsuite uitgebreid naar 592 geslaagd en 0 mislukt
+✅ Volledige testsuite uitgebreid naar 596 geslaagd en 0 mislukt
 
 ✅ IBKR live bid/ask-, spread-, freshness- en top-size execution gate
 
@@ -182,6 +182,10 @@ Voorkom dubbele implementaties.
 ✅ Economische entrygate inclusief geamortiseerde marktdata-overhead
 
 ✅ Twee entries per dag, 60-minuten herinstappauze en 90-minuten tijdstop
+
+✅ MICRO_500 5d/5m-candles met incomplete-barfilter en tien-minutenfreshness
+
+✅ Intervalbewuste trend-, momentum- en volatiliteitsschaal
 
 ---
 

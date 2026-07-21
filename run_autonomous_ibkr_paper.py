@@ -284,6 +284,9 @@ def build_config(
             max_risk_per_trade_pct=0.01,
             max_portfolio_risk_pct=0.02,
             max_drawdown_pct=0.05,
+            history_period="5d",
+            history_interval="5m",
+            max_history_age_minutes=10,
             max_holding_minutes=90,
             small_profit_target_us_eur=2.5,
             small_profit_target_eu_eur=3.5,
@@ -375,6 +378,16 @@ def print_runtime_mode(
         f"{config.sleep_seconds:g} seconds"
     )
     print("Maximum symbols:   100 (50 US + 50 EU)")
+    print(
+        "Market candles:    "
+        f"{config.live_config.history_period} / "
+        f"{config.live_config.history_interval}"
+    )
+    if config.live_config.max_history_age_minutes is not None:
+        print(
+            "Candle freshness: max "
+            f"{config.live_config.max_history_age_minutes} minutes"
+        )
     print(
         "Maximum positions: "
         f"{config.live_config.max_open_positions} "

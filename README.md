@@ -88,7 +88,9 @@ $env:ORION_IBKR_CYCLES="1"
 Bevestig met `START ONE ORION MICRO 500 SHADOW CYCLE`. Dit profiel start met
 €500, houdt minimaal 30% cash aan, staat maximaal twee posities en twee nieuwe
 entries per dag toe, gebruikt een 60-minuten herinstappauze en een 90-minuten
-tijdstop. Een economische gate weigert een entry wanneer geraamde retourkosten
+tijdstop. Entries gebruiken vijf handelsdagen aan uitsluitend afgeronde
+5-minutencandles. Een nog lopende candle wordt verwijderd en data ouder dan tien
+minuten wordt fail-closed geweigerd. Een economische gate weigert een entry wanneer geraamde retourkosten
 meer dan 2% van de positie vragen of kosten plus nettodoel en buffer een
 brutobeweging boven 3% vereisen. De eigen state gebruikt prefix
 `data/orion_shadow_micro_500`.

@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import time
 from collections.abc import Callable
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
+
+import pandas as pd
 
 from models.live_paper_trading_config import LivePaperTradingConfig
 from models.live_paper_trading_result import (
@@ -135,6 +137,12 @@ class LivePaperMarketScanner:
                         interval=self.config.history_interval,
                     )
 
+                history = self._prepare_history(
+                    symbol=symbol,
+                    history=history,
+                    evaluated_at=evaluated_at,
+                )
+
                 pipeline_result = self.adapter.run(
                     symbol=symbol,
                     history=history,
@@ -169,6 +177,59 @@ class LivePaperMarketScanner:
             executed_trades=0,
             rejected_trades=0,
         )
+
+    def _prepare_history(
+        self,
+        *,
+        symbol: str,
+        history: pd.DataFrame,
+        evaluated_at: datetime,
+    ) -> pd.DataFrame:
+        interval = self.config.history_interval.strip().lower()
+        prepared = history.copy()
+        prepared.attrs["interval"] = interval
+
+        if interval != "5m":
+            return prepared
+        if not isinstance(prepared.index, pd.DatetimeIndex):
+            raise ValueError(
+                f"Intraday history for {symbol} requires a DatetimeIndex."
+            )
+
+        evaluated_timestamp = pd.Timestamp(evaluated_at)
+        if evaluated_timestamp.tzinfo is None:
+            evaluated_timestamp = evaluated_timestamp.tz_localize("UTC")
+        else:
+            evaluated_timestamp = evaluated_timestamp.tz_convert("UTC")
+
+        timestamps = prepared.index
+        if timestamps.tz is None:
+            timestamps = timestamps.tz_localize("UTC")
+        else:
+            timestamps = timestamps.tz_convert("UTC")
+
+        complete_before = evaluated_timestamp - timedelta(minutes=5)
+        prepared = prepared.loc[timestamps <= complete_before].copy()
+        prepared.attrs["interval"] = interval
+        if prepared.empty:
+            raise ValueError(
+                f"No completed 5-minute candles available for {symbol}."
+            )
+
+        latest_timestamp = timestamps[timestamps <= complete_before][-1]
+        maximum_age = self.config.max_history_age_minutes
+        if maximum_age is not None:
+            age_minutes = (
+                evaluated_timestamp - latest_timestamp
+            ).total_seconds() / 60.0
+            if age_minutes > maximum_age:
+                raise ValueError(
+                    f"Latest completed 5-minute candle for {symbol} is "
+                    f"{age_minutes:.1f} minutes old; maximum is "
+                    f"{maximum_age} minutes."
+                )
+
+        return prepared
 
     def _build_candidate(
         self,

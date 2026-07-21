@@ -43,13 +43,26 @@ class IndicatorBuilder:
 
         latest_price = float(close.iloc[-1])
         latest_volume = float(history["Volume"].iloc[-1])
+        interval = str(history.attrs.get("interval", "1d")).lower()
+
+        required_candles = max(
+            self.config.rsi_period,
+            self.config.trend_period,
+            self.config.momentum_period,
+            self.config.volatility_period,
+            20,
+        ) + 1
+        if len(history) < required_candles:
+            raise ValueError(
+                f"At least {required_candles} completed candles are required."
+            )
 
         indicator_pack = IndicatorPack(
             symbol=symbol,
             rsi=self._calculate_rsi(close),
-            trend=self._calculate_trend(close),
-            volatility=self._calculate_volatility(close),
-            momentum=self._calculate_momentum(close),
+            trend=self._calculate_trend(close, interval=interval),
+            volatility=self._calculate_volatility(close, interval=interval),
+            momentum=self._calculate_momentum(close, interval=interval),
             volume=latest_volume,
             price=latest_price,
             market_structure=self._build_market_structure(
@@ -158,6 +171,7 @@ class IndicatorBuilder:
     def _calculate_trend(
         self,
         close: pd.Series,
+        interval: str = "1d",
     ) -> float:
 
         sma = close.rolling(
@@ -173,15 +187,19 @@ class IndicatorBuilder:
         # Express the distance from the moving average as a signed score.
         # The former latest/average ratio was almost always close to +1 and
         # could not represent a downtrend after clamping. A five-percent
-        # deviation now maps to the full +/-1 range.
+        # deviation now maps to the full +/-1 range. Intraday bars use a
+        # tighter half-percent scale because a five-percent displacement over
+        # twenty 5-minute bars would make nearly every valid trend look flat.
         deviation = (latest - average) / average
-        score = deviation / 0.05
+        full_scale_deviation = 0.005 if interval == "5m" else 0.05
+        score = deviation / full_scale_deviation
 
         return max(-1.0, min(1.0, score))
 
     def _calculate_momentum(
         self,
         close: pd.Series,
+        interval: str = "1d",
     ) -> float:
 
         period = self.config.momentum_period
@@ -197,13 +215,15 @@ class IndicatorBuilder:
 
         percentage = ((latest - previous) / previous) * 100
 
-        score = 50 + percentage
+        scale = 20.0 if interval == "5m" else 1.0
+        score = 50 + (percentage * scale)
 
         return max(0.0, min(100.0, score))
 
     def _calculate_volatility(
         self,
         close: pd.Series,
+        interval: str = "1d",
     ) -> float:
 
         period = self.config.volatility_period
@@ -220,6 +240,13 @@ class IndicatorBuilder:
         # Downstream intelligence normalizes percentage values on a 0..100
         # scale. Return annualized realized volatility in percentage points
         # instead of a raw daily decimal (for example 22.0, not 0.014).
-        annualized_percent = float(volatility) * math.sqrt(252.0) * 100.0
+        periods_per_year = 252.0
+        if interval == "5m":
+            periods_per_year *= 78.0
+        annualized_percent = (
+            float(volatility)
+            * math.sqrt(periods_per_year)
+            * 100.0
+        )
 
         return max(0.0, min(100.0, annualized_percent))
