@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import pandas as pd
+import pytest
 from run_autonomous_ibkr_paper import (
     CYCLES_ENVIRONMENT_VARIABLE,
     SCAN_INTERVAL_ENVIRONMENT_VARIABLE,
@@ -98,6 +99,17 @@ def test_bounded_cycle_environment(monkeypatch) -> None:
 
     assert read_cycle_count() == 12
     assert read_scan_interval_seconds() == 900
+
+
+def test_cycle_environment_accepts_two_hundred_and_rejects_more(
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv(CYCLES_ENVIRONMENT_VARIABLE, "200")
+    assert read_cycle_count() == 200
+
+    monkeypatch.setenv(CYCLES_ENVIRONMENT_VARIABLE, "201")
+    with pytest.raises(RuntimeError, match="between 1 and 200"):
+        read_cycle_count()
 
 
 def test_yahoo_symbol_normalization_preserves_exchange_suffixes() -> None:

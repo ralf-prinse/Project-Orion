@@ -60,7 +60,7 @@ gerapporteerd en kan geen configuratie of order wijzigen.
 Architectuurgrens: de actieve `TradingPipeline` gebruikt uitsluitend
 `services.trading_decision`. `services/decisions` is research/explainability en
 wordt niet door de autonome runner geïmporteerd. De oude `engines`- en
-`ScannerService`-keten is verwijderd. De volledige suite telt 597 groene tests.
+`ScannerService`-keten is verwijderd. De volledige suite telt 598 groene tests.
 
 Werkend:
 
@@ -85,7 +85,7 @@ Actuele IBKR Paper-schaalconfiguratie:
 - 100-symbolenvalidatie-universum: 50 VS, 25 Amsterdam, 25 Xetra;
 - officiële markturen bepalen welke subset per cyclus wordt verwerkt;
 - historische Yahoo-data: batches van 25, cache-TTL 15 minuten;
-- standaard één cyclus; begrensd configureerbaar tot 96 cycli;
+- standaard één cyclus; begrensd configureerbaar tot 200 cycli;
 - standaard scaninterval 900 seconden bij meerdere cycli;
 - maximaal drie nieuwe posities per cyclus en twintig totaal;
 - live-moneyaccounts blijven technisch geblokkeerd; alleen `DU` Paper-accounts.

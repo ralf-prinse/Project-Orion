@@ -22,6 +22,11 @@ gebruikt EUR 2,50/3,50 netto winstdoelen voor VS/EU, EUR 3/4 netto verlieslimiet
 60 minuten cooldown, 90 minuten maximale houdtijd en 1,5% dagelijks verlies.
 Een eerder netwerkafhankelijke FX-test gebruikt nu een vaste testfixture.
 
+De expliciete runnerlimiet is verhoogd van 96 naar 200 cycli. Bij het aanbevolen
+5-minuteninterval kan één bevestigde run daarmee ongeveer 16 uur en 35 minuten
+draaien. De bovengrens blijft als bescherming tegen typefouten en onbedoeld
+praktisch eindeloze interactieve runs bestaan.
+
 `MICRO_500` gebruikt nu daadwerkelijk `5d/5m`-historie in plaats van de
 standaard `3mo/1d`-swingdata. De intradayketen verwijdert de nog niet afgesloten
 5-minutencandle, weigert een laatste volledige candle ouder dan vijftien minuten
@@ -161,7 +166,7 @@ en 15 minuten persistent gecachet. De positieprijs- en broker-syncpaden blijven
 ongewijzigd fail-closed werken.
 
 Een begrensde multi-cycle Paper-sessie kan expliciet worden ingesteld via
-`ORION_IBKR_CYCLES` (maximaal 96) en
+`ORION_IBKR_CYCLES` (destijds maximaal 96; huidig maximum 200) en
 `ORION_IBKR_SCAN_INTERVAL_SECONDS` (60-3600; standaard 900). De runner wacht nu
 daadwerkelijk tussen cycli en vereist bij meerdere cycli een bevestiging met het
 exacte aantal. Per cyclus mogen maximaal drie nieuwe posities worden geopend;

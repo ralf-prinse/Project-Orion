@@ -155,7 +155,7 @@ Voorkom dubbele implementaties.
 
 ✅ Legacy `engines`/`ScannerService` en lege placeholders verwijderd
 
-✅ Volledige testsuite uitgebreid naar 597 geslaagd en 0 mislukt
+✅ Volledige testsuite uitgebreid naar 598 geslaagd en 0 mislukt
 
 ✅ IBKR live bid/ask-, spread-, freshness- en top-size execution gate
 
