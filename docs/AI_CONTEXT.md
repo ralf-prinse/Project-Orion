@@ -43,7 +43,8 @@ brutobeweging vragen. Maandelijkse marktdata-overhead wordt per verwachte
 round-trip aan de kostenraming toegevoegd.
 De entryanalyse van dit profiel gebruikt vijf handelsdagen 5-minutencandles.
 Een lopende candle wordt uitgesloten; de nieuwste volledige candle mag tijdens
-een open sessie maximaal tien minuten oud zijn. Trend/momentum en
+een open sessie maximaal vijftien minuten na candle completion oud zijn. Deze
+marge vangt de gemeten Yahoo-publicatievertraging op. Trend/momentum en
 volatiliteitsannualisatie zijn intervalbewust. De standaardconfiguratie blijft
 op `3mo/1d` en wordt niet door intradayschaling beïnvloed.
 
@@ -59,7 +60,7 @@ gerapporteerd en kan geen configuratie of order wijzigen.
 Architectuurgrens: de actieve `TradingPipeline` gebruikt uitsluitend
 `services.trading_decision`. `services/decisions` is research/explainability en
 wordt niet door de autonome runner geïmporteerd. De oude `engines`- en
-`ScannerService`-keten is verwijderd. De volledige suite telt 596 groene tests.
+`ScannerService`-keten is verwijderd. De volledige suite telt 597 groene tests.
 
 Werkend:
 

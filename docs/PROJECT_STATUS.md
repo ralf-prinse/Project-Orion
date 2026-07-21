@@ -58,9 +58,9 @@ Architectuuropschoning:
 - oude directe decisionengine en dubbele `engines`/scannerketen verwijderd;
 - research/explainability blijft geïsoleerd in `services/decisions`;
 - lege placeholders en tests zonder assertions verwijderd;
-- volledige testsuite: 596 geslaagd, 0 mislukt.
-- MICRO_500 intradaydata: `5d/5m`, uitsluitend volledige candles, maximaal tien
-  minuten oud en twee minuten cache;
+- volledige testsuite: 597 geslaagd, 0 mislukt.
+- MICRO_500 intradaydata: `5d/5m`, uitsluitend volledige candles, maximaal
+  vijftien minuten oud na completion en twee minuten cache;
 
 ---
 

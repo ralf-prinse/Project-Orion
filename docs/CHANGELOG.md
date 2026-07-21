@@ -24,9 +24,11 @@ Een eerder netwerkafhankelijke FX-test gebruikt nu een vaste testfixture.
 
 `MICRO_500` gebruikt nu daadwerkelijk `5d/5m`-historie in plaats van de
 standaard `3mo/1d`-swingdata. De intradayketen verwijdert de nog niet afgesloten
-5-minutencandle, weigert een laatste volledige candle ouder dan tien minuten en
-gebruikt een cache-TTL van twee minuten. Trend en momentum hebben een
-5-minutenschaal; volatiliteit wordt geannualiseerd met 78 vijfminutenperioden
+5-minutencandle, weigert een laatste volledige candle ouder dan vijftien minuten
+na candle completion en gebruikt een cache-TTL van twee minuten. De leeftijd
+wordt vanaf het einde van de candle gemeten; dit vangt de praktisch gemeten
+Yahoo-publicatievertraging van ongeveer twaalf minuten op. Trend en momentum
+hebben een 5-minutenschaal; volatiliteit wordt geannualiseerd met 78 vijfminutenperioden
 per Amerikaanse handelsdag. Minder dan 21 volledige candles stopt fail-closed.
 De standaard EUR 10.000-strategie behoudt dagcandles en dagelijkse schaling.
 

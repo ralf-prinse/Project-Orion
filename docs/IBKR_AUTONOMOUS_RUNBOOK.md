@@ -126,7 +126,9 @@ Profielgrenzen:
 - 90 minuten maximale houdtijd en 1,5% dagelijkse verliescircuitbreaker.
 - vijf handelsdagen aan 5-minutencandles met twee minuten cache;
 - de lopende candle wordt nooit geanalyseerd en de nieuwste volledige candle
-  mag maximaal tien minuten oud zijn;
+  mag maximaal vijftien minuten na candle completion oud zijn;
+- deze marge vangt de gemeten Yahoo-publicatievertraging op; oudere data wordt
+  nog steeds fail-closed geweigerd;
 - bij starten om 09:00 wacht Orion fail-closed tot de eerste volledige candle
   rond 09:05 beschikbaar is.
 

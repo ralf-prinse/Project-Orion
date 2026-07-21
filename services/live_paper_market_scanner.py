@@ -217,15 +217,17 @@ class LivePaperMarketScanner:
             )
 
         latest_timestamp = timestamps[timestamps <= complete_before][-1]
+        latest_completed_at = latest_timestamp + timedelta(minutes=5)
         maximum_age = self.config.max_history_age_minutes
         if maximum_age is not None:
             age_minutes = (
-                evaluated_timestamp - latest_timestamp
+                evaluated_timestamp - latest_completed_at
             ).total_seconds() / 60.0
             if age_minutes > maximum_age:
                 raise ValueError(
                     f"Latest completed 5-minute candle for {symbol} is "
-                    f"{age_minutes:.1f} minutes old; maximum is "
+                    f"{age_minutes:.1f} minutes old after completion; "
+                    "maximum is "
                     f"{maximum_age} minutes."
                 )
 

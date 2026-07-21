@@ -89,7 +89,7 @@ def test_micro_profile_has_isolated_realistic_capital_limits() -> None:
     assert config.reentry_cooldown_minutes == 60
     assert config.history_period == "5d"
     assert config.history_interval == "5m"
-    assert config.max_history_age_minutes == 10
+    assert config.max_history_age_minutes == 15
 
 
 def test_micro_profile_is_restricted_to_shadow_mode() -> None:
@@ -348,6 +348,23 @@ def test_intraday_history_rejects_stale_completed_candle() -> None:
             history=history,
             evaluated_at=now,
         )
+
+
+def test_intraday_history_accepts_yahoo_delay_after_candle_completion() -> None:
+    now = datetime(2026, 7, 21, 10, 0, tzinfo=UTC)
+    scanner = LivePaperMarketScanner(
+        config=micro_config(),
+        clock=lambda: now,
+    )
+    history = intraday_history(now=now, last_offset_minutes=-17)
+
+    prepared = scanner._prepare_history(
+        symbol="F",
+        history=history,
+        evaluated_at=now,
+    )
+
+    assert prepared.index[-1] == now - timedelta(minutes=17)
 
 
 def test_five_minute_indicators_use_intraday_scaling() -> None:

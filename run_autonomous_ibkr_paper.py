@@ -286,7 +286,7 @@ def build_config(
             max_drawdown_pct=0.05,
             history_period="5d",
             history_interval="5m",
-            max_history_age_minutes=10,
+            max_history_age_minutes=15,
             max_holding_minutes=90,
             small_profit_target_us_eur=2.5,
             small_profit_target_eu_eur=3.5,
