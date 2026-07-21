@@ -92,7 +92,9 @@ tijdstop. Entries gebruiken vijf handelsdagen aan uitsluitend afgeronde
 5-minutencandles. Een nog lopende candle wordt verwijderd en data ouder dan tien
 minuten wordt fail-closed geweigerd. Een economische gate weigert een entry wanneer geraamde retourkosten
 meer dan 2% van de positie vragen of kosten plus nettodoel en buffer een
-brutobeweging boven 3% vereisen. De eigen state gebruikt prefix
+brutobeweging boven 1,6% vereisen. Het netto microdoel is EUR 0,50; hoge
+Europese minimumcommissies blijven daardoor via de economische gate
+fail-closed. De eigen state gebruikt prefix
 `data/orion_shadow_micro_500`.
 
 ## Architectuurgrenzen

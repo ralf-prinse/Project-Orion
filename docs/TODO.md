@@ -155,7 +155,7 @@ Voorkom dubbele implementaties.
 
 ✅ Legacy `engines`/`ScannerService` en lege placeholders verwijderd
 
-✅ Volledige testsuite uitgebreid naar 598 geslaagd en 0 mislukt
+✅ Volledige testsuite uitgebreid naar 602 geslaagd en 0 mislukt
 
 ✅ IBKR live bid/ask-, spread-, freshness- en top-size execution gate
 
@@ -187,6 +187,10 @@ Voorkom dubbele implementaties.
 na candle completion
 
 ✅ Intervalbewuste trend-, momentum- en volatiliteitsschaal
+
+✅ Netto shadowcash, UTC-journals en herstel van historische MICRO_500-state
+
+✅ Empirisch 90-minutenonderzoek en haalbaarheidsgate van 1,6%
 
 ---
 

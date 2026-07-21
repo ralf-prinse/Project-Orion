@@ -58,9 +58,11 @@ Architectuuropschoning:
 - oude directe decisionengine en dubbele `engines`/scannerketen verwijderd;
 - research/explainability blijft geïsoleerd in `services/decisions`;
 - lege placeholders en tests zonder assertions verwijderd;
-- volledige testsuite: 598 geslaagd, 0 mislukt.
+- volledige testsuite: 602 geslaagd, 0 mislukt.
 - MICRO_500 intradaydata: `5d/5m`, uitsluitend volledige candles, maximaal
   vijftien minuten oud na completion en twee minuten cache;
+- MICRO_500 netto-accounting: exitkosten in cash, startreconciliatie en
+  UTC-aware trade journals;
 
 ---
 

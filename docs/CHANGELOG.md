@@ -1,5 +1,24 @@
 # CHANGELOG.md
 
+## 2026-07-22 - Net shadow accounting and empirically feasible micro targets
+
+De eerste volledige MICRO_500-run bleek bruto EUR 0,54 positief maar na EUR
+2,39 geraamde kosten EUR 1,86 negatief. Shadowexits trekken round-tripkosten nu
+werkelijk van cash af. Bij starten wordt de geïsoleerde microcash opnieuw
+opgebouwd uit startkapitaal, completed nettoresultaten en open kostbasis. Nieuwe
+trade-journaltimestamps zijn UTC-aware. De bestaande state is herstelbaar
+geback-upt en gereconcilieerd naar EUR 498,14; 6.317 timestamps en twee
+houdtijden zijn gecorrigeerd. De oude bruto peak equity is hersteld naar de
+netto startbasis van EUR 500 zodat drawdown weer economisch klopt.
+
+Analyse van 15.000 Amerikaanse en 20.357 Europese 90-minutenvensters toont dat
+het oude doel meestal buiten de waargenomen beweging lag. Het netto microdoel
+is daarom EUR 0,50 voor VS en EU en de maximale vereiste brutobeweging is
+verlaagd naar 1,6%. Europese entries blijven bij de huidige minimumcommissies
+meestal terecht economisch geblokkeerd. Er is geen openingsbuffer toegevoegd:
+de gemeten openingsvensters waren juist sterker dan latere vensters. De
+verlieslimieten en tijdstop zijn na slechts twee trades bewust niet geoptimaliseerd.
+
 ## 2026-07-21 - Isolated MICRO_500 capital profile
 
 Een afzonderlijk `MICRO_500`-profiel simuleert voortaan het beoogde

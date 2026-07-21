@@ -38,9 +38,11 @@ toegestaan en gebruikt een eigen `data/orion_shadow_micro_500`-state. Het
 profiel start met EUR 500, maximaal twee posities, 30% cashreserve, maximaal
 EUR 175 per positie, twee entries per dag, 60 minuten re-entrycooldown en een
 90-minuten tijdstop. Entries worden vóór RiskManager aanvullend afgewezen als
-retourkosten boven 2% liggen of kosten plus doel en buffer meer dan 3%
+retourkosten boven 2% liggen of kosten plus doel en buffer meer dan 1,6%
 brutobeweging vragen. Maandelijkse marktdata-overhead wordt per verwachte
-round-trip aan de kostenraming toegevoegd.
+round-trip aan de kostenraming toegevoegd. Het actuele netto microdoel is
+EUR 0,50 voor VS en EU; Europese minimumcommissies zorgen er bij EUR 500 voor
+dat zulke entries meestal economisch worden afgewezen.
 De entryanalyse van dit profiel gebruikt vijf handelsdagen 5-minutencandles.
 Een lopende candle wordt uitgesloten; de nieuwste volledige candle mag tijdens
 een open sessie maximaal vijftien minuten na candle completion oud zijn. Deze
@@ -60,7 +62,7 @@ gerapporteerd en kan geen configuratie of order wijzigen.
 Architectuurgrens: de actieve `TradingPipeline` gebruikt uitsluitend
 `services.trading_decision`. `services/decisions` is research/explainability en
 wordt niet door de autonome runner geïmporteerd. De oude `engines`- en
-`ScannerService`-keten is verwijderd. De volledige suite telt 598 groene tests.
+`ScannerService`-keten is verwijderd. De volledige suite telt 602 groene tests.
 
 Werkend:
 

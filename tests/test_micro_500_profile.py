@@ -28,6 +28,7 @@ from services.ibkr.ibkr_autonomous_runtime_factory import (
 from services.intelligence.indicator_builder import IndicatorBuilder
 from services.live_paper_market_scanner import LivePaperMarketScanner
 from services.portfolio_allocator import PortfolioAllocator
+from services.position_monitor import PositionMonitor
 from services.risk.time_stop_service import TimeStopService
 from services.trading_cost_estimator import TradingCostEstimator
 from models.paper_position import PaperPosition
@@ -90,6 +91,9 @@ def test_micro_profile_has_isolated_realistic_capital_limits() -> None:
     assert config.history_period == "5d"
     assert config.history_interval == "5m"
     assert config.max_history_age_minutes == 15
+    assert config.small_profit_target_us_eur == 0.5
+    assert config.small_profit_target_eu_eur == 0.5
+    assert config.max_required_gross_move_pct == 0.016
 
 
 def test_micro_profile_is_restricted_to_shadow_mode() -> None:
@@ -116,6 +120,101 @@ def test_micro_runtime_uses_two_minute_intraday_cache() -> None:
     )
 
     assert runtime.historical_provider.cache.ttl.total_seconds() == 120
+
+
+def test_micro_shadow_reconciles_legacy_gross_cash_to_completed_net() -> None:
+    runner = AutonomousPaperTradingRunner(
+        config=build_config(
+            execution_mode=AutonomousPaperTradingConfig.SHADOW,
+            pricing_plan=LivePaperTradingConfig.TIERED_PRICING,
+            news_mode=LivePaperTradingConfig.NEWS_DISABLED,
+            capital_profile=LivePaperTradingConfig.MICRO_500,
+            monthly_market_data_cost_eur=3.0,
+        ),
+        completed_trade_repository=SimpleNamespace(
+            load_all=lambda: [
+                SimpleNamespace(estimated_net_profit_loss=-2.06),
+                SimpleNamespace(estimated_net_profit_loss=0.20),
+            ]
+        ),
+    )
+    legacy_session = TradingSession(
+        name="Legacy micro shadow",
+        portfolio=PaperPortfolio(cash=500.54),
+        peak_portfolio_value=500.54,
+    )
+
+    reconciled = runner._reconcile_micro_shadow_cash(legacy_session)
+
+    assert reconciled.cash == 498.14
+    assert reconciled.equity == 498.14
+    assert reconciled.peak_portfolio_value == 500.0
+
+
+def test_micro_shadow_does_not_reconcile_without_completed_trade_store() -> None:
+    runner = AutonomousPaperTradingRunner(
+        config=build_config(
+            execution_mode=AutonomousPaperTradingConfig.SHADOW,
+            capital_profile=LivePaperTradingConfig.MICRO_500,
+        )
+    )
+    session = TradingSession(
+        name="Micro without completed store",
+        portfolio=PaperPortfolio(cash=490.0),
+    )
+
+    assert runner._reconcile_micro_shadow_cash(session) is session
+
+
+def test_micro_shadow_exit_cost_is_deducted_from_portfolio_cash() -> None:
+    runner = AutonomousPaperTradingRunner(
+        config=build_config(
+            execution_mode=AutonomousPaperTradingConfig.SHADOW,
+            pricing_plan=LivePaperTradingConfig.TIERED_PRICING,
+            news_mode=LivePaperTradingConfig.NEWS_DISABLED,
+            capital_profile=LivePaperTradingConfig.MICRO_500,
+            monthly_market_data_cost_eur=3.0,
+        )
+    )
+    position = PaperPosition(
+        symbol="F",
+        quantity=3,
+        entry_price=50.0,
+        current_price=51.0,
+        currency="USD",
+        fx_rate_to_base=1.0,
+    )
+    gross_exit_portfolio = PaperPortfolio(cash=503.0)
+    estimate = TradingCostEstimator().estimate_round_trip(
+        position=position,
+        config=runner.config.live_config,
+    )
+
+    net_portfolio = runner._apply_shadow_exit_cost(
+        portfolio=gross_exit_portfolio,
+        position=position,
+        executed_price=51.0,
+    )
+
+    assert net_portfolio.cash == round(503.0 - estimate.total_cost_eur, 2)
+
+
+def test_micro_target_captures_observed_qcom_small_net_profit() -> None:
+    result = PositionMonitor().evaluate(
+        PaperPosition(
+            symbol="QCOM",
+            quantity=1,
+            entry_price=171.92,
+            current_price=173.89,
+            currency="USD",
+            fx_rate_to_base=(150.46 / 171.92),
+        ),
+        micro_config(),
+    )
+
+    assert result.action == "TAKE_PROFIT"
+    assert result.estimated_net_profit_loss >= 0.50
+    assert result.minimum_net_profit == 0.50
 
 
 def test_micro_profile_uses_separate_shadow_storage_prefix() -> None:

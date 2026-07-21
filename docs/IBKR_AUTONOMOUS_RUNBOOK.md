@@ -120,9 +120,9 @@ Profielgrenzen:
 - TIERED-kostenmodel, plus EUR 3 maandelijkse marktdata verdeeld over veertig
   verwachte round-trips;
 - maximaal 2% geschatte round-tripkosten ten opzichte van positiewaarde;
-- maximaal 3% vereiste brutobeweging inclusief kosten, nettodoel en EUR 0,50
+- maximaal 1,6% vereiste brutobeweging inclusief kosten, nettodoel en EUR 0,50
   onzekerheidsbuffer;
-- nettodoelen VS/EU EUR 2,50/EUR 3,50 en nettoverlieslimieten EUR 3/EUR 4;
+- nettodoelen VS/EU EUR 0,50/EUR 0,50 en nettoverlieslimieten EUR 3/EUR 4;
 - 90 minuten maximale houdtijd en 1,5% dagelijkse verliescircuitbreaker.
 - vijf handelsdagen aan 5-minutencandles met twee minuten cache;
 - de lopende candle wordt nooit geanalyseerd en de nieuwste volledige candle
@@ -131,6 +131,8 @@ Profielgrenzen:
   nog steeds fail-closed geweigerd;
 - bij starten om 09:00 wacht Orion fail-closed tot de eerste volledige candle
   rond 09:05 beschikbaar is.
+- shadowcash is netto: de volledige conservatieve round-tripkosten worden bij
+  exit afgetrokken en bij starten tegen completed trades gereconcilieerd.
 
 Bestanden:
 

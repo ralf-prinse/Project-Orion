@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 
 from models.autonomous_paper_trading_result import (
     AutonomousPaperTradingResult,
@@ -183,7 +183,7 @@ class TradeJournalBuilder:
         )
 
         return TradeJournalEntry(
-            timestamp=datetime.now(),
+            timestamp=datetime.now(UTC),
             symbol=decision.symbol,
             action=action,
             decision=pipeline_result.decision,

@@ -3,7 +3,7 @@ from __future__ import annotations
 import time
 from copy import copy
 from dataclasses import is_dataclass, replace
-from datetime import datetime
+from datetime import UTC, datetime
 
 from models.autonomous_paper_trading_config import (
     AutonomousPaperTradingConfig,
@@ -151,6 +151,7 @@ class AutonomousPaperTradingRunner:
     def run(self):
         session_id = self._build_session_id()
         session = self._load_or_create_session()
+        session = self._reconcile_micro_shadow_cash(session)
         peak_portfolio_value = max(
             session.peak_portfolio_value,
             session.equity,
@@ -486,6 +487,96 @@ class AutonomousPaperTradingRunner:
         ):
             return self.completed_trade_repository.load_all()
         return []
+
+    def _reconcile_micro_shadow_cash(self, session):
+        """Rebuild isolated micro cash from net completed results.
+
+        The MICRO_500 account has a fixed synthetic starting balance and no
+        deposits or withdrawals. That makes its economically correct cash
+        balance deterministic: initial cash plus completed net P/L, minus
+        the cost basis of positions that remain open. Rebuilding it on start
+        also repairs shadow files produced before costs were deducted from
+        portfolio cash.
+        """
+        if not (
+            self._is_shadow()
+            and self.config.live_config.capital_profile
+            == LivePaperTradingConfig.MICRO_500
+        ):
+            return session
+        if (
+            self.completed_trade_repository is None
+            or not hasattr(self.completed_trade_repository, "load_all")
+        ):
+            return session
+
+        completed_net = sum(
+            float(trade.estimated_net_profit_loss)
+            for trade in self._load_completed_trades()
+        )
+        open_cost_basis = sum(
+            position.cost_basis
+            for position in session.portfolio.positions.values()
+        )
+        expected_cash = round(
+            self.config.live_config.initial_cash
+            + completed_net
+            - open_cost_basis,
+            2,
+        )
+        if abs(session.portfolio.cash - expected_cash) < 0.005:
+            return session
+
+        reconciled_equity = round(
+            expected_cash + session.portfolio.positions_value,
+            2,
+        )
+        reconciled_peak = max(
+            self.config.live_config.initial_cash,
+            reconciled_equity,
+        )
+
+        return TradingSession(
+            name=session.name,
+            portfolio=PaperPortfolio(
+                cash=expected_cash,
+                positions=dict(session.portfolio.positions),
+                base_currency=session.portfolio.base_currency,
+            ),
+            position_states=dict(session.position_states),
+            risk_plans=dict(session.risk_plans),
+            status=session.status,
+            peak_portfolio_value=reconciled_peak,
+        )
+
+    def _apply_shadow_exit_cost(
+        self,
+        *,
+        portfolio,
+        position,
+        executed_price,
+    ):
+        """Deduct the conservative round-trip estimate after a shadow exit."""
+        cost_position = replace(
+            position,
+            current_price=float(executed_price),
+        )
+        estimate = (
+            self.position_monitor
+            .trading_cost_estimator
+            .estimate_round_trip(
+                position=cost_position,
+                config=self.config.live_config,
+            )
+        )
+        return PaperPortfolio(
+            cash=round(
+                portfolio.cash - estimate.total_cost_eur,
+                2,
+            ),
+            positions=dict(portfolio.positions),
+            base_currency=portfolio.base_currency,
+        )
 
     def _reconcile_native_protective_exits(
         self,
@@ -968,9 +1059,17 @@ class AutonomousPaperTradingRunner:
                 f"{position.symbol}."
             )
 
+        execution_portfolio = engine_result.portfolio
+        if self._is_shadow():
+            execution_portfolio = self._apply_shadow_exit_cost(
+                portfolio=execution_portfolio,
+                position=position,
+                executed_price=execution.executed_price,
+            )
+
         provisional_session = TradingSession(
             name=session.name,
-            portfolio=engine_result.portfolio,
+            portfolio=execution_portfolio,
             position_states=dict(
                 session.position_states
             ),
@@ -1050,6 +1149,13 @@ class AutonomousPaperTradingRunner:
 
         if not result.executed:
             return session
+
+        if self._is_shadow():
+            portfolio = self._apply_shadow_exit_cost(
+                portfolio=portfolio,
+                position=position,
+                executed_price=decision.current_price,
+            )
 
         self._append_exit_journal_entry(
             position,
@@ -1166,7 +1272,7 @@ class AutonomousPaperTradingRunner:
             state = session.position_states[record.symbol]
             self.trade_journal_repository.append(
                 TradeJournalEntry(
-                    timestamp=datetime.now(),
+                    timestamp=datetime.now(UTC),
                     symbol=record.symbol,
                     action="ADOPT_POSITION",
                     decision="ADOPT",
@@ -1255,7 +1361,7 @@ class AutonomousPaperTradingRunner:
         entry = TradeJournalEntry(
             timestamp=(
                 execution.executed_at
-                or datetime.now()
+                or datetime.now(UTC)
             ),
             symbol=position.symbol,
             action="CLOSE_POSITION",
@@ -1315,7 +1421,7 @@ class AutonomousPaperTradingRunner:
         exit_value = position.market_value
 
         entry = TradeJournalEntry(
-            timestamp=datetime.now(),
+            timestamp=datetime.now(UTC),
             symbol=position.symbol,
             action="CLOSE_POSITION",
             decision=action,

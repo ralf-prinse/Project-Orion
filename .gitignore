@@ -31,3 +31,4 @@ data/ibkr_completed_trades.jsonl
 data/orion_shadow*_trading_session.json
 data/orion_shadow*_paper_portfolio.json
 data/orion_shadow*_completed_trades.jsonl
+data/backups/micro_500_net_reconciliation_*/

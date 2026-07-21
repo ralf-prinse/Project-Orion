@@ -149,3 +149,4 @@ def test_runner_persists_completed_record_after_confirmed_local_exit():
     assert len(completed.records) == 1
     assert completed.records[0].trade_id == "trade-1"
     assert completed.records[0].exit_reason == "Net target reached"
+    assert completed.records[0].closed_at.tzinfo is not None

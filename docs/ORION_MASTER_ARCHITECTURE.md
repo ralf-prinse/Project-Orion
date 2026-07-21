@@ -158,6 +158,9 @@ De microdata-adapter levert `5d/5m` aan dezelfde canonieke pipeline, maar pas na
 het verwijderen van een lopende candle en een freshnesscontrole. Indicatoren
 lezen intervalmetadata en schalen trend, momentum en annualisatie passend voor
 5-minutenbars. De standaard dagpipeline behoudt zijn bestaande schaal.
+MICRO_500-shadowcash is een netto grootheid: bij sluiten worden geschatte
+round-tripkosten werkelijk afgetrokken en bij laden wordt cash vanuit de
+afzonderlijke completed-trade store gereconcilieerd.
 
 ---
 
