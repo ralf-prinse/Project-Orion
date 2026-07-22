@@ -84,7 +84,7 @@ def test_micro_profile_has_isolated_realistic_capital_limits() -> None:
     assert config.max_open_positions == 1
     assert config.max_new_positions_per_cycle == 1
     assert config.max_new_positions_per_day == 1
-    assert config.max_new_positions_per_week == 3
+    assert config.max_new_positions_per_week == 5
     assert config.max_position_value == 350.0
     assert config.min_cash_reserve_pct == 0.30
     assert config.max_holding_minutes == 180
@@ -405,6 +405,36 @@ def test_entry_frequency_gate_enforces_weekly_limit() -> None:
     assert decision.allowed is False
     assert decision.entries_this_week == 3
     assert "Weekly entry limit" in decision.reason
+
+
+def test_micro_week_limit_allows_fifth_entry_on_a_new_day() -> None:
+    now = datetime(2026, 7, 24, 12, 0, tzinfo=UTC)
+    completed = [
+        SimpleNamespace(
+            trade_id=f"weekly-{index}",
+            symbol=f"OLD{index}",
+            opened_at=now - timedelta(days=(index % 3) + 1),
+            closed_at=now - timedelta(days=(index % 3) + 1, hours=-1),
+        )
+        for index in range(4)
+    ]
+
+    decision = EntryFrequencyGate().evaluate(
+        symbol="F",
+        session=TradingSession(
+            name="Micro",
+            portfolio=PaperPortfolio(cash=493.24),
+        ),
+        completed_trades=completed,
+        max_new_positions_per_day=1,
+        max_new_positions_per_week=5,
+        reentry_cooldown_minutes=240,
+        now=now,
+    )
+
+    assert decision.allowed is True
+    assert decision.entries_today == 0
+    assert decision.entries_this_week == 4
 
 
 def test_runner_applies_daily_entry_limit_to_accepted_candidates() -> None:

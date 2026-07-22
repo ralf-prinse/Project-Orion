@@ -87,7 +87,7 @@ $env:ORION_IBKR_CYCLES="1"
 
 Bevestig met `START ONE ORION MICRO 500 SHADOW CYCLE`. Dit profiel start met
 €500, houdt minimaal 30% cash aan en staat maximaal één positie, één entry per
-dag en drie entries per UTC-week toe. De maximale positie is EUR 350. Alleen
+dag en vijf entries per UTC-week toe. De maximale positie is EUR 350. Alleen
 Amerikaanse symbolen kunnen een entry krijgen; Europa blijft zichtbaar in de
 analyse maar wordt voor micro-uitvoering fail-closed geblokkeerd.
 

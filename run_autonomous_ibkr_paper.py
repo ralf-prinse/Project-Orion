@@ -275,7 +275,7 @@ def build_config(
             max_open_positions=1,
             max_new_positions_per_cycle=1,
             max_new_positions_per_day=1,
-            max_new_positions_per_week=3,
+            max_new_positions_per_week=5,
             reentry_cooldown_minutes=240,
             allowed_entry_market_codes=("XUSA",),
             entry_open_buffer_minutes=15,

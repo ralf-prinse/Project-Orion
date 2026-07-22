@@ -8,7 +8,7 @@ negatief. Samen met de eerste run staat de geïsoleerde portefeuille op EUR
 onrealistische break-even winrate van 85,7% en is daarom niet behouden.
 
 MICRO_500 gebruikt nu maximaal één positie van EUR 350, één entry per dag en
-drie per UTC-week. Alleen XUSA kan entries krijgen; Europa blijft onderdeel van
+vijf per UTC-week. Alleen XUSA kan entries krijgen; Europa blijft onderdeel van
 de scan maar wordt voor dit kleine kapitaal fail-closed geblokkeerd. Het
 VS-nettodoel is EUR 4,50 tegenover EUR 3 maximaal nettoverlies, met minimaal
 1,5 reward/risk. De kostenratio is begrensd op 0,6% en de maximaal benodigde

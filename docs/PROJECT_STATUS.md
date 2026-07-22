@@ -59,7 +59,7 @@ Architectuuropschoning:
 - oude directe decisionengine en dubbele `engines`/scannerketen verwijderd;
 - research/explainability blijft geïsoleerd in `services/decisions`;
 - lege placeholders en tests zonder assertions verwijderd;
-- volledige testsuite: 609 geslaagd, 0 mislukt.
+- volledige testsuite: 610 geslaagd, 0 mislukt.
 - MICRO_500 intradaydata: `5d/5m`, uitsluitend volledige candles, maximaal
   vijftien minuten oud na completion en twee minuten cache;
 - MICRO_500 netto-accounting: exitkosten in cash, startreconciliatie en
@@ -99,7 +99,7 @@ Architectuuropschoning:
 
 ✅ Entry-economie op kostenratio, benodigde brutobeweging en marktdata-overhead
 
-✅ Eén entry per dag, drie per week, 240-minuten cooldown en 180-minuten tijdstop
+✅ Eén entry per dag, vijf per week, 240-minuten cooldown en 180-minuten tijdstop
 
 ✅ VS-only micro-entry met opening/sluitingsbuffer, 5m/15m, VWAP, relatief
 volume en SPY-relatieve-sterktebevestiging

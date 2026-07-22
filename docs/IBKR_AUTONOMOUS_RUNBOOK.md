@@ -115,7 +115,7 @@ Profielgrenzen:
 
 - EUR 500 startkapitaal en EUR 350 maximale positie;
 - maximaal één open positie en één nieuwe positie per cyclus;
-- maximaal één entry per UTC-dag, drie per UTC-week en 240 minuten cooldown;
+- maximaal één entry per UTC-dag, vijf per UTC-week en 240 minuten cooldown;
 - minimaal 30% cashreserve en maximaal 70% totale exposure;
 - TIERED-kostenmodel, plus EUR 3 maandelijkse marktdata verdeeld over twaalf
   verwachte round-trips;

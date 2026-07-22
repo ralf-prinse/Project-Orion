@@ -155,7 +155,7 @@ Voorkom dubbele implementaties.
 
 ✅ Legacy `engines`/`ScannerService` en lege placeholders verwijderd
 
-✅ Volledige testsuite uitgebreid naar 609 geslaagd en 0 mislukt
+✅ Volledige testsuite uitgebreid naar 610 geslaagd en 0 mislukt
 
 ✅ IBKR live bid/ask-, spread-, freshness- en top-size execution gate
 
@@ -181,7 +181,7 @@ Voorkom dubbele implementaties.
 
 ✅ Economische entrygate inclusief geamortiseerde marktdata-overhead
 
-✅ Eén entry per dag, drie per week, 240-minuten herinstappauze en
+✅ Eén entry per dag, vijf per week, 240-minuten herinstappauze en
 180-minuten tijdstop
 
 ✅ MICRO_500 5d/5m-candles met incomplete-barfilter en vijftien-minutenfreshness

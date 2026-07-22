@@ -36,7 +36,7 @@ referentieprijzen met conservatieve slippage en geraamde round-tripkosten.
 Kapitaalprofiel `MICRO_500` is uitsluitend aan execution mode `SHADOW`
 toegestaan en gebruikt een eigen `data/orion_shadow_micro_500`-state. Het
 profiel start met EUR 500, maximaal één positie, 30% cashreserve, maximaal
-EUR 350 per positie, één entry per dag, drie per week, 240 minuten
+EUR 350 per positie, één entry per dag, vijf per week, 240 minuten
 re-entrycooldown en een 180-minuten tijdstop. Alleen XUSA is uitvoerbaar;
 Europese symbolen blijven analyseerbaar maar worden voor micro-entry hard
 geblokkeerd. Het Amerikaanse nettodoel is EUR 4,50 tegenover EUR 3,00 maximaal
@@ -64,7 +64,7 @@ gerapporteerd en kan geen configuratie of order wijzigen.
 Architectuurgrens: de actieve `TradingPipeline` gebruikt uitsluitend
 `services.trading_decision`. `services/decisions` is research/explainability en
 wordt niet door de autonome runner geïmporteerd. De oude `engines`- en
-`ScannerService`-keten is verwijderd. De volledige suite telt 609 groene tests.
+`ScannerService`-keten is verwijderd. De volledige suite telt 610 groene tests.
 
 Werkend:
 
