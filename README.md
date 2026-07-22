@@ -86,17 +86,19 @@ $env:ORION_IBKR_CYCLES="1"
 ```
 
 Bevestig met `START ONE ORION MICRO 500 SHADOW CYCLE`. Dit profiel start met
-€500, houdt minimaal 30% cash aan, staat maximaal twee posities en twee nieuwe
-entries per dag toe, gebruikt een 60-minuten herinstappauze en een 90-minuten
-tijdstop. Entries gebruiken vijf handelsdagen aan uitsluitend afgeronde
-5-minutencandles. Een nog lopende candle wordt verwijderd en data ouder dan
-vijftien minuten na completion wordt fail-closed geweigerd. Een economische
-gate weigert een entry wanneer geraamde retourkosten
-meer dan 2% van de positie vragen of kosten plus nettodoel en buffer een
-brutobeweging boven 1,6% vereisen. Het netto microdoel is EUR 0,50; hoge
-Europese minimumcommissies blijven daardoor via de economische gate
-fail-closed. De eigen state gebruikt prefix
-`data/orion_shadow_micro_500`.
+€500, houdt minimaal 30% cash aan en staat maximaal één positie, één entry per
+dag en drie entries per UTC-week toe. De maximale positie is EUR 350. Alleen
+Amerikaanse symbolen kunnen een entry krijgen; Europa blijft zichtbaar in de
+analyse maar wordt voor micro-uitvoering fail-closed geblokkeerd.
+
+Een entry vereist na de eerste vijftien marktminuten een stijgende
+15-minutentrend, een bullish afgeronde 5-minutencandle, koers boven sessie-VWAP,
+voldoende relatief volume en positieve 15-minutensterkte tegenover SPY. Binnen
+drie uur voor de Amerikaanse sluiting worden geen nieuwe posities geopend. Het
+nettodoel is EUR 4,50 tegenover maximaal EUR 3,00 nettoverlies, met minimaal
+1,5 netto reward/risk. Retourkosten mogen maximaal 0,6% van de positie zijn en
+kosten plus doel en buffer maximaal 2,5% brutobeweging vragen. De eigen state
+gebruikt prefix `data/orion_shadow_micro_500`.
 
 Voor een volledige Europese en Amerikaanse shadowdag start je rond 08:55:
 

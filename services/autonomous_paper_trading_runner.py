@@ -455,6 +455,9 @@ class AutonomousPaperTradingRunner:
                 reentry_cooldown_minutes=(
                     config.reentry_cooldown_minutes
                 ),
+                max_new_positions_per_week=(
+                    config.max_new_positions_per_week
+                ),
             )
             if decision.allowed:
                 candidates.append(candidate)

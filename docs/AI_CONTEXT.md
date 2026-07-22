@@ -35,20 +35,22 @@ referentieprijzen met conservatieve slippage en geraamde round-tripkosten.
 
 Kapitaalprofiel `MICRO_500` is uitsluitend aan execution mode `SHADOW`
 toegestaan en gebruikt een eigen `data/orion_shadow_micro_500`-state. Het
-profiel start met EUR 500, maximaal twee posities, 30% cashreserve, maximaal
-EUR 175 per positie, twee entries per dag, 60 minuten re-entrycooldown en een
-90-minuten tijdstop. Entries worden vóór RiskManager aanvullend afgewezen als
-retourkosten boven 2% liggen of kosten plus doel en buffer meer dan 1,6%
-brutobeweging vragen. Maandelijkse marktdata-overhead wordt per verwachte
-round-trip aan de kostenraming toegevoegd. Het actuele netto microdoel is
-EUR 0,50 voor VS en EU; Europese minimumcommissies zorgen er bij EUR 500 voor
-dat zulke entries meestal economisch worden afgewezen.
+profiel start met EUR 500, maximaal één positie, 30% cashreserve, maximaal
+EUR 350 per positie, één entry per dag, drie per week, 240 minuten
+re-entrycooldown en een 180-minuten tijdstop. Alleen XUSA is uitvoerbaar;
+Europese symbolen blijven analyseerbaar maar worden voor micro-entry hard
+geblokkeerd. Het Amerikaanse nettodoel is EUR 4,50 tegenover EUR 3,00 maximaal
+nettoverlies. Kosten mogen maximaal 0,6% van de positie vragen en kosten plus
+doel en buffer maximaal 2,5% brutobeweging.
 De entryanalyse van dit profiel gebruikt vijf handelsdagen 5-minutencandles.
 Een lopende candle wordt uitgesloten; de nieuwste volledige candle mag tijdens
 een open sessie maximaal vijftien minuten na candle completion oud zijn. Deze
 marge vangt de gemeten Yahoo-publicatievertraging op. Trend/momentum en
-volatiliteitsannualisatie zijn intervalbewust. De standaardconfiguratie blijft
-op `3mo/1d` en wordt niet door intradayschaling beïnvloed.
+volatiliteitsannualisatie zijn intervalbewust. MICRO_500 vereist daarnaast een
+bullish 5-minutentrigger, stijgende 15-minutentrend, koers boven sessie-VWAP,
+relatief volume en positieve 15-minutensterkte tegenover SPY. Entries zijn de
+eerste vijftien minuten en laatste drie uren van XUSA geblokkeerd. De
+standaardconfiguratie blijft op `3mo/1d` en wordt niet door deze gates geraakt.
 
 De vroegere structurele BUY-bias is gecorrigeerd: trend is nu een getekende
 afwijking van het voortschrijdend gemiddelde en volatiliteit heeft de juiste
@@ -62,7 +64,7 @@ gerapporteerd en kan geen configuratie of order wijzigen.
 Architectuurgrens: de actieve `TradingPipeline` gebruikt uitsluitend
 `services.trading_decision`. `services/decisions` is research/explainability en
 wordt niet door de autonome runner geïmporteerd. De oude `engines`- en
-`ScannerService`-keten is verwijderd. De volledige suite telt 602 groene tests.
+`ScannerService`-keten is verwijderd. De volledige suite telt 609 groene tests.
 
 Werkend:
 

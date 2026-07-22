@@ -155,7 +155,7 @@ Voorkom dubbele implementaties.
 
 ✅ Legacy `engines`/`ScannerService` en lege placeholders verwijderd
 
-✅ Volledige testsuite uitgebreid naar 602 geslaagd en 0 mislukt
+✅ Volledige testsuite uitgebreid naar 609 geslaagd en 0 mislukt
 
 ✅ IBKR live bid/ask-, spread-, freshness- en top-size execution gate
 
@@ -181,7 +181,8 @@ Voorkom dubbele implementaties.
 
 ✅ Economische entrygate inclusief geamortiseerde marktdata-overhead
 
-✅ Twee entries per dag, 60-minuten herinstappauze en 90-minuten tijdstop
+✅ Eén entry per dag, drie per week, 240-minuten herinstappauze en
+180-minuten tijdstop
 
 ✅ MICRO_500 5d/5m-candles met incomplete-barfilter en vijftien-minutenfreshness
 na candle completion
@@ -191,6 +192,9 @@ na candle completion
 ✅ Netto shadowcash, UTC-journals en herstel van historische MICRO_500-state
 
 ✅ Empirisch 90-minutenonderzoek en haalbaarheidsgate van 1,6%
+
+✅ Kostenherstelprofiel: XUSA-only entry, EUR 4,50/3,00 netto reward/risk,
+openings-/sluitingsbuffer, VWAP, relatief volume en SPY-bevestiging
 
 ---
 

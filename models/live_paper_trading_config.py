@@ -40,7 +40,22 @@ class LivePaperTradingConfig:
 
     max_new_positions_per_day: int = 20
 
+    max_new_positions_per_week: int = 100
+
     reentry_cooldown_minutes: int = 0
+
+    # Optional entry-session restrictions. An empty market tuple preserves
+    # the standard multi-market profile. MICRO_500 uses these controls to
+    # keep small-capital entries in the lower-minimum-commission US market
+    # and away from the opening and closing auction windows.
+    allowed_entry_market_codes: tuple[str, ...] = ()
+    entry_open_buffer_minutes: int = 0
+    entry_close_buffer_minutes: int = 0
+
+    # Intraday confirmation is calculated from completed candles only.
+    require_intraday_confirmation: bool = False
+    min_intraday_relative_volume: float = 0.0
+    min_intraday_relative_strength: float = 0.0
 
     min_confidence: float = 0.75
 
@@ -109,6 +124,7 @@ class LivePaperTradingConfig:
     max_round_trip_cost_pct: float = 1.0
     max_required_gross_move_pct: float = 1.0
     entry_cost_uncertainty_buffer_eur: float = 0.0
+    min_net_reward_risk_ratio: float = 0.0
 
     news_mode: str = NEWS_DISABLED
     news_lookback_hours: int = 24
@@ -203,10 +219,45 @@ class LivePaperTradingConfig:
             raise ValueError(
                 "max_new_positions_per_day must be at least 1."
             )
+        if self.max_new_positions_per_week < 1:
+            raise ValueError(
+                "max_new_positions_per_week must be at least 1."
+            )
+        if self.max_new_positions_per_week < self.max_new_positions_per_day:
+            raise ValueError(
+                "max_new_positions_per_week must be at least the daily "
+                "entry limit."
+            )
         if self.reentry_cooldown_minutes < 0:
             raise ValueError(
                 "reentry_cooldown_minutes must not be negative."
             )
+        for name, value in {
+            "entry_open_buffer_minutes": self.entry_open_buffer_minutes,
+            "entry_close_buffer_minutes": self.entry_close_buffer_minutes,
+        }.items():
+            if value < 0:
+                raise ValueError(f"{name} must not be negative.")
+
+        market_codes = tuple(
+            str(code).strip().upper()
+            for code in self.allowed_entry_market_codes
+        )
+        unknown_market_codes = set(market_codes) - {
+            "XAMS",
+            "XETR",
+            "XUSA",
+        }
+        if unknown_market_codes:
+            raise ValueError(
+                "allowed_entry_market_codes contains unsupported markets: "
+                + ", ".join(sorted(unknown_market_codes))
+            )
+        object.__setattr__(
+            self,
+            "allowed_entry_market_codes",
+            market_codes,
+        )
         if self.max_holding_minutes is not None:
             if self.max_holding_minutes < 1:
                 raise ValueError(
@@ -292,6 +343,14 @@ class LivePaperTradingConfig:
                 )
         if self.max_quote_age_seconds <= 0:
             raise ValueError("max_quote_age_seconds must be greater than zero.")
+        if self.min_intraday_relative_volume < 0:
+            raise ValueError(
+                "min_intraday_relative_volume must not be negative."
+            )
+        if self.min_net_reward_risk_ratio < 0:
+            raise ValueError(
+                "min_net_reward_risk_ratio must not be negative."
+            )
 
         positive_amounts = {
             "small_profit_target_us_eur": (
@@ -310,6 +369,26 @@ class LivePaperTradingConfig:
         for name, value in positive_amounts.items():
             if value <= 0:
                 raise ValueError(f"{name} must be greater than zero.")
+
+        if self.min_net_reward_risk_ratio > 0:
+            reward_risk_pairs = {
+                "US": (
+                    self.small_profit_target_us_eur,
+                    self.small_profit_max_loss_us_eur,
+                ),
+                "EU": (
+                    self.small_profit_target_eu_eur,
+                    self.small_profit_max_loss_eu_eur,
+                ),
+            }
+            for market, (target, maximum_loss) in reward_risk_pairs.items():
+                ratio = target / maximum_loss
+                if ratio + 1e-12 < self.min_net_reward_risk_ratio:
+                    raise ValueError(
+                        f"{market} net reward/risk ratio {ratio:.2f} is "
+                        "below min_net_reward_risk_ratio "
+                        f"{self.min_net_reward_risk_ratio:.2f}."
+                    )
 
         non_negative_amounts = {
             "estimated_slippage_pct_per_side": (

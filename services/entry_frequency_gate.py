@@ -12,6 +12,7 @@ class EntryFrequencyDecision:
     allowed: bool
     reason: str
     entries_today: int
+    entries_this_week: int = 0
 
 
 class EntryFrequencyGate:
@@ -25,6 +26,7 @@ class EntryFrequencyGate:
         completed_trades: list[CompletedTradeRecord],
         max_new_positions_per_day: int,
         reentry_cooldown_minutes: int,
+        max_new_positions_per_week: int | None = None,
         now: datetime | None = None,
     ) -> EntryFrequencyDecision:
         evaluated_at = self._as_utc(now or datetime.now(UTC))
@@ -40,6 +42,23 @@ class EntryFrequencyGate:
                 entry_ids.add(trade.trade_id)
 
         entries_today = len(entry_ids)
+        week_start = trade_date - timedelta(days=trade_date.weekday())
+        week_end = week_start + timedelta(days=7)
+        weekly_entry_ids: set[str] = set()
+
+        for state in session.position_states.values():
+            opened_date = self._as_utc(state.opened_at).date()
+            if week_start <= opened_date < week_end:
+                weekly_entry_ids.add(
+                    state.trade_id or f"open:{state.symbol}"
+                )
+
+        for trade in completed_trades:
+            opened_date = self._as_utc(trade.opened_at).date()
+            if week_start <= opened_date < week_end:
+                weekly_entry_ids.add(trade.trade_id)
+
+        entries_this_week = len(weekly_entry_ids)
         if entries_today >= max_new_positions_per_day:
             return EntryFrequencyDecision(
                 allowed=False,
@@ -48,6 +67,21 @@ class EntryFrequencyGate:
                     f"{entries_today}/{max_new_positions_per_day}."
                 ),
                 entries_today=entries_today,
+                entries_this_week=entries_this_week,
+            )
+
+        if (
+            max_new_positions_per_week is not None
+            and entries_this_week >= max_new_positions_per_week
+        ):
+            return EntryFrequencyDecision(
+                allowed=False,
+                reason=(
+                    "Weekly entry limit reached: "
+                    f"{entries_this_week}/{max_new_positions_per_week}."
+                ),
+                entries_today=entries_today,
+                entries_this_week=entries_this_week,
             )
 
         normalized_symbol = str(symbol).strip().upper()
@@ -69,12 +103,14 @@ class EntryFrequencyGate:
                         f"{cooldown_ends.isoformat()}."
                     ),
                     entries_today=entries_today,
+                    entries_this_week=entries_this_week,
                 )
 
         return EntryFrequencyDecision(
             allowed=True,
             reason="Entry frequency limits passed.",
             entries_today=entries_today,
+            entries_this_week=entries_this_week,
         )
 
     def _as_utc(self, value: datetime) -> datetime:

@@ -113,17 +113,21 @@ START ONE ORION MICRO 500 SHADOW CYCLE
 
 Profielgrenzen:
 
-- EUR 500 startkapitaal en EUR 175 maximale positie;
-- maximaal twee open posities en één nieuwe positie per cyclus;
-- maximaal twee entries per UTC-dag en 60 minuten cooldown na een exit;
+- EUR 500 startkapitaal en EUR 350 maximale positie;
+- maximaal één open positie en één nieuwe positie per cyclus;
+- maximaal één entry per UTC-dag, drie per UTC-week en 240 minuten cooldown;
 - minimaal 30% cashreserve en maximaal 70% totale exposure;
-- TIERED-kostenmodel, plus EUR 3 maandelijkse marktdata verdeeld over veertig
+- TIERED-kostenmodel, plus EUR 3 maandelijkse marktdata verdeeld over twaalf
   verwachte round-trips;
-- maximaal 2% geschatte round-tripkosten ten opzichte van positiewaarde;
-- maximaal 1,6% vereiste brutobeweging inclusief kosten, nettodoel en EUR 0,50
+- maximaal 0,6% geschatte round-tripkosten ten opzichte van positiewaarde;
+- maximaal 2,5% vereiste brutobeweging inclusief kosten, nettodoel en EUR 0,50
   onzekerheidsbuffer;
-- nettodoelen VS/EU EUR 0,50/EUR 0,50 en nettoverlieslimieten EUR 3/EUR 4;
-- 90 minuten maximale houdtijd en 1,5% dagelijkse verliescircuitbreaker.
+- alleen `XUSA` kan entries krijgen; Amsterdam en Xetra blijven analyseerbaar;
+- VS-nettodoel EUR 4,50 en nettoverlieslimiet EUR 3,00, minimaal 1,5 reward/risk;
+- 180 minuten maximale houdtijd en 0,6% dagelijkse verliescircuitbreaker;
+- geen entry in de eerste vijftien minuten of laatste drie sessie-uren;
+- entry vereist bullish 5m, stijgende 15m, sessie-VWAP, relatief volume en
+  positieve 15-minutensterkte tegenover SPY;
 - vijf handelsdagen aan 5-minutencandles met twee minuten cache;
 - de lopende candle wordt nooit geanalyseerd en de nieuwste volledige candle
   mag maximaal vijftien minuten na candle completion oud zijn;
@@ -164,10 +168,11 @@ START 160 ORION MICRO 500 SHADOW CYCLES
 ```
 
 Bij starten rond 08:55 loopt de sessie ongeveer tot 22:10. Amsterdam en Xetra
-worden vanaf de eerste volledige candle rond 09:05 geanalyseerd; de Verenigde
-Staten vanaf de eerste volledige candle rond 15:35. Na 17:30 blijft alleen de
-VS-subset actief. Gesloten markten worden fail-closed overgeslagen. TWS is voor
-deze geïsoleerde shadowrun niet nodig.
+worden vanaf de eerste volledige candle rond 09:05 geanalyseerd, maar kunnen in
+`MICRO_500` geen entry krijgen. De Verenigde Staten worden vanaf de eerste
+volledige candle geanalyseerd; entries blijven tot 15 minuten na opening
+geblokkeerd en stoppen drie uur voor sluiting. Gesloten markten worden
+fail-closed overgeslagen. TWS is voor deze geïsoleerde shadowrun niet nodig.
 
 Verander `ORION_MONTHLY_MARKET_DATA_COST_EUR` later naar het werkelijk betaalde
 maandbedrag. Een lage of nulwaarde is geen toestemming om ontbrekende realtime

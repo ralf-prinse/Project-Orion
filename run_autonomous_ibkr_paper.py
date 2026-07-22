@@ -257,7 +257,6 @@ def build_config(
     shared = dict(
         watchlist_path="data/universes/ibkr_eu_us_validation.csv",
         max_symbols=100,
-        min_confidence=0.75,
         exit_strategy=exit_strategy,
         ibkr_pricing_plan=pricing_plan,
         news_mode=news_mode,
@@ -273,34 +272,49 @@ def build_config(
             **shared,
             capital_profile=capital_profile,
             initial_cash=500.0,
-            max_open_positions=2,
+            max_open_positions=1,
             max_new_positions_per_cycle=1,
-            max_new_positions_per_day=2,
-            reentry_cooldown_minutes=60,
-            max_position_value=175.0,
-            max_position_size_pct=0.35,
+            max_new_positions_per_day=1,
+            max_new_positions_per_week=3,
+            reentry_cooldown_minutes=240,
+            allowed_entry_market_codes=("XUSA",),
+            entry_open_buffer_minutes=15,
+            entry_close_buffer_minutes=180,
+            require_intraday_confirmation=True,
+            min_intraday_relative_volume=1.0,
+            min_intraday_relative_strength=0.0,
+            min_confidence=0.85,
+            min_thesis_conviction=75.0,
+            min_opportunity_score=80.0,
+            min_trend_factor=0.55,
+            min_momentum_factor=0.65,
+            min_pressure_confirmation_factor=0.65,
+            max_position_value=350.0,
+            max_position_size_pct=0.70,
             max_portfolio_exposure=0.70,
             min_cash_reserve_pct=0.30,
-            max_risk_per_trade_pct=0.01,
-            max_portfolio_risk_pct=0.02,
+            max_risk_per_trade_pct=0.006,
+            max_portfolio_risk_pct=0.006,
             max_drawdown_pct=0.05,
             history_period="5d",
             history_interval="5m",
             max_history_age_minutes=15,
-            max_holding_minutes=90,
-            small_profit_target_us_eur=0.5,
-            small_profit_target_eu_eur=0.5,
+            max_holding_minutes=180,
+            small_profit_target_us_eur=4.5,
+            small_profit_target_eu_eur=10.0,
             small_profit_max_loss_us_eur=3.0,
             small_profit_max_loss_eu_eur=4.0,
             estimated_monthly_market_data_cost_eur=(
                 monthly_market_data_cost_eur
             ),
-            expected_monthly_round_trips=40,
-            max_round_trip_cost_pct=0.02,
-            max_required_gross_move_pct=0.016,
+            expected_monthly_round_trips=12,
+            max_round_trip_cost_pct=0.006,
+            max_required_gross_move_pct=0.025,
             entry_cost_uncertainty_buffer_eur=0.50,
-            max_daily_loss_pct=0.015,
-            max_positions_per_market=2,
+            min_net_reward_risk_ratio=1.5,
+            max_daily_loss_pct=0.006,
+            max_consecutive_losses=1,
+            max_positions_per_market=1,
             max_market_exposure_pct=0.70,
             max_positions_per_sector=1,
             max_sector_exposure_pct=0.35,
@@ -454,6 +468,21 @@ def print_runtime_mode(
         f"max {config.live_config.max_positions_per_sector} per sector / "
         f"{config.live_config.max_sector_exposure_pct:.0%} exposure"
     )
+    if config.live_config.allowed_entry_market_codes:
+        print(
+            "Entry markets:    "
+            + ", ".join(config.live_config.allowed_entry_market_codes)
+        )
+        print(
+            "Entry window:     open +"
+            f"{config.live_config.entry_open_buffer_minutes}m / close -"
+            f"{config.live_config.entry_close_buffer_minutes}m"
+        )
+    print(
+        "Entry frequency:  "
+        f"{config.live_config.max_new_positions_per_day}/day / "
+        f"{config.live_config.max_new_positions_per_week}/week"
+    )
     if (
         config.live_config.exit_strategy
         == LivePaperTradingConfig.COST_AWARE_SMALL_PROFIT
@@ -481,6 +510,11 @@ def print_runtime_mode(
             "required move "
             f"{config.live_config.max_required_gross_move_pct:.1%}"
         )
+        if config.live_config.min_net_reward_risk_ratio > 0:
+            print(
+                "Net reward/risk: min "
+                f"{config.live_config.min_net_reward_risk_ratio:.2f}"
+            )
     print(
         "Order submission: "
         + (

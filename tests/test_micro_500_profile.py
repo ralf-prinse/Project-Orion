@@ -81,19 +81,25 @@ def test_micro_profile_has_isolated_realistic_capital_limits() -> None:
 
     assert config.capital_profile == LivePaperTradingConfig.MICRO_500
     assert config.initial_cash == 500.0
-    assert config.max_open_positions == 2
+    assert config.max_open_positions == 1
     assert config.max_new_positions_per_cycle == 1
-    assert config.max_new_positions_per_day == 2
-    assert config.max_position_value == 175.0
+    assert config.max_new_positions_per_day == 1
+    assert config.max_new_positions_per_week == 3
+    assert config.max_position_value == 350.0
     assert config.min_cash_reserve_pct == 0.30
-    assert config.max_holding_minutes == 90
-    assert config.reentry_cooldown_minutes == 60
+    assert config.max_holding_minutes == 180
+    assert config.reentry_cooldown_minutes == 240
+    assert config.allowed_entry_market_codes == ("XUSA",)
+    assert config.entry_open_buffer_minutes == 15
+    assert config.entry_close_buffer_minutes == 180
+    assert config.require_intraday_confirmation is True
     assert config.history_period == "5d"
     assert config.history_interval == "5m"
     assert config.max_history_age_minutes == 15
-    assert config.small_profit_target_us_eur == 0.5
-    assert config.small_profit_target_eu_eur == 0.5
-    assert config.max_required_gross_move_pct == 0.016
+    assert config.small_profit_target_us_eur == 4.5
+    assert config.small_profit_max_loss_us_eur == 3.0
+    assert config.min_net_reward_risk_ratio == 1.5
+    assert config.max_required_gross_move_pct == 0.025
 
 
 def test_micro_profile_is_restricted_to_shadow_mode() -> None:
@@ -199,8 +205,8 @@ def test_micro_shadow_exit_cost_is_deducted_from_portfolio_cash() -> None:
     assert net_portfolio.cash == round(503.0 - estimate.total_cost_eur, 2)
 
 
-def test_micro_target_captures_observed_qcom_small_net_profit() -> None:
-    result = PositionMonitor().evaluate(
+def test_micro_target_does_not_take_cost_dominated_qcom_profit() -> None:
+    small_move = PositionMonitor().evaluate(
         PaperPosition(
             symbol="QCOM",
             quantity=1,
@@ -212,9 +218,24 @@ def test_micro_target_captures_observed_qcom_small_net_profit() -> None:
         micro_config(),
     )
 
-    assert result.action == "TAKE_PROFIT"
-    assert result.estimated_net_profit_loss >= 0.50
-    assert result.minimum_net_profit == 0.50
+    assert small_move.action == "HOLD"
+    assert small_move.estimated_net_profit_loss < 4.50
+
+    qualified_move = PositionMonitor().evaluate(
+        PaperPosition(
+            symbol="QCOM",
+            quantity=1,
+            entry_price=171.92,
+            current_price=180.0,
+            currency="USD",
+            fx_rate_to_base=(150.46 / 171.92),
+        ),
+        micro_config(),
+    )
+
+    assert qualified_move.action == "TAKE_PROFIT"
+    assert qualified_move.estimated_net_profit_loss >= 4.50
+    assert qualified_move.minimum_net_profit == 4.50
 
 
 def test_micro_profile_uses_separate_shadow_storage_prefix() -> None:
@@ -254,8 +275,8 @@ def test_market_data_budget_is_amortized_per_round_trip() -> None:
         config=micro_config(),
     )
 
-    assert estimate.market_data_overhead_eur == 0.08
-    assert estimate.total_cost_eur == 1.27
+    assert estimate.market_data_overhead_eur == 0.25
+    assert estimate.total_cost_eur == 1.44
 
 
 def test_micro_economic_gate_rejects_unrealistic_european_trade() -> None:
@@ -271,7 +292,7 @@ def test_micro_economic_gate_rejects_unrealistic_european_trade() -> None:
 
     assert result.approved_count == 0
     assert "estimated round-trip costs" in result.decisions[0].reason
-    assert "above 2.00%" in result.decisions[0].reason
+    assert "above 0.60%" in result.decisions[0].reason
 
 
 def test_micro_economic_gate_can_accept_liquid_us_sized_trade() -> None:
@@ -281,12 +302,12 @@ def test_micro_economic_gate_can_accept_liquid_us_sized_trade() -> None:
             portfolio=PaperPortfolio(cash=500.0),
             peak_portfolio_value=500.0,
         ),
-        candidates=[candidate("F", 50.0, 49.0)],
+        candidates=[candidate("F", 50.0, 49.7)],
         config=micro_config(),
     )
 
     assert result.approved_count == 1
-    assert result.approved[0].quantity == 3
+    assert result.approved[0].quantity == 7
 
 
 def test_entry_frequency_gate_enforces_daily_limit() -> None:
@@ -356,6 +377,36 @@ def test_entry_frequency_gate_enforces_symbol_cooldown() -> None:
     assert "Re-entry cooldown" in decision.reason
 
 
+def test_entry_frequency_gate_enforces_weekly_limit() -> None:
+    now = datetime(2026, 7, 23, 12, 0, tzinfo=UTC)
+    completed = [
+        SimpleNamespace(
+            trade_id=f"weekly-{index}",
+            symbol=f"OLD{index}",
+            opened_at=now - timedelta(days=index + 1),
+            closed_at=now - timedelta(days=index + 1, hours=-1),
+        )
+        for index in range(3)
+    ]
+
+    decision = EntryFrequencyGate().evaluate(
+        symbol="F",
+        session=TradingSession(
+            name="Micro",
+            portfolio=PaperPortfolio(cash=500.0),
+        ),
+        completed_trades=completed,
+        max_new_positions_per_day=1,
+        max_new_positions_per_week=3,
+        reentry_cooldown_minutes=240,
+        now=now,
+    )
+
+    assert decision.allowed is False
+    assert decision.entries_this_week == 3
+    assert "Weekly entry limit" in decision.reason
+
+
 def test_runner_applies_daily_entry_limit_to_accepted_candidates() -> None:
     now = datetime.now(UTC)
     completed = [
@@ -391,7 +442,7 @@ def test_runner_applies_daily_entry_limit_to_accepted_candidates() -> None:
     assert "Daily entry limit" in filtered.candidates[0].reason
 
 
-def test_micro_time_stop_activates_after_ninety_minutes() -> None:
+def test_micro_time_stop_activates_after_three_hours() -> None:
     now = datetime(2026, 7, 21, 12, 0, tzinfo=UTC)
     state = PositionState(
         symbol="F",
@@ -399,18 +450,18 @@ def test_micro_time_stop_activates_after_ninety_minutes() -> None:
         current_stop_loss=9.0,
         highest_price=10.0,
         current_price=10.0,
-        opened_at=now - timedelta(minutes=91),
+        opened_at=now - timedelta(minutes=181),
     )
 
     result = TimeStopService().evaluate(
         state=state,
         maximum_days=2,
-        maximum_minutes=90,
+        maximum_minutes=180,
         now=now,
     )
 
     assert result.activated is True
-    assert result.maximum_hours == 1.5
+    assert result.maximum_hours == 3.0
     assert "intraday" in result.reason
 
 

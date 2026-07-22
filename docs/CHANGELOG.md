@@ -1,5 +1,26 @@
 # CHANGELOG.md
 
+## 2026-07-23 - MICRO_500 cost-adjusted recovery profile
+
+De tweede volledige run sloot F netto EUR 3,02 negatief en KO netto EUR 1,87
+negatief. Samen met de eerste run staat de geïsoleerde portefeuille op EUR
+493,24. Het eerdere EUR 0,50-doel tegenover EUR 3 verlies vereiste een
+onrealistische break-even winrate van 85,7% en is daarom niet behouden.
+
+MICRO_500 gebruikt nu maximaal één positie van EUR 350, één entry per dag en
+drie per UTC-week. Alleen XUSA kan entries krijgen; Europa blijft onderdeel van
+de scan maar wordt voor dit kleine kapitaal fail-closed geblokkeerd. Het
+VS-nettodoel is EUR 4,50 tegenover EUR 3 maximaal nettoverlies, met minimaal
+1,5 reward/risk. De kostenratio is begrensd op 0,6% en de maximaal benodigde
+brutobeweging op 2,5%.
+
+Nieuwe entries vereisen na een openingsbuffer van vijftien minuten een bullish
+afgeronde 5-minutencandle, stijgende 15-minutentrend, koers boven sessie-VWAP,
+voldoende relatief volume en positieve 15-minutensterkte tegenover SPY. De
+laatste drie uren van de Amerikaanse sessie zijn voor nieuwe entries gesloten;
+de tijdstop is 180 minuten. Deze wijzigingen blijven uitsluitend SHADOW en
+activeren geen IBKR-orderpad.
+
 ## 2026-07-22 - Net shadow accounting and empirically feasible micro targets
 
 De eerste volledige MICRO_500-run bleek bruto EUR 0,54 positief maar na EUR

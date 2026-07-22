@@ -31,10 +31,11 @@ trades volgen. Deze modus is technisch geïsoleerd van broker-sync, adoptie,
 IBKR-quotes en ordertransport en weigert ordertoestemming fail-closed.
 
 Binnen `SHADOW` bestaat tevens een volledig gescheiden `MICRO_500`-
-kapitaalprofiel. Dit modelleert EUR 500 startkapitaal, twee posities, 30%
-cashreserve, dagelijkse entry- en herinstaplimieten, minutennauwkeurige exits en
+kapitaalprofiel. Dit modelleert EUR 500 startkapitaal, één positie, 30%
+cashreserve, dagelijkse én wekelijkse entrylimieten, minutennauwkeurige exits en
 een economische gate die minimumcommissies en marktdata-overhead vóór allocatie
-toetst. Het profiel deelt geen state met de standaardshadowportefeuille.
+toetst. Alleen XUSA kan micro-entries krijgen; Europa blijft analyseerbaar. Het
+profiel deelt geen state met de standaardshadowportefeuille.
 
 De eerste schaalfase voor autonoom Paper-traden is operationeel:
 
@@ -58,7 +59,7 @@ Architectuuropschoning:
 - oude directe decisionengine en dubbele `engines`/scannerketen verwijderd;
 - research/explainability blijft geïsoleerd in `services/decisions`;
 - lege placeholders en tests zonder assertions verwijderd;
-- volledige testsuite: 602 geslaagd, 0 mislukt.
+- volledige testsuite: 609 geslaagd, 0 mislukt.
 - MICRO_500 intradaydata: `5d/5m`, uitsluitend volledige candles, maximaal
   vijftien minuten oud na completion en twee minuten cache;
 - MICRO_500 netto-accounting: exitkosten in cash, startreconciliatie en
@@ -98,7 +99,10 @@ Architectuuropschoning:
 
 ✅ Entry-economie op kostenratio, benodigde brutobeweging en marktdata-overhead
 
-✅ Dagelijkse entrylimiet, herinstap-cooldown en 90-minuten microtijdstop
+✅ Eén entry per dag, drie per week, 240-minuten cooldown en 180-minuten tijdstop
+
+✅ VS-only micro-entry met opening/sluitingsbuffer, 5m/15m, VWAP, relatief
+volume en SPY-relatieve-sterktebevestiging
 
 ## Data
 
