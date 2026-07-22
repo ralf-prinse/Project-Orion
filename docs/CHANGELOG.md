@@ -1,5 +1,142 @@
 # CHANGELOG.md
 
+## 2026-07-23 - MICRO_500 cost-adjusted recovery profile
+
+De tweede volledige run sloot F netto EUR 3,02 negatief en KO netto EUR 1,87
+negatief. Samen met de eerste run staat de geïsoleerde portefeuille op EUR
+493,24. Het eerdere EUR 0,50-doel tegenover EUR 3 verlies vereiste een
+onrealistische break-even winrate van 85,7% en is daarom niet behouden.
+
+MICRO_500 gebruikt nu maximaal één positie van EUR 350, één entry per dag en
+vijf per UTC-week. Alleen XUSA kan entries krijgen; Europa blijft onderdeel van
+de scan maar wordt voor dit kleine kapitaal fail-closed geblokkeerd. Het
+VS-nettodoel is EUR 4,50 tegenover EUR 3 maximaal nettoverlies, met minimaal
+1,5 reward/risk. De kostenratio is begrensd op 0,6% en de maximaal benodigde
+brutobeweging op 2,5%.
+
+Nieuwe entries vereisen na een openingsbuffer van vijftien minuten een bullish
+afgeronde 5-minutencandle, stijgende 15-minutentrend, koers boven sessie-VWAP,
+voldoende relatief volume en positieve 15-minutensterkte tegenover SPY. De
+laatste drie uren van de Amerikaanse sessie zijn voor nieuwe entries gesloten;
+de tijdstop is 180 minuten. Deze wijzigingen blijven uitsluitend SHADOW en
+activeren geen IBKR-orderpad.
+
+## 2026-07-22 - Net shadow accounting and empirically feasible micro targets
+
+De eerste volledige MICRO_500-run bleek bruto EUR 0,54 positief maar na EUR
+2,39 geraamde kosten EUR 1,86 negatief. Shadowexits trekken round-tripkosten nu
+werkelijk van cash af. Bij starten wordt de geïsoleerde microcash opnieuw
+opgebouwd uit startkapitaal, completed nettoresultaten en open kostbasis. Nieuwe
+trade-journaltimestamps zijn UTC-aware. De bestaande state is herstelbaar
+geback-upt en gereconcilieerd naar EUR 498,14; 6.317 timestamps en twee
+houdtijden zijn gecorrigeerd. De oude bruto peak equity is hersteld naar de
+netto startbasis van EUR 500 zodat drawdown weer economisch klopt.
+
+Analyse van 15.000 Amerikaanse en 20.357 Europese 90-minutenvensters toont dat
+het oude doel meestal buiten de waargenomen beweging lag. Het netto microdoel
+is daarom EUR 0,50 voor VS en EU en de maximale vereiste brutobeweging is
+verlaagd naar 1,6%. Europese entries blijven bij de huidige minimumcommissies
+meestal terecht economisch geblokkeerd. Er is geen openingsbuffer toegevoegd:
+de gemeten openingsvensters waren juist sterker dan latere vensters. De
+verlieslimieten en tijdstop zijn na slechts twee trades bewust niet geoptimaliseerd.
+
+Een vaste `start_orion_micro_shadow_full_day.ps1` voorkomt configuratiefouten
+voor een volledige gezamenlijke EU/VS-shadowdag. De starter gebruikt 160 cycli
+van 300 seconden, blijft hard op `MICRO_500`/`SHADOW` zonder ordertoestemming en
+neemt het Paper-account uitsluitend als niet-gecommit parameter aan.
+
+## 2026-07-21 - Isolated MICRO_500 capital profile
+
+Een afzonderlijk `MICRO_500`-profiel simuleert voortaan het beoogde
+startkapitaal van EUR 500 zonder de bestaande EUR 10.000-shadowportefeuille te
+overschrijven. Het profiel is voorlopig uitsluitend toegestaan in `SHADOW`,
+gebruikt eigen persistentiebestanden, maximaal twee posities, één nieuwe positie
+per cyclus, twee entries per UTC-dag, 30% cashreserve en maximaal EUR 175 per
+positie.
+
+Kostenhaalbaarheid is nu een harde pre-ordergate. Round-tripkosten omvatten ook
+een configureerbaar aandeel van toekomstige maandelijkse marktdata-abonnementen.
+Het microprofiel weigert posities boven 2% geraamde retourkosten of wanneer
+kosten, nettowinstdoel en onzekerheidsbuffer meer dan 3% brutobeweging vereisen.
+TIERED is de profieldefault; daadwerkelijke IBKR commission reports blijven
+vereist vóór Paper-orders of live-moneyontwerp.
+
+De lifecycle kent daarnaast een algemene dagelijkse entrylimiet, symbol-based
+herinstap-cooldown en een optionele minutennauwkeurige tijdstop. `MICRO_500`
+gebruikt EUR 2,50/3,50 netto winstdoelen voor VS/EU, EUR 3/4 netto verlieslimiet,
+60 minuten cooldown, 90 minuten maximale houdtijd en 1,5% dagelijks verlies.
+Een eerder netwerkafhankelijke FX-test gebruikt nu een vaste testfixture.
+
+De expliciete runnerlimiet is verhoogd van 96 naar 200 cycli. Bij het aanbevolen
+5-minuteninterval kan één bevestigde run daarmee ongeveer 16 uur en 35 minuten
+draaien. De bovengrens blijft als bescherming tegen typefouten en onbedoeld
+praktisch eindeloze interactieve runs bestaan.
+
+`MICRO_500` gebruikt nu daadwerkelijk `5d/5m`-historie in plaats van de
+standaard `3mo/1d`-swingdata. De intradayketen verwijdert de nog niet afgesloten
+5-minutencandle, weigert een laatste volledige candle ouder dan vijftien minuten
+na candle completion en gebruikt een cache-TTL van twee minuten. De leeftijd
+wordt vanaf het einde van de candle gemeten; dit vangt de praktisch gemeten
+Yahoo-publicatievertraging van ongeveer twaalf minuten op. Trend en momentum
+hebben een 5-minutenschaal; volatiliteit wordt geannualiseerd met 78 vijfminutenperioden
+per Amerikaanse handelsdag. Minder dan 21 volledige candles stopt fail-closed.
+De standaard EUR 10.000-strategie behoudt dagcandles en dagelijkse schaling.
+
+## 2026-07-20 - Isolated shadow trading and signal normalization
+
+De autonome runtime kent nu een expliciete `SHADOW`-uitvoeringsmodus. Deze
+modus weigert fail-closed te starten wanneer ordertoestemming aanstaat, bouwt
+geen IBKR quote- of orderpad, synchroniseert of adopteert geen brokerposities en
+gebruikt een afzonderlijke lokale portefeuille, sessie, decision journal, trade
+journal en completed-trade store. Fictieve fills bewaren de auditeerbare Yahoo-
+referentieprijs; adverse slippage, round-tripcommissies, externe kosten en FX-
+buffers blijven expliciet in journal en completed-trade-resultaten staan.
+
+De oorzaak van de onrealistische 50-uit-50 BUY-uitkomst is hersteld. De
+trendindicator gebruikte `laatste prijs / gemiddelde`, waardoor vrijwel ieder
+aandeel na begrenzing een trend van `+1` kreeg en een dalende trend niet kon
+bestaan. Trend is nu de geschaalde, getekende afwijking van het 20-daags
+gemiddelde. Volatiliteit wordt voortaan als geannualiseerd percentage aan de
+downstream 0..100-normalisatie geleverd in plaats van als vrijwel nul gelezen
+dagdecimaal.
+
+Een configureerbare selectiviteitsgate vereist naast het actieve BUY-besluit
+ook bevestiging door de onafhankelijke investment thesis, minimale conviction,
+opportunity score, trend, momentum en pressure confirmation. Iedere afwijzing
+wordt met de gemeten waarde en grens gejournaliseerd. De volledige testsuite
+eindigt op 581 geslaagde tests en nul failures.
+
+## 2026-07-19 - Execution-grade Paper safety controls
+
+Nieuwe IBKR BUY-orders gebruiken actuele live bid/ask- en top-of-bookdata als
+fail-closed execution gate. Verouderde, onvolledige, te brede of te dunne
+quotes blokkeren de order met een expliciete reden. Normale BUY- en
+winstnemingsorders worden als begrensde marketable limitorder verzonden;
+urgente stop- en time-exits blijven marktgericht om risico af te bouwen.
+
+Iedere Paper BUY wordt atomair als IBKR bracket verzonden met een parent,
+profit-taker en broker-native stop-loss. Parent en children gebruiken de
+voorgeschreven `Transmit`-volgorde. De children en iedere latere softwarematige
+SELL delen een persistente trade-ID gebaseerde OCA-groep, zodat slechts één
+exit kan vullen. IBKR-uitgevoerde protective children worden bij broker-sync
+via `orderRef` teruggevonden en met de oorspronkelijke `trade_id`, fillprijs en
+SELL-reden in trade memory opgeslagen. Een verdwenen positie zonder
+reconcilieerbare execution stopt fail-closed.
+
+De entryketen heeft daarnaast een sessiecircuitbreaker voor verlies,
+opeenvolgende verliestrades en brokerfouten. Markt-, sector- en gecureerde
+correlatieclusterlimieten beschermen tegen schijnspreiding. Alle 100 huidige
+EU/VS-symbolen hebben versiebeheerde risicometadata. Een earningsinterface
+blokkeert bekende events en verzint geen datum wanneer brondata ontbreekt.
+
+`analyze_completed_trades.py` rapporteert alleen offline nettowachting na
+geraamde kosten. Deze analyse heeft geen schrijfpad naar runtimeconfiguratie of
+orders. Live-moneyaccounts blijven geblokkeerd en nieuws blijft SHADOW-only.
+
+Tevens is hersteld dat de gegenereerde `trade_id` vóór het append-moment in de
+BUY-journalregel wordt geplaatst, zodat entry en exit betrouwbaar tot één
+completed trade worden samengevoegd.
+
 ## 2026-07-19 - Canonical runtime architecture cleanup
 
 De actieve adaptieve decisioncomponenten zijn zonder strategiewijziging
@@ -74,7 +211,7 @@ en 15 minuten persistent gecachet. De positieprijs- en broker-syncpaden blijven
 ongewijzigd fail-closed werken.
 
 Een begrensde multi-cycle Paper-sessie kan expliciet worden ingesteld via
-`ORION_IBKR_CYCLES` (maximaal 96) en
+`ORION_IBKR_CYCLES` (destijds maximaal 96; huidig maximum 200) en
 `ORION_IBKR_SCAN_INTERVAL_SECONDS` (60-3600; standaard 900). De runner wacht nu
 daadwerkelijk tussen cycli en vereist bij meerdere cycli een bevestiging met het
 exacte aantal. Per cyclus mogen maximaal drie nieuwe posities worden geopend;

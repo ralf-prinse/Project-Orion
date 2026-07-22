@@ -5,6 +5,7 @@ import threading
 import time
 from datetime import datetime
 import logging
+from dataclasses import dataclass
 
 from ibapi.client import EClient
 from ibapi.contract import Contract
@@ -28,11 +29,24 @@ class IbkrOrderTransportError(RuntimeError):
     """Raised when an IBKR order operation cannot finish safely."""
 
 
+@dataclass(frozen=True)
+class IbkrProtectiveExecution:
+    symbol: str
+    order_reference: str
+    side: str
+    quantity: int
+    price: float
+    executed_at: datetime
+    order_id: int
+    permanent_id: int | None = None
+
+
 class _IbkrOrderClient(EWrapper, EClient):
     INFORMATIONAL_ERROR_CODES = {2104, 2106, 2107, 2108, 2158}
     CANCELLED_STATUSES = {"APICANCELLED", "CANCELLED"}
     REJECTED_STATUSES = {"INACTIVE"}
     EXECUTION_RECONCILIATION_REQUEST_ID = 9101
+    EXECUTION_HISTORY_REQUEST_ID = 9102
 
     def __init__(self) -> None:
         EWrapper.__init__(self)
@@ -42,6 +56,8 @@ class _IbkrOrderClient(EWrapper, EClient):
         self.accounts_ready = threading.Event()
         self.terminal_event = threading.Event()
         self.execution_reconciliation_ready = threading.Event()
+        self.execution_history_ready = threading.Event()
+        self.protective_children_ready = threading.Event()
 
         self.next_order_id: int | None = None
         self.active_order_id: int | None = None
@@ -49,16 +65,23 @@ class _IbkrOrderClient(EWrapper, EClient):
         self.managed_accounts: list[str] = []
         self.outcome: IbkrOrderOutcome | None = None
         self.errors: list[str] = []
+        self.active_permanent_id: int | None = None
+        self.active_bracket_order_ids: set[int] = set()
+        self.protective_child_order_ids: set[int] = set()
+        self.accepted_protective_child_ids: set[int] = set()
 
         self._execution_ids: set[str] = set()
         self._filled_quantity = 0.0
         self._fill_value = 0.0
         self._last_fill_time: datetime | None = None
+        self.collect_execution_history = False
+        self.execution_history: list[IbkrProtectiveExecution] = []
 
     def reset_connection_state(self) -> None:
         self.connection_ready.clear()
         self.accounts_ready.clear()
         self.execution_reconciliation_ready.clear()
+        self.execution_history_ready.clear()
         self.next_order_id = None
         self.managed_accounts = []
         self.errors = []
@@ -74,6 +97,21 @@ class _IbkrOrderClient(EWrapper, EClient):
         self._filled_quantity = 0.0
         self._fill_value = 0.0
         self._last_fill_time = None
+        self.active_permanent_id = None
+        self.active_bracket_order_ids = set()
+        self.protective_child_order_ids = set()
+        self.accepted_protective_child_ids = set()
+        self.protective_children_ready.clear()
+
+    def set_active_bracket_order_ids(
+        self,
+        order_ids: set[int],
+        child_order_ids: set[int],
+    ) -> None:
+        self.active_bracket_order_ids = {int(value) for value in order_ids}
+        self.protective_child_order_ids = {
+            int(value) for value in child_order_ids
+        }
 
     def nextValidId(self, orderId: int) -> None:
         self.next_order_id = int(orderId)
@@ -117,7 +155,34 @@ class _IbkrOrderClient(EWrapper, EClient):
         whyHeld,
         mktCapPrice,
     ) -> None:
-        if self.active_order_id is None or int(orderId) != self.active_order_id:
+        normalized_order_id = int(orderId)
+        if (
+            self.active_order_id is not None
+            and normalized_order_id != self.active_order_id
+            and normalized_order_id in self.active_bracket_order_ids
+        ):
+            child_status = str(status).strip().upper()
+            if child_status in self.REJECTED_STATUSES:
+                self.outcome = IbkrOrderOutcome(
+                    status="REJECTED",
+                    message=(
+                        "IBKR protective child ended with status "
+                        f"{str(status).strip().upper()}."
+                    ),
+                    order_id=normalized_order_id,
+                )
+                self.terminal_event.set()
+            elif child_status in {"PRESUBMITTED", "SUBMITTED", "FILLED"}:
+                self.accepted_protective_child_ids.add(normalized_order_id)
+                if self.protective_child_order_ids.issubset(
+                    self.accepted_protective_child_ids
+                ):
+                    self.protective_children_ready.set()
+            return
+        if (
+            self.active_order_id is None
+            or normalized_order_id != self.active_order_id
+        ):
             return
 
         normalized_status = str(status).strip().upper()
@@ -138,6 +203,12 @@ class _IbkrOrderClient(EWrapper, EClient):
         )
         filled_quantity = self._safe_quantity(filled)
         average_fill_price = self._safe_float(avgFillPrice)
+        try:
+            permanent_id = int(permId)
+        except (TypeError, ValueError):
+            permanent_id = 0
+        if permanent_id > 0:
+            self.active_permanent_id = permanent_id
 
         if normalized_status == "FILLED":
             self.outcome = IbkrOrderOutcome(
@@ -146,6 +217,8 @@ class _IbkrOrderClient(EWrapper, EClient):
                 average_fill_price=average_fill_price,
                 filled_at=datetime.now(),
                 message="IBKR Paper order filled via orderStatus.",
+                order_id=int(orderId),
+                permanent_id=self.active_permanent_id,
             )
             self.terminal_event.set()
             return
@@ -156,6 +229,8 @@ class _IbkrOrderClient(EWrapper, EClient):
                 filled_quantity=filled_quantity,
                 average_fill_price=average_fill_price,
                 message=f"IBKR order ended with status {normalized_status}.",
+                order_id=int(orderId),
+                permanent_id=self.active_permanent_id,
             )
             self.terminal_event.set()
             return
@@ -166,10 +241,15 @@ class _IbkrOrderClient(EWrapper, EClient):
                 filled_quantity=filled_quantity,
                 average_fill_price=average_fill_price,
                 message=f"IBKR order ended with status {normalized_status}.",
+                order_id=int(orderId),
+                permanent_id=self.active_permanent_id,
             )
             self.terminal_event.set()
 
     def execDetails(self, reqId, contract, execution) -> None:
+        if self.collect_execution_history:
+            self._collect_execution(contract, execution)
+
         if self.active_order_id is None:
             return
 
@@ -208,12 +288,57 @@ class _IbkrOrderClient(EWrapper, EClient):
                 average_fill_price=average_price,
                 filled_at=self._last_fill_time,
                 message="IBKR Paper order filled via execDetails.",
+                order_id=self.active_order_id,
+                permanent_id=self.active_permanent_id,
             )
             self.terminal_event.set()
 
     def execDetailsEnd(self, reqId: int) -> None:
         if int(reqId) == self.EXECUTION_RECONCILIATION_REQUEST_ID:
             self.execution_reconciliation_ready.set()
+        if int(reqId) == self.EXECUTION_HISTORY_REQUEST_ID:
+            self.collect_execution_history = False
+            self.execution_history_ready.set()
+
+    def begin_execution_history(self) -> None:
+        self.execution_history = []
+        self.execution_history_ready.clear()
+        self.collect_execution_history = True
+        self.active_order_id = None
+        self.terminal_event.clear()
+
+    def _collect_execution(self, contract, execution) -> None:
+        side = str(getattr(execution, "side", "")).strip().upper()
+        order_reference = str(
+            getattr(execution, "orderRef", "")
+        ).strip()
+        symbol = str(getattr(contract, "symbol", "")).strip().upper()
+        quantity = self._safe_quantity(getattr(execution, "shares", 0))
+        price = self._safe_float(getattr(execution, "price", 0))
+        executed_at = self._parse_execution_time(
+            str(getattr(execution, "time", ""))
+        ) or datetime.now()
+        try:
+            order_id = int(getattr(execution, "orderId", 0))
+        except (TypeError, ValueError):
+            order_id = 0
+        try:
+            permanent_id = int(getattr(execution, "permId", 0))
+        except (TypeError, ValueError):
+            permanent_id = 0
+        if symbol and quantity > 0 and price > 0:
+            self.execution_history.append(
+                IbkrProtectiveExecution(
+                    symbol=symbol,
+                    order_reference=order_reference,
+                    side=side,
+                    quantity=quantity,
+                    price=price,
+                    executed_at=executed_at,
+                    order_id=order_id,
+                    permanent_id=(permanent_id or None),
+                )
+            )
 
     def error(
         self,
@@ -237,7 +362,10 @@ class _IbkrOrderClient(EWrapper, EClient):
 
         if (
             self.active_order_id is not None
-            and int(reqId) in {-1, self.active_order_id}
+            and (
+                int(reqId) in {-1, self.active_order_id}
+                or int(reqId) in self.active_bracket_order_ids
+            )
         ):
             warning_text = str(errorString).lower()
 
@@ -437,6 +565,177 @@ class IbkrOrderTransport:
                 if self.disconnect_after_order:
                     self.disconnect()
 
+    def submit_bracket_order(
+        self,
+        *,
+        contract: Contract,
+        parent_order: IbkrOrder,
+        take_profit_order: IbkrOrder,
+        stop_loss_order: IbkrOrder,
+        timeout_seconds: float,
+    ) -> IbkrOrderOutcome:
+        """Atomically transmit a parent, profit-taker and stop-loss."""
+        if not self.allow_order_submission:
+            raise PermissionError(
+                "IBKR order submission is disabled. Native protective "
+                "orders require an explicitly enabled Paper runtime."
+            )
+        if timeout_seconds <= 0:
+            raise ValueError("Order timeout_seconds must be greater than zero.")
+
+        self._validate_contract(contract)
+        expected_quantity = self._validate_ibkr_order(
+            parent_order,
+            require_transmit=False,
+        )
+        self._validate_bracket_child(take_profit_order, "LMT")
+        self._validate_bracket_child(stop_loss_order, "STP")
+
+        with self._submission_lock:
+            try:
+                self._connect()
+                parent_id = self._claim_order_id()
+                take_profit_id = self._claim_order_id()
+                stop_loss_id = self._claim_order_id()
+
+                parent_order.orderId = parent_id
+                parent_order.account = self.paper_account_id
+                parent_order.tif = "DAY"
+                parent_order.transmit = False
+
+                for child_order, child_id in (
+                    (take_profit_order, take_profit_id),
+                    (stop_loss_order, stop_loss_id),
+                ):
+                    child_order.orderId = child_id
+                    child_order.parentId = parent_id
+                    child_order.account = self.paper_account_id
+                    child_order.tif = "GTC"
+
+                take_profit_order.transmit = False
+                stop_loss_order.transmit = True
+                self._client.reset_order_state(parent_id, expected_quantity)
+                self._client.set_active_bracket_order_ids(
+                    {parent_id, take_profit_id, stop_loss_id},
+                    {take_profit_id, stop_loss_id},
+                )
+
+                logger.info(
+                    "Submitting protected IBKR bracket: parent=%s "
+                    "take_profit=%s stop_loss=%s account=%s symbol=%s",
+                    parent_id,
+                    take_profit_id,
+                    stop_loss_id,
+                    _mask_account_id(self.paper_account_id),
+                    contract.symbol,
+                )
+                self._client.placeOrder(parent_id, contract, parent_order)
+                self._client.placeOrder(
+                    take_profit_id,
+                    contract,
+                    take_profit_order,
+                )
+                self._client.placeOrder(
+                    stop_loss_id,
+                    contract,
+                    stop_loss_order,
+                )
+
+                outcome = None
+                if self._client.terminal_event.wait(float(timeout_seconds)):
+                    outcome = self._require_outcome()
+                else:
+                    outcome = self._reconcile_execution_with_retries()
+
+                if outcome is None:
+                    self._cancel_order_safely(parent_id)
+                    raise TimeoutError(
+                        "Timed out without a confirmed IBKR bracket parent "
+                        "fill. The parent was cancelled after reconciliation; "
+                        "verify all three orders in TWS before retrying."
+                    )
+
+                if outcome.status.strip().upper() != "FILLED":
+                    self._cancel_order_safely(parent_id)
+                    self._cancel_order_safely(take_profit_id)
+                    self._cancel_order_safely(stop_loss_id)
+
+                if (
+                    outcome.status.strip().upper() == "FILLED"
+                    and not self._client.protective_children_ready.wait(
+                        self.reconciliation_timeout_seconds
+                    )
+                ):
+                    raise IbkrOrderTransportError(
+                        "IBKR parent filled, but both protective children "
+                        "were not confirmed active. Do not retry the BUY; "
+                        "inspect and protect the position in TWS immediately."
+                    )
+
+                return IbkrOrderOutcome(
+                    status=outcome.status,
+                    filled_quantity=outcome.filled_quantity,
+                    average_fill_price=outcome.average_fill_price,
+                    filled_at=outcome.filled_at,
+                    message=outcome.message,
+                    order_id=outcome.order_id or parent_id,
+                    permanent_id=outcome.permanent_id,
+                    child_order_ids=(take_profit_id, stop_loss_id),
+                )
+            finally:
+                if self.disconnect_after_order:
+                    self.disconnect()
+
+    def find_protective_exit(
+        self,
+        *,
+        trade_id: str,
+        symbol: str,
+        timeout_seconds: float = 5.0,
+    ) -> IbkrProtectiveExecution | None:
+        """Read back a TP/SL execution using its persistent orderRef."""
+        normalized_trade_id = trade_id.strip()
+        if not normalized_trade_id:
+            return None
+        if timeout_seconds <= 0:
+            raise ValueError("timeout_seconds must be greater than zero.")
+
+        with self._submission_lock:
+            try:
+                self._connect()
+                self._client.begin_execution_history()
+                execution_filter = ExecutionFilter()
+                execution_filter.acctCode = self.paper_account_id
+                self._client.reqExecutions(
+                    self._client.EXECUTION_HISTORY_REQUEST_ID,
+                    execution_filter,
+                )
+                if not self._client.execution_history_ready.wait(
+                    timeout_seconds
+                ):
+                    raise IbkrOrderTransportError(
+                        "Timeout while reconciling protective executions."
+                    )
+
+                expected_references = {
+                    normalized_trade_id + ":TP",
+                    normalized_trade_id + ":SL",
+                }
+                comparison_symbol = self._comparison_symbol(symbol)
+                matches = [
+                    execution
+                    for execution in self._client.execution_history
+                    if execution.order_reference in expected_references
+                    and self._comparison_symbol(execution.symbol)
+                    == comparison_symbol
+                    and execution.side in {"SELL", "SLD"}
+                ]
+                if not matches:
+                    return None
+                return max(matches, key=lambda item: item.executed_at)
+            finally:
+                self.disconnect()
+
     def disconnect(self) -> None:
         if self._client.isConnected():
             self._client.disconnect()
@@ -605,7 +904,12 @@ class IbkrOrderTransport:
         if not currency:
             raise ValueError("IBKR contract currency must not be empty.")
 
-    def _validate_ibkr_order(self, order: IbkrOrder) -> int:
+    def _validate_ibkr_order(
+        self,
+        order: IbkrOrder,
+        *,
+        require_transmit: bool = True,
+    ) -> int:
         action = str(order.action).strip().upper()
         order_type = str(order.orderType).strip().upper()
         try:
@@ -617,9 +921,9 @@ class IbkrOrderTransport:
             raise ValueError(
                 "IbkrOrderTransport supports only BUY or SELL orders."
             )
-        if order_type != "MKT":
+        if order_type not in {"MKT", "LMT"}:
             raise ValueError(
-                "IbkrOrderTransport currently supports only MKT orders."
+                "IbkrOrderTransport supports only MKT and LMT parent orders."
             )
         if not math.isfinite(quantity):
             raise ValueError("IBKR order quantity must be finite.")
@@ -627,11 +931,54 @@ class IbkrOrderTransport:
             raise ValueError("IBKR order quantity must be greater than zero.")
         if not quantity.is_integer():
             raise ValueError("IBKR order quantity must be a whole number.")
-        if not bool(order.transmit):
+        if order_type == "LMT":
+            try:
+                limit_price = float(order.lmtPrice)
+            except (TypeError, ValueError) as exc:
+                raise ValueError("IBKR limit price must be numeric.") from exc
+            if not math.isfinite(limit_price) or limit_price <= 0:
+                raise ValueError(
+                    "IBKR limit price must be finite and greater than zero."
+                )
+        if require_transmit and not bool(order.transmit):
             raise ValueError(
                 "Controlled IBKR Paper orders must explicitly set transmit=True."
             )
         return int(quantity)
+
+    def _validate_bracket_child(
+        self,
+        order: IbkrOrder,
+        required_type: str,
+    ) -> None:
+        action = str(order.action).strip().upper()
+        order_type = str(order.orderType).strip().upper()
+        if action != "SELL":
+            raise ValueError("Protective child action must be SELL.")
+        if order_type != required_type:
+            raise ValueError(
+                f"Protective child must use {required_type}, received "
+                f"{order_type or 'empty'}."
+            )
+        try:
+            quantity = float(order.totalQuantity)
+            price = float(
+                order.lmtPrice if required_type == "LMT" else order.auxPrice
+            )
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                "Protective child quantity and price must be numeric."
+            ) from exc
+        if not math.isfinite(quantity) or quantity <= 0:
+            raise ValueError(
+                "Protective child quantity must be finite and positive."
+            )
+        if not quantity.is_integer():
+            raise ValueError("Protective child quantity must be a whole number.")
+        if not math.isfinite(price) or price <= 0:
+            raise ValueError(
+                "Protective child price must be finite and positive."
+            )
 
     def _cancel_order_safely(self, order_id: int) -> None:
         try:
@@ -640,6 +987,14 @@ class IbkrOrderTransport:
             self._client.cancelOrder(order_id)
         except Exception:
             pass
+
+    @staticmethod
+    def _comparison_symbol(symbol: str) -> str:
+        normalized = str(symbol).strip().upper()
+        for suffix in (".AS", ".DE"):
+            if normalized.endswith(suffix):
+                return normalized[: -len(suffix)]
+        return normalized
 
     def __enter__(self) -> IbkrOrderTransport:
         return self

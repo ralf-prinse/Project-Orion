@@ -13,6 +13,7 @@ class TradingCostEstimate:
     slippage_eur: float
     external_fees_eur: float
     fx_conversion_buffer_eur: float
+    market_data_overhead_eur: float
     total_cost_eur: float
 
 
@@ -73,12 +74,18 @@ class TradingCostEstimator:
                 buy_value_eur + sell_value_eur
             ) * config.auto_fx_conversion_pct_per_side
 
+        market_data_overhead = (
+            config.estimated_monthly_market_data_cost_eur
+            / config.expected_monthly_round_trips
+        )
+
         total = (
             buy_commission
             + sell_commission
             + slippage
             + config.estimated_external_fees_eur
             + fx_buffer
+            + market_data_overhead
         )
 
         return TradingCostEstimate(
@@ -90,6 +97,10 @@ class TradingCostEstimator:
                 2,
             ),
             fx_conversion_buffer_eur=round(fx_buffer, 2),
+            market_data_overhead_eur=round(
+                market_data_overhead + 1e-12,
+                2,
+            ),
             total_cost_eur=round(total, 2),
         )
 

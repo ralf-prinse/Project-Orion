@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any
-from uuid import uuid4
 
 from models.execution_context import ExecutionContext
 from models.position_state import PositionState
@@ -84,7 +83,7 @@ class PaperTradingService:
 
             position_state = PositionState(
                 symbol=symbol,
-                trade_id=str(uuid4()),
+                trade_id=request.trade_id,
                 entry_price=request.risk_plan.entry_price,
                 current_stop_loss=request.risk_plan.stop_loss,
                 highest_price=request.risk_plan.entry_price,

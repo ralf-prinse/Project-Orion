@@ -48,10 +48,15 @@ class TimeStopService:
         state: PositionState,
         maximum_days: int,
         now: datetime | None = None,
+        maximum_minutes: int | None = None,
     ) -> TimeStopResult:
         if maximum_days < 1:
             raise ValueError(
                 "maximum_days must be at least 1."
+            )
+        if maximum_minutes is not None and maximum_minutes < 1:
+            raise ValueError(
+                "maximum_minutes must be at least 1 when set."
             )
 
         opened_at = self._as_utc(state.opened_at)
@@ -64,7 +69,11 @@ class TimeStopService:
             (evaluated_at - opened_at).total_seconds(),
         )
         elapsed_hours = elapsed_seconds / 3600.0
-        maximum_hours = float(maximum_days * 24)
+        maximum_hours = (
+            float(maximum_minutes) / 60.0
+            if maximum_minutes is not None
+            else float(maximum_days * 24)
+        )
         days_open = int(elapsed_hours // 24)
 
         if elapsed_hours < maximum_hours:
@@ -81,7 +90,11 @@ class TimeStopService:
             activated=True,
             days_open=days_open,
             maximum_days=maximum_days,
-            reason="Maximum holding period reached.",
+            reason=(
+                "Maximum intraday holding period reached."
+                if maximum_minutes is not None
+                else "Maximum holding period reached."
+            ),
             elapsed_hours=round(elapsed_hours, 3),
             maximum_hours=maximum_hours,
         )

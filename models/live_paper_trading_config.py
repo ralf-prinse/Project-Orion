@@ -21,6 +21,10 @@ class LivePaperTradingConfig:
     TIERED_PRICING: ClassVar[str] = "TIERED"
     NEWS_DISABLED: ClassVar[str] = "DISABLED"
     NEWS_SHADOW: ClassVar[str] = "SHADOW"
+    STANDARD_10000: ClassVar[str] = "STANDARD_10000"
+    MICRO_500: ClassVar[str] = "MICRO_500"
+
+    capital_profile: str = STANDARD_10000
 
     watchlist_path: Path = Path("data/universes/swing.csv")
 
@@ -34,7 +38,36 @@ class LivePaperTradingConfig:
 
     max_new_positions_per_cycle: int = 3
 
+    max_new_positions_per_day: int = 20
+
+    max_new_positions_per_week: int = 100
+
+    reentry_cooldown_minutes: int = 0
+
+    # Optional entry-session restrictions. An empty market tuple preserves
+    # the standard multi-market profile. MICRO_500 uses these controls to
+    # keep small-capital entries in the lower-minimum-commission US market
+    # and away from the opening and closing auction windows.
+    allowed_entry_market_codes: tuple[str, ...] = ()
+    entry_open_buffer_minutes: int = 0
+    entry_close_buffer_minutes: int = 0
+
+    # Intraday confirmation is calculated from completed candles only.
+    require_intraday_confirmation: bool = False
+    min_intraday_relative_volume: float = 0.0
+    min_intraday_relative_strength: float = 0.0
+
     min_confidence: float = 0.75
+
+    # Entry selectivity. The legacy decision remains visible in journals,
+    # but a BUY may only reach allocation when the independently built
+    # investment thesis and opportunity ranking confirm it.
+    require_buy_thesis: bool = True
+    min_thesis_conviction: float = 68.0
+    min_opportunity_score: float = 70.0
+    min_trend_factor: float = 0.40
+    min_momentum_factor: float = 0.50
+    min_pressure_confirmation_factor: float = 0.55
 
     max_position_value: float = 500.0
 
@@ -52,6 +85,7 @@ class LivePaperTradingConfig:
 
     history_period: str = "3mo"
     history_interval: str = "1d"
+    max_history_age_minutes: int | None = None
 
     allow_fractional_shares: bool = False
 
@@ -61,6 +95,8 @@ class LivePaperTradingConfig:
     break_even_trigger_percent: float = 0.05
 
     max_holding_days: int = 2
+
+    max_holding_minutes: int | None = None
 
     enable_trailing_stop: bool = True
     enable_break_even: bool = True
@@ -77,15 +113,65 @@ class LivePaperTradingConfig:
 
     estimated_slippage_pct_per_side: float = 0.0005
     estimated_external_fees_eur: float = 0.25
+    estimated_monthly_market_data_cost_eur: float = 0.0
+    expected_monthly_round_trips: int = 1
     include_auto_fx_conversion_buffer: bool = True
     auto_fx_conversion_pct_per_side: float = 0.0003
+
+    # Entry economics gate. Defaults preserve the standard profile; the
+    # MICRO_500 profile uses strict values so minimum commissions cannot
+    # consume an unreasonable share of a small position.
+    max_round_trip_cost_pct: float = 1.0
+    max_required_gross_move_pct: float = 1.0
+    entry_cost_uncertainty_buffer_eur: float = 0.0
+    min_net_reward_risk_ratio: float = 0.0
 
     news_mode: str = NEWS_DISABLED
     news_lookback_hours: int = 24
     news_max_articles_per_symbol: int = 10
     news_max_candidate_symbols_per_cycle: int = 20
 
+    # Execution-grade Paper controls. Native child orders and software exits
+    # share a persistent trade-based OCA group so only one exit can fill.
+    enable_native_protective_orders: bool = True
+    enable_execution_quality_gate: bool = True
+    max_bid_ask_spread_pct: float = 0.003
+    max_quote_age_seconds: float = 5.0
+    max_entry_slippage_pct: float = 0.0015
+
+    # Session-level circuit breaker. It blocks new BUY orders; managed exits
+    # remain active.
+    max_daily_loss_pct: float = 0.02
+    max_consecutive_losses: int = 3
+    circuit_breaker_cooldown_minutes: int = 60
+    max_consecutive_order_failures: int = 3
+
+    # Coarse concentration controls that work without unreliable third-party
+    # sector metadata. More detailed sector/correlation controls can be fed by
+    # the optional instrument metadata service.
+    max_positions_per_market: int = 12
+    max_market_exposure_pct: float = 0.70
+    max_positions_per_sector: int = 4
+    max_sector_exposure_pct: float = 0.25
+    max_positions_per_correlation_cluster: int = 4
+    instrument_metadata_path: Path = Path("data/instrument_metadata.csv")
+
+    # Known earnings events can block entries. Missing event data is reported
+    # but does not pretend that a date is known.
+    earnings_blackout_days: int = 1
+    earnings_calendar_path: Path = Path("data/earnings_calendar.csv")
+
     def __post_init__(self) -> None:
+        normalized_profile = self.capital_profile.strip().upper()
+        if normalized_profile not in {
+            self.STANDARD_10000,
+            self.MICRO_500,
+        }:
+            raise ValueError(
+                "capital_profile must be STANDARD_10000 or MICRO_500."
+            )
+        object.__setattr__(self, "capital_profile", normalized_profile)
+
         normalized_strategy = self.exit_strategy.strip().upper()
         if normalized_strategy not in {
             self.SWING,
@@ -129,6 +215,78 @@ class LivePaperTradingConfig:
             raise ValueError(
                 "max_new_positions_per_cycle must be at least 1."
             )
+        if self.max_new_positions_per_day < 1:
+            raise ValueError(
+                "max_new_positions_per_day must be at least 1."
+            )
+        if self.max_new_positions_per_week < 1:
+            raise ValueError(
+                "max_new_positions_per_week must be at least 1."
+            )
+        if self.max_new_positions_per_week < self.max_new_positions_per_day:
+            raise ValueError(
+                "max_new_positions_per_week must be at least the daily "
+                "entry limit."
+            )
+        if self.reentry_cooldown_minutes < 0:
+            raise ValueError(
+                "reentry_cooldown_minutes must not be negative."
+            )
+        for name, value in {
+            "entry_open_buffer_minutes": self.entry_open_buffer_minutes,
+            "entry_close_buffer_minutes": self.entry_close_buffer_minutes,
+        }.items():
+            if value < 0:
+                raise ValueError(f"{name} must not be negative.")
+
+        market_codes = tuple(
+            str(code).strip().upper()
+            for code in self.allowed_entry_market_codes
+        )
+        unknown_market_codes = set(market_codes) - {
+            "XAMS",
+            "XETR",
+            "XUSA",
+        }
+        if unknown_market_codes:
+            raise ValueError(
+                "allowed_entry_market_codes contains unsupported markets: "
+                + ", ".join(sorted(unknown_market_codes))
+            )
+        object.__setattr__(
+            self,
+            "allowed_entry_market_codes",
+            market_codes,
+        )
+        if self.max_holding_minutes is not None:
+            if self.max_holding_minutes < 1:
+                raise ValueError(
+                    "max_holding_minutes must be at least 1 when set."
+                )
+        if self.max_history_age_minutes is not None:
+            if self.max_history_age_minutes < 1:
+                raise ValueError(
+                    "max_history_age_minutes must be at least 1 when set."
+                )
+
+        bounded_scores = {
+            "min_thesis_conviction": self.min_thesis_conviction,
+            "min_opportunity_score": self.min_opportunity_score,
+        }
+        for name, value in bounded_scores.items():
+            if not 0 <= value <= 100:
+                raise ValueError(f"{name} must be between 0 and 100.")
+
+        bounded_factors = {
+            "min_trend_factor": self.min_trend_factor,
+            "min_momentum_factor": self.min_momentum_factor,
+            "min_pressure_confirmation_factor": (
+                self.min_pressure_confirmation_factor
+            ),
+        }
+        for name, value in bounded_factors.items():
+            if not 0 <= value <= 1:
+                raise ValueError(f"{name} must be between 0 and 1.")
 
         if self.news_lookback_hours < 1:
             raise ValueError("news_lookback_hours must be at least 1.")
@@ -139,6 +297,59 @@ class LivePaperTradingConfig:
         if self.news_max_candidate_symbols_per_cycle < 1:
             raise ValueError(
                 "news_max_candidate_symbols_per_cycle must be at least 1."
+            )
+
+        if self.max_consecutive_losses < 1:
+            raise ValueError("max_consecutive_losses must be at least 1.")
+        if self.circuit_breaker_cooldown_minutes < 1:
+            raise ValueError(
+                "circuit_breaker_cooldown_minutes must be at least 1."
+            )
+        if self.max_consecutive_order_failures < 1:
+            raise ValueError(
+                "max_consecutive_order_failures must be at least 1."
+            )
+        if self.max_positions_per_market < 1:
+            raise ValueError("max_positions_per_market must be at least 1.")
+        if self.max_positions_per_sector < 1:
+            raise ValueError("max_positions_per_sector must be at least 1.")
+        if self.max_positions_per_correlation_cluster < 1:
+            raise ValueError(
+                "max_positions_per_correlation_cluster must be at least 1."
+            )
+        if self.earnings_blackout_days < 0:
+            raise ValueError("earnings_blackout_days must not be negative.")
+
+        bounded_percentages = {
+            "max_bid_ask_spread_pct": self.max_bid_ask_spread_pct,
+            "max_entry_slippage_pct": self.max_entry_slippage_pct,
+            "max_daily_loss_pct": self.max_daily_loss_pct,
+            "max_market_exposure_pct": self.max_market_exposure_pct,
+            "max_sector_exposure_pct": self.max_sector_exposure_pct,
+        }
+        for name, value in bounded_percentages.items():
+            if not 0 < value < 1:
+                raise ValueError(f"{name} must be between zero and one.")
+        inclusive_percentages = {
+            "max_round_trip_cost_pct": self.max_round_trip_cost_pct,
+            "max_required_gross_move_pct": (
+                self.max_required_gross_move_pct
+            ),
+        }
+        for name, value in inclusive_percentages.items():
+            if not 0 < value <= 1:
+                raise ValueError(
+                    f"{name} must be greater than zero and at most one."
+                )
+        if self.max_quote_age_seconds <= 0:
+            raise ValueError("max_quote_age_seconds must be greater than zero.")
+        if self.min_intraday_relative_volume < 0:
+            raise ValueError(
+                "min_intraday_relative_volume must not be negative."
+            )
+        if self.min_net_reward_risk_ratio < 0:
+            raise ValueError(
+                "min_net_reward_risk_ratio must not be negative."
             )
 
         positive_amounts = {
@@ -159,6 +370,26 @@ class LivePaperTradingConfig:
             if value <= 0:
                 raise ValueError(f"{name} must be greater than zero.")
 
+        if self.min_net_reward_risk_ratio > 0:
+            reward_risk_pairs = {
+                "US": (
+                    self.small_profit_target_us_eur,
+                    self.small_profit_max_loss_us_eur,
+                ),
+                "EU": (
+                    self.small_profit_target_eu_eur,
+                    self.small_profit_max_loss_eu_eur,
+                ),
+            }
+            for market, (target, maximum_loss) in reward_risk_pairs.items():
+                ratio = target / maximum_loss
+                if ratio + 1e-12 < self.min_net_reward_risk_ratio:
+                    raise ValueError(
+                        f"{market} net reward/risk ratio {ratio:.2f} is "
+                        "below min_net_reward_risk_ratio "
+                        f"{self.min_net_reward_risk_ratio:.2f}."
+                    )
+
         non_negative_amounts = {
             "estimated_slippage_pct_per_side": (
                 self.estimated_slippage_pct_per_side
@@ -169,7 +400,18 @@ class LivePaperTradingConfig:
             "auto_fx_conversion_pct_per_side": (
                 self.auto_fx_conversion_pct_per_side
             ),
+            "estimated_monthly_market_data_cost_eur": (
+                self.estimated_monthly_market_data_cost_eur
+            ),
+            "entry_cost_uncertainty_buffer_eur": (
+                self.entry_cost_uncertainty_buffer_eur
+            ),
         }
         for name, value in non_negative_amounts.items():
             if value < 0:
                 raise ValueError(f"{name} must not be negative.")
+
+        if self.expected_monthly_round_trips < 1:
+            raise ValueError(
+                "expected_monthly_round_trips must be at least 1."
+            )

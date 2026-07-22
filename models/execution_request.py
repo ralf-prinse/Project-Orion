@@ -17,3 +17,5 @@ class ExecutionRequest:
     source: str = "TradingPipeline"
     currency: str = "EUR"
     fx_rate_to_base: float = 1.0
+    trade_id: str = ""
+    execution_urgency: str = "NORMAL"

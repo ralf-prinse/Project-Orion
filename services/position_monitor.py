@@ -121,6 +121,7 @@ class PositionMonitor:
                 state=temporary_state,
                 maximum_days=config.max_holding_days,
                 now=now,
+                maximum_minutes=config.max_holding_minutes,
             )
 
             if time_stop.activated:
@@ -210,6 +211,7 @@ class PositionMonitor:
                 resolved_config.max_holding_days
             ),
             now=now,
+            maximum_minutes=resolved_config.max_holding_minutes,
         )
 
         if time_stop.activated:

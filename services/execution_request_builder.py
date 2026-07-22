@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any
+from uuid import uuid4
 
 from models.execution_request import ExecutionRequest
 from models.risk_plan import RiskPlan
@@ -60,6 +61,7 @@ class ExecutionRequestBuilder:
             source="TradingPipeline",
             fx_rate_to_base=float(fx_rate_to_base),
             currency=currency.strip().upper(),
+            trade_id=str(uuid4()),
         )
 
     def _build_from_legacy_dict(
@@ -96,4 +98,5 @@ class ExecutionRequestBuilder:
             source="TradingPipeline",
             fx_rate_to_base=float(fx_rate_to_base),
             currency=currency.strip().upper(),
+            trade_id=str(uuid4()),
         )

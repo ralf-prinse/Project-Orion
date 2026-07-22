@@ -117,6 +117,16 @@ class PositionExitExecutionService:
             source="PositionMonitor",
             currency=position.currency,
             fx_rate_to_base=position.fx_rate_to_base,
+            trade_id=(
+                session.position_states[symbol].trade_id
+                if symbol in session.position_states
+                else ""
+            ),
+            execution_urgency=(
+                "PROTECTIVE"
+                if action in {"STOP_LOSS", "MAX_HOLDING_TIME"}
+                else "NORMAL"
+            ),
         )
 
         context = ExecutionContext(

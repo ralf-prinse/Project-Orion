@@ -2,15 +2,15 @@
 
 # Project Orion - TODO
 
-Laatste update: 19-07-2026
+Laatste update: 20-07-2026
 
 ---
 
 # Huidige prioriteit
 
-Geen nieuwe functionaliteit ontwikkelen voordat de bestaande codebase volledig is geïnventariseerd.
-
-De focus verschuift van **bouwen** naar **integreren**.
+Verzamel eerst voldoende geïsoleerde shadowresultaten voordat IBKR-orderrechten
+of betaalde realtime marktdata worden overwogen. Kalibreer de nieuwe
+selectiviteitsgrenzen uitsluitend offline en nooit automatisch vanuit learning.
 
 ---
 
@@ -155,18 +155,64 @@ Voorkom dubbele implementaties.
 
 ✅ Legacy `engines`/`ScannerService` en lege placeholders verwijderd
 
-✅ Volledige testsuite hersteld naar 555 geslaagd en 0 mislukt
+✅ Volledige testsuite uitgebreid naar 610 geslaagd en 0 mislukt
+
+✅ IBKR live bid/ask-, spread-, freshness- en top-size execution gate
+
+✅ Broker-native Paper brackets met OCA-veilige software-exits
+
+✅ Native protective-fillreconciliatie naar trade memory
+
+✅ Sessieverlies-, loss-streak- en brokerfout-circuitbreaker
+
+✅ Markt-, sector- en correlatieclusterconcentratie voor 100 symbolen
+
+✅ Earnings-blackoutinterface zonder verzonnen kalenderdata
+
+✅ Offline cost-aware expectancyanalyse zonder runtimeconfiguraties te wijzigen
+
+✅ Getekende trendnormalisatie en geannualiseerde volatiliteitsschaal
+
+✅ Onafhankelijke thesis-/ranking-/factorselectiviteitsgate
+
+✅ Geïsoleerde SHADOW-modus met aparte portefeuille en trade memory
+
+✅ Afzonderlijk MICRO_500-shadowprofiel met EUR 500 startkapitaal
+
+✅ Economische entrygate inclusief geamortiseerde marktdata-overhead
+
+✅ Eén entry per dag, vijf per week, 240-minuten herinstappauze en
+180-minuten tijdstop
+
+✅ MICRO_500 5d/5m-candles met incomplete-barfilter en vijftien-minutenfreshness
+na candle completion
+
+✅ Intervalbewuste trend-, momentum- en volatiliteitsschaal
+
+✅ Netto shadowcash, UTC-journals en herstel van historische MICRO_500-state
+
+✅ Empirisch 90-minutenonderzoek en haalbaarheidsgate van 1,6%
+
+✅ Kostenherstelprofiel: XUSA-only entry, EUR 4,50/3,00 netto reward/risk,
+openings-/sluitingsbuffer, VWAP, relatief volume en SPY-bevestiging
 
 ---
 
 # Volgende schaalstappen
 
 - Paper-observatie met 100 symbolen en orders uitgeschakeld;
+- minimaal meerdere weken shadowtrades verzamelen en nettoresultaten per markt,
+  regime en afwijzingsreden beoordelen;
+- MICRO_500 afzonderlijk meten; niet vergelijken op bruto P&L maar op netto
+  expectancy na commissie, spread, slippage, FX en marktdata-overhead;
+- false positives/negatives van de selectiviteitsgate handmatig auditen voordat
+  grenzen worden aangepast;
 - ontbrekende/ambigue Yahoo- en IBKR-contracten uit het universum filteren;
-- liquiditeits-, spread- en volumevoorselectie toevoegen;
-- IBKR realtime marktdata voor open posities en topkandidaten koppelen;
+- execution-qualitymetingen tijdens Paper-cycli verzamelen en limieten op
+  werkelijke spread/fill/slippage kalibreren;
+- officiële earningskalender periodiek vullen en bron/auditdatum vastleggen;
 - pas na stabiele meetresultaten opschalen naar 250 symbolen;
-- broker-native beschermende stoporders toevoegen vóór live-moneyontwerp.
+- TWS execution-historyretentie en herstel na meerdaagse uitval valideren;
 - nieuwsproviderdekking en latency meten tijdens orderloze Paper-cycli;
 - classifier valideren op EU/VS-headlines en false positives;
 - pas daarna beslissen over een fail-closed nieuws-gate;

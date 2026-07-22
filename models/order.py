@@ -15,3 +15,8 @@ class Order:
     source: str = "ExecutionEngine"
     currency: str = "EUR"
     fx_rate_to_base: float = 1.0
+    stop_loss_price: float | None = None
+    take_profit_price: float | None = None
+    client_order_id: str = ""
+    oca_group: str = ""
+    execution_urgency: str = "NORMAL"

@@ -2,7 +2,7 @@
 
 # Project Orion - Status
 
-Laatste update: 19-07-2026
+Laatste update: 21-07-2026
 
 ---
 
@@ -26,6 +26,17 @@ De complete end-to-end handelsketen is operationeel:
 
 De autonome runner voltooit een volledige cyclus zonder fouten.
 
+Een afzonderlijke `SHADOW`-modus kan zonder IBKR-marktdata-abonnement fictieve
+trades volgen. Deze modus is technisch geïsoleerd van broker-sync, adoptie,
+IBKR-quotes en ordertransport en weigert ordertoestemming fail-closed.
+
+Binnen `SHADOW` bestaat tevens een volledig gescheiden `MICRO_500`-
+kapitaalprofiel. Dit modelleert EUR 500 startkapitaal, één positie, 30%
+cashreserve, dagelijkse én wekelijkse entrylimieten, minutennauwkeurige exits en
+een economische gate die minimumcommissies en marktdata-overhead vóór allocatie
+toetst. Alleen XUSA kan micro-entries krijgen; Europa blijft analyseerbaar. Het
+profiel deelt geen state met de standaardshadowportefeuille.
+
 De eerste schaalfase voor autonoom Paper-traden is operationeel:
 
 - 100 gecureerde EU/VS-symbolen;
@@ -48,11 +59,50 @@ Architectuuropschoning:
 - oude directe decisionengine en dubbele `engines`/scannerketen verwijderd;
 - research/explainability blijft geïsoleerd in `services/decisions`;
 - lege placeholders en tests zonder assertions verwijderd;
-- volledige testsuite: 555 geslaagd, 0 mislukt.
+- volledige testsuite: 610 geslaagd, 0 mislukt.
+- MICRO_500 intradaydata: `5d/5m`, uitsluitend volledige candles, maximaal
+  vijftien minuten oud na completion en twee minuten cache;
+- MICRO_500 netto-accounting: exitkosten in cash, startreconciliatie en
+  UTC-aware trade journals;
 
 ---
 
 # Werkende onderdelen
+
+## Execution-grade Paper bescherming
+
+✅ IBKR live bid/ask-, freshness-, spread- en top-sizegate
+
+✅ Begrensde limituitvoering voor normale BUY- en winstexits
+
+✅ Broker-native bracket met stop-loss en profit-taker
+
+✅ Persistente OCA-koppeling tussen native en softwarematige exits
+
+✅ Reconciliatie en journaling van native IBKR protective fills
+
+✅ Sessieverlies-, loss-streak- en brokerfout-circuitbreaker
+
+✅ Markt-, sector- en correlatieclusterconcentratie
+
+✅ Geverifieerde earnings-blackoutinterface
+
+✅ Offline netto-expectancyrapportage zonder autonome configuratiewijzigingen
+
+✅ Getekende trend- en correct geschaalde volatiliteitsindicatoren
+
+✅ Thesis- en opportunity-gebaseerde selectiviteitsgate
+
+✅ Geïsoleerde kostenbewuste shadowportfolio zonder IBKR-orderpad
+
+✅ Afzonderlijk MICRO_500-profiel met eigen state en fail-closed profielgrens
+
+✅ Entry-economie op kostenratio, benodigde brutobeweging en marktdata-overhead
+
+✅ Eén entry per dag, vijf per week, 240-minuten cooldown en 180-minuten tijdstop
+
+✅ VS-only micro-entry met opening/sluitingsbuffer, 5m/15m, VWAP, relatief
+volume en SPY-relatieve-sterktebevestiging
 
 ## Data
 
@@ -160,9 +210,18 @@ Wanneer het maximum aantal open posities is bereikt worden nieuwe BUY-signalen c
 
 Dit is verwacht gedrag.
 
-Yahoo blijft in deze fase de analysebron. Voor handel met echt geld moet actuele
-IBKR-marktdata voor posities en topkandidaten nog de execution-grade bron worden.
+Yahoo blijft in deze fase de brede analysebron. Actuele IBKR bid/askdata is nu
+wel verplicht voor iedere daadwerkelijke IBKR-entry en normale winstexit.
+`SHADOW` gebruikt bewust niet-uitvoerbare referentieprijzen en mag daarom niet
+als bewijs van haalbare brokerfills worden geïnterpreteerd.
 De runtime accepteert bewust uitsluitend IBKR Paper-accounts met `DU`-prefix.
+
+IBKR top-of-bookdata vereist passende marktdata-abonnementen. Ontbrekende
+bid/ask of size blokkeert entries fail-closed. Earningsdata wordt niet uit
+headlines afgeleid; alleen expliciet aangeleverde kalenderdata activeert de
+harde eventgate. TWS kan execution history beperkt bewaren. Een niet
+reconcilieerbare verdwenen positie vereist daarom handmatige controle en wordt
+niet automatisch als trade-uitkomst ingevuld.
 
 IBKR-nieuwsdekking hangt af van API-beschikbare providers en account-
 abonnementen. `UNAVAILABLE` is daarom een geldige observatiestatus. De eerste

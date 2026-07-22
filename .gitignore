@@ -28,3 +28,7 @@ data/ibkr_autonomous_paper_portfolio.json
 data/ibkr_news_events.jsonl
 data/ibkr_news_assessments.jsonl
 data/ibkr_completed_trades.jsonl
+data/orion_shadow*_trading_session.json
+data/orion_shadow*_paper_portfolio.json
+data/orion_shadow*_completed_trades.jsonl
+data/backups/micro_500_net_reconciliation_*/

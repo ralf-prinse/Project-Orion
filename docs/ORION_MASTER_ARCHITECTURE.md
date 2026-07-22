@@ -1,6 +1,6 @@
 # ORION MASTER ARCHITECTURE
 
-Laatste update: 19-07-2026
+Laatste update: 20-07-2026
 
 ---
 
@@ -51,7 +51,13 @@ Portfolio Management
 Execution Engine
       │
       ▼
+Execution Quality (IBKR bid/ask + bounded limit)
+      │
+      ▼
 Broker (Paper / IBKR)
+      │
+      ▼
+Native Protection (Bracket + OCA)
       │
       ▼
 Synchronization
@@ -114,6 +120,22 @@ IBKR-runtime. De oude root-`engines` en `ScannerService` bestaan niet meer.
 - Order Transport
 - Broker Synchronization
 
+De autonome IBKR Paper composition root koppelt vóór een normale order een
+fail-closed actuele top-of-bookgate. Nieuwe BUY's worden met parent-, stop- en
+profit-child verzonden. De persistente `trade_id` is tegelijk journalcorrelatie,
+`orderRef` en basis voor de OCA-groep. Hierdoor blijven broker-native en
+softwarematige exitpaden één lifecycle. Een native fill wordt via execution
+history teruggeleid naar `CompletedTradeRecord`.
+
+Dezelfde composition root kent daarnaast execution mode `SHADOW`. In deze
+modus wordt `ShadowBroker` in `ExecutionEngine` geïnjecteerd en worden broker-
+sync, positieadoptie, IBKR quote provider, ordertransport en native protective
+reconciliation niet aan de runner gekoppeld. De shadowruntime gebruikt eigen
+persistentiebestanden en kan niet met ordertoestemming worden gecombineerd.
+Kapitaalprofiel `MICRO_500` is een extra fail-closed grens binnen `SHADOW` en
+heeft een eigen composition-configuratie en opslagprefix. Hierdoor kan een EUR
+500-experiment nooit de standaard EUR 10.000-shadowstate laden of overschrijven.
+
 ---
 
 ## Portfolio
@@ -122,6 +144,23 @@ IBKR-runtime. De oude root-`engines` en `ScannerService` bestaan niet meer.
 - Cash Management
 - Equity Management
 - Portfolio Synchronization
+
+`PortfolioAllocator` combineert de canonieke `RiskManager` met een afzonderlijke
+concentratiegate. De gate begrenst markt, sector en een handmatig gecureerd
+correlatiecluster en telt reeds in dezelfde cyclus goedgekeurde posities mee.
+Bekende earnings-events kunnen entries deterministisch blokkeren. Onbekende
+eventdata wordt expliciet als onbekend behandeld en niet door nieuws geschat.
+Voor kleine kapitaalprofielen volgt na quantityberekening een economische gate:
+geraamde commissie, slippage, FX, externe kosten en geamortiseerde marktdata-
+overhead worden afgezet tegen positiewaarde en benodigde brutobeweging. Een
+entry-frequencygate begrenst daarnaast entries per dag en herinstap per symbool.
+De microdata-adapter levert `5d/5m` aan dezelfde canonieke pipeline, maar pas na
+het verwijderen van een lopende candle en een freshnesscontrole. Indicatoren
+lezen intervalmetadata en schalen trend, momentum en annualisatie passend voor
+5-minutenbars. De standaard dagpipeline behoudt zijn bestaande schaal.
+MICRO_500-shadowcash is een netto grootheid: bij sluiten worden geschatte
+round-tripkosten werkelijk afgetrokken en bij laden wordt cash vanuit de
+afzonderlijke completed-trade store gereconcilieerd.
 
 ---
 

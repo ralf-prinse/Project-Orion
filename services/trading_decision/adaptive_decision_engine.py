@@ -37,7 +37,7 @@ class AdaptiveDecisionEngine:
             confidence = min(1.0, score + 0.1)
         elif score <= sell_threshold:
             decision = "SELL"
-            confidence = max(0.0, 1.0 - score)
+            confidence = min(1.0, max(0.0, 1.0 - score))
         else:
             decision = "HOLD"
             confidence = 0.5

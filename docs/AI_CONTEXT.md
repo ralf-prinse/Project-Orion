@@ -22,10 +22,49 @@ brokerinterface. Nieuwsintelligentie is gekoppeld als IBKR `SHADOW`-
 observatielaag en heeft geen invloed op orders. Gesloten trades worden als één
 record bewaard voor latere offline analyse; autonoom self-learning staat uit.
 
+De echte Paper-uitvoeringslaag vereist actuele IBKR bid/askdata, begrenst normale
+orders met marketable limits en verzendt BUY's met broker-native stop/profit
+children. Een gedeelde trade-OCA-groep voorkomt dubbele SELL's tussen IBKR en
+Orions softwarematige lifecycle. Native fills worden teruggelezen naar dezelfde
+trade memory.
+
+Zonder betaald realtime-abonnement kan Orion via execution mode `SHADOW` een
+volledig geïsoleerde fictieve portefeuille beheren. Deze modus kan geen IBKR-
+quote of orderpad activeren, gebruikt aparte persistentie en verwerkt Yahoo-
+referentieprijzen met conservatieve slippage en geraamde round-tripkosten.
+
+Kapitaalprofiel `MICRO_500` is uitsluitend aan execution mode `SHADOW`
+toegestaan en gebruikt een eigen `data/orion_shadow_micro_500`-state. Het
+profiel start met EUR 500, maximaal één positie, 30% cashreserve, maximaal
+EUR 350 per positie, één entry per dag, vijf per week, 240 minuten
+re-entrycooldown en een 180-minuten tijdstop. Alleen XUSA is uitvoerbaar;
+Europese symbolen blijven analyseerbaar maar worden voor micro-entry hard
+geblokkeerd. Het Amerikaanse nettodoel is EUR 4,50 tegenover EUR 3,00 maximaal
+nettoverlies. Kosten mogen maximaal 0,6% van de positie vragen en kosten plus
+doel en buffer maximaal 2,5% brutobeweging.
+De entryanalyse van dit profiel gebruikt vijf handelsdagen 5-minutencandles.
+Een lopende candle wordt uitgesloten; de nieuwste volledige candle mag tijdens
+een open sessie maximaal vijftien minuten na candle completion oud zijn. Deze
+marge vangt de gemeten Yahoo-publicatievertraging op. Trend/momentum en
+volatiliteitsannualisatie zijn intervalbewust. MICRO_500 vereist daarnaast een
+bullish 5-minutentrigger, stijgende 15-minutentrend, koers boven sessie-VWAP,
+relatief volume en positieve 15-minutensterkte tegenover SPY. Entries zijn de
+eerste vijftien minuten en laatste drie uren van XUSA geblokkeerd. De
+standaardconfiguratie blijft op `3mo/1d` en wordt niet door deze gates geraakt.
+
+De vroegere structurele BUY-bias is gecorrigeerd: trend is nu een getekende
+afwijking van het voortschrijdend gemiddelde en volatiliteit heeft de juiste
+percentageschaal. Een tweede selectiviteitsgate vereist thesis-, ranking-,
+trend-, momentum- en pressurebevestiging voordat allocatie mogelijk is.
+
+Entryrisico omvat daarnaast een sessiecircuitbreaker, markt-/sector-/cluster-
+concentratie en bekende earnings-events. Nettowachting wordt alleen offline
+gerapporteerd en kan geen configuratie of order wijzigen.
+
 Architectuurgrens: de actieve `TradingPipeline` gebruikt uitsluitend
 `services.trading_decision`. `services/decisions` is research/explainability en
 wordt niet door de autonome runner geïmporteerd. De oude `engines`- en
-`ScannerService`-keten is verwijderd. De volledige suite telt 555 groene tests.
+`ScannerService`-keten is verwijderd. De volledige suite telt 610 groene tests.
 
 Werkend:
 
@@ -50,10 +89,12 @@ Actuele IBKR Paper-schaalconfiguratie:
 - 100-symbolenvalidatie-universum: 50 VS, 25 Amsterdam, 25 Xetra;
 - officiële markturen bepalen welke subset per cyclus wordt verwerkt;
 - historische Yahoo-data: batches van 25, cache-TTL 15 minuten;
-- standaard één cyclus; begrensd configureerbaar tot 96 cycli;
+- standaard één cyclus; begrensd configureerbaar tot 200 cycli;
 - standaard scaninterval 900 seconden bij meerdere cycli;
 - maximaal drie nieuwe posities per cyclus en twintig totaal;
 - live-moneyaccounts blijven technisch geblokkeerd; alleen `DU` Paper-accounts.
+- `MICRO_500` blijft shadow-only totdat voldoende nettoresultaten na kosten zijn
+  verzameld en echte commission reports het kostenmodel valideren.
 
 ---
 

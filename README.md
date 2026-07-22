@@ -12,8 +12,10 @@ EU/US universe en beurskalender
   -> services.orchestration.TradingPipeline
   -> services.trading_decision
   -> canonieke RiskPlan en PortfolioAllocator/RiskManager
+  -> session-, earnings- en concentration gates
+  -> actuele IBKR bid/ask execution-quality gate
   -> ExecutionEngine en IbkrBroker
-  -> IBKR Paper fill en broker-truth synchronisatie
+  -> IBKR Paper bracket/OCA fill en broker-truth synchronisatie
   -> managed exits, journals en CompletedTradeRecord
 ```
 
@@ -22,11 +24,17 @@ en gejournaliseerd, maar kan geen BUY, SELL, quantity, riskplan of order
 wijzigen. Learning- en recommendationservices zijn eveneens niet met de
 autonome runtime verbonden.
 
+Execution mode `SHADOW` is een afzonderlijke veiligheidsgrens voor fictieve
+trades zonder betaald IBKR-marktdata-abonnement. De modus gebruikt een lokale
+shadowbroker, aparte persistentie en Yahoo-referentieprijzen; IBKR-quotes,
+orders, broker-sync en positieadoptie zijn niet bereikbaar.
+
 ## Belangrijkste entrypoints
 
 - `run_autonomous_ibkr_paper.py`: begrensde autonome IBKR Paper-cycli;
 - `test_ibkr_account_reader.py`: read-only account- en positiediagnose;
 - `run_dashboard.py`: optionele tekstuele rapportage zonder desktop-GUI.
+- `analyze_completed_trades.py`: offline netto-expectancy na geraamde kosten.
 
 ## Veilige observatiecyclus
 
@@ -42,6 +50,64 @@ $env:ORION_IBKR_CYCLES="1"
 
 Ordertoestemming moet expliciet worden aangezet en blijft beperkt tot Paper
 Trading. Activeer dit project niet op een live-moneyaccount.
+
+## Geïsoleerde shadowcyclus zonder IBKR-marktdata
+
+```powershell
+$env:ORION_IBKR_PAPER_ACCOUNT_ID="<DU_PAPER_ACCOUNT>"
+$env:ORION_IBKR_EXECUTION_MODE="SHADOW"
+$env:ORION_IBKR_ALLOW_ORDERS="false"
+$env:ORION_IBKR_NEWS_MODE="DISABLED"
+$env:ORION_IBKR_CYCLES="1"
+
+.\.venv\Scripts\python.exe run_autonomous_ibkr_paper.py
+```
+
+Bevestig met `START ONE ORION SHADOW CYCLE`. Resultaten worden uitsluitend
+geschreven naar bestanden met prefix `data/orion_shadow`; deze portefeuille
+wordt nooit gemengd met de echte IBKR Paper-portefeuille.
+
+## Realistische €500-shadowcyclus
+
+Gebruik `MICRO_500` om strategiegedrag met het beoogde startkapitaal te meten
+zonder de bestaande €10.000-shadowportefeuille te wijzigen:
+
+```powershell
+$env:ORION_IBKR_PAPER_ACCOUNT_ID="<DU_PAPER_ACCOUNT>"
+$env:ORION_IBKR_EXECUTION_MODE="SHADOW"
+$env:ORION_IBKR_ALLOW_ORDERS="false"
+$env:ORION_CAPITAL_PROFILE="MICRO_500"
+$env:ORION_IBKR_PRICING_PLAN="TIERED"
+$env:ORION_MONTHLY_MARKET_DATA_COST_EUR="3.00"
+$env:ORION_IBKR_NEWS_MODE="DISABLED"
+$env:ORION_IBKR_CYCLES="1"
+
+.\.venv\Scripts\python.exe run_autonomous_ibkr_paper.py
+```
+
+Bevestig met `START ONE ORION MICRO 500 SHADOW CYCLE`. Dit profiel start met
+€500, houdt minimaal 30% cash aan en staat maximaal één positie, één entry per
+dag en vijf entries per UTC-week toe. De maximale positie is EUR 350. Alleen
+Amerikaanse symbolen kunnen een entry krijgen; Europa blijft zichtbaar in de
+analyse maar wordt voor micro-uitvoering fail-closed geblokkeerd.
+
+Een entry vereist na de eerste vijftien marktminuten een stijgende
+15-minutentrend, een bullish afgeronde 5-minutencandle, koers boven sessie-VWAP,
+voldoende relatief volume en positieve 15-minutensterkte tegenover SPY. Binnen
+drie uur voor de Amerikaanse sluiting worden geen nieuwe posities geopend. Het
+nettodoel is EUR 4,50 tegenover maximaal EUR 3,00 nettoverlies, met minimaal
+1,5 netto reward/risk. Retourkosten mogen maximaal 0,6% van de positie zijn en
+kosten plus doel en buffer maximaal 2,5% brutobeweging vragen. De eigen state
+gebruikt prefix `data/orion_shadow_micro_500`.
+
+Voor een volledige Europese en Amerikaanse shadowdag start je rond 08:55:
+
+```powershell
+.\start_orion_micro_shadow_full_day.ps1 -PaperAccountId "DU..."
+```
+
+De starter gebruikt 160 begrensde cycli van 300 seconden, dekt daarmee tot
+ongeveer 22:10 Nederlandse tijd en kan geen IBKR-orderpad activeren.
 
 ## Architectuurgrenzen
 

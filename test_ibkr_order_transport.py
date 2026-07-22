@@ -30,9 +30,11 @@ class FakeIbkrOrderClient:
         self.accounts_ready = threading.Event()
         self.terminal_event = threading.Event()
         self.execution_reconciliation_ready = threading.Event()
+        self.protective_children_ready = threading.Event()
         self.next_order_id: int | None = None
         self.active_order_id: int | None = None
         self.expected_quantity = 0
+        self.active_bracket_order_ids = set()
         self.managed_accounts: list[str] = []
         self.outcome: IbkrOrderOutcome | None = None
         self.errors: list[str] = []
@@ -101,6 +103,14 @@ class FakeIbkrOrderClient:
         self.errors = []
         self.terminal_event.clear()
         self.execution_reconciliation_ready.clear()
+
+    def set_active_bracket_order_ids(
+        self,
+        order_ids,
+        child_order_ids,
+    ) -> None:
+        self.active_bracket_order_ids = set(order_ids)
+        self.protective_children_ready.set()
 
     def placeOrder(self, order_id: int, contract, order) -> None:
         self.place_order_called = True

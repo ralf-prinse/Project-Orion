@@ -42,6 +42,10 @@ from services.market_data.yahoo_historical_provider import (
 )
 from services.ibkr.ibkr_news_provider import IbkrNewsProvider
 from services.news.news_intelligence_service import NewsIntelligenceService
+from services.ibkr.ibkr_quote_provider import IbkrQuoteProvider
+from services.portfolio_concentration_gate import PortfolioConcentrationGate
+from services.earnings_calendar_service import EarningsCalendarService
+from services.shadow_broker import ShadowBroker
 
 
 @dataclass(frozen=True)
@@ -56,13 +60,13 @@ class IbkrAutonomousRuntime:
 
     runner: AutonomousPaperTradingRunner
     transport: IbkrOrderTransport
-    broker: IbkrBroker
+    broker: object
     execution_engine: ExecutionEngine
     paper_trading_service: PaperTradingService
     trading_cycle: TradingCycle
     position_exit_execution_service: PositionExitExecutionService
     account_service: IbkrAccountService
-    trading_session_sync_service: IbkrTradingSessionSyncService
+    trading_session_sync_service: IbkrTradingSessionSyncService | None
     price_provider: YahooProvider
     historical_provider: YahooHistoricalDataProvider
     news_provider: object | None
@@ -85,6 +89,7 @@ class IbkrAutonomousRuntimeFactory:
     ACCOUNT_CLIENT_ID = 110
     ORDER_CLIENT_ID = 120
     NEWS_CLIENT_ID = 130
+    QUOTE_CLIENT_ID = 140
 
     def build(
         self,
@@ -122,6 +127,14 @@ class IbkrAutonomousRuntimeFactory:
             )
 
         runtime_config = config or AutonomousPaperTradingConfig()
+        shadow_mode = (
+            runtime_config.execution_mode
+            == AutonomousPaperTradingConfig.SHADOW
+        )
+        if shadow_mode and allow_order_submission:
+            raise ValueError(
+                "SHADOW mode cannot be combined with order submission."
+            )
         if runtime_config.live_config.base_currency.strip().upper() != "EUR":
             raise ValueError(
                 "Autonomous IBKR Paper base currency must be EUR."
@@ -129,8 +142,15 @@ class IbkrAutonomousRuntimeFactory:
         price_provider = YahooProvider()
         fx_rate_service = FxRateService()
         market_session_service = MarketSessionService()
+        intraday_micro_profile = (
+            shadow_mode
+            and runtime_config.live_config.capital_profile
+            == LivePaperTradingConfig.MICRO_500
+        )
         historical_provider = YahooHistoricalDataProvider(
-            cache=HistoricalCache(ttl_minutes=15),
+            cache=HistoricalCache(
+                ttl_minutes=(2 if intraday_micro_profile else 15)
+            ),
             batch_size=25,
         )
         resolved_news_provider = None
@@ -169,6 +189,12 @@ class IbkrAutonomousRuntimeFactory:
         allocator = PortfolioAllocator(
             fx_rate_service=fx_rate_service,
             require_live_fx=True,
+            concentration_gate=PortfolioConcentrationGate(
+                runtime_config.live_config.instrument_metadata_path
+            ),
+            earnings_calendar_service=EarningsCalendarService(
+                runtime_config.live_config.earnings_calendar_path
+            ),
         )
 
         account_service = IbkrAccountService(
@@ -186,9 +212,44 @@ class IbkrAutonomousRuntimeFactory:
             allow_order_submission=allow_order_submission,
         )
 
-        broker = IbkrBroker(
-            transport=transport,
-        )
+        quote_provider = None
+        if (
+            not shadow_mode
+            and runtime_config.live_config.enable_execution_quality_gate
+        ):
+            quote_provider = IbkrQuoteProvider(
+                host=host,
+                port=port,
+                client_id=self.QUOTE_CLIENT_ID,
+            )
+
+        if shadow_mode:
+            broker = ShadowBroker(
+                slippage_pct_per_side=(
+                    runtime_config
+                    .live_config
+                    .estimated_slippage_pct_per_side
+                )
+            )
+        else:
+            broker = IbkrBroker(
+                transport=transport,
+                enable_native_protective_orders=(
+                    runtime_config
+                    .live_config
+                    .enable_native_protective_orders
+                ),
+                quote_provider=quote_provider,
+                max_bid_ask_spread_pct=(
+                    runtime_config.live_config.max_bid_ask_spread_pct
+                ),
+                max_quote_age_seconds=(
+                    runtime_config.live_config.max_quote_age_seconds
+                ),
+                max_entry_slippage_pct=(
+                    runtime_config.live_config.max_entry_slippage_pct
+                ),
+            )
 
         execution_engine = ExecutionEngine(
             broker=broker,
@@ -232,16 +293,19 @@ class IbkrAutonomousRuntimeFactory:
                 decision_journal_repository
             ),
             price_provider=price_provider,
-            position_exit_execution_service=(
-                position_exit_execution_service
-            ),
+            position_exit_execution_service=position_exit_execution_service,
             trading_session_sync_service=(
-                trading_session_sync_service
+                None if shadow_mode else trading_session_sync_service
             ),
             market_session_service=market_session_service,
-            position_adoption_service=position_adoption_service,
+            position_adoption_service=(
+                None if shadow_mode else position_adoption_service
+            ),
             news_intelligence_service=news_intelligence_service,
             completed_trade_repository=completed_trade_repository,
+            protective_execution_reconciler=(
+                None if shadow_mode else transport
+            ),
         )
 
         return IbkrAutonomousRuntime(
@@ -256,7 +320,7 @@ class IbkrAutonomousRuntimeFactory:
             ),
             account_service=account_service,
             trading_session_sync_service=(
-                trading_session_sync_service
+                None if shadow_mode else trading_session_sync_service
             ),
             price_provider=price_provider,
             historical_provider=historical_provider,
